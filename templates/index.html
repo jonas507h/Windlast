@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>Einfacher Rechner</title>
+</head>
+<body>
+  <h1>Zahlen addieren</h1>
+  <form method="post">
+    <input type="number" name="a" step="any" required>
+    <input type="number" name="b" step="any" required>
+    <button type="submit">Berechnen</button>
+  </form>
+
+  {% if result is not none %}
+    <p>Ergebnis: {{ result }}</p>
+  {% endif %}
+</body>
+</html>
