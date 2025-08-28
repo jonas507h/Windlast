@@ -1,3 +1,3 @@
-id,anzeige_name,kantenlaenge_m,gewicht_kg
+name_intern,anzeige_name,kantenlaenge_m,gewicht_kg
 bp_stahl_100x100,100x100 Stahlbodenplatte,1.0,75
 bp_ballast_500,500kg Ballastbase,0.8,500
