@@ -1,12 +1,13 @@
 <section id="konstruktion-tor">
   <h2>Tor</h2>
 
-  <!-- Nur Struktur – Daten/Funktionalität folgen später -->
   <form id="tor-form">
     <label for="bodenplatte">Bodenplatte</label>
-    <select id="bodenplatte" name="bodenplatte">
+    <select id="bodenplatte" name="bodenplatte_name_intern">
       <option value="">Bitte wählen …</option>
-      <!-- Optionen werden später dynamisch gefüllt -->
+      {% for bp in bodenplatten %}
+        <option value="{{ bp.name_intern }}">{{ bp.anzeige_name }}</option>
+      {% endfor %}
     </select>
 
     <button type="button" id="berechnen">Berechnen</button>

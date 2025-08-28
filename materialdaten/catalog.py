@@ -54,7 +54,7 @@ def _load_bodenplatten_csv(csv_path: Path) -> Dict[str, BodenplatteSpec]:
 
 class Catalog:
     def __init__(self, daten_root: Optional[Path] = None) -> None:
-        self._root = daten_root or _resource_path("daten")
+        self._root = daten_root or _resource_path("materialdaten")
         self._bodenplatten = _load_bodenplatten_csv(self._root / "bodenplatten.csv")
 
     @property
