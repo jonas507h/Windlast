@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from typing import List, Optional
 from bauelemente import Bodenplatte, Traversenstrecke
+from materialdaten.catalog import catalog
 from rechenfunktionen import (
     kippsicherheit as _kippsicherheit,
     gleitsicherheit as _gleitsicherheit,
@@ -24,9 +25,40 @@ class Tor:
     traverse_name_intern: Optional[str] = None
 
     def __post_init__(self):
-         # Default: (später gern 3 Traversen) – aktuell Gewicht kommt nur aus Bodenplatten
-        if not self.traversen:
-            self.traversen = []  # Platzhalter
+        # Traversenstrecken aus Breite/Höhe + Profilhöhe t
+        if not self.traversen and self.breite_m and self.hoehe_m and self.traverse_name_intern:
+            B = float(self.breite_m)
+            H = float(self.hoehe_m)
+            if B <= 0 or H <= 0:
+                raise ValueError("Breite und Höhe müssen > 0 sein.")
+
+            spec = catalog.get_traverse(self.traverse_name_intern)
+            t = float(spec.hoehe_m)  # Traversenhöhe (Profilmaß)
+
+            # Sinnvolle Geometrie-Bedingung: oberer Träger nur möglich, wenn H > t
+            if H <= t or B <= 0:
+                raise ValueError("Höhe muss größer als Traversenhöhe sein und Breite > 0.")
+
+            # Links (x = t/2):  z: 0 -> H
+            left = Traversenstrecke(
+                traverse_name_intern=self.traverse_name_intern,
+                start=(t/2, 0.0, 0.0),
+                ende=(t/2, 0.0, H),
+            )
+            # Oben (z = H - t/2): x: 0 -> B
+            top = Traversenstrecke(
+                traverse_name_intern=self.traverse_name_intern,
+                start=(0.0, 0.0, H - t/2),
+                ende=(B,   0.0, H - t/2),
+            )
+            # Rechts (x = B - t/2): z: 0 -> H
+            right = Traversenstrecke(
+                traverse_name_intern=self.traverse_name_intern,
+                start=(B - t/2, 0.0, 0.0),
+                ende=(B - t/2, 0.0, H),
+            )
+
+            self.traversen = [left, top, right]
 
         if not self.bodenplatten:
             # Wenn Auswahl vorhanden → entsprechend viele Instanzen
