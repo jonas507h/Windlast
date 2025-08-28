@@ -1,0 +1,4 @@
+name_intern,anzeige_name,anzahl_gurtrohre,hoehe_m,d_gurt_m,d_diagonalen_m,gewicht_linear_kg_m
+prolyte_h30v,H30V,4,0.287,0.048,0.016,6.3
+prolyte_h40v,H40V,4,0.387,0.048,0.020,6.9
+prolyte_h30d,H30D,3,0.287,0.048,0.016,5.4
