@@ -19,18 +19,34 @@ def context_for_konstruktion(konstruktion: str) -> dict:
         return {"bodenplatten": bodenplatten}
     return {}
 
-@app.route("/", methods=["GET"])   # <-- Route ist wichtig
+@app.route("/", methods=["GET", "POST"])
 def index():
     k = request.args.get("k", "tor")
-    tpl = KONSTRUKTIONS_TEMPLATES.get(k)
-    if not tpl:
-        abort(404)
-    ctx = context_for_konstruktion(k)
+    tpl = KONSTRUKTIONS_TEMPLATES.get(k) or abort(404)
+
+    # Grundkontext (Dropdown-Daten etc.)
+    ctx = dict(konstruktion_template=tpl, aktive_konstruktion=k)
+    ctx.update(context_for_konstruktion(k))
+
+    gesamtgewicht = None
+    selected_bodenplatte = None
+
+    if k == "tor":
+        selected_bodenplatte = (
+            request.form.get("bodenplatte_name_intern")
+            or request.args.get("bodenplatte_name_intern")
+            or None
+        )
+        if request.method == "POST" and selected_bodenplatte:
+            from konstruktionen import Tor
+            tor = Tor(bodenplatte_name_intern=selected_bodenplatte, anzahl_bodenplatten=2)
+            gesamtgewicht = tor.gesamtgewicht()
+
     return render_template(
         "index.html",
-        konstruktion_template=tpl,
-        aktive_konstruktion=k,
-        **ctx
+        gesamtgewicht=gesamtgewicht,
+        selected_bodenplatte=selected_bodenplatte,
+        **ctx,
     )
 
 if __name__ == "__main__":        # <-- Serverstart ist wichtig

@@ -1,3 +1,11 @@
 <footer>
-  <p>Gesamtgewicht: <strong id="gesamtgewicht">—</strong></p>
+  <p>Gesamtgewicht:
+    <strong id="gesamtgewicht">
+      {% if gesamtgewicht is not none %}
+        {{ "%.3f"|format(gesamtgewicht) }} kg
+      {% else %}
+        —
+      {% endif %}
+    </strong>
+  </p>
 </footer>
