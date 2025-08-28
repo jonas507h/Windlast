@@ -24,6 +24,17 @@
       value="{{ eingabe_hoehe_m if eingabe_hoehe_m is not none else '' }}"
     >
 
+    <label for="traverse">Traverse</label>
+    <select id="traverse" name="traverse_name_intern" required>
+      <option value="">Bitte wählen …</option>
+      {% for tr in traversen %}
+        <option value="{{ tr.name_intern }}"
+                {% if selected_traverse == tr.name_intern %}selected{% endif %}>
+          {{ tr.anzeige_name }}
+        </option>
+      {% endfor %}
+    </select>
+
     <label for="bodenplatte">Bodenplatte</label>
     <select id="bodenplatte" name="bodenplatte_name_intern" required>
       <option value="">Bitte wählen …</option>

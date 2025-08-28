@@ -16,7 +16,9 @@ def context_for_konstruktion(konstruktion: str) -> dict:
             catalog.bodenplatten.values(),
             key=lambda bp: bp.anzeige_name.lower()
         )
-        return {"bodenplatten": bodenplatten}
+        traversen = sorted(catalog.traversen.values(),
+                           key=lambda tr: tr.anzeige_name.lower())
+        return {"bodenplatten": bodenplatten, "traversen": traversen}
     return {}
 
 @app.route("/", methods=["GET", "POST"])
@@ -30,7 +32,7 @@ def index():
 
     gesamtgewicht = None
     selected_bodenplatte = None
-    
+    selected_traverse = None
     eingabe_breite_m = None
     eingabe_hoehe_m = None
 
@@ -38,6 +40,11 @@ def index():
         selected_bodenplatte = (
             request.form.get("bodenplatte_name_intern")
             or request.args.get("bodenplatte_name_intern")
+            or None
+        )
+        selected_traverse = (
+            request.form.get("traverse_name_intern")
+            or request.args.get("traverse_name_intern")
             or None
         )
         if request.method == "POST":
@@ -52,6 +59,7 @@ def index():
             tor = Tor(
                 bodenplatte_name_intern=selected_bodenplatte,
                 anzahl_bodenplatten=2,
+                traverse_name_intern=selected_traverse,
                 breite_m=eingabe_breite_m,
                 hoehe_m=eingabe_hoehe_m,
             )
@@ -62,6 +70,7 @@ def index():
         "index.html",
         gesamtgewicht=gesamtgewicht,
         selected_bodenplatte=selected_bodenplatte,
+        selected_traverse=selected_traverse, 
         eingabe_breite_m=eingabe_breite_m,
         eingabe_hoehe_m=eingabe_hoehe_m,
         **ctx,

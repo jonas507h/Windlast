@@ -115,7 +115,8 @@ class Catalog:
                 f"Bodenplatte name_intern='{name_intern}' nicht gefunden. "
                 f"Vorhanden: {', '.join(self._bodenplatten)}"
             )
-        
+    
+    @property 
     def traversen(self) -> Dict[str, TraverseSpec]:
         return self._traversen
 

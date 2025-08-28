@@ -21,6 +21,7 @@ class Tor:
     # Konfiguration: wie viele Bodenplatten und welche Auswahl
     bodenplatte_name_intern: Optional[str] = None
     anzahl_bodenplatten: int = 2
+    traverse_name_intern: Optional[str] = None
 
     def __post_init__(self):
          # Default: (später gern 3 Traversen) – aktuell Gewicht kommt nur aus Bodenplatten
