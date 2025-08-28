@@ -30,6 +30,9 @@ def index():
 
     gesamtgewicht = None
     selected_bodenplatte = None
+    
+    eingabe_breite_m = None
+    eingabe_hoehe_m = None
 
     if k == "tor":
         selected_bodenplatte = (
@@ -37,15 +40,30 @@ def index():
             or request.args.get("bodenplatte_name_intern")
             or None
         )
-        if request.method == "POST" and selected_bodenplatte:
+        if request.method == "POST":
+            # Strings -> float (leere Strings zu None behandeln)
+            def as_float(s):
+                return float(s) if (s is not None and s != "") else None
+
+            eingabe_breite_m = as_float(request.form.get("breite_m"))
+            eingabe_hoehe_m  = as_float(request.form.get("hoehe_m"))
+
             from konstruktionen import Tor
-            tor = Tor(bodenplatte_name_intern=selected_bodenplatte, anzahl_bodenplatten=2)
+            tor = Tor(
+                bodenplatte_name_intern=selected_bodenplatte,
+                anzahl_bodenplatten=2,
+                breite_m=eingabe_breite_m,
+                hoehe_m=eingabe_hoehe_m,
+            )
+            # Gewicht (aktuell nur Bodenplatten – Traversen kommen im nächsten Schritt dazu)
             gesamtgewicht = tor.gesamtgewicht()
 
     return render_template(
         "index.html",
         gesamtgewicht=gesamtgewicht,
         selected_bodenplatte=selected_bodenplatte,
+        eingabe_breite_m=eingabe_breite_m,
+        eingabe_hoehe_m=eingabe_hoehe_m,
         **ctx,
     )
 

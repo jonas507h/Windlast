@@ -11,6 +11,8 @@ from rechenfunktionen import (
 @dataclass
 class Tor:
     name: str = "Tor"
+    breite_m: Optional[float] = None
+    hoehe_m: Optional[float] = None
 
     # Kinder
     traversen: List[Traversenstrecke] = field(default_factory=list)

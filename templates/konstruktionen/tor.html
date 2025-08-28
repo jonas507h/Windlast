@@ -2,6 +2,28 @@
   <h2>Tor</h2>
 
   <form id="tor-form" method="post" action="/?k=tor">
+    <label for="breite_m">Breite (m)</label>
+    <input
+      type="number"
+      id="breite_m"
+      name="breite_m"
+      step="any"
+      min="0"
+      required
+      value="{{ eingabe_breite_m if eingabe_breite_m is not none else '' }}"
+    >
+
+    <label for="hoehe_m">Höhe (m)</label>
+    <input
+      type="number"
+      id="hoehe_m"
+      name="hoehe_m"
+      step="any"
+      min="0"
+      required
+      value="{{ eingabe_hoehe_m if eingabe_hoehe_m is not none else '' }}"
+    >
+
     <label for="bodenplatte">Bodenplatte</label>
     <select id="bodenplatte" name="bodenplatte_name_intern" required>
       <option value="">Bitte wählen …</option>
