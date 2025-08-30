@@ -22,7 +22,7 @@ def _schlankheit_default(laenge: float, hoehe: float) -> Zwischenergebnis:
     return Zwischenergebnis(
         wert=wert,
         formel="---",
-        quelle="---",
+        quelle_formel="---",
         formelzeichen=["---", "---", "---"],
         quelle_formelzeichen=["---"]
     )
