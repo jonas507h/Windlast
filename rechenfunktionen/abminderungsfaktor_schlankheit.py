@@ -1,7 +1,8 @@
 from __future__ import annotations
 from typing import Sequence, Tuple, Dict, Callable
 import bisect
-from datenstruktur.zwischenergebnis import Norm,Zwischenergebnis
+from datenstruktur.zwischenergebnis import Zwischenergebnis
+from datenstruktur.enums import Norm
 
 # --- Tabellendaten ----------------------------------------------------------
 _X_Schlankheit: Tuple[float, ...] = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 30, 40, 50, 60, 70)

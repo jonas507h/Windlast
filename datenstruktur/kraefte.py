@@ -2,17 +2,10 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Optional, Tuple, List
+from datenstruktur.enums import Lasttyp, Variabilitaet
 
 Vec3 = Tuple[float, float, float]
 EPS = 1e-9
-
-class Lasttyp(str, Enum):
-    WIND = "wind"
-    GEWICHT = "gewicht"
-
-class Variabilitaet(str, Enum):
-    STAENDIG = "staendig"
-    VERAENDERLICH = "veraenderlich"
 
 @dataclass
 class Kraefte:

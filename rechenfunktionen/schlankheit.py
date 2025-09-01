@@ -1,5 +1,6 @@
 from typing import Dict, Callable
-from datenstruktur.zwischenergebnis import Norm,Zwischenergebnis
+from datenstruktur.zwischenergebnis import Zwischenergebnis
+from datenstruktur.enums import Norm
 
 def _validate_inputs(laenge: float, hoehe: float) -> None:
     if laenge <= 0 or hoehe <= 0:
