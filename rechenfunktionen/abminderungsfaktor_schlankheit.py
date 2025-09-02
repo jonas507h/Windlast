@@ -63,10 +63,10 @@ _DISPATCH: Dict[Norm, Callable[[ObjektTyp, float, float], Zwischenergebnis]] = {
 }
 
 def abminderungsfaktor_schlankheit(
+    norm: Norm,
     objekttyp: ObjektTyp,
     schlankheit: float,
     voelligkeitsgrad: float,
-    norm: Norm = Norm.DEFAULT,
 ) -> Zwischenergebnis:
     _validate_inputs(objekttyp, voelligkeitsgrad=voelligkeitsgrad, schlankheit=schlankheit)
     funktion = _DISPATCH.get(norm, _abminderungsfaktor_schlankheit_default)

@@ -40,16 +40,16 @@ class Traversenstrecke:
         _luftdichte = 1.25
         _norm = Norm.DEFAULT
         _windrichtung: Vec3 = (0.0, 1.0, 0.0)  # Beispielwert für die Windrichtung
-        _reynoldszahl = reynoldszahl(self.objekttyp, self.traverse_name_intern, _staudruck, _zaehigkeit, _luftdichte, _norm)
-        _projizierte_Flaeche = projizierte_flaeche(self.objekttyp, self.traverse_name_intern, [self.start, self.ende, self.orientierung], _windrichtung, _norm)
-        _eingeschlossene_Flaeche = eingeschlossene_flaeche(self.objekttyp, self.traverse_name_intern, [self.start, self.ende], _norm)
-        _voelligkeitsgrad = voelligkeitsgrad(_projizierte_Flaeche.wert, _eingeschlossene_Flaeche.wert, _norm)
-        _grundkraftbeiwert = grundkraftbeiwert(self.objekttyp, self.traverse_name_intern, [self.start, self.ende, self.orientierung], None, _windrichtung, _voelligkeitsgrad.wert, _reynoldszahl.wert, _norm)
-        _schlankheit = schlankheit(self.objekttyp, self.traverse_name_intern, [self.start, self.ende], _norm)
-        _abminderungsfaktor_schlankheit = abminderungsfaktor_schlankheit(self.objekttyp, _schlankheit.wert, _voelligkeitsgrad.wert, _norm)
-        _kraftbeiwert = kraftbeiwert(self.objekttyp, _grundkraftbeiwert.wert, _abminderungsfaktor_schlankheit.wert, _norm)
-        _windkraft = windkraft(self.objekttyp, _kraftbeiwert.wert, _staudruck, _projizierte_Flaeche.wert, _norm)
-        _windkraft_vektor = windkraft_zu_vektor(self.objekttyp, None, _windkraft.wert, _windrichtung, _norm)
+        _reynoldszahl = reynoldszahl(_norm, self.objekttyp, self.traverse_name_intern, _staudruck, _zaehigkeit, _luftdichte)
+        _projizierte_Flaeche = projizierte_flaeche(_norm, self.objekttyp, self.traverse_name_intern, [self.start, self.ende, self.orientierung], _windrichtung)
+        _eingeschlossene_Flaeche = eingeschlossene_flaeche(_norm, self.objekttyp, self.traverse_name_intern, [self.start, self.ende])
+        _voelligkeitsgrad = voelligkeitsgrad(_norm, _projizierte_Flaeche.wert, _eingeschlossene_Flaeche.wert,)
+        _grundkraftbeiwert = grundkraftbeiwert(_norm, self.objekttyp, self.traverse_name_intern, [self.start, self.ende, self.orientierung], None, _windrichtung, _voelligkeitsgrad.wert, _reynoldszahl.wert)
+        _schlankheit = schlankheit(_norm, self.objekttyp, self.traverse_name_intern, [self.start, self.ende])
+        _abminderungsfaktor_schlankheit = abminderungsfaktor_schlankheit(_norm, self.objekttyp, _schlankheit.wert, _voelligkeitsgrad.wert)
+        _kraftbeiwert = kraftbeiwert(_norm, self.objekttyp, _grundkraftbeiwert.wert, _abminderungsfaktor_schlankheit.wert)
+        _windkraft = windkraft(_norm, self.objekttyp, _kraftbeiwert.wert, _staudruck, _projizierte_Flaeche.wert)
+        _windkraft_vektor = windkraft_zu_vektor(_norm, self.objekttyp, None, _windkraft.wert, _windrichtung)
 
         return Kraefte(
             typ=Lasttyp.WIND,

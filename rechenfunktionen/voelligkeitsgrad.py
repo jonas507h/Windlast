@@ -40,9 +40,9 @@ _DISPATCH_VG: Dict[Norm, Callable[[float, float], Zwischenergebnis]] = {
 }
 
 def voelligkeitsgrad(
+    norm: Norm,
     projizierte_flaeche: float,
     eingeschlossene_flaeche: float,
-    norm: Norm = Norm.DEFAULT,
 ) -> Zwischenergebnis:
     _validate_inputs_voelligkeitsgrad(projizierte_flaeche, eingeschlossene_flaeche)
     funktion = _DISPATCH_VG.get(norm, _voelligkeitsgrad_default)

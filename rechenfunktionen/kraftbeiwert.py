@@ -45,10 +45,10 @@ _DISPATCH: Dict[Norm, Callable[[ObjektTyp, float, Optional[float]], Zwischenerge
 }
 
 def kraftbeiwert(
+    norm: Norm,
     objekttyp: ObjektTyp,
     grundkraftbeiwert: float,
     abminderungsfaktor_schlankheit: Optional[float] = None,
-    norm: Norm = Norm.DEFAULT,
 ) -> Zwischenergebnis:
     _validate_inputs(objekttyp, grundkraftbeiwert, abminderungsfaktor_schlankheit)
     funktion = _DISPATCH.get(norm, _kraftbeiwert_default)

@@ -53,11 +53,11 @@ _DISPATCH: Dict[Norm, Callable[[ObjektTyp, Sequence[Vec3], float, Vec3], Zwische
 }
 
 def windkraft_zu_vektor(
+    norm: Norm,
     objekttyp: ObjektTyp,
     punkte: Optional[Sequence[Vec3]],
     windkraft: float,
     windrichtung: Vec3,
-    norm: Norm = Norm.DEFAULT,
 ) -> Zwischenergebnis_Vektor:
     _validate_inputs(objekttyp, punkte, windkraft, windrichtung)
     funktion = _DISPATCH.get(norm, _windkraft_zu_vektor_default)

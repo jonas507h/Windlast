@@ -77,11 +77,11 @@ _DISPATCH_PROJ: Dict[Norm, Callable[[ObjektTyp, Optional[str], Sequence[Vec3], V
 }
 
 def projizierte_flaeche(
+    norm: Norm,
     objekttyp: ObjektTyp,
     objekt_name_intern: Optional[str],
     punkte: Sequence[Vec3],          # TRAVERSE: [start, ende, (optional) orientierung]
     windrichtung: Vec3,              # Einheitsvektor
-    norm: Norm = Norm.DEFAULT,
 ) -> Zwischenergebnis:
     _validate_inputs(objekttyp, objekt_name_intern, punkte, windrichtung)
     funktion = _DISPATCH_PROJ.get(norm, _projizierte_flaeche_default)

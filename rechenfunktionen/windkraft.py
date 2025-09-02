@@ -50,11 +50,11 @@ _DISPATCH: Dict[Norm, Callable[[ObjektTyp, float, float, float], Zwischenergebni
 }
 
 def windkraft(
+    norm: Norm,
     objekttyp: ObjektTyp,
     kraftbeiwert: float,
     staudruck: float,
     projizierte_flaeche: float,
-    norm: Norm = Norm.DEFAULT,
 ) -> Zwischenergebnis:
     _validate_inputs(objekttyp, kraftbeiwert, staudruck, projizierte_flaeche)
     funktion = _DISPATCH.get(norm, _windkraft_default)

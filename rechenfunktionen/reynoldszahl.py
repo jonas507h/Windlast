@@ -54,12 +54,12 @@ _DISPATCH: Dict[Norm, Callable[
 }
 
 def reynoldszahl(
+    norm: Norm,
     objekttyp: ObjektTyp,
     objekt_name_intern: str,
     staudruck: float,       # N/m²
     zaehigkeit: float,      # m²/s
     luftdichte: float,      # kg/m³
-    norm: Norm = Norm.DEFAULT
 ) -> Zwischenergebnis:
     _validate_inputs(objekttyp, objekt_name_intern, staudruck, zaehigkeit, luftdichte)
     funktion = _DISPATCH.get(norm, _reynoldszahl_default)

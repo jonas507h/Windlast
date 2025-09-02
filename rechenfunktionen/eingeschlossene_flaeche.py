@@ -56,10 +56,10 @@ _DISPATCH: Dict[Norm, Callable[[ObjektTyp, str, Sequence[Vec3]], Zwischenergebni
 }
 
 def eingeschlossene_flaeche(
+    norm: Norm,
     objekttyp: ObjektTyp,
     objekt_name_intern: str,
     punkte: Sequence[Vec3],
-    norm: Norm = Norm.DEFAULT,
 ) -> Zwischenergebnis:
     _validate_inputs(objekttyp, objekt_name_intern, punkte)
     funktion = _DISPATCH.get(norm, _eingeschlossene_flaeche_default)

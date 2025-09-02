@@ -63,10 +63,10 @@ _DISPATCH: Dict[Norm, Callable[[ObjektTyp, Optional[str], Sequence[Vec3]], Zwisc
 }
 
 def schlankheit(
+    norm: Norm,
     objekttyp: ObjektTyp,
     objekt_name_intern: Optional[str],
     punkte: Sequence[Vec3],           # TRAVERSE: [start, ende]
-    norm: Norm = Norm.DEFAULT,
 ) -> Zwischenergebnis:
     _validate_inputs(objekttyp, objekt_name_intern, punkte)
     funktion = _DISPATCH.get(norm, _schlankheit_default)

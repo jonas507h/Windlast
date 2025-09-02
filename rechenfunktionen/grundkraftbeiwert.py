@@ -166,6 +166,7 @@ _DISPATCH: Dict[Norm, Callable[
 }
 
 def grundkraftbeiwert(
+    norm: Norm,
     objekttyp: ObjektTyp,
     objekt_name_intern: Optional[str],
     punkte: Sequence[Vec3],                # TRAVERSE: [start, ende, orientierung]
@@ -173,7 +174,6 @@ def grundkraftbeiwert(
     windrichtung: Vec3,                    # Einheitsvektor
     voelligkeitsgrad: Optional[float] = None,
     reynoldszahl: Optional[float] = None,
-    norm: Norm = Norm.DEFAULT,
 ) -> Zwischenergebnis:
     _validate_inputs(objekttyp, objekt_name_intern, punkte, abschnitt, windrichtung, voelligkeitsgrad, reynoldszahl)
     funktion = _DISPATCH.get(norm, _grundkraftbeiwert_default)
