@@ -12,6 +12,8 @@ from .grundkraftbeiwert import grundkraftbeiwert
 from .schlankheit import schlankheit
 from .abminderungsfaktor_schlankheit import abminderungsfaktor_schlankheit
 from .kraftbeiwert import kraftbeiwert
+from .windkraft import windkraft
+from .windkraft_zu_vektor import windkraft_zu_vektor
 
 __all__ = [
     # Standsicherheit
@@ -35,4 +37,6 @@ __all__ = [
     "schlankheit",
     "abminderungsfaktor_schlankheit",
     "kraftbeiwert",
+    "windkraft",
+    "windkraft_zu_vektor",
 ]
