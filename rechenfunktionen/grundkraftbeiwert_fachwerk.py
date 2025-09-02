@@ -54,7 +54,6 @@ def _validate_inputs(
         and startpunkt[2] == endpunkt[2]):
         raise ValueError("startpunkt und endpunkt dürfen nicht identisch sein.")
 
-# --- Default-Implementierung (Platzhalter) ----------------------------------
 
 def _grundkraftbeiwert_fachwerk_default(
     voelligkeitsgrad: float,
