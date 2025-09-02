@@ -49,8 +49,8 @@ def _load_bodenplatten_csv(csv_path: Path) -> Dict[str, BodenplatteSpec]:
                 bp = BodenplatteSpec(
                     name_intern=key,
                     anzeige_name=row["anzeige_name"].strip(),
-                    kantenlaenge_m=float(row["kantenlaenge_m"]),
-                    gewicht_kg=float(row["gewicht_kg"]),
+                    kantenlaenge=float(row["kantenlaenge_m"]),
+                    gewicht=float(row["gewicht_kg"]),
                 )
             except Exception as e:
                 raise ValueError(f"Ungültige Werte in Zeile mit name_intern='{key}': {e}") from e
@@ -81,10 +81,10 @@ def _load_traversen_csv(csv_path: Path) -> Dict[str, TraverseSpec]:
                     name_intern=key,
                     anzeige_name=row["anzeige_name"].strip(),
                     anzahl_gurtrohre=int(row["anzahl_gurtrohre"]),
-                    hoehe_m=float(row["hoehe_m"]),
-                    d_gurt_m=float(row["d_gurt_m"]),
-                    d_diagonalen_m=float(row["d_diagonalen_m"]),
-                    gewicht_linear_kg_m=float(row["gewicht_linear_kg_m"]),
+                    hoehe=float(row["hoehe_m"]),
+                    d_gurt=float(row["d_gurt_m"]),
+                    d_diagonalen=float(row["d_diagonalen_m"]),
+                    gewicht_linear=float(row["gewicht_linear_kg_m"]),
                 )
             except Exception as e:
                 raise ValueError(f"Ungültige Werte in Zeile mit name_intern='{key}': {e}") from e

@@ -18,11 +18,11 @@ from datenstruktur.enums import Lasttyp, Variabilitaet, ObjektTyp, Norm
 
 @dataclass
 class Traversenstrecke:
-    objekttyp: ObjektTyp = ObjektTyp.TRAVERSE
     traverse_name_intern: str
     start: Vec3
     ende:  Vec3
     orientierung: Vec3
+    objekttyp: ObjektTyp = ObjektTyp.TRAVERSE
 
     def laenge(self) -> float:
         return abstand_punkte(self.start, self.ende)
@@ -37,7 +37,7 @@ class Traversenstrecke:
         _zaehigkeit = 15.32e-6
         _luftdichte = 1.25
         _norm = Norm.DEFAULT
-        _windrichtung = Vec3(1, 0, 0)  # Beispielwert für die Windrichtung
+        _windrichtung: Vec3 = (0.0, 1.0, 0.0)  # Beispielwert für die Windrichtung
         _reynoldszahl = reynoldszahl(self.objekttyp, self.traverse_name_intern, _staudruck, _zaehigkeit, _luftdichte, _norm)
         _projizierte_Flaeche = projizierte_flaeche(self.objekttyp, self.traverse_name_intern, [self.start, self.ende, self.orientierung], _windrichtung, _norm)
         _eingeschlossene_Flaeche = eingeschlossene_flaeche(self.objekttyp, self.traverse_name_intern, [self.start, self.ende], _norm)
@@ -52,6 +52,6 @@ class Traversenstrecke:
         return Kraefte(
             typ=Lasttyp.WIND,
             variabilitaet=Variabilitaet.STAENDIG,
-            Einzelkraefte=[(_windkraft, 1.0, 1.0)],
+            Einzelkraefte=[(_windkraft, 0.0, 0.0)],
             Angriffsflaeche_Einzelkraefte=[[self.start, self.ende]],
         )

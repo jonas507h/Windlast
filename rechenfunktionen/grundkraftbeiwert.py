@@ -91,14 +91,14 @@ def _grundkraftbeiwert_default(
         windrichtung_projiziert = vektor_invertieren(
             projektion_vektor_auf_ebene(windrichtung, traversenachse_norm)
         )
+        traverse = catalog.get_traverse(objekt_name_intern)
+        traversentyp = TraversenTyp.from_points(traverse.anzahl_gurtrohre)
 
         # Anströmrichtung
         if vektor_laenge(windrichtung_projiziert) < 1e-9:
             anstroemrichtung = Anstroemrichtung.PARALLEL
         else:
             winkel = vektor_winkel(windrichtung_projiziert, orientierung)
-            traverse = catalog.get_traverse(objekt_name_intern)
-            traversentyp = TraversenTyp.from_points(traverse.anzahl_gurtrohre)
             if traversentyp == TraversenTyp.DREI_PUNKT:
                 winkel += 90.0
 
