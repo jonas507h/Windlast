@@ -16,4 +16,4 @@ class Traversenstrecke:
 
     def gewicht(self) -> float:
         spec = catalog.get_traverse(self.traverse_name_intern)
-        return self.laenge() * float(spec.gewicht_linear_kg_m)
+        return self.laenge() * float(spec.gewicht_linear)

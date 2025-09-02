@@ -11,18 +11,18 @@ from typing import Dict, Optional
 class BodenplatteSpec:
     name_intern: str
     anzeige_name: str
-    kantenlaenge_m: float
-    gewicht_kg: float
+    kantenlaenge: float
+    gewicht: float
 
 @dataclass(frozen=True)
 class TraverseSpec:
     name_intern: str
     anzeige_name: str
     anzahl_gurtrohre: int
-    hoehe_m: float
-    d_gurt_m: float
-    d_diagonalen_m: float
-    gewicht_linear_kg_m: float
+    hoehe: float
+    d_gurt: float
+    d_diagonalen: float
+    gewicht_linear: float
 
 # --- Resource path helper (PyInstaller-kompatibel) ------------------------
 

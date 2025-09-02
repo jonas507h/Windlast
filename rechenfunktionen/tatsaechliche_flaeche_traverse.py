@@ -34,8 +34,8 @@ def _tatsaechliche_flaeche_traverse_default(
     # simple Berechnung nach Ebner
     laenge = abstand_punkte(startpunkt, endpunkt)
     traverse = catalog.get_traverse(traverse_name_intern)
-    d_Gurt = traverse.d_gurt_m
-    d_Diagonale = traverse.d_diagonalen_m
+    d_Gurt = traverse.d_gurt
+    d_Diagonale = traverse.d_diagonalen
 
     wert = (2 * laenge * d_Gurt) + (3.2 * laenge * d_Diagonale)
 

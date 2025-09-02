@@ -31,7 +31,7 @@ def _reynoldszahl_default(
 
     if objekttyp == ObjektTyp.TRAVERSE:
         traverse = catalog.get_traverse(objekt_name_intern)
-        charak_Laenge = traverse.d_gurt_m  # charakteristische Länge (hier: Durchmesser Gurt)
+        charak_Laenge = traverse.d_gurt  # charakteristische Länge (hier: Durchmesser Gurt)
     elif objekttyp == ObjektTyp.ROHR:
         raise NotImplementedError("Objekttyp 'rohr' wird aktuell nicht unterstützt.")
     else:
