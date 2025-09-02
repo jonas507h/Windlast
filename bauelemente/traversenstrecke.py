@@ -12,6 +12,8 @@ from rechenfunktionen import (
     schlankheit,
     abminderungsfaktor_schlankheit,
     kraftbeiwert,
+    windkraft,
+    windkraft_zu_vektor
 )
 from datenstruktur.kraefte import Kraefte
 from datenstruktur.enums import Lasttyp, Variabilitaet, ObjektTyp, Norm
@@ -46,12 +48,12 @@ class Traversenstrecke:
         _schlankheit = schlankheit(self.objekttyp, self.traverse_name_intern, [self.start, self.ende], _norm)
         _abminderungsfaktor_schlankheit = abminderungsfaktor_schlankheit(self.objekttyp, _schlankheit.wert, _voelligkeitsgrad.wert, _norm)
         _kraftbeiwert = kraftbeiwert(self.objekttyp, _grundkraftbeiwert.wert, _abminderungsfaktor_schlankheit.wert, _norm)
-
-        _windkraft = _kraftbeiwert.wert * _staudruck * _projizierte_Flaeche.wert #braucht noch eine Richtung
+        _windkraft = windkraft(self.objekttyp, _kraftbeiwert.wert, _staudruck, _projizierte_Flaeche.wert, _norm)
+        _windkraft_vektor = windkraft_zu_vektor(self.objekttyp, None, _windkraft.wert, _windrichtung, _norm)
 
         return Kraefte(
             typ=Lasttyp.WIND,
             variabilitaet=Variabilitaet.STAENDIG,
-            Einzelkraefte=[(_windkraft, 0.0, 0.0)],
+            Einzelkraefte=[_windkraft_vektor.wert],
             Angriffsflaeche_Einzelkraefte=[[self.start, self.ende]],
         )

@@ -1,6 +1,6 @@
 # rechenfunktionen/windkraft_zu_vektor.py
 from __future__ import annotations
-from typing import Dict, Callable, Sequence
+from typing import Dict, Callable, Sequence, Optional
 import math
 
 from datenstruktur.enums import Norm, ObjektTyp
@@ -9,7 +9,7 @@ from rechenfunktionen.geom3d import Vec3, vektor_laenge
 
 def _validate_inputs(
     objekttyp: ObjektTyp,
-    punkte: Sequence[Vec3],
+    punkte: Optional[Sequence[Vec3]],
     windkraft: float,
     windrichtung: Vec3,   # Einheitsvektor
 ) -> None:
@@ -22,15 +22,13 @@ def _validate_inputs(
     if not (0.999 <= n <= 1.001):
         raise ValueError(f"windrichtung soll Einheitsvektor sein (||v||≈1), ist {n:.6f}.")
 
-    if not isinstance(punkte, (list, tuple)):
-        raise ValueError("punkte muss eine Sequenz sein.")
-    if objekttyp != ObjektTyp.TRAVERSE and len(punkte) == 0:
-        # Für zukünftige Typen werden Punkte benötigt
-        raise ValueError("punkte darf für diesen Objekttyp nicht leer sein.")
-
+    # punkte ist optional. Wenn übergeben, kurz prüfen:
+    if punkte is not None and not isinstance(punkte, (list, tuple)):
+        raise ValueError("punkte muss eine Sequenz sein, falls gesetzt.")
+    
 def _windkraft_zu_vektor_default(
     objekttyp: ObjektTyp,
-    punkte: Sequence[Vec3],
+    punkte: Optional[Sequence[Vec3]],
     windkraft: float,
     windrichtung: Vec3,
 ) -> Zwischenergebnis_Vektor:
@@ -56,7 +54,7 @@ _DISPATCH: Dict[Norm, Callable[[ObjektTyp, Sequence[Vec3], float, Vec3], Zwische
 
 def windkraft_zu_vektor(
     objekttyp: ObjektTyp,
-    punkte: Sequence[Vec3],
+    punkte: Optional[Sequence[Vec3]],
     windkraft: float,
     windrichtung: Vec3,
     norm: Norm = Norm.DEFAULT,
