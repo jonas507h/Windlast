@@ -28,3 +28,7 @@ class Norm(str, Enum):
     DIN_EN_13814_2005_06 = "DIN EN 13814:2005-06" #Fliegende Bauten
     DIN_EN_17879_2024_08 = "DIN EN 17879:2024-08" #Event-Strukturen
     DEFAULT = "Default"
+
+class ObjektTyp(str, Enum):
+    TRAVERSE = "traverse"
+    ROHR = "rohr"
