@@ -1,39 +1,73 @@
-from typing import Dict, Callable
+# rechenfunktionen/schlankheit.py
+from __future__ import annotations
+from typing import Dict, Callable, Optional, Sequence
 from datenstruktur.zwischenergebnis import Zwischenergebnis
-from datenstruktur.enums import Norm
+from datenstruktur.enums import Norm, ObjektTyp
+from materialdaten.catalog import catalog
+from rechenfunktionen.geom3d import Vec3, abstand_punkte
+from rechenfunktionen.interpolation import interpol_2D
 
-def _validate_inputs(laenge: float, hoehe: float) -> None:
-    if laenge <= 0 or hoehe <= 0:
-        raise ValueError("laenge und hoehe müssen > 0 sein.")
+_EPS = 1e-9
 
-def _schlankheit_default(laenge: float, hoehe: float) -> Zwischenergebnis:
-    # Faktor bestimmen
-    if laenge >= 50:
-        faktor = 1.4
-    elif laenge < 15:
-        faktor = 2.0
+def _validate_inputs(
+    objekttyp: ObjektTyp,
+    objekt_name_intern: Optional[str],
+    punkte: Sequence[Vec3],  # TRAVERSE: [start, ende]
+) -> None:
+    if not isinstance(objekttyp, ObjektTyp):
+        raise TypeError("objekttyp muss vom Typ ObjektTyp sein.")
+    if objekttyp == ObjektTyp.TRAVERSE:
+        if not isinstance(punkte, (list, tuple)) or len(punkte) < 2:
+            raise ValueError("Für TRAVERSE werden [start, ende] erwartet.")
+        if abstand_punkte(punkte[0], punkte[1]) <= _EPS:
+            raise ValueError("Start- und Endpunkt dürfen nicht identisch (bzw. zu nah) sein.")
+        if not objekt_name_intern:
+            raise ValueError("Für TRAVERSE ist objekt_name_intern erforderlich.")
     else:
-        # lineare Interpolation zwischen (15,2.0) und (50,1.4)
-        faktor = 2.0 + (laenge - 15) * (1.4 - 2.0) / (50 - 15)
+        # Für andere Objekttypen noch unklar → Platzhalter
+        raise NotImplementedError(f"Schlankheit für Objekttyp '{objekttyp}' ist noch nicht implementiert.")
 
-    rechenwert = faktor * (laenge / hoehe)
+def _schlankheit_default(
+    objekttyp: ObjektTyp,
+    objekt_name_intern: Optional[str],
+    punkte: Sequence[Vec3],
+) -> Zwischenergebnis:
 
-    wert = min(rechenwert, 70.0)
+    if objekttyp == ObjektTyp.TRAVERSE:
+        start, ende = punkte[0], punkte[1]
+        laenge = abstand_punkte(start, ende)
 
-    return Zwischenergebnis(
-        wert=wert,
-        formel="---",
-        quelle_formel="---",
-        formelzeichen=["---", "---", "---"],
-        quelle_formelzeichen=["---"]
-    )
+        traverse = catalog.get_traverse(objekt_name_intern)
+        hoehe = traverse.hoehe
+        if hoehe is None or hoehe <= 0:
+            raise ValueError(f"Traverse '{objekt_name_intern}': ungültige Höhe ({hoehe}).")
 
-#zuweisung Norm -> Funktion
-_DISPATCH: Dict[Norm, Callable[[float, float], Zwischenergebnis]] = {
+        faktor = interpol_2D([15.0, 50.0], [2.0, 1.4], laenge)
+
+        rechenwert = faktor * (laenge / hoehe)
+        wert = min(rechenwert, 70.0)
+
+        return Zwischenergebnis(
+            wert=wert,
+            formel="---",
+            quelle_formel="---",
+            formelzeichen=["---", "---", "---"],
+            quelle_formelzeichen=["---"]
+        )
+
+    # Andere Objekttypen:
+    raise NotImplementedError(f"Schlankheit für Objekttyp '{objekttyp}' ist noch nicht implementiert.")
+
+_DISPATCH: Dict[Norm, Callable[[ObjektTyp, Optional[str], Sequence[Vec3]], Zwischenergebnis]] = {
     Norm.DEFAULT: _schlankheit_default,
 }
 
-def schlankheit(laenge: float, hoehe: float, norm: Norm = Norm.DEFAULT) -> Zwischenergebnis:
-    _validate_inputs(laenge, hoehe)
+def schlankheit(
+    objekttyp: ObjektTyp,
+    objekt_name_intern: Optional[str],
+    punkte: Sequence[Vec3],           # TRAVERSE: [start, ende]
+    norm: Norm = Norm.DEFAULT,
+) -> Zwischenergebnis:
+    _validate_inputs(objekttyp, objekt_name_intern, punkte)
     funktion = _DISPATCH.get(norm, _schlankheit_default)
-    return funktion(laenge, hoehe)
+    return funktion(objekttyp, objekt_name_intern, punkte)
