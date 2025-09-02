@@ -3,8 +3,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Optional, Tuple, List
 from datenstruktur.enums import Lasttyp, Variabilitaet
+from rechenfunktionen.geom3d import Vec3
 
-Vec3 = Tuple[float, float, float]
 EPS = 1e-9
 
 @dataclass
@@ -21,7 +21,7 @@ class Kraefte:
 
     Einzelkraefte: List[Vec3]            # [N] – eine oder mehrere Kräfte
     Angriffsflaeche_Einzelkraefte: List[List[Vec3]] = field(default_factory=list)  # [m]
-    Schwerpunkt: Optional[Vec3] = None   # [m] – v.a. bei Gewicht
+    Schwerpunkt: Optional[Vec3] = None   # [m] – bei Gewicht
 
     # wird automatisch gesetzt (Summe der Einzelkräfte)
     Resultierende: Vec3 = field(init=False)
