@@ -41,10 +41,10 @@ def _reynoldszahl_default(
 
     return Zwischenergebnis(
         wert=wert,
-        formel="Re = (ρ · v · L) / μ mit v = sqrt(2·q/ρ)",
-        quelle_formel="Technische Strömungslehre (Definition Reynolds-Zahl & Staudruckbezug)",
-        formelzeichen=["Re", "ρ", "v", "L", "μ", "q"],
-        quelle_formelzeichen=["Projektinterne Bezeichnungen"]
+        formel="---",
+        quelle_formel="---",
+        formelzeichen=["---", "---", "---"],
+        quelle_formelzeichen=["---"]
     )
 
 _DISPATCH: Dict[Norm, Callable[
