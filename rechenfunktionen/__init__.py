@@ -14,6 +14,7 @@ from .abminderungsfaktor_schlankheit import abminderungsfaktor_schlankheit
 from .kraftbeiwert import kraftbeiwert
 from .windkraft import windkraft
 from .windkraft_zu_vektor import windkraft_zu_vektor
+from .segmentierung import segmentiere_strecke_nach_hoehenbereichen
 
 __all__ = [
     # Standsicherheit
@@ -27,6 +28,9 @@ __all__ = [
     # Geometrie
     "abstand_punkte",
     "Vec3",
+
+    # Segmentierung
+    "segmentiere_strecke_nach_hoehenbereichen",
 
     # Aerodynamik / Wind
     "reynoldszahl",

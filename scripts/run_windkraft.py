@@ -1,12 +1,12 @@
 from datenstruktur.enums import ObjektTyp
 from rechenfunktionen import Vec3
+from rechenfunktionen.geom3d import vektor_normieren
 from bauelemente.traversenstrecke import Traversenstrecke
 
 def main():
-    # 8 m waagerecht (x-Achse), Orientierung nach oben (z-Achse)
-    start: Vec3 = (0.0, 0.0, 0.0)
-    ende: Vec3 = (8.0, 0.0, 0.0)
-    orientierung: Vec3 = (0.0, 0.0, 1.0)
+    start: Vec3 = (-3.0, 0.0, 8.0)
+    ende: Vec3 = (1.0, 2.0, 6.0)
+    orientierung: Vec3 = vektor_normieren((1.0, 1.0, 0.0))
 
     ts = Traversenstrecke(
         traverse_name_intern="prolyte_h30v",

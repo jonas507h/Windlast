@@ -240,7 +240,7 @@ def schnittpunkt_strecke_ebene(strecke_start: Vec3, strecke_ende: Vec3, ebenenpu
     if abs(d) < 1e-9:
         return None  # Strecke ist parallel zur Ebene
 
-    t = vektor_skalarprodukt(ebenennormal, vektor_zwischen_punkten(ebenenpunkt, strecke_start)) / d
+    t = vektor_skalarprodukt(ebenennormal, vektor_zwischen_punkten(strecke_start, ebenenpunkt)) / d
     if t < 0.0 or t > 1.0:
         return None  # Schnittpunkt liegt außerhalb der Strecke
 
