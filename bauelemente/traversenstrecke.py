@@ -34,18 +34,23 @@ class Traversenstrecke:
         return self.laenge() * float(spec.gewicht_linear)
 
     def windkraft(self) -> Kraefte:
-        # Grundgerüst, noch ohne Berechnung
+        # Unterscheidung in unterschiedliche Höhen einbauen
         _staudruck = 350
         _zaehigkeit = 15.32e-6
         _luftdichte = 1.25
         _norm = Norm.DEFAULT
         _windrichtung: Vec3 = (0.0, 1.0, 0.0)  # Beispielwert für die Windrichtung
+
+        #Berechnung
+        #Gesamt
         _reynoldszahl = reynoldszahl(_norm, self.objekttyp, self.traverse_name_intern, _staudruck, _zaehigkeit, _luftdichte)
+        _schlankheit = schlankheit(_norm, self.objekttyp, self.traverse_name_intern, [self.start, self.ende])
+
+        #pro Abschnitt
         _projizierte_Flaeche = projizierte_flaeche(_norm, self.objekttyp, self.traverse_name_intern, [self.start, self.ende, self.orientierung], _windrichtung)
         _eingeschlossene_Flaeche = eingeschlossene_flaeche(_norm, self.objekttyp, self.traverse_name_intern, [self.start, self.ende])
         _voelligkeitsgrad = voelligkeitsgrad(_norm, _projizierte_Flaeche.wert, _eingeschlossene_Flaeche.wert,)
         _grundkraftbeiwert = grundkraftbeiwert(_norm, self.objekttyp, self.traverse_name_intern, [self.start, self.ende, self.orientierung], None, _windrichtung, _voelligkeitsgrad.wert, _reynoldszahl.wert)
-        _schlankheit = schlankheit(_norm, self.objekttyp, self.traverse_name_intern, [self.start, self.ende])
         _abminderungsfaktor_schlankheit = abminderungsfaktor_schlankheit(_norm, self.objekttyp, _schlankheit.wert, _voelligkeitsgrad.wert)
         _kraftbeiwert = kraftbeiwert(_norm, self.objekttyp, _grundkraftbeiwert.wert, _abminderungsfaktor_schlankheit.wert)
         _windkraft = windkraft(_norm, self.objekttyp, _kraftbeiwert.wert, _staudruck, _projizierte_Flaeche.wert)

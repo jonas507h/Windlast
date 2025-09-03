@@ -1,6 +1,6 @@
 # rechenfunktionen/geom3d.py
 from math import hypot
-from typing import Sequence, Tuple
+from typing import Sequence, Tuple, Optional
 import math
 
 Vec3 = Tuple[float, float, float]
@@ -209,3 +209,43 @@ def vektor_invertieren(v: Vec3) -> Vec3:
         raise ValueError("vektor_invertieren erwartet Vektor mit genau 3 Komponenten (x, y, z).")
 
     return (-v[0], -v[1], -v[2])
+
+def schnittpunkt_strecke_ebene(strecke_start: Vec3, strecke_ende: Vec3, ebenenpunkt: Vec3, ebenennormal: Vec3) -> Optional[Vec3]:
+    """
+    Berechnet den Schnittpunkt einer Strecke mit einer Ebene im 3D-Raum.
+
+    Parameter
+    ---------
+    strecke_start : Vec3
+        Der Startpunkt der Strecke.
+    strecke_ende : Vec3
+        Der Endpunkt der Strecke.
+    ebenenpunkt : Vec3
+        Ein Punkt auf der Ebene.
+    ebenennormal : Vec3
+        Der Normalenvektor der Ebene.
+
+    Rückgabe
+    --------
+    Optional[Vec3] : Der Schnittpunkt als Vektor (x, y, z) oder None, wenn kein Schnittpunkt existiert.
+
+    Raises
+    ------
+    ValueError : falls einer der Eingabevektoren nicht genau 3 Komponenten hat oder der Normalenvektor die Länge 0 hat
+    """
+    if len(strecke_start) != 3 or len(strecke_ende) != 3 or len(ebenenpunkt) != 3 or len(ebenennormal) != 3:
+        raise ValueError("schnittpunkt_strecke_ebene erwartet Vektoren mit genau 3 Komponenten (x, y, z).")
+
+    d = vektor_skalarprodukt(ebenennormal, vektor_zwischen_punkten(strecke_start, strecke_ende))
+    if abs(d) < 1e-9:
+        return None  # Strecke ist parallel zur Ebene
+
+    t = vektor_skalarprodukt(ebenennormal, vektor_zwischen_punkten(ebenenpunkt, strecke_start)) / d
+    if t < 0.0 or t > 1.0:
+        return None  # Schnittpunkt liegt außerhalb der Strecke
+
+    return (
+        strecke_start[0] + t * (strecke_ende[0] - strecke_start[0]),
+        strecke_start[1] + t * (strecke_ende[1] - strecke_start[1]),
+        strecke_start[2] + t * (strecke_ende[2] - strecke_start[2])
+    )
