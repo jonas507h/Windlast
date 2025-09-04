@@ -1,7 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
-from typing import List
+from typing import List, Optional
 from rechenfunktionen.geom3d import Vec3
 
 @dataclass(frozen=True)
@@ -12,6 +12,8 @@ class Zwischenergebnis:
     quelle_formel: str                 # Quelle der Formel
     formelzeichen: List[str]           # z.B. ["λ", "l", "h"]
     quelle_formelzeichen: List[str]    # Quelle der Formelzeichen
+    einzelwerte: Optional[List[float]] = None
+    quelle_einzelwerte: Optional[List[str]] = None
 
 @dataclass(frozen=True)
 class Zwischenergebnis_Vektor:
