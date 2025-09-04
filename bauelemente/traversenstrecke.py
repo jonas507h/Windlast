@@ -4,6 +4,7 @@ from datenstruktur.konstanten import PhysikKonstanten, aktuelle_konstanten, get_
 from materialdaten.catalog import catalog
 from rechenfunktionen import (
     Vec3,
+    flaechenschwerpunkt,
     abstand_punkte,
     reynoldszahl,
     projizierte_flaeche,
@@ -28,12 +29,29 @@ class Traversenstrecke:
     orientierung: Vec3
     objekttyp: ObjektTyp = ObjektTyp.TRAVERSE
 
-    def laenge(self) -> float:
-        return abstand_punkte(self.start, self.ende)
+    def gewichtskraefte(self) -> List[Kraefte]:
+        laenge = abstand_punkte(self.start, self.ende)
 
-    def gewicht(self) -> float:
-        spec = catalog.get_traverse(self.traverse_name_intern)
-        return self.laenge() * float(spec.gewicht_linear)
+        specs = catalog.get_traverse(self.traverse_name_intern)
+        gewichtskraft_lin = float(specs.gewicht_linear) * aktuelle_konstanten().erdbeschleunigung  # [N/m]
+
+        Fz = -laenge * gewichtskraft_lin
+        einzelkraefte_vektoren: list[Vec3] = [(0.0, 0.0, Fz)]
+
+        angriffsbereiche: list[list[Vec3]] = [[self.start, self.ende]]
+
+        schwerpunkt = flaechenschwerpunkt([self.start, self.ende])
+
+        return [Kraefte(
+            typ=Lasttyp.GEWICHT,
+            variabilitaet=Variabilitaet.STAENDIG,
+            Einzelkraefte=einzelkraefte_vektoren,
+            Angriffsflaeche_Einzelkraefte=angriffsbereiche,
+            Schwerpunkt=schwerpunkt,
+            # optional:
+            # lastfall_id_intern="G_STAENDIG",
+            # element_id_intern=self.traverse_name_intern,
+        )]
 
     def windkraefte(
         self,

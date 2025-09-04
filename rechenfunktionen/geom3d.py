@@ -5,7 +5,7 @@ import math
 
 Vec3 = Tuple[float, float, float]
 
-__all__ = ["abstand", "Vec3"]
+__all__ = ["abstand", "Vec3", "flaechenschwerpunkt"]
 
 def abstand_punkte(a: Sequence[float], b: Sequence[float]) -> float:
     """
@@ -306,3 +306,113 @@ def mittelpunkt (punkte: Sequence[Vec3]) -> Vec3:
 
     n = len(punkte)
     return (sum_x / n, sum_y / n, sum_z / n)
+
+def vektor_kreuzprodukt(a: Vec3, b: Vec3) -> Vec3:
+    """
+    Berechnet das Kreuzprodukt zweier 3D-Vektoren.
+
+    Parameter
+    ---------
+    a, b : Vektoren als Tupel (x, y, z)
+
+    Rückgabe
+    --------
+    Vec3 : Das Kreuzprodukt von a und b.
+
+    Raises
+    ------
+    ValueError : falls a oder b nicht genau 3 Komponenten haben
+    """
+    if len(a) != 3 or len(b) != 3:
+        raise ValueError("vektor_kreuzprodukt erwartet Vektoren mit genau 3 Komponenten (x, y, z).")
+
+    return (
+        a[1] * b[2] - a[2] * b[1],
+        a[2] * b[0] - a[0] * b[2],
+        a[0] * b[1] - a[1] * b[0]
+    )
+
+def flaechenschwerpunkt(punkte: Sequence[Vec3]) -> Vec3:
+    """
+    Flächenschwerpunkt eines ebenen (nicht selbstschneidenden) 3D-Polygons.
+    Punkte müssen auf einer Ebene liegen und in Reihenfolge des Randes angegeben sein.
+
+    Sonderfälle:
+    - 1 Punkt  -> dieser Punkt
+    - 2 Punkte -> Mittelpunkt der Strecke
+    - >=3 Punkte -> Schwerpunkt der Polygonfläche (Vorzeichen robust bzgl. Orientierung)
+
+    Raises
+    ------
+    ValueError : bei leerer Liste, kollinearen Punkten oder Fläche ~ 0
+    """
+    if punkte is None:
+        raise ValueError("punkte darf nicht None sein.")
+
+    n = len(punkte)
+    if n == 0:
+        raise ValueError("flaechenschwerpunkt erwartet mindestens einen Punkt.")
+    if n == 1:
+        p = punkte[0]
+        if len(p) != 3:
+            raise ValueError("Punkte müssen 3D sein (x, y, z).")
+        # 1 Punkt -> zurückgeben
+        return p
+    if n == 2:
+        # 2 Punkte -> Mittelpunkt
+        a, b = punkte[0], punkte[1]
+        if len(a) != 3 or len(b) != 3:
+            raise ValueError("Punkte müssen 3D sein (x, y, z).")
+        return mittelpunkt([a, b])
+
+    # --- Newell-Normale berechnen (robust, auch für konkave Polygone) ---
+    Nx = Ny = Nz = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        xi, yi, zi = map(float, punkte[i])
+        xj, yj, zj = map(float, punkte[j])
+        # einfachste Newell-Variante: Summe der Kreuzprodukte Pi x Pj
+        cx, cy, cz = vektor_kreuzprodukt((xi, yi, zi), (xj, yj, zj))
+        Nx += cx; Ny += cy; Nz += cz
+
+    N = (Nx, Ny, Nz)
+    # Normale normieren (wirft bei Länge 0 eine Exception)
+    try:
+        n_hat = vektor_normieren(N)
+    except ValueError:
+        # Kollinear / degeneriert
+        raise ValueError("Degeneriertes Polygon: Normale hat Länge 0 (Punkte evtl. kollinear).")
+
+    # --- Triangulation um P0 ---
+    P0 = tuple(map(float, punkte[0]))
+    A_sum = 0.0
+    Cx = Cy = Cz = 0.0
+
+    for i in range(1, n - 1):
+        Pi = tuple(map(float, punkte[i]))
+        Pj = tuple(map(float, punkte[i+1]))
+
+        # v1 = Pi - P0, v2 = Pj - P0
+        v1 = vektor_zwischen_punkten(P0, Pi)
+        v2 = vektor_zwischen_punkten(P0, Pj)
+
+        # vorzeichenbehaftete Teilfläche: 0.5 * ( (v1 x v2) · n_hat )
+        cx, cy, cz = vektor_kreuzprodukt(v1, v2)
+        area_i = 0.5 * vektor_skalarprodukt((cx, cy, cz), n_hat)
+
+        if area_i != 0.0:
+            # Schwerpunkt des Dreiecks (P0, Pi, Pj)
+            ci_x = (P0[0] + Pi[0] + Pj[0]) / 3.0
+            ci_y = (P0[1] + Pi[1] + Pj[1]) / 3.0
+            ci_z = (P0[2] + Pi[2] + Pj[2]) / 3.0
+
+            A_sum += area_i
+            Cx += area_i * ci_x
+            Cy += area_i * ci_y
+            Cz += area_i * ci_z
+
+    if A_sum == 0.0 or not math.isfinite(A_sum):
+        # Fläche verschwindet numerisch -> kein Flächenschwerpunkt definiert
+        raise ValueError("Polygonfläche ist 0 oder numerisch instabil – überprüfe die Punkte (Planarität/Reihenfolge).")
+
+    return (Cx / A_sum, Cy / A_sum, Cz / A_sum)

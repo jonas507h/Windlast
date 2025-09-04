@@ -2,7 +2,7 @@
 
 from .standsicherheit import kippsicherheit, gleitsicherheit, abhebesicherheit
 from .masse import gesamtgewicht
-from .geom3d import abstand_punkte, Vec3
+from .geom3d import abstand_punkte, flaechenschwerpunkt, Vec3
 
 from .reynoldszahl import reynoldszahl
 from .projizierte_flaeche import projizierte_flaeche
@@ -27,6 +27,7 @@ __all__ = [
 
     # Geometrie
     "abstand_punkte",
+    "flaechenschwerpunkt",
     "Vec3",
 
     # Segmentierung
