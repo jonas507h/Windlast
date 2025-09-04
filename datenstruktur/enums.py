@@ -18,6 +18,7 @@ class TraversenTyp(str, Enum):
 class Lasttyp(str, Enum):
     WIND = "wind"
     GEWICHT = "gewicht"
+    REIBUNG = "reibung"
 
 class Variabilitaet(str, Enum):
     STAENDIG = "staendig"
@@ -32,3 +33,14 @@ class Norm(str, Enum):
 class ObjektTyp(str, Enum):
     TRAVERSE = "traverse"
     ROHR = "rohr"
+    BODENPLATTE = "bodenplatte"
+
+class MaterialTyp(str, Enum):
+    HOLZ = "holz"
+    STAHL = "stahl"
+    BETON = "beton"
+    TON = "ton"
+    LEHM = "lehm"
+    SAND = "sand"
+    KIES = "kies"
+    GUMMI = "gummi"

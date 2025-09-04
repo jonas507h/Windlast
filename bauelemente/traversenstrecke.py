@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Tuple, List, Sequence
-from datenstruktur.konstanten import PhysikKonstanten, aktuelle_konstanten, get_konstanten
+from datenstruktur.konstanten import PhysikKonstanten, aktuelle_konstanten
 from materialdaten.catalog import catalog
 from rechenfunktionen import (
     Vec3,

@@ -19,7 +19,7 @@ class Kraefte:
     lastfall_id_intern: Optional[str] = None
     element_id_intern: Optional[str] = None
 
-    typ: Lasttyp                         # WIND / GEWICHT
+    typ: Lasttyp                         # WIND / GEWICHT / REIBUNG
     variabilitaet: Variabilitaet         # STAENDIG / VERAENDERLICH
 
     Einzelkraefte: List[Vec3]            # [N] – eine oder mehrere Kräfte
