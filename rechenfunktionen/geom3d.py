@@ -249,3 +249,60 @@ def schnittpunkt_strecke_ebene(strecke_start: Vec3, strecke_ende: Vec3, ebenenpu
         strecke_start[1] + t * (strecke_ende[1] - strecke_start[1]),
         strecke_start[2] + t * (strecke_ende[2] - strecke_start[2])
     )
+
+def vektoren_addieren (vektoren: Sequence[Vec3]) -> Vec3:
+    """
+    Addiert eine Liste von 3D-Vektoren.
+
+    Parameter
+    ---------
+    vektoren : Sequenz von Vec3
+        Die zu addierenden Vektoren.
+
+    Rückgabe
+    --------
+    Vec3 : Der resultierende Vektor.
+
+    Raises
+    ------
+    ValueError : falls einer der Vektoren nicht genau 3 Komponenten hat
+    """
+    sum_x = sum_y = sum_z = 0.0
+    for v in vektoren:
+        if len(v) != 3:
+            raise ValueError("vektoren_addieren erwartet Vektoren mit genau 3 Komponenten (x, y, z).")
+        sum_x += v[0]
+        sum_y += v[1]
+        sum_z += v[2]
+    return (sum_x, sum_y, sum_z)
+
+def mittelpunkt (punkte: Sequence[Vec3]) -> Vec3:
+    """
+    Berechnet den Mittelpunkt einer Liste von 3D-Punkten.
+
+    Parameter
+    ---------
+    punkte : Sequenz von Vec3
+        Die Punkte, deren Mittelpunkt berechnet werden soll.
+
+    Rückgabe
+    --------
+    Vec3 : Der Mittelpunkt als Vektor (x, y, z).
+
+    Raises
+    ------
+    ValueError : falls die Liste leer ist oder einer der Punkte nicht genau 3 Komponenten hat
+    """
+    if not punkte:
+        raise ValueError("mittelpunkt erwartet mindestens einen Punkt.")
+
+    sum_x = sum_y = sum_z = 0.0
+    for p in punkte:
+        if len(p) != 3:
+            raise ValueError("mittelpunkt erwartet Punkte mit genau 3 Komponenten (x, y, z).")
+        sum_x += p[0]
+        sum_y += p[1]
+        sum_z += p[2]
+
+    n = len(punkte)
+    return (sum_x / n, sum_y / n, sum_z / n)

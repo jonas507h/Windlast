@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Optional, Tuple, List
 from datenstruktur.enums import Lasttyp, Variabilitaet
-from rechenfunktionen.geom3d import Vec3
+from rechenfunktionen.geom3d import Vec3, vektoren_addieren
 
 EPS = 1e-9
 
@@ -16,6 +16,9 @@ class Kraefte:
       Struktur: [[Flaeche1_P1, Flaeche1_P2, ...], [Flaeche2_P1, ...], ...]
       Für Punktlast: Liste mit genau 1 Punkt. Für Linie: >=2 Punkte. Für Fläche: >=3 Punkte.
     """
+    lastfall_id_intern: Optional[str] = None
+    element_id_intern: Optional[str] = None
+
     typ: Lasttyp                         # WIND / GEWICHT
     variabilitaet: Variabilitaet         # STAENDIG / VERAENDERLICH
 
@@ -28,14 +31,7 @@ class Kraefte:
 
     def __post_init__(self) -> None:
         self._validate()
-        self.Resultierende = self._sum_forces()
-
-    # --- Helfer ---
-    def _sum_forces(self) -> Vec3:
-        Fx = Fy = Fz = 0.0
-        for F in self.Einzelkraefte:
-            Fx += F[0]; Fy += F[1]; Fz += F[2]
-        return (Fx, Fy, Fz)
+        self.Resultierende = vektoren_addieren(self.Einzelkraefte)
 
     def _validate(self) -> None:
         # Wenn Angriffsgeometrien angegeben sind, muss die Anzahl zur Kraftliste passen
@@ -55,4 +51,4 @@ class Kraefte:
 
     # optional: falls du nach dem Erzeugen die Kräfte änderst
     def aktualisiere_resultierende(self) -> None:
-        self.Resultierende = self._sum_forces()
+        self.Resultierende = vektoren_addieren(self.Einzelkraefte)
