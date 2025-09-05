@@ -44,3 +44,8 @@ class MaterialTyp(str, Enum):
     SAND = "sand"
     KIES = "kies"
     GUMMI = "gummi"
+
+class FormTyp(str, Enum):
+    RECHTECK = "rechteck"
+    KREIS = "kreis"
+    DREIECK = "dreieck"

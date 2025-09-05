@@ -2,7 +2,7 @@
 
 from .standsicherheit import kippsicherheit, gleitsicherheit, abhebesicherheit
 from .masse import gesamtgewicht
-from .geom3d import abstand_punkte, flaechenschwerpunkt, Vec3
+from .geom3d import vektor_laenge, vektor_normieren, vektoren_addieren, vektor_invertieren, vektor_skalarprodukt, abstand_punkte, flaechenschwerpunkt, vektor_parallelanteil, vektor_senkrechtanteil, vektor_multiplizieren, senkrechter_vektor, Vec3
 
 from .reynoldszahl import reynoldszahl
 from .projizierte_flaeche import projizierte_flaeche
@@ -27,8 +27,17 @@ __all__ = [
     "gesamtgewicht",
 
     # Geometrie
+    "vektor_laenge",
+    "vektor_normieren",
+    "vektor_skalarprodukt",
+    "vektor_invertieren",
     "abstand_punkte",
     "flaechenschwerpunkt",
+    "vektor_parallelanteil",
+    "vektor_senkrechtanteil",
+    "senkrechter_vektor",
+    "vektoren_addieren",
+    "vektor_multiplizieren",
     "Vec3",
 
     # Segmentierung

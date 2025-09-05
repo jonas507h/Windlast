@@ -5,9 +5,9 @@ import math
 
 Vec3 = Tuple[float, float, float]
 
-__all__ = ["abstand", "Vec3", "flaechenschwerpunkt"]
+__all__ = ["abstand", "Vec3", "flaechenschwerpunkt", "vektor_parallelanteil", "vektor_senkrechtanteil"]
 
-def abstand_punkte(a: Sequence[float], b: Sequence[float]) -> float:
+def abstand_punkte(a: Vec3, b: Vec3) -> float:
     """
     Euklidischer Abstand zweier 3D-Punkte.
 
@@ -31,7 +31,7 @@ def abstand_punkte(a: Sequence[float], b: Sequence[float]) -> float:
     bx, by, bz = map(float, b)
     return hypot(bx - ax, by - ay, bz - az)
 
-def vektor_normieren(v: Sequence[float]) -> Vec3:
+def vektor_normieren(v: Vec3) -> Vec3:
     """
     Normiert einen 3D-Vektor.
 
@@ -58,7 +58,7 @@ def vektor_normieren(v: Sequence[float]) -> Vec3:
 
     return (x / laenge, y / laenge, z / laenge)
 
-def vektor_laenge(v: Sequence[float]) -> float:
+def vektor_laenge(v: Vec3) -> float:
     """
     Berechnet die Länge eines 3D-Vektors.
 
@@ -416,3 +416,92 @@ def flaechenschwerpunkt(punkte: Sequence[Vec3]) -> Vec3:
         raise ValueError("Polygonfläche ist 0 oder numerisch instabil – überprüfe die Punkte (Planarität/Reihenfolge).")
 
     return (Cx / A_sum, Cy / A_sum, Cz / A_sum)
+
+def vektor_multiplizieren(v: Vec3, skalar: float) -> Vec3:
+    """
+    Multipliziert einen 3D-Vektor mit einem Skalar.
+
+    Parameter
+    ---------
+    v : Vec3
+        Der zu skalierende Vektor.
+    skalar : float
+        Der Skalierungsfaktor.
+
+    Rückgabe
+    --------
+    Vec3 : Der skalierte Vektor.
+
+    Raises
+    ------
+    ValueError : falls v nicht genau 3 Komponenten hat
+    """
+    if len(v) != 3:
+        raise ValueError("vektor_multiplizieren erwartet Vektor mit genau 3 Komponenten (x, y, z).")
+
+    return (v[0] * skalar, v[1] * skalar, v[2] * skalar)
+
+def vektor_parallelanteil(v: Vec3, richtung: Vec3) -> Vec3:
+    """
+    Berechnet den Parallelanteil eines Vektors v auf einen Richtungsvektor.
+
+    Parameter
+    ---------
+    v : Vec3
+        Der zu projizierende Vektor.
+    richtung : Vec3
+        Der Richtungsvektor (muss normiert sein).
+
+    Rückgabe
+    --------
+    Vec3 : Der Parallelanteil von v auf richtung.
+    """
+    if not richtung:
+        raise ValueError("Der Richtungsvektor darf nicht der Nullvektor sein.")
+
+    skalar = vektor_skalarprodukt(v, richtung)
+    return vektor_multiplizieren(richtung, skalar)
+
+def vektor_senkrechtanteil(v: Vec3, richtung: Vec3) -> Vec3:
+    """
+    Berechnet den Senkrechtanteil eines Vektors v zu einem Richtungsvektor.
+
+    Parameter
+    ---------
+    v : Vec3
+        Der zu projizierende Vektor.
+    richtung : Vec3
+        Der Richtungsvektor (muss normiert sein).
+
+    Rückgabe
+    --------
+    Vec3 : Der Senkrechtanteil von v zu richtung.
+    """
+    parallel = vektor_parallelanteil(v, richtung)
+    return vektor_zwischen_punkten(parallel, v)
+
+def senkrechter_vektor(a: Vec3, b: Vec3) -> Vec3:
+    """
+    Berechnet einen Vektor, der senkrecht auf den beiden gegebenen Vektoren a und b steht.
+
+    Parameter
+    ---------
+    a, b : Vec3
+        Die beiden Vektoren.
+
+    Rückgabe
+    --------
+    Vec3 : Ein Vektor, der senkrecht auf a und b steht.
+
+    Raises
+    ------
+    ValueError : falls a oder b nicht genau 3 Komponenten haben oder die Vektoren kollinear sind
+    """
+    if len(a) != 3 or len(b) != 3:
+        raise ValueError("senkrechter_vektor erwartet Vektoren mit genau 3 Komponenten (x, y, z).")
+
+    kreuz = vektor_kreuzprodukt(a, b)
+    if vektor_laenge(kreuz) == 0:
+        raise ValueError("Die Vektoren a und b sind kollinear; kein eindeutiger senkrechter Vektor existiert.")
+
+    return vektor_normieren(kreuz)
