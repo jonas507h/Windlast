@@ -48,9 +48,6 @@ class Traversenstrecke:
             Einzelkraefte=einzelkraefte_vektoren,
             Angriffsflaeche_Einzelkraefte=angriffsbereiche,
             Schwerpunkt=schwerpunkt,
-            # optional:
-            # lastfall_id_intern="G_STAENDIG",
-            # element_id_intern=self.traverse_name_intern,
         )]
 
     def windkraefte(

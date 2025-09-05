@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from materialdaten.catalog import catalog
+from datenstruktur.konstanten import PhysikKonstanten, aktuelle_konstanten
 from typing import List, Optional
 from rechenfunktionen import (
     Vec3,
@@ -31,11 +32,24 @@ class Bodenplatte:
     gummimatte: Optional[MaterialTyp] = None
     untergrund: MaterialTyp
     objekttyp: ObjektTyp = ObjektTyp.BODENPLATTE
+    
+    def gewichtskraefte(self) -> List[Kraefte]:
+        specs = catalog.get_bodenplatte(self.name_intern)
+        gewichtskraft = -1 * float(specs.gewicht) * aktuelle_konstanten().erdbeschleunigung  # [N/m]
 
-    def gewicht(self) -> float:
-        """Gewicht in kg anhand des internen Namens aus dem Katalog."""
-        spec = catalog.get_bodenplatte(self.name_intern)
-        return float(spec.gewicht)
+        einzelkraefte_vektoren: list[Vec3] = [(0.0, 0.0, gewichtskraft)]
+
+        angriffsbereiche: list[list[Vec3]] = [self.eckpunkte()]
+
+        schwerpunkt = flaechenschwerpunkt(self.eckpunkte())
+
+        return [Kraefte(
+            typ=Lasttyp.GEWICHT,
+            variabilitaet=Variabilitaet.STAENDIG,
+            Einzelkraefte=einzelkraefte_vektoren,
+            Angriffsflaeche_Einzelkraefte=angriffsbereiche,
+            Schwerpunkt=schwerpunkt,
+        )]
     
     def reibkraefte(self, belastung: Vec3) -> List[Kraefte]:
         # Reibwert ermitteln
