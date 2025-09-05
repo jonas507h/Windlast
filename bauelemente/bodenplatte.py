@@ -32,6 +32,7 @@ class Bodenplatte:
     gummimatte: Optional[MaterialTyp] = None
     untergrund: MaterialTyp
     objekttyp: ObjektTyp = ObjektTyp.BODENPLATTE
+    element_id_intern: Optional[str] = None
     
     def gewichtskraefte(self) -> List[Kraefte]:
         specs = catalog.get_bodenplatte(self.name_intern)
@@ -44,6 +45,7 @@ class Bodenplatte:
         schwerpunkt = flaechenschwerpunkt(self.eckpunkte())
 
         return [Kraefte(
+            element_id_intern=self.element_id_intern,
             typ=Lasttyp.GEWICHT,
             variabilitaet=Variabilitaet.STAENDIG,
             Einzelkraefte=einzelkraefte_vektoren,
@@ -79,7 +81,7 @@ class Bodenplatte:
                 _reibkraft_richtung[2] * _reibkraft_betrag,
             )
         return [Kraefte(
-            lastfall_id_intern=None,
+            element_id_intern=self.element_id_intern,
             typ=Lasttyp.REIBUNG,
             variabilitaet=Variabilitaet.VERAENDERLICH,
             Einzelkraefte=[_reibkraft],

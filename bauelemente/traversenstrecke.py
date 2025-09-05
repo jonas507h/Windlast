@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Tuple, List, Sequence
+from typing import Tuple, List, Sequence, Optional
 from datenstruktur.konstanten import PhysikKonstanten, aktuelle_konstanten
 from materialdaten.catalog import catalog
 from rechenfunktionen import (
@@ -28,6 +28,7 @@ class Traversenstrecke:
     ende:  Vec3
     orientierung: Vec3
     objekttyp: ObjektTyp = ObjektTyp.TRAVERSE
+    element_id_intern: Optional[str] = None
 
     def gewichtskraefte(self) -> List[Kraefte]:
         laenge = abstand_punkte(self.start, self.ende)
@@ -43,6 +44,7 @@ class Traversenstrecke:
         schwerpunkt = flaechenschwerpunkt([self.start, self.ende])
 
         return [Kraefte(
+            element_id_intern=self.element_id_intern,
             typ=Lasttyp.GEWICHT,
             variabilitaet=Variabilitaet.STAENDIG,
             Einzelkraefte=einzelkraefte_vektoren,
@@ -122,11 +124,9 @@ class Traversenstrecke:
             angriffsbereiche.append([start_lokal, ende_lokal])
 
         return [Kraefte(
+            element_id_intern=self.element_id_intern,
             typ=Lasttyp.WIND,
             variabilitaet=Variabilitaet.VERAENDERLICH,
             Einzelkraefte=einzelkraefte_vektoren,
             Angriffsflaeche_Einzelkraefte=angriffsbereiche,
-            # optional:
-            # lastfall_id_intern="WIND_ALLG",
-            # element_id_intern=self.traverse_name_intern,
         )]
