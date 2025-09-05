@@ -505,3 +505,27 @@ def senkrechter_vektor(a: Vec3, b: Vec3) -> Vec3:
         raise ValueError("Die Vektoren a und b sind kollinear; kein eindeutiger senkrechter Vektor existiert.")
 
     return vektor_normieren(kreuz)
+
+def einheitsvektor_aus_winkeln(azimut: float, elevation: float) -> Vec3:
+    """
+    Erstellt einen Einheitsvektor aus Azimut- und Elevationswinkel (in Grad).
+
+    Parameter
+    ---------
+    azimut : float
+        Der Azimutwinkel in Grad (0° = x-Achse, 90° = y-Achse).
+    elevation : float
+        Der Elevationswinkel in Grad (0° = xy-Ebene, 90° = z-Achse).
+
+    Rückgabe
+    --------
+    Vec3 : Der resultierende Einheitsvektor (x, y, z).
+    """
+    az_rad = math.radians(azimut)
+    el_rad = math.radians(elevation)
+
+    x = math.cos(el_rad) * math.cos(az_rad)
+    y = math.cos(el_rad) * math.sin(az_rad)
+    z = math.sin(el_rad)
+
+    return (x, y, z)
