@@ -1,9 +1,10 @@
 # rechenfunktionen/geom3d.py
 from math import hypot
-from typing import Sequence, Tuple, Optional
+from typing import Sequence, Tuple, Optional, List
 import math
 
 Vec3 = Tuple[float, float, float]
+_EPS = 1e-9
 
 __all__ = ["abstand", "Vec3", "flaechenschwerpunkt", "vektor_parallelanteil", "vektor_senkrechtanteil"]
 
@@ -529,3 +530,75 @@ def einheitsvektor_aus_winkeln(azimut: float, elevation: float) -> Vec3:
     z = math.sin(el_rad)
 
     return (x, y, z)
+
+def konvexe_huelle_xy(punkte: List[Vec3], *, include_Randpunkte: bool = False) -> List[Vec3]:
+    """
+    Berechnet die konvexe Hülle einer Menge von 3D-Punkten, projiziert auf die XY-Ebene.
+    Die Z-Koordinate der Rückgabepunkte entspricht derjenigen des ursprünglichen Punktes.
+
+    Parameter
+    ---------
+    punkte : Liste von Vec3
+        Die Eingabepunkte.
+    include_Randpunkte : bool, optional
+        Ob Punkte auf dem Rand der konvexen Hülle eingeschlossen werden sollen (Standard: False).
+
+    Rückgabe
+    --------
+    Liste von Vec3 : Die Punkte der konvexen Hülle in Reihenfolge (CCW, ohne Startpunkt-Duplikat).
+
+    Raises
+    ------
+    ValueError : falls weniger als 3 Punkte gegeben sind oder alle Punkte kollinear sind
+    """
+    if len(punkte) < 3:
+        raise ValueError("Mindestens 3 Punkte sind erforderlich, um eine konvexe Hülle zu berechnen.")
+
+    # Sortiere Punkte lexikographisch nach (x, y)
+    unique_xy = {}
+    for x, y, z in punkte:
+        unique_xy.setdefault((x, y), (x, y, z))
+    punkte = sorted(unique_xy.values(), key=lambda p: (p[0], p[1]))
+
+    def kreuzprodukt_2D(o: Vec3, a: Vec3, b: Vec3) -> float:
+        return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+
+    untere_huelle: List[Vec3] = []
+    for p in punkte:
+        while len(untere_huelle) >= 2:
+            turn = kreuzprodukt_2D(untere_huelle[-2], untere_huelle[-1], p)
+            if include_Randpunkte:
+                if turn < -_EPS:
+                    untere_huelle.pop()
+                else:
+                    break
+            else:
+                if turn <= _EPS:
+                    untere_huelle.pop()
+                else:
+                    break
+        untere_huelle.append(p)
+
+    obere_huelle: List[Vec3] = []
+    for p in reversed(punkte):
+        while len(obere_huelle) >= 2:
+            turn = kreuzprodukt_2D(obere_huelle[-2], obere_huelle[-1], p)
+            if include_Randpunkte:
+                if turn < -_EPS:
+                    obere_huelle.pop()
+                else:
+                    break
+            else:
+                if turn <= _EPS:
+                    obere_huelle.pop()
+                else:
+                    break
+        obere_huelle.append(p)
+
+    # Entferne das letzte Element jeder Hälfte, da es das erste Element der anderen Hälfte ist
+    del untere_huelle[-1]
+    del obere_huelle[-1]
+
+    konvexe_huelle = untere_huelle +  obere_huelle
+
+    return konvexe_huelle
