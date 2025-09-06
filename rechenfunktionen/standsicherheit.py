@@ -1,10 +1,16 @@
+from typing import List, Tuple
 from standsicherheit_utils import generiere_windrichtungen, kippachsen_aus_eckpunkten
 from rechenfunktionen.geom3d import Vec3
 
 def kippsicherheit(konstruktion) -> float:
-    # TODO: hier Eckpunkte der Bodenplatten sammeln
-    # eckpunkte = sammle_eckpunkte(konstruktion)
-    eckpunkte = ...  # <- du füllst das gleich
+    eckpunkte: List[Vec3] = []
+
+    for obj in getattr(konstruktion, "bauelemente", []):
+        ep = getattr(obj, "eckpunkte", None)
+        if callable(ep):
+            punkte = ep()
+            if punkte:
+                eckpunkte.extend(punkte)
 
     achsen = kippachsen_aus_eckpunkten(eckpunkte, include_Randpunkte=False)
 
