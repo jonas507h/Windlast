@@ -9,6 +9,7 @@ from rechenfunktionen import (
     gesamtgewicht as _gesamtgewicht,
 )
 
+# TODO: ID-Vergabe
 @dataclass
 class Tor:
     name: str = "Tor"
@@ -42,16 +43,19 @@ class Tor:
                 traverse_name_intern=self.traverse_name_intern,
                 start=(t/2, 0.0, 0.0),
                 ende=(t/2, 0.0, H),
+                element_id_intern="Strecke_Links",
             )
             top = Traversenstrecke(
                 traverse_name_intern=self.traverse_name_intern,
                 start=(0.0, 0.0, H - t/2),
                 ende=(B,   0.0, H - t/2),
+                element_id_intern="Strecke_Oben",
             )
             right = Traversenstrecke(
                 traverse_name_intern=self.traverse_name_intern,
                 start=(B - t/2, 0.0, 0.0),
                 ende=(B - t/2, 0.0, H),
+                element_id_intern="Strecke_Rechts",
             )
             self.bauelemente.extend([left, top, right])
 
@@ -59,7 +63,7 @@ class Tor:
         hat_bodenplatten = any(isinstance(k, Bodenplatte) for k in self.bauelemente)
         if (not hat_bodenplatten) and self.bodenplatte_name_intern:
             self.bauelemente.extend(
-                Bodenplatte(name_intern=self.bodenplatte_name_intern)
+                Bodenplatte(name_intern=self.bodenplatte_name_intern, element_id_intern=f"Bodenplatte_{_}")
                 for _ in range(self.anzahl_bodenplatten)
             )
 
