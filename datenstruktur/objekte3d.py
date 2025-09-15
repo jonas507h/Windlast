@@ -1,5 +1,7 @@
 from dataclasses import dataclass
-from rechenfunktionen.geom3d import Vec3
+from typing import Tuple
+
+Vec3 = Tuple[float, float, float]
 
 @dataclass
 class Achse:

@@ -16,9 +16,6 @@ class Kraefte:
       Struktur: [[Flaeche1_P1, Flaeche1_P2, ...], [Flaeche2_P1, ...], ...]
       Für Punktlast: Liste mit genau 1 Punkt. Für Linie: >=2 Punkte. Für Fläche: >=3 Punkte.
     """
-    lastfall_id_intern: Optional[str] = None
-    element_id_intern: Optional[str] = None
-
     typ: Lasttyp                         # WIND / GEWICHT / REIBUNG
     variabilitaet: Variabilitaet         # STAENDIG / VERAENDERLICH
 
@@ -29,6 +26,9 @@ class Kraefte:
     # wird automatisch gesetzt (Summe der Einzelkräfte)
     Resultierende: Vec3 = field(init=False)
     Angriffspunkte_Einzelkraefte: List[Vec3] = field(init=False)  # [m] ein Punkt je Einzelkraft
+
+    lastfall_id_intern: Optional[str] = None
+    element_id_intern: Optional[str] = None
 
     def __post_init__(self) -> None:
         self._validate()

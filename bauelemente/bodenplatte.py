@@ -29,8 +29,8 @@ class Bodenplatte:
     drehung: Vec3 # Einheitsvektor entlang der langen Kante, senkrecht zur Orientierung
     form: FormTyp
     material: MaterialTyp
-    gummimatte: Optional[MaterialTyp] = None
     untergrund: MaterialTyp
+    gummimatte: Optional[MaterialTyp] = None
     objekttyp: ObjektTyp = ObjektTyp.BODENPLATTE
     element_id_intern: Optional[str] = None
     

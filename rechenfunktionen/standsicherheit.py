@@ -1,6 +1,6 @@
 from math import inf
 from typing import List, Tuple, Dict
-from standsicherheit_utils import generiere_windrichtungen, kippachsen_aus_eckpunkten, bewerte_lastfall_fuer_achse, kipp_envelope_pro_bauelement
+from rechenfunktionen.standsicherheit_utils import generiere_windrichtungen, kippachsen_aus_eckpunkten, bewerte_lastfall_fuer_achse, kipp_envelope_pro_bauelement
 from rechenfunktionen.geom3d import Vec3
 from datenstruktur.kraefte import Kraefte
 from datenstruktur.enums import Norm
