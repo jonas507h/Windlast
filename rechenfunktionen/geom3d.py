@@ -2,6 +2,7 @@
 from math import hypot
 from typing import Sequence, Tuple, Optional, List
 import math
+from datenstruktur.objekte3d import Achse
 
 Vec3 = Tuple[float, float, float]
 _EPS = 1e-9
@@ -602,3 +603,41 @@ def konvexe_huelle_xy(punkte: List[Vec3], *, include_Randpunkte: bool = False) -
     konvexe_huelle = untere_huelle +  obere_huelle
 
     return konvexe_huelle
+
+def moment_einzelkraft_um_achse(achse: Achse, kraft: Vec3, angriffspunkt: Vec3) -> float:
+    """
+    Berechnet das Moment einer Einzelkraft um eine gegebene Achse.
+
+    Parameter
+    ---------
+    achse : Achse
+        Die Achse, um die das Moment berechnet wird.
+    kraft : Vec3
+        Der Kraftvektor (x, y, z).
+    angriffspunkt : Vec3
+        Der Punkt, an dem die Kraft angreift (x, y, z).
+
+    Rückgabe
+    --------
+    float : Das Moment der Kraft um die Achse (positiv im Sinne der Rechtsschraube).
+
+    Raises
+    ------
+    ValueError : falls die Achse keinen gültigen Richtungsvektor hat oder einer der Vektoren nicht genau 3 Komponenten hat
+    """
+    if len(kraft) != 3 or len(angriffspunkt) != 3:
+        raise ValueError("kraft und angriffspunkt müssen Vektoren mit genau 3 Komponenten (x, y, z) sein.")
+    if vektor_laenge(achse.richtung) == 0:
+        raise ValueError("Die Achse muss einen gültigen Richtungsvektor haben.")
+
+    # Vektor vom Achsenpunkt zum Angriffspunkt
+    r = vektor_zwischen_punkten(achse.punkt, angriffspunkt)
+
+    # Kreuzprodukt r x F
+    moment_vektor = vektor_kreuzprodukt(r, kraft)
+
+    # Projektion des Momentvektors auf den Achsenrichtungsvektor (normiert)
+    achsen_richtung_norm = vektor_normieren(achse.richtung)
+    moment = vektor_skalarprodukt(moment_vektor, achsen_richtung_norm)
+
+    return moment
