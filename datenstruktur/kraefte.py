@@ -56,23 +56,23 @@ class Kraefte:
         - Falls Angriffsgeometrien vorhanden: Schwerpunkt je Geometrie.
         - Sonst: Schwerpunkt-Fallback.
         """
-        self.angriffspunkte_einzelkraefte = []
+        self.Angriffspunkte_Einzelkraefte = []
 
         if self.Angriffsflaeche_Einzelkraefte:
             # Schwerpunkt je zugehöriger Geometrie (Punkt/Linie/Fläche)
             for poly in self.Angriffsflaeche_Einzelkraefte:
                 sp = flaechenschwerpunkt(poly)
-                self.angriffspunkte_einzelkraefte.append(sp)
+                self.Angriffspunkte_Einzelkraefte.append(sp)
         else:
             # Kein Polygon/Segment/Punkt pro Kraft angegeben → auf globalen Schwerpunkt zurückfallen
             if self.Schwerpunkt is None:
                 raise ValueError("Kein Angriffspunkt ableitbar: weder Angriffsflächen noch Schwerpunkt gesetzt.")
-            self.angriffspunkte_einzelkraefte = [self.Schwerpunkt for _ in self.Einzelkraefte]
+            self.Angriffspunkte_Einzelkraefte = [self.Schwerpunkt for _ in self.Einzelkraefte]
 
-        if len(self.angriffspunkte_einzelkraefte) != len(self.Einzelkraefte):
+        if len(self.Angriffspunkte_Einzelkraefte) != len(self.Einzelkraefte):
             raise RuntimeError(
                 "Anzahl der Angriffspunkte passt nicht zu den Einzelkräften "
-                f"({len(self.angriffspunkte_einzelkraefte)} vs. {len(self.Einzelkraefte)})."
+                f"({len(self.Angriffspunkte_Einzelkraefte)} vs. {len(self.Einzelkraefte)})."
             )
 
     # optional: falls du nach dem Erzeugen die Kräfte änderst
