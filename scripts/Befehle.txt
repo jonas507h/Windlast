@@ -1,1 +1,5 @@
 python -m scripts.run_windkraft
+
+App ausführen
+.venv\Scripts\activate
+python app.py

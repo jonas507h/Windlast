@@ -5,6 +5,9 @@ import csv
 import sys
 from typing import Dict, Optional, Tuple
 from datenstruktur.enums import MaterialTyp
+import warnings
+
+# TODO: Reibwerte laden abhängig von Norm
 
 # --- Datamodels -----------------------------------------------------------
 
@@ -66,8 +69,13 @@ def _load_reibwerte_csv(csv_path: Path) -> Dict[Pair, ReibwertSpec]:
 
             key = _norm_pair(a, b)
             if key in pairs:
-                raise ValueError(f"Doppelter Reibwert für Paar {a.value}-{b.value} in Zeile {i}.")
-            pairs[key] = ReibwertSpec(material_a=a, material_b=b, reibwert=reibwert, quelle=quelle)
+                existing = pairs[key]
+                if abs(existing.reibwert - reibwert) < 1e-6:
+                    quelle = f"{existing.quelle}; {quelle}".strip("; ")
+                    pairs[key] = ReibwertSpec(existing.material_a, existing.material_b, existing.reibwert, quelle)
+                else:
+                    warnings.warn(f"Abweichende Reibwerte für {a.value}-{b.value} (behalte {existing.reibwert}, verwerfe {reibwert} aus Zeile {i}).")
+                continue
     return pairs
 
 def _load_bodenplatten_csv(csv_path: Path) -> Dict[str, BodenplatteSpec]:
