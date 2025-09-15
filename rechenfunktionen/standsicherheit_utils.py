@@ -1,7 +1,10 @@
 import math
-from typing import List, Tuple, Optional, Sequence
-from rechenfunktionen.geom3d import Vec3, vektor_zwischen_punkten, vektor_normieren, einheitsvektor_aus_winkeln, konvexe_huelle_xy
+from typing import List, Tuple, Optional, Sequence, Iterable
+from rechenfunktionen.geom3d import Vec3, vektor_zwischen_punkten, vektor_normieren, einheitsvektor_aus_winkeln, konvexe_huelle_xy, moment_einzelkraft_um_achse
 from datenstruktur.objekte3d import Achse
+from datenstruktur.kraefte import Kraefte
+from datenstruktur.enums import Norm, Lasttyp, Variabilitaet
+from rechenfunktionen.sicherheitsbeiwert import sicherheitsbeiwert
 
 _EPS = 1e-9
 
@@ -18,6 +21,8 @@ def generiere_windrichtungen(
         raise ValueError("Anzahl der Windrichtungen muss mindestens 1 sein.")
     winkelabstand = 360.0 / anzahl
     return [(i * winkelabstand + startwinkel, einheitsvektor_aus_winkeln(i * winkelabstand + startwinkel, 0.0)) for i in range(anzahl)]
+
+# Kippsicherheit Utils --------------------------------------------
 
 def kippachsen_aus_eckpunkten(punkte: List[Vec3], *, include_Randpunkte: bool = False) -> List[Achse]:
     if len(punkte) < 3:
@@ -40,3 +45,108 @@ def kippachsen_aus_eckpunkten(punkte: List[Vec3], *, include_Randpunkte: bool = 
         kippachsen.append(Achse(punkt=p1, richtung=richtung))
     
     return kippachsen
+
+def bewerte_lastfall_fuer_achse(norm: Norm, achse: Achse, lastfall: Kraefte) -> Tuple[float, float]:
+    """
+    Aggregiert das Moment eines Lastfalls (Objekt 'Kraefte') um die gegebene Achse.
+
+    Pro Einzelkraft i:
+      1) m_sign = u · ((r_i - p) × F_i)
+      2) m_kipp = -m_sign  (>0 = kippend/ungünstig, <=0 = stabilisierend/günstig)
+      3) γ = Sicherheitsbeiwert(norm, lastfall, ist_guenstig=(m_kipp <= 0))
+      4) Summen:
+           kipp_sum  += γ * max(m_kipp, 0)
+           stand_sum += γ * max(-m_kipp, 0)
+
+    Rückgabe:
+      (kipp_sum, stand_sum) für diesen Lastfall.
+    """
+    Einzelkraefte: Sequence[Vec3] = lastfall.Einzelkraefte
+    Angriffspunkte: Sequence[Vec3] = getattr(lastfall, "angriffspunkte_einzelkraefte", None)
+
+    if Angriffspunkte is None or len(Angriffspunkte) != len(Einzelkraefte):
+        raise ValueError(
+            "Kraefte.angriffspunkte_einzelkraefte fehlt oder passt nicht zu Einzelkraefte."
+        )
+
+    kipp_sum = 0.0
+    stand_sum = 0.0
+
+    for Kraft, Punkt in zip(Einzelkraefte, Angriffspunkte):
+        # 1) Moment um die Achse (Skalar, Rechtsschraube) …
+        m_rechnerisch = moment_einzelkraft_um_achse(achse, Kraft, Punkt)
+        # 2) … in „kippende Richtung“ drehen:
+        m_kipp = -m_rechnerisch
+
+        # 3) Sicherheitsbeiwert nach Günstigkeit bestimmen
+        ist_guenstig = (m_kipp <= _EPS)
+        gamma = sicherheitsbeiwert(norm, lastfall, ist_guenstig).wert
+
+        # 4) Aufteilen in kippend vs. stabilisierend
+        if m_kipp > _EPS:
+            kipp_sum += gamma * m_kipp
+        else:
+            # (-m_kipp) ist der Betrag des stabilisierenden Moments
+            stand_sum += gamma * (-m_kipp)
+
+    return kipp_sum, stand_sum
+
+
+def kipp_envelope_pro_bauelement(
+    norm: Norm,
+    achse: Achse,
+    lastfaelle: Iterable[Kraefte],
+) -> Tuple[float, float]:
+    """
+    Bildet je Bauelement den ungünstigen „Envelope“ über seine Lastfälle.
+
+    Regeln:
+      - WIND:    wähle den Lastfall mit maximalem kippenden Anteil (kipp_sum).
+                 (stabilisierende Windanteile haben γ=0 → werden nicht gutgeschrieben)
+      - GEWICHT: wähle den Lastfall mit maximalem (kipp_sum - stand_sum)
+                 (= „am wenigsten günstig“; berücksichtigt, dass nur günstige & ständige
+                    Eigenlast mit γ>0 stabilisierend wirken darf)
+      - Sonstiges (z. B. REIBUNG): konservativ wie WIND → max. kipp_sum.
+
+    Rückgabe:
+      (kipp_sum_bauteil, stand_sum_bauteil) — die Beiträge des Bauteils zum globalen Nachweis.
+    """
+    # Sammle bewertete Lastfälle pro Typ
+    wind_kipp: List[float] = []
+    gewicht_pairs: List[Tuple[float, float]] = []
+    other_pairs: List[Tuple[float, float]] = []
+
+    for k in lastfaelle:
+        kipp, stand = bewerte_lastfall_fuer_achse(norm, achse, k)
+        if k.typ == Lasttyp.WIND:
+            wind_kipp.append(kipp)
+        elif k.typ == Lasttyp.GEWICHT:
+            gewicht_pairs.append((kipp, stand))
+        else:
+            other_pairs.append((kipp, stand))
+
+    # Envelopebildung je Typ
+    best_wind_kipp = max(wind_kipp) if wind_kipp else 0.0
+
+    best_gew_kipp = 0.0
+    best_gew_stand = 0.0
+    if gewicht_pairs:
+        # „ungünstigster“ Gewichts-Lastfall
+        best_gew_kipp, best_gew_stand = max(
+            gewicht_pairs,
+            key=lambda pair: pair[0] - pair[1]
+        )
+
+    best_other_kipp = 0.0
+    best_other_stand = 0.0
+    if other_pairs:
+        # konservativ: max kippend
+        best_other_kipp, best_other_stand = max(
+            other_pairs,
+            key=lambda pair: pair[0]
+        )
+
+    # Ergebnis für das Bauelement
+    kipp_sum_bauteil = best_wind_kipp + best_gew_kipp + best_other_kipp
+    stand_sum_bauteil = best_gew_stand + best_other_stand
+    return kipp_sum_bauteil, stand_sum_bauteil
