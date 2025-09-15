@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Optional, Tuple, List
 from datenstruktur.enums import Lasttyp, Variabilitaet
-from rechenfunktionen.geom3d import Vec3, vektoren_addieren
+from rechenfunktionen.geom3d import Vec3, vektoren_addieren, flaechenschwerpunkt
 
 EPS = 1e-9
 
@@ -28,10 +28,12 @@ class Kraefte:
 
     # wird automatisch gesetzt (Summe der Einzelkräfte)
     Resultierende: Vec3 = field(init=False)
+    Angriffspunkte_Einzelkraefte: List[Vec3] = field(init=False)  # [m] ein Punkt je Einzelkraft
 
     def __post_init__(self) -> None:
         self._validate()
         self.Resultierende = vektoren_addieren(self.Einzelkraefte)
+        self._setze_angriffspunkte()
 
     def _validate(self) -> None:
         # Wenn Angriffsgeometrien angegeben sind, muss die Anzahl zur Kraftliste passen
@@ -48,7 +50,33 @@ class Kraefte:
                 for j, p in enumerate(poly):
                     if len(p) != 3:
                         raise ValueError(f"Punkt #{j} in Angriffsfläche #{i} ist kein Vec3: {p}")
+                    
+    def _setze_angriffspunkte(self) -> None:
+        """Erzeugt self.angriffspunkte_einzelkraefte 1:1 zu self.Einzelkraefte.
+        - Falls Angriffsgeometrien vorhanden: Schwerpunkt je Geometrie.
+        - Sonst: Schwerpunkt-Fallback.
+        """
+        self.angriffspunkte_einzelkraefte = []
+
+        if self.Angriffsflaeche_Einzelkraefte:
+            # Schwerpunkt je zugehöriger Geometrie (Punkt/Linie/Fläche)
+            for poly in self.Angriffsflaeche_Einzelkraefte:
+                sp = flaechenschwerpunkt(poly)
+                self.angriffspunkte_einzelkraefte.append(sp)
+        else:
+            # Kein Polygon/Segment/Punkt pro Kraft angegeben → auf globalen Schwerpunkt zurückfallen
+            if self.Schwerpunkt is None:
+                raise ValueError("Kein Angriffspunkt ableitbar: weder Angriffsflächen noch Schwerpunkt gesetzt.")
+            self.angriffspunkte_einzelkraefte = [self.Schwerpunkt for _ in self.Einzelkraefte]
+
+        if len(self.angriffspunkte_einzelkraefte) != len(self.Einzelkraefte):
+            raise RuntimeError(
+                "Anzahl der Angriffspunkte passt nicht zu den Einzelkräften "
+                f"({len(self.angriffspunkte_einzelkraefte)} vs. {len(self.Einzelkraefte)})."
+            )
 
     # optional: falls du nach dem Erzeugen die Kräfte änderst
     def aktualisiere_resultierende(self) -> None:
         self.Resultierende = vektoren_addieren(self.Einzelkraefte)
+    def aktualisiere_angriffspunkte(self) -> None:
+        self._setze_angriffspunkte()
