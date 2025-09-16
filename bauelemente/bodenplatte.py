@@ -53,6 +53,11 @@ class Bodenplatte:
             Schwerpunkt=schwerpunkt,
         )]
     
+    def reibwert(self) -> float:
+        _materialfolge = [self.material, self.gummimatte, self.untergrund]
+        _reibwert = reibwert(_materialfolge).wert
+        return _reibwert
+    
     def reibkraefte(self, belastung: Vec3) -> List[Kraefte]:
         # Reibwert ermitteln
         _materialfolge = [self.material, self.gummimatte, self.untergrund]

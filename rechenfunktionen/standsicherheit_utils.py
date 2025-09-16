@@ -238,3 +238,21 @@ def kipp_envelope_pro_bauelement(
     kipp_sum_bauteil = best_wind_kipp + best_gew_kipp + best_other_kipp
     stand_sum_bauteil = best_gew_stand + best_other_stand
     return kipp_sum_bauteil, stand_sum_bauteil
+
+# Gleitsicherheit Utils ------------------------------
+
+def ermittle_min_reibwert(konstruktion) -> float:
+    """Liest μ aus allen Bodenplatten (Elem hat Methode reibwert()) und gibt das Minimum zurück.
+       Falls keine Platte gefunden → 0.0 (konservativ)."""
+    mu_werte: List[float] = []
+    for elem in getattr(konstruktion, "bauelemente", []):
+        reib_fn = getattr(elem, "reibwert", None)
+        if callable(reib_fn):
+            try:
+                mu = reib_fn()
+                if mu is not None:
+                    mu_werte.append(float(mu))
+            except Exception:
+                # Robust gegen exotische Implementationen
+                pass
+    return min(mu_werte) if mu_werte else 0.0

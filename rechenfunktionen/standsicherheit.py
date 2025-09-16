@@ -6,6 +6,7 @@ from rechenfunktionen.standsicherheit_utils import (
     sammle_kippachsen,
     get_or_create_lastset,
     obtain_pool,
+    ermittle_min_reibwert,
 )
 from rechenfunktionen.geom3d import Vec3
 from datenstruktur.kraefte import Kraefte
@@ -58,7 +59,30 @@ def kippsicherheit(konstruktion, *, reset_berechnungen: bool = True) -> float:
 
     return sicherheit_min_global
 
-def gleitsicherheit(konstruktion) -> float:
+def gleitsicherheit(
+    konstruktion,
+    *,
+    reset_berechnungen: bool = False,
+    methode: str = "min_reibwert",          # "min_reibwert" | "pro_platte" | "reaktionen" (später)
+    anzahl_windrichtungen: int = _anzahl_windrichtungen_standard,
+) -> float:
+    if methode == "min_reibwert":
+        reibwert_min = ermittle_min_reibwert(konstruktion)
+        pool = obtain_pool(konstruktion, reset_berechnungen)
+
+        for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen):
+            lastset = get_or_create_lastset(
+                pool,
+                konstruktion,
+                winkel_deg=winkel,
+                windrichtung=richtung,
+                norm=Norm.DEFAULT,      # wie bisher: Platzhalter
+                staudruecke=[350.0],        # wie bisher: Platzhalter
+                obergrenzen=[float("inf")], # wie bisher
+                konst=None,
+            )
+            kraefte_nach_element = lastset.kraefte_nach_element
+
     return 1.0  # TODO
 
 def abhebesicherheit(konstruktion) -> float:
