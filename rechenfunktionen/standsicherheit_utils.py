@@ -66,6 +66,12 @@ def ermittle_kraefte_pro_windrichtung(
 def _angle_key(winkel_deg: float) -> int:
     return int(round(winkel_deg * 1e4))
 
+def obtain_pool(konstruktion, reset_berechnungen: bool) -> LastPool:
+    if reset_berechnungen or not hasattr(konstruktion, "_lastpool") or konstruktion._lastpool is None:
+        konstruktion._lastpool = LastPool()
+    return konstruktion._lastpool
+
+
 def get_or_create_lastset(
     pool: LastPool,
     konstruktion,

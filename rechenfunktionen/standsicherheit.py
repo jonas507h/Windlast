@@ -5,6 +5,7 @@ from rechenfunktionen.standsicherheit_utils import (
     kipp_envelope_pro_bauelement,
     sammle_kippachsen,
     get_or_create_lastset,
+    obtain_pool,
 )
 from rechenfunktionen.geom3d import Vec3
 from datenstruktur.kraefte import Kraefte
@@ -14,14 +15,14 @@ from datenstruktur.lastpool import LastPool
 _EPS = 1e-12
 _anzahl_windrichtungen_standard = 4
 
-def kippsicherheit(konstruktion) -> float:
+def kippsicherheit(konstruktion, *, reset_berechnungen: bool = True) -> float:
     # 1) Eckpunkte sammeln → Kippachsen bestimmen
     achsen = sammle_kippachsen(konstruktion)
 
     # 2) Minimum der Sicherheit über alle (Windrichtung × Achse)
     sicherheit_min_global = inf
 
-    pool = LastPool()  # NEU: lokaler Cache; später ggf. an konstruktion hängen
+    pool = obtain_pool(konstruktion, reset_berechnungen)
 
     for winkel, richtung in generiere_windrichtungen(anzahl=_anzahl_windrichtungen_standard):
         lastset = get_or_create_lastset(

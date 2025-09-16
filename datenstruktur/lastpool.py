@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple, Hashable
 from datenstruktur.kraefte import Kraefte
 from rechenfunktionen.geom3d import Vec3
 
