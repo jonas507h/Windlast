@@ -7,8 +7,9 @@ from rechenfunktionen.standsicherheit_utils import (
     get_or_create_lastset,
     obtain_pool,
     ermittle_min_reibwert,
+    gleit_envelope_pro_bauelement,
 )
-from rechenfunktionen.geom3d import Vec3
+from rechenfunktionen.geom3d import Vec3, vektoren_addieren, vektor_laenge
 from datenstruktur.kraefte import Kraefte
 from datenstruktur.enums import Norm
 from datenstruktur.lastpool import LastPool
@@ -68,6 +69,7 @@ def gleitsicherheit(
 ) -> float:
     if methode == "min_reibwert":
         reibwert_min = ermittle_min_reibwert(konstruktion)
+        sicherheit_min_global = inf
         pool = obtain_pool(konstruktion, reset_berechnungen)
 
         for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen):
@@ -83,7 +85,28 @@ def gleitsicherheit(
             )
             kraefte_nach_element = lastset.kraefte_nach_element
 
-    return 1.0  # TODO
+            total_horizontal: Vec3 = (0.0, 0.0, 0.0)
+            total_normal_up = 0.0
+            total_normal_down = 0.0
+
+            for _, lastfaelle_elem in kraefte_nach_element.items():
+                H_vec, N_down, N_up = gleit_envelope_pro_bauelement(Norm.DEFAULT, lastfaelle_elem)
+                total_horizontal = vektoren_addieren([total_horizontal, H_vec])
+                total_normal_up += N_up
+                total_normal_down += N_down
+
+            horizontal_betrag = vektor_laenge(total_horizontal)
+            normal_effektiv = max(0.0, total_normal_down - total_normal_up)
+            reibkraft = reibwert_min * normal_effektiv
+
+            if horizontal_betrag > _EPS:
+                sicherheit = reibkraft / horizontal_betrag
+                sicherheit_min_global = min(sicherheit_min_global, sicherheit)
+        
+        return sicherheit_min_global
+    
+    else:
+        raise NotImplementedError(f"Methode '{methode}' ist noch nicht implementiert.")
 
 def abhebesicherheit(konstruktion) -> float:
     return 1.0  # TODO

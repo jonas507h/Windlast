@@ -1,6 +1,6 @@
 import math
 from typing import List, Tuple, Optional, Sequence, Iterable, Dict
-from rechenfunktionen.geom3d import Vec3, vektor_zwischen_punkten, vektor_normieren, einheitsvektor_aus_winkeln, konvexe_huelle_xy, moment_einzelkraft_um_achse
+from rechenfunktionen.geom3d import Vec3, vektor_zwischen_punkten, vektor_normieren, einheitsvektor_aus_winkeln, konvexe_huelle_xy, moment_einzelkraft_um_achse, vektor_laenge
 from datenstruktur.objekte3d import Achse
 from datenstruktur.kraefte import Kraefte
 from datenstruktur.enums import Norm, Lasttyp, Variabilitaet
@@ -256,3 +256,70 @@ def ermittle_min_reibwert(konstruktion) -> float:
                 # Robust gegen exotische Implementationen
                 pass
     return min(mu_werte) if mu_werte else 0.0
+
+def bewerte_lastfall_fuer_gleiten(norm: Norm, lastfall: Kraefte) -> Tuple[Vec3, float, float]:
+    """
+    Zerlegt einen Lastfall in:
+      H_vec (treibend, horizontal, γ_ungünstig),
+      N_down (günstig, nur aus GEWICHT mit γ_günstig),
+      N_up   (ungünstig, γ_ungünstig).
+    Rückgabe: (H_vec, N_down, N_up)
+    """
+
+    Einzelkraefte: Sequence[Vec3] = lastfall.Einzelkraefte
+
+    Hx = Hy = Hz = 0.0
+    N_down = 0.0
+    N_up   = 0.0
+
+    gamma_unguenstig = sicherheitsbeiwert(norm, lastfall, ist_guenstig=False).wert
+    gamma_guenstig = sicherheitsbeiwert(norm, lastfall, ist_guenstig=True).wert
+
+    for Kraft in Einzelkraefte:
+        fx = Kraft[0]
+        fy = Kraft[1]
+        fz = Kraft[2]
+
+        Hx += gamma_unguenstig * fx
+        Hy += gamma_unguenstig * fy
+
+        if fz > _EPS:
+            N_up += gamma_unguenstig * fz
+        elif fz < -_EPS:
+            N_down += gamma_guenstig * (-fz)
+    
+    H_vec: Vec3 = (Hx, Hy, Hz)
+
+    return H_vec, N_down, N_up
+
+def gleit_envelope_pro_bauelement(
+    norm: Norm,
+    lastfaelle: Iterable[Kraefte],
+) -> Tuple[Vec3, float, float]:
+    """
+    Element-konsistent:
+      - Wähle den Lastfall mit maximaler ||H_vec|| ⇒ dessen H_vec und N_up zählen.
+      - N_down kommt aus den GEWICHT-Lastfällen: kleinster (ungünstigster) Wert.
+    Rückgabe: (H_vec_bauteil, N_down_bauteil, N_up_bauteil)
+    """
+    best_H_vec: Vec3 = (0.0, 0.0, 0.0)
+    best_H_betrag = -1.0
+    best_N_down = None
+    best_N_up = 0.0
+
+    for k in lastfaelle:
+        H_vec, N_down, N_up = bewerte_lastfall_fuer_gleiten(norm, k)
+        H_betrag = vektor_laenge(H_vec)
+        if k.typ == Lasttyp.WIND:
+            if H_betrag > best_H_betrag:
+                best_H_betrag = H_betrag
+                best_H_vec = H_vec
+                best_N_up = N_up
+
+        if k.typ == Lasttyp.GEWICHT:
+            best_N_down = N_down if best_N_down is None else min(best_N_down, N_down)
+
+    if best_N_down is None:
+        best_N_down = 0.0
+
+    return best_H_vec, best_N_down, best_N_up
