@@ -8,6 +8,7 @@ from rechenfunktionen.standsicherheit_utils import (
     obtain_pool,
     ermittle_min_reibwert,
     gleit_envelope_pro_bauelement,
+    abhebe_envelope_pro_bauelement,
 )
 from rechenfunktionen.geom3d import Vec3, vektoren_addieren, vektor_laenge
 from datenstruktur.kraefte import Kraefte
@@ -108,5 +109,44 @@ def gleitsicherheit(
     else:
         raise NotImplementedError(f"Methode '{methode}' ist noch nicht implementiert.")
 
-def abhebesicherheit(konstruktion) -> float:
-    return 1.0  # TODO
+def abhebesicherheit(
+    konstruktion,
+    *,
+    reset_berechnungen: bool = False,
+    anzahl_windrichtungen: int = _anzahl_windrichtungen_standard,
+) -> float:
+    """
+    Sicherheitszahl gegen Abheben:
+      η = Summe(N_down) / Summe(N_up), Minimum über alle Windrichtungen.
+      - N_down: nur GEWICHT (günstig), mit γ_günstig
+      - N_up:   alle aufwärts gerichteten Beiträge (ungünstig), mit γ_ungünstig
+    """
+    sicherheit_min_global = inf
+    pool = obtain_pool(konstruktion, reset_berechnungen)
+
+    for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen):
+        lastset = get_or_create_lastset(
+            pool,
+            konstruktion,
+            winkel_deg=winkel,
+            windrichtung=richtung,
+            norm=Norm.DEFAULT,              # Platzhalter wie gehabt
+            staudruecke=[350.0],
+            obergrenzen=[float("inf")],
+            konst=None,
+        )
+        kraefte_nach_element = lastset.kraefte_nach_element
+
+        total_normal_down = 0.0
+        total_normal_up = 0.0
+
+        for _, lastfaelle_elem in kraefte_nach_element.items():
+            N_down_b, N_up_b = abhebe_envelope_pro_bauelement(Norm.DEFAULT, lastfaelle_elem)
+            total_normal_down += N_down_b
+            total_normal_up += N_up_b
+
+        sicherheit = inf if total_normal_up <= _EPS else (total_normal_down / total_normal_up)
+        if sicherheit < sicherheit_min_global:
+            sicherheit_min_global = sicherheit
+
+    return sicherheit_min_global

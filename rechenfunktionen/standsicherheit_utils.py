@@ -319,3 +319,57 @@ def gleit_envelope_pro_bauelement(
         best_N_down = 0.0
 
     return best_H_vec, best_N_down, best_N_up
+
+# Abhebesicherheit Utils -----------------------------------
+
+def bewerte_lastfall_fuer_abheben(norm: Norm, lastfall: Kraefte) -> Tuple[float, float]:
+    """
+    Zerlegt einen Lastfall in:
+      N_down (günstig, NACH UNTEN; nur aus GEWICHT mit γ_günstig, als positive Größe),
+      N_up   (ungünstig, NACH OBEN; aus allen Lastfällen mit γ_ungünstig, als positive Größe).
+    Rückgabe: (N_down, N_up)
+    """
+    N_down = 0.0
+    N_up = 0.0
+
+    gamma_unguenstig = sicherheitsbeiwert(norm, lastfall, ist_guenstig=False).wert
+    gamma_guenstig = sicherheitsbeiwert(norm, lastfall, ist_guenstig=True).wert
+
+    for F in lastfall.Einzelkraefte:
+        fz = F[2]
+        if fz > _EPS:
+            # nach oben → ungünstig
+            N_up += gamma_unguenstig * fz
+        elif fz < -_EPS:
+            # nach unten → günstig, positive Magnitude
+            N_down += gamma_guenstig * (-fz)
+
+    return N_down, N_up
+
+
+def abhebe_envelope_pro_bauelement(
+    norm: Norm,
+    lastfaelle: Iterable[Kraefte],
+) -> Tuple[float, float]:
+    """
+    Element-konsistent:
+      - N_up_bauteil = max (Auftrieb) über ALLE Lastfälle.
+      - N_down_bauteil = min (Auflast) über GEWICHT-Lastfälle (ungünstig kleinster Wert).
+    Rückgabe: (N_down_bauteil, N_up_bauteil)
+    """
+    best_N_up = 0.0
+    best_N_down = None  # min über GEWICHT
+
+    for k in lastfaelle:
+        N_down, N_up = bewerte_lastfall_fuer_abheben(norm, k)
+
+        if N_up > best_N_up:
+            best_N_up = N_up
+
+        if k.typ == Lasttyp.GEWICHT:
+            best_N_down = N_down if best_N_down is None else min(best_N_down, N_down)
+
+    if best_N_down is None:
+        best_N_down = 0.0
+
+    return best_N_down, best_N_up
