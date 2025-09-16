@@ -62,11 +62,8 @@ def bewerte_lastfall_fuer_achse(norm: Norm, achse: Achse, lastfall: Kraefte) -> 
       (kipp_sum, stand_sum) für diesen Lastfall.
     """
 
-    print(f"Bewerte Lastfall {lastfall.typ}/{lastfall.variabilitaet} um Achse bei Punkt {achse.punkt} mit Richtung {achse.richtung}")
     Einzelkraefte: Sequence[Vec3] = lastfall.Einzelkraefte
-    print(f"  Einzelkräfte: {Einzelkraefte}")
     Angriffspunkte: Sequence[Vec3] = lastfall.Angriffspunkte_Einzelkraefte
-    print(f"  Angriffspunkte: {Angriffspunkte}")
 
     if Angriffspunkte is None or len(Angriffspunkte) != len(Einzelkraefte):
         raise ValueError(
@@ -79,7 +76,6 @@ def bewerte_lastfall_fuer_achse(norm: Norm, achse: Achse, lastfall: Kraefte) -> 
     for Kraft, Punkt in zip(Einzelkraefte, Angriffspunkte):
         # 1) Moment um die Achse (Skalar, Rechtsschraube) …
         m_kipp = moment_einzelkraft_um_achse(achse, Kraft, Punkt)
-        print(f"  Kraft {Kraft} an Punkt {Punkt} → m_kipp={m_kipp:.3f}")
 
         # 2) Sicherheitsbeiwert nach Günstigkeit bestimmen
         ist_guenstig = (m_kipp <= _EPS)
