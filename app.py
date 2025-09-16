@@ -64,7 +64,7 @@ def index():
                 hoehe_m=eingabe_hoehe_m,
             )
             # Gewicht (aktuell nur Bodenplatten – Traversen kommen im nächsten Schritt dazu)
-            gesamtgewicht = tor.berechne_kippsicherheit()
+            gesamtgewicht = tor.berechne_gleitsicherheit()
 
     return render_template(
         "index.html",

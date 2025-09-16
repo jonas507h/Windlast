@@ -248,13 +248,9 @@ def ermittle_min_reibwert(konstruktion) -> float:
     for elem in getattr(konstruktion, "bauelemente", []):
         reib_fn = getattr(elem, "reibwert", None)
         if callable(reib_fn):
-            try:
-                mu = reib_fn()
-                if mu is not None:
-                    mu_werte.append(float(mu))
-            except Exception:
-                # Robust gegen exotische Implementationen
-                pass
+            mu = reib_fn()
+            if mu:
+                mu_werte.append(float(mu))
     return min(mu_werte) if mu_werte else 0.0
 
 def bewerte_lastfall_fuer_gleiten(norm: Norm, lastfall: Kraefte) -> Tuple[Vec3, float, float]:

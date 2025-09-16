@@ -75,7 +75,8 @@ def _load_reibwerte_csv(csv_path: Path) -> Dict[Pair, ReibwertSpec]:
                     pairs[key] = ReibwertSpec(existing.material_a, existing.material_b, existing.reibwert, quelle)
                 else:
                     warnings.warn(f"Abweichende Reibwerte für {a.value}-{b.value} (behalte {existing.reibwert}, verwerfe {reibwert} aus Zeile {i}).")
-                continue
+            else:
+                pairs[key] = ReibwertSpec(a, b, reibwert, quelle)
     return pairs
 
 def _load_bodenplatten_csv(csv_path: Path) -> Dict[str, BodenplatteSpec]:

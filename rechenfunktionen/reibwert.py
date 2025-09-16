@@ -19,8 +19,6 @@ def reibwert(materialfolge: Sequence[Optional[MaterialTyp]]) -> Zwischenergebnis
 
     for i in range(len(cleaned) - 1):
         a, b = cleaned[i], cleaned[i + 1]
-        reibwert = float(catalog.get_reibwert(a, b))
-        einzelwerte.append(reibwert)
 
         spec = catalog.get_reibwert(a, b)  # ReibwertSpec
         einzelwerte.append(spec.reibwert)
