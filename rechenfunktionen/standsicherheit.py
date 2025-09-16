@@ -1,59 +1,40 @@
 from math import inf
 from typing import List, Tuple, Dict
-from rechenfunktionen.standsicherheit_utils import generiere_windrichtungen, kippachsen_aus_eckpunkten, bewerte_lastfall_fuer_achse, kipp_envelope_pro_bauelement
+from rechenfunktionen.standsicherheit_utils import (
+    generiere_windrichtungen,
+    kipp_envelope_pro_bauelement,
+    sammle_kippachsen,
+    get_or_create_lastset,
+)
 from rechenfunktionen.geom3d import Vec3
 from datenstruktur.kraefte import Kraefte
 from datenstruktur.enums import Norm
+from datenstruktur.lastpool import LastPool
 
 _EPS = 1e-12
 _anzahl_windrichtungen_standard = 4
 
 def kippsicherheit(konstruktion) -> float:
     # 1) Eckpunkte sammeln → Kippachsen bestimmen
-    eckpunkte: List[Vec3] = []
-
-    for obj in getattr(konstruktion, "bauelemente", []):
-        ep = getattr(obj, "eckpunkte", None)
-        if callable(ep):
-            punkte = ep()
-            if punkte:
-                eckpunkte.extend(punkte)
-
-    achsen = kippachsen_aus_eckpunkten(eckpunkte, include_Randpunkte=False)
+    achsen = sammle_kippachsen(konstruktion)
 
     # 2) Minimum der Sicherheit über alle (Windrichtung × Achse)
     sicherheit_min_global = inf
 
+    pool = LastPool()  # NEU: lokaler Cache; später ggf. an konstruktion hängen
+
     for winkel, richtung in generiere_windrichtungen(anzahl=_anzahl_windrichtungen_standard):
-        # 2a) Für diese Richtung: Wind- & Gewichtskräfte aller Bauelemente holen
-        kraefte_windrichtung: List[Kraefte] = []
-
-        for elem in (getattr(konstruktion, "bauelemente", None) or []):
-            # Gewicht
-            fn_gewicht = getattr(elem, "gewichtskraefte", None)
-            if callable(fn_gewicht):
-                kraefte_gewicht = fn_gewicht()  # -> List[Kraefte]
-                if kraefte_gewicht:
-                    kraefte_windrichtung.extend(kraefte_gewicht)
-
-            # Wind
-            fn_wind = getattr(elem, "windkraefte", None)
-            if callable(fn_wind):
-                kraefte_wind = fn_wind(
-                    norm=Norm.DEFAULT,              # Platzhalter
-                    windrichtung=richtung,
-                    staudruecke=[350.0],          # Platzhalter
-                    obergrenzen=[float("inf")],   # Platzhalter
-                    konst=None,
-                )  # -> List[Kraefte]
-                if kraefte_wind:
-                    kraefte_windrichtung.extend(kraefte_wind)
-    
-        # 2b) Nach Bauelement gruppieren (erwartet: element_id_intern gesetzt)
-        kraefte_nach_element: Dict[str, List[Kraefte]] = {}
-        for k in kraefte_windrichtung:
-            key = k.element_id_intern or f"elem_{id(k)}"  # Fallback, falls ID fehlt
-            kraefte_nach_element.setdefault(key, []).append(k)
+        lastset = get_or_create_lastset(
+            pool,
+            konstruktion,
+            winkel_deg=winkel,
+            windrichtung=richtung,
+            norm=Norm.DEFAULT,      # wie bisher: Platzhalter
+            staudruecke=[350.0],        # wie bisher: Platzhalter
+            obergrenzen=[float("inf")], # wie bisher
+            konst=None,
+        )
+        kraefte_nach_element = lastset.kraefte_nach_element
 
         # 2c) Für jede Achse: Envelope je Bauelement → summieren → η bilden
         for achse in achsen:

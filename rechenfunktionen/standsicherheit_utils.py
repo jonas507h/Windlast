@@ -1,10 +1,11 @@
 import math
-from typing import List, Tuple, Optional, Sequence, Iterable
+from typing import List, Tuple, Optional, Sequence, Iterable, Dict
 from rechenfunktionen.geom3d import Vec3, vektor_zwischen_punkten, vektor_normieren, einheitsvektor_aus_winkeln, konvexe_huelle_xy, moment_einzelkraft_um_achse
 from datenstruktur.objekte3d import Achse
 from datenstruktur.kraefte import Kraefte
 from datenstruktur.enums import Norm, Lasttyp, Variabilitaet
 from rechenfunktionen.sicherheitsbeiwert import sicherheitsbeiwert
+from datenstruktur.lastpool import LastPool, LastSet
 
 _EPS = 1e-9
 
@@ -22,7 +23,89 @@ def generiere_windrichtungen(
     winkelabstand = 360.0 / anzahl
     return [(i * winkelabstand + startwinkel, einheitsvektor_aus_winkeln(i * winkelabstand + startwinkel, 0.0)) for i in range(anzahl)]
 
+def ermittle_kraefte_pro_windrichtung(
+    konstruktion,
+    norm: Norm,
+    windrichtung: Vec3,
+    staudruecke: Sequence[float],
+    obergrenzen: Sequence[float],
+    konst
+) -> Dict[str, List[Kraefte]]:  # <- Rückgabetyp korrigiert
+    # 1)Wind- & Gewichtskräfte aller Bauelemente holen
+    kraefte_windrichtung: List[Kraefte] = []
+
+    for elem in (getattr(konstruktion, "bauelemente", None) or []):
+        # Gewicht
+        fn_gewicht = getattr(elem, "gewichtskraefte", None)
+        if callable(fn_gewicht):
+            kraefte_gewicht = fn_gewicht()  # -> List[Kraefte]
+            if kraefte_gewicht:
+                kraefte_windrichtung.extend(kraefte_gewicht)
+
+        # Wind
+        fn_wind = getattr(elem, "windkraefte", None)
+        if callable(fn_wind):
+            kraefte_wind = fn_wind(
+                norm=norm,
+                windrichtung=windrichtung,
+                staudruecke=staudruecke,
+                obergrenzen=obergrenzen,
+                konst=konst,
+            )  # -> List[Kraefte]
+            if kraefte_wind:
+                kraefte_windrichtung.extend(kraefte_wind)
+    
+    # 2) Nach Bauelement gruppieren (erwartet: element_id_intern gesetzt)
+    kraefte_nach_element: Dict[str, List[Kraefte]] = {}
+    for k in kraefte_windrichtung:
+        key = k.element_id_intern or f"elem_{id(k)}"  # Fallback, falls ID fehlt
+        kraefte_nach_element.setdefault(key, []).append(k)
+
+    return kraefte_nach_element
+
+def _angle_key(winkel_deg: float) -> int:
+    return int(round(winkel_deg * 1e4))
+
+def get_or_create_lastset(
+    pool: LastPool,
+    konstruktion,
+    *,
+    winkel_deg: float,
+    windrichtung: Vec3,
+    norm: Norm,
+    staudruecke: Sequence[float],
+    obergrenzen: Sequence[float],
+    konst
+) -> LastSet:
+    key = _angle_key(winkel_deg)
+    ls = pool.nach_winkel.get(key)
+    if ls is None:
+        kbe = ermittle_kraefte_pro_windrichtung(
+            konstruktion,
+            norm=norm,
+            windrichtung=windrichtung,
+            staudruecke=staudruecke,
+            obergrenzen=obergrenzen,
+            konst=konst,
+        )
+        ls = LastSet(winkel_deg=winkel_deg, windrichtung=windrichtung, kraefte_nach_element=kbe)
+        pool.nach_winkel[key] = ls
+    return ls
+
 # Kippsicherheit Utils --------------------------------------------
+
+def sammle_kippachsen(konstruktion) -> List[Achse]:
+    eckpunkte: List[Vec3] = []
+
+    for obj in getattr(konstruktion, "bauelemente", []):
+        ep = getattr(obj, "eckpunkte", None)
+        if callable(ep):
+            punkte = ep()
+            if punkte:
+                eckpunkte.extend(punkte)
+
+    achsen = kippachsen_aus_eckpunkten(eckpunkte, include_Randpunkte=False)
+    return achsen
 
 def kippachsen_aus_eckpunkten(punkte: List[Vec3], *, include_Randpunkte: bool = False) -> List[Achse]:
     if len(punkte) < 3:
@@ -42,7 +125,7 @@ def kippachsen_aus_eckpunkten(punkte: List[Vec3], *, include_Randpunkte: bool = 
         richtung_norm = vektor_normieren(richtung)
         if richtung_norm == (0.0, 0.0, 0.0):
             continue
-        kippachsen.append(Achse(punkt=p1, richtung=richtung))
+        kippachsen.append(Achse(punkt=p1, richtung=richtung_norm))
     
     return kippachsen
 
