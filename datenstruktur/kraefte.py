@@ -4,8 +4,7 @@ from enum import Enum
 from typing import Optional, Tuple, List
 from datenstruktur.enums import Lasttyp, Variabilitaet
 from rechenfunktionen.geom3d import Vec3, vektoren_addieren, flaechenschwerpunkt
-
-EPS = 1e-9
+from datenstruktur.konstanten import _EPS
 
 @dataclass
 class Kraefte:

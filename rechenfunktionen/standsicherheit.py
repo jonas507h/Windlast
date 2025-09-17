@@ -14,8 +14,8 @@ from rechenfunktionen.geom3d import Vec3, vektoren_addieren, vektor_laenge
 from datenstruktur.kraefte import Kraefte
 from datenstruktur.enums import Norm
 from datenstruktur.lastpool import LastPool
+from datenstruktur.konstanten import _EPS
 
-_EPS = 1e-12
 _anzahl_windrichtungen_standard = 4
 
 def kippsicherheit(konstruktion, *, reset_berechnungen: bool = True) -> float:

@@ -3,6 +3,12 @@ from dataclasses import dataclass, replace
 import contextlib, contextvars
 from typing import Optional
 
+# Toleranzen
+
+_EPS = 1e-9
+
+# Physik Konstanten
+
 @dataclass(frozen=True)
 class PhysikKonstanten:
     luftdichte: float = 1.25        # kg/m^3

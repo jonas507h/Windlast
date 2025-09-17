@@ -18,8 +18,7 @@ from rechenfunktionen import (
 )
 from datenstruktur.enums import ObjektTyp, MaterialTyp, Lasttyp, Variabilitaet, FormTyp
 from datenstruktur.kraefte import Kraefte
-
-_EPS = 1e-9
+from datenstruktur.konstanten import _EPS
 
 @dataclass
 class Bodenplatte:

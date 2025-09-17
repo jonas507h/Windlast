@@ -6,8 +6,7 @@ from datenstruktur.kraefte import Kraefte
 from datenstruktur.enums import Norm, Lasttyp, Variabilitaet
 from rechenfunktionen.sicherheitsbeiwert import sicherheitsbeiwert
 from datenstruktur.lastpool import LastPool, LastSet
-
-_EPS = 1e-9
+from datenstruktur.konstanten import _EPS
 
 def generiere_windrichtungen(
     anzahl: int = 4,
