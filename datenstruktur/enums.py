@@ -49,3 +49,14 @@ class FormTyp(str, Enum):
     RECHTECK = "rechteck"
     KREIS = "kreis"
     DREIECK = "dreieck"
+
+class RechenmethodeKippen(str, Enum):
+    STANDARD = "Standard"
+
+class RechenmethodeGleiten(str, Enum):
+    MIN_REIBWERT = "Minimaler Reibwert"
+    PRO_PLATTE = "Pro Platte"
+    REAKTIONEN = "Reaktionen"
+
+class RechenmethodeAbheben(str, Enum):
+    STANDARD = "Standard"
