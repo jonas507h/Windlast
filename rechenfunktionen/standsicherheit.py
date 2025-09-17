@@ -12,7 +12,7 @@ from rechenfunktionen.standsicherheit_utils import (
 )
 from rechenfunktionen.geom3d import Vec3, vektoren_addieren, vektor_laenge
 from datenstruktur.kraefte import Kraefte
-from datenstruktur.enums import Norm, RechenmethodeKippen, RechenmethodeGleiten, RechenmethodeAbheben
+from datenstruktur.enums import Norm, RechenmethodeKippen, RechenmethodeGleiten, RechenmethodeAbheben, VereinfachungKonstruktion
 from datenstruktur.lastpool import LastPool
 from datenstruktur.konstanten import _EPS
 
@@ -27,8 +27,12 @@ def kippsicherheit(
     konst=None,
     reset_berechnungen: bool = True,
     methode: RechenmethodeKippen = RechenmethodeKippen.STANDARD,
+    vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
     anzahl_windrichtungen: int = _anzahl_windrichtungen_standard,
 ) -> float:
+    if vereinfachung_konstruktion is not VereinfachungKonstruktion.KEINE:
+        raise NotImplementedError(f"Vereinfachung '{vereinfachung_konstruktion.value}' ({vereinfachung_konstruktion.name}) ist noch nicht implementiert.")
+
     if methode == RechenmethodeKippen.STANDARD:
         # 1) Eckpunkte sammeln → Kippachsen bestimmen
         achsen = sammle_kippachsen(konstruktion)
@@ -84,8 +88,12 @@ def gleitsicherheit(
     konst=None,
     reset_berechnungen: bool = False,
     methode: RechenmethodeGleiten = RechenmethodeGleiten.MIN_REIBWERT,
+    vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
     anzahl_windrichtungen: int = _anzahl_windrichtungen_standard,
 ) -> float:
+    if vereinfachung_konstruktion is not VereinfachungKonstruktion.KEINE:
+        raise NotImplementedError(f"Vereinfachung '{vereinfachung_konstruktion.value}' ({vereinfachung_konstruktion.name}) ist noch nicht implementiert.")
+
     if methode == RechenmethodeGleiten.MIN_REIBWERT:
         reibwert_min = ermittle_min_reibwert(konstruktion)
         sicherheit_min_global = inf
@@ -136,8 +144,12 @@ def abhebesicherheit(
     konst=None,
     reset_berechnungen: bool = False,
     methode: RechenmethodeAbheben = RechenmethodeAbheben.STANDARD,
+    vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
     anzahl_windrichtungen: int = _anzahl_windrichtungen_standard,
 ) -> float:
+    if vereinfachung_konstruktion is not VereinfachungKonstruktion.KEINE:
+        raise NotImplementedError(f"Vereinfachung '{vereinfachung_konstruktion.value}' ({vereinfachung_konstruktion.name}) ist noch nicht implementiert.")
+
     if methode == RechenmethodeAbheben.STANDARD:
         """
         Sicherheitszahl gegen Abheben:

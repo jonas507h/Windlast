@@ -60,3 +60,6 @@ class RechenmethodeGleiten(str, Enum):
 
 class RechenmethodeAbheben(str, Enum):
     STANDARD = "Standard"
+
+class VereinfachungKonstruktion(str, Enum):
+    KEINE = "keine"
