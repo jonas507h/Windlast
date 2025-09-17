@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import List, Optional, Sequence
 from bauelemente import Bodenplatte, Traversenstrecke
 from materialdaten.catalog import catalog
 from rechenfunktionen import (
@@ -8,7 +8,8 @@ from rechenfunktionen import (
     abhebesicherheit as _abhebesicherheit,
     gesamtgewicht as _gesamtgewicht,
 )
-from datenstruktur.enums import Norm, ObjektTyp, MaterialTyp, FormTyp, Lasttyp, Variabilitaet
+from datenstruktur.enums import Norm, MaterialTyp, FormTyp, RechenmethodeKippen, RechenmethodeGleiten, RechenmethodeAbheben, VereinfachungKonstruktion
+from datenstruktur.zwischenergebnis import Zwischenergebnis 
 
 # TODO: ID-Vergabe
 @dataclass
@@ -25,11 +26,11 @@ class Tor:
     traverse_name_intern: Optional[str] = None
 
     def __post_init__(self):
-        B = float(self.breite_m)
-        H = float(self.hoehe_m)
+        B = float(self.breite)
+        H = float(self.hoehe)
         # Traversenstrecken aus Breite/Höhe + Profilhöhe t
         hat_traversen = any(isinstance(k, Traversenstrecke) for k in self.bauelemente)
-        if (not hat_traversen) and self.breite_m and self.hoehe_m and self.traverse_name_intern:
+        if (not hat_traversen) and self.breite and self.hoehe and self.traverse_name_intern:
             
             if B <= 0 or H <= 0:
                 raise ValueError("Breite und Höhe müssen > 0 sein.")
@@ -90,15 +91,77 @@ class Tor:
             )
             self.bauelemente.extend([left, right])
 
-    # öffentliche Methoden, die auf gemeinsame Rechenfunktionen delegieren
-    def berechne_kippsicherheit(self) -> float:
-        return _kippsicherheit(self)
+    def berechne_kippsicherheit(
+        self,
+        norm: Norm,
+        staudruecke: Sequence[float],
+        obergrenzen: Sequence[float],
+        *,
+        konst=None,
+        reset_berechnungen: bool = True,
+        methode: RechenmethodeKippen = RechenmethodeKippen.STANDARD,
+        vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
+        anzahl_windrichtungen: int = 4,
+    ) -> Zwischenergebnis:
+        return _kippsicherheit(
+            self,
+            norm,
+            staudruecke,
+            obergrenzen,
+            konst=konst,
+            reset_berechnungen=reset_berechnungen,
+            methode=methode,
+            vereinfachung_konstruktion=vereinfachung_konstruktion,
+            anzahl_windrichtungen=anzahl_windrichtungen,
+        )
 
-    def berechne_gleitsicherheit(self) -> float:
-        return _gleitsicherheit(self)
+    def berechne_gleitsicherheit(
+        self,
+        norm: Norm,
+        staudruecke: Sequence[float],
+        obergrenzen: Sequence[float],
+        *,
+        konst=None,
+        reset_berechnungen: bool = False,
+        methode: RechenmethodeGleiten = RechenmethodeGleiten.MIN_REIBWERT,
+        vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
+        anzahl_windrichtungen: int = 4,
+    ) -> Zwischenergebnis:
+        return _gleitsicherheit(
+            self,
+            norm,
+            staudruecke,
+            obergrenzen,
+            konst=konst,
+            reset_berechnungen=reset_berechnungen,
+            methode=methode,
+            vereinfachung_konstruktion=vereinfachung_konstruktion,
+            anzahl_windrichtungen=anzahl_windrichtungen,
+        )
 
-    def berechne_abhebesicherheit(self) -> float:
-        return _abhebesicherheit(self)
+    def berechne_abhebesicherheit(
+        self,
+        norm: Norm,
+        staudruecke: Sequence[float],
+        obergrenzen: Sequence[float],
+        *,
+        konst=None,
+        reset_berechnungen: bool = False,
+        methode: RechenmethodeAbheben = RechenmethodeAbheben.STANDARD,
+        vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
+        anzahl_windrichtungen: int = 4,
+    ) -> Zwischenergebnis:
+        return _abhebesicherheit(
+            self,
+            norm,
+            staudruecke,
+            obergrenzen,
+            konst=konst,
+            reset_berechnungen=reset_berechnungen,
+            methode=methode,
+            vereinfachung_konstruktion=vereinfachung_konstruktion,
+            anzahl_windrichtungen=anzahl_windrichtungen,
+        )
     
     def gesamtgewicht(self) -> float:
         return _gesamtgewicht(self)

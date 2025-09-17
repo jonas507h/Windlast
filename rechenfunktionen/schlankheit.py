@@ -6,8 +6,7 @@ from datenstruktur.enums import Norm, ObjektTyp
 from materialdaten.catalog import catalog
 from rechenfunktionen.geom3d import Vec3, abstand_punkte
 from rechenfunktionen.interpolation import interpol_2D
-
-_EPS = 1e-9
+from datenstruktur.konstanten import _EPS
 
 def _validate_inputs(
     objekttyp: ObjektTyp,
