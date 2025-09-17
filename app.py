@@ -60,8 +60,8 @@ def index():
                 bodenplatte_name_intern=selected_bodenplatte,
                 anzahl_bodenplatten=2,
                 traverse_name_intern=selected_traverse,
-                breite_m=eingabe_breite_m,
-                hoehe_m=eingabe_hoehe_m,
+                breite=eingabe_breite_m,
+                hoehe=eingabe_hoehe_m,
             )
             # Gewicht (aktuell nur Bodenplatten – Traversen kommen im nächsten Schritt dazu)
             gesamtgewicht = tor.berechne_abhebesicherheit()

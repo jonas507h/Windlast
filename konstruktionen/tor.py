@@ -14,10 +14,9 @@ from datenstruktur.enums import Norm, ObjektTyp, MaterialTyp, FormTyp, Lasttyp, 
 @dataclass
 class Tor:
     name: str = "Tor"
-    breite_m: Optional[float] = None
-    hoehe_m: Optional[float] = None
+    breite: Optional[float] = None #[m]
+    hoehe: Optional[float] = None #[m]
 
-    # NEU: alle Kinder an einer Stelle
     bauelemente: List[object] = field(default_factory=list)
 
     # Konfiguration
