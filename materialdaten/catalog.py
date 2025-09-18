@@ -7,16 +7,7 @@ from typing import Dict, Optional, Tuple
 from datenstruktur.enums import MaterialTyp
 import warnings
 
-# TODO: Reibwerte laden abhängig von Norm
-
 # --- Datamodels -----------------------------------------------------------
-
-@dataclass(frozen=True)
-class ReibwertSpec:
-    material_a: MaterialTyp
-    material_b: MaterialTyp
-    reibwert: float
-    quelle: str
 
 @dataclass(frozen=True)
 class BodenplatteSpec:
@@ -48,36 +39,6 @@ def _resource_path(rel: str) -> Path:
     return (base / rel).resolve()
 
 # --- Loader ---------------------------------------------------------------
-
-def _load_reibwerte_csv(csv_path: Path) -> Dict[Pair, ReibwertSpec]:
-    pairs: Dict[Pair, ReibwertSpec] = {}
-    with csv_path.open("r", encoding="utf-8-sig", newline="") as f:
-        reader = csv.DictReader(f)
-        required = {"material_a", "material_b", "mu", "quelle"}
-        missing = required - set(reader.fieldnames or [])
-        if missing:
-            raise ValueError(f"Fehlende Spalten in {csv_path.name}: {sorted(missing)}")
-
-        for i, row in enumerate(reader, start=2):
-            try:
-                a = MaterialTyp((row["material_a"] or "").strip().lower())
-                b = MaterialTyp((row["material_b"] or "").strip().lower())
-                reibwert = float(row["mu"])
-                quelle = (row["quelle"] or "").strip()
-            except Exception as e:
-                raise ValueError(f"Zeile {i}: Ungültiger Eintrag: {e}") from e
-
-            key = _norm_pair(a, b)
-            if key in pairs:
-                existing = pairs[key]
-                if abs(existing.reibwert - reibwert) < 1e-6:
-                    quelle = f"{existing.quelle}; {quelle}".strip("; ")
-                    pairs[key] = ReibwertSpec(existing.material_a, existing.material_b, existing.reibwert, quelle)
-                else:
-                    warnings.warn(f"Abweichende Reibwerte für {a.value}-{b.value} (behalte {existing.reibwert}, verwerfe {reibwert} aus Zeile {i}).")
-            else:
-                pairs[key] = ReibwertSpec(a, b, reibwert, quelle)
-    return pairs
 
 def _load_bodenplatten_csv(csv_path: Path) -> Dict[str, BodenplatteSpec]:
     bp_map: Dict[str, BodenplatteSpec] = {}
@@ -149,7 +110,6 @@ class Catalog:
         self._root = daten_root or base
         self._bodenplatten = _load_bodenplatten_csv(self._root / "bodenplatten.csv")
         self._traversen = _load_traversen_csv(self._root / "traversen.csv")
-        self._reibwerte = _load_reibwerte_csv(self._root / "reibwerte.csv")
 
     @property
     def bodenplatten(self) -> Dict[str, BodenplatteSpec]:
@@ -176,21 +136,9 @@ class Catalog:
                 f"Traverse name_intern='{name_intern}' nicht gefunden. "
                 f"Vorhanden: {', '.join(self._traversen)}"
             )
-        
-    @property
-    def reibwerte(self) -> Dict[Pair, ReibwertSpec]:
-        return self._reibwerte
-
-    def get_reibwert(self, a: MaterialTyp, b: MaterialTyp) -> ReibwertSpec:
-        try:
-            return self._reibwerte[_norm_pair(a, b)]
-        except KeyError:
-            raise KeyError(f"Kein Reibwert hinterlegt für {a.value} – {b.value}.")
-
 
     def reload(self) -> None:
         self._bodenplatten = _load_bodenplatten_csv(self._root / "bodenplatten.csv")
         self._traversen = _load_traversen_csv(self._root / "traversen.csv")
-        self._reibwerte = _load_reibwerte_csv(self._root / "reibwerte.csv")
 
 catalog = Catalog()
