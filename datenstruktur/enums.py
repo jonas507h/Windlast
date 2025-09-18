@@ -63,3 +63,27 @@ class RechenmethodeAbheben(str, Enum):
 
 class VereinfachungKonstruktion(str, Enum):
     KEINE = "keine"
+
+class Betriebszustand(str, Enum):
+    IN_BETRIEB = "in Betrieb"
+    AUSSER_BETRIEB = "außer Betrieb"
+
+class Windzone(str, Enum):
+    I_BINNENLAND = "1 Binnenland"
+    II_BINNENLAND = "2 Binnenland"
+    II_KUESTE = "2 Küste und Inseln der Ostsee"
+    III_Binnenland = "3 Binnenland"
+    III_KUESTE = "3 Küste und Inseln der Ostsee"
+    IV_BINNENLAND = "4 Binnenland"
+    IV_KUESTE = "4 Küste der Nord- und Ostesee; Inseln der Ostsee"
+    IV_INSELN = "4 Inseln der Nordsee"
+
+class Schutzmassnahmen(str, Enum):
+    KEINE = "keine"
+    SCHUETZEND = "schützend"
+    VERSTAERKEND = "verstärkend"
+
+class Zeitfaktor(str, Enum):
+    TAG = "Tag"
+    MONAT = "Monat"
+    JAHR = "Jahr"
