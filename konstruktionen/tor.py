@@ -91,6 +91,32 @@ class Tor:
             )
             self.bauelemente.extend([left, right])
 
+    def gesamthoehe(self) -> float:
+        """Maximale Gesamthöhe über alle Bauelemente mit .gesamthoehe()."""
+        max_h = 0.0
+        found = False
+
+        for el in self.bauelemente:
+            gh = getattr(el, "gesamthoehe", None)
+            if callable(gh):
+                try:
+                    h = float(gh())
+                except Exception:
+                    # falls ein Element fehlschlägt, überspringen
+                    continue
+                if h > max_h:
+                    max_h = h
+                found = True
+
+        if found:
+            return max_h
+
+        # Fallback: falls Tor selbst eine Höhe definiert hat
+        if self.hoehe is not None:
+            return float(self.hoehe)
+
+        raise ValueError("Kein Bauelement mit gesamthoehe() gefunden und 'hoehe' am Tor ist nicht gesetzt.")
+
     def berechne_kippsicherheit(
         self,
         norm: Norm,

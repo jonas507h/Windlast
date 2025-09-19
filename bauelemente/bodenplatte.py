@@ -32,6 +32,9 @@ class Bodenplatte:
     gummimatte: Optional[MaterialTyp] = None
     objekttyp: ObjektTyp = ObjektTyp.BODENPLATTE
     element_id_intern: Optional[str] = None
+
+    def gesamthoehe(self) -> float:
+        return self.mittelpunkt[2]
     
     def gewichtskraefte(self) -> List[Kraefte]:
         specs = catalog.get_bodenplatte(self.name_intern)

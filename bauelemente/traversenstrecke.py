@@ -30,6 +30,9 @@ class Traversenstrecke:
     objekttyp: ObjektTyp = ObjektTyp.TRAVERSE
     element_id_intern: Optional[str] = None
 
+    def gesamthoehe(self) -> float:
+        return max(self.start[2], self.ende[2])
+
     def gewichtskraefte(self) -> List[Kraefte]:
         laenge = abstand_punkte(self.start, self.ende)
 
