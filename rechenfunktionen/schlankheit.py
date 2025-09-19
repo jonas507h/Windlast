@@ -26,7 +26,7 @@ def _validate_inputs(
         # Für andere Objekttypen noch unklar → Platzhalter
         raise NotImplementedError(f"Schlankheit für Objekttyp '{objekttyp}' ist noch nicht implementiert.")
 
-def _schlankheit_default(
+def _schlankheit_DinEn1991_1_4_2010_12(
     objekttyp: ObjektTyp,
     objekt_name_intern: Optional[str],
     punkte: Sequence[Vec3],
@@ -79,15 +79,16 @@ def _schlankheit_default(
     raise NotImplementedError(f"Schlankheit für Objekttyp '{objekttyp}' ist noch nicht implementiert.")
 
 _DISPATCH: Dict[Norm, Callable[[ObjektTyp, Optional[str], Sequence[Vec3]], Zwischenergebnis]] = {
-    Norm.DEFAULT: _schlankheit_default,
+    Norm.DEFAULT: _schlankheit_DinEn1991_1_4_2010_12,
+    Norm.DIN_EN_1991_1_4_2010_12: _schlankheit_DinEn1991_1_4_2010_12,
 }
 
 def schlankheit(
     norm: Norm,
     objekttyp: ObjektTyp,
     objekt_name_intern: Optional[str],
-    punkte: Sequence[Vec3],           # TRAVERSE: [start, ende]
+    punkte: Sequence[Vec3],           # TRAVERSE, ROHR: [start, ende]
 ) -> Zwischenergebnis:
     _validate_inputs(objekttyp, objekt_name_intern, punkte)
-    funktion = _DISPATCH.get(norm, _schlankheit_default)
+    funktion = _DISPATCH.get(norm, _DISPATCH[Norm.DEFAULT])
     return funktion(objekttyp, objekt_name_intern, punkte)

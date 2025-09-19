@@ -20,24 +20,25 @@ def _validate_inputs(
     if luftdichte_kg_m3 <= 0:
         raise ValueError("luftdichte muss > 0 sein (in kg/m³).")
 
-def _reynoldszahl_default(
+def _reynoldszahl_DinEn1991_1_4_2010_12(
     objekttyp: ObjektTyp,
     objekt_name_intern: str,
     staudruck: float,
     zaehigkeit: float,
     luftdichte: float,
 ) -> Zwischenergebnis:
-    geschwindigkeit = math.sqrt(2.0 * staudruck / luftdichte)
-
     if objekttyp == ObjektTyp.TRAVERSE:
+        geschwindigkeit = math.sqrt(2.0 * staudruck / luftdichte)
         traverse = catalog.get_traverse(objekt_name_intern)
         charak_Laenge = traverse.d_gurt  # charakteristische Länge (hier: Durchmesser Gurt)
+        wert = geschwindigkeit * charak_Laenge / zaehigkeit
     elif objekttyp == ObjektTyp.ROHR:
-        raise NotImplementedError("Objekttyp 'rohr' wird aktuell nicht unterstützt.")
+        geschwindigkeit = math.sqrt(2.0 * staudruck / luftdichte)
+        rohr = catalog.get_rohr(objekt_name_intern)
+        charak_Laenge = rohr.d_aussen  # charakteristische Länge (hier: Außendurchmesser)
+        wert = geschwindigkeit * charak_Laenge / zaehigkeit
     else:
         raise NotImplementedError(f"Objekttyp '{objekttyp}' wird aktuell nicht unterstützt.")
-
-    wert = geschwindigkeit * charak_Laenge / zaehigkeit
 
     return Zwischenergebnis(
         wert=wert,
@@ -50,7 +51,8 @@ def _reynoldszahl_default(
 _DISPATCH: Dict[Norm, Callable[
     [ObjektTyp, str, float, float, float], Zwischenergebnis
 ]] = {
-    Norm.DEFAULT: _reynoldszahl_default,
+    Norm.DEFAULT: _reynoldszahl_DinEn1991_1_4_2010_12,
+    Norm.DIN_EN_1991_1_4_2010_12: _reynoldszahl_DinEn1991_1_4_2010_12,
 }
 
 def reynoldszahl(
@@ -62,6 +64,6 @@ def reynoldszahl(
     luftdichte: float,      # kg/m³
 ) -> Zwischenergebnis:
     _validate_inputs(objekttyp, objekt_name_intern, staudruck, zaehigkeit, luftdichte)
-    funktion = _DISPATCH.get(norm, _reynoldszahl_default)
+    funktion = _DISPATCH.get(norm, _DISPATCH[Norm.DEFAULT])
     return funktion(objekttyp, objekt_name_intern, staudruck, zaehigkeit, luftdichte)
 
