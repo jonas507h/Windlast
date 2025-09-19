@@ -26,6 +26,14 @@ class TraverseSpec:
     d_diagonalen: float
     gewicht_linear: float
 
+@dataclass(frozen=True)
+class RohrSpec:
+    name_intern: str
+    anzeige_name: str
+    d_aussen: float
+    t_wand: float
+    dichte: float
+
 Pair = Tuple[MaterialTyp, MaterialTyp]
 
 def _norm_pair(a: MaterialTyp, b: MaterialTyp) -> Pair:
@@ -102,6 +110,35 @@ def _load_traversen_csv(csv_path: Path) -> Dict[str, TraverseSpec]:
             tr_map[key] = tr
     return tr_map
 
+def _load_rohre_csv(csv_path: Path) -> Dict[str, RohrSpec]:
+    rohr_map: Dict[str, RohrSpec] = {}
+    with csv_path.open("r", encoding="utf-8-sig", newline="") as f:
+        reader = csv.DictReader(f)
+        required = {"name_intern", "anzeige_name", "d_aussen_m", "t_wand_m", "dichte_kg_m3"}
+        missing = required - set(reader.fieldnames or [])
+        if missing:
+            raise ValueError(f"Fehlende Spalten in {csv_path.name}: {sorted(missing)}")
+
+        for row in reader:
+            key = (row["name_intern"] or "").strip()
+            if not key:
+                continue
+            try:
+                rohr = RohrSpec(
+                    name_intern=key,
+                    anzeige_name=row["anzeige_name"].strip(),
+                    d_aussen=float(row["d_aussen_m"]),
+                    t_wand=float(row["t_wand_m"]),
+                    dichte=float(row["dichte_kg_m3"]),
+                )
+            except Exception as e:
+                raise ValueError(f"Ungültige Werte in Zeile mit name_intern='{key}': {e}") from e
+
+            if key in rohr_map:
+                raise ValueError(f"Doppelter name_intern in {csv_path.name}: {key}")
+            rohr_map[key] = rohr
+    return rohr_map
+
 # --- Registry (einmal laden, überall nutzen) -----------------------------
 
 class Catalog:
@@ -110,6 +147,7 @@ class Catalog:
         self._root = daten_root or base
         self._bodenplatten = _load_bodenplatten_csv(self._root / "bodenplatten.csv")
         self._traversen = _load_traversen_csv(self._root / "traversen.csv")
+        self._rohre = _load_rohre_csv(self._root / "rohre.csv")
 
     @property
     def bodenplatten(self) -> Dict[str, BodenplatteSpec]:
@@ -136,9 +174,24 @@ class Catalog:
                 f"Traverse name_intern='{name_intern}' nicht gefunden. "
                 f"Vorhanden: {', '.join(self._traversen)}"
             )
+        
+    @property
+    def rohre(self) -> Dict[str, RohrSpec]:
+        return self._rohre
+    
+    def get_rohr(self, name_intern: str) -> RohrSpec:
+        try:
+            return self._rohre[name_intern]
+        except KeyError:
+            raise KeyError(
+                f"Rohr name_intern='{name_intern}' nicht gefunden. "
+                f"Vorhanden: {', '.join(self._rohre)}"
+            )
+
 
     def reload(self) -> None:
         self._bodenplatten = _load_bodenplatten_csv(self._root / "bodenplatten.csv")
         self._traversen = _load_traversen_csv(self._root / "traversen.csv")
+        self._rohre = _load_rohre_csv(self._root / "rohre.csv")
 
 catalog = Catalog()
