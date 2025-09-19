@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Dict, Callable, Optional, Sequence
 from enum import Enum
 import math
+import warnings
 
 from datenstruktur.enums import Norm, TraversenTyp, ObjektTyp
 from datenstruktur.zwischenergebnis import Zwischenergebnis
@@ -18,6 +19,7 @@ from rechenfunktionen.geom3d import (
     abstand_punkte,
 )
 from rechenfunktionen.interpolation import interpol_2D
+from datenstruktur.konstanten import _EPS
 
 
 class Anstroemrichtung(Enum):
@@ -38,12 +40,12 @@ def anzahl_flaechen(typ: TraversenTyp) -> int:
 
 def _validate_inputs(
     objekttyp: ObjektTyp,
-    objekt_name_intern: Optional[str],
-    punkte: Sequence[Vec3],           # TRAVERSE: [start, ende, orientierung]
-    abschnitt: Optional[str],         
-    windrichtung: Vec3,               # Einheitsvektor
-    voelligkeitsgrad: Optional[float],
-    reynoldszahl: Optional[float],
+    objekt_name_intern: Optional[str] = None,
+    punkte: Optional[Sequence[Vec3]] = None,   # TRAVERSE: [start, ende, orientierung]
+    abschnitt: Optional[str] = None,
+    windrichtung: Optional[Vec3] = None,       # Einheitsvektor
+    voelligkeitsgrad: Optional[float] = None,
+    reynoldszahl: Optional[float] = None,
 ) -> None:
     if not isinstance(objekttyp, ObjektTyp):
         raise TypeError("objekttyp muss vom Typ ObjektTyp sein.")
@@ -58,7 +60,7 @@ def _validate_inputs(
         if not isinstance(punkte, (list, tuple)) or len(punkte) < 3:
             raise ValueError("Für TRAVERSE werden [start, ende, orientierung] erwartet.")
         startpunkt, endpunkt, orientierung = punkte[0], punkte[1], punkte[2]
-        if abstand_punkte(startpunkt, endpunkt) <= 1e-9:
+        if abstand_punkte(startpunkt, endpunkt) <= _EPS:
             raise ValueError("Start- und Endpunkt dürfen nicht identisch (bzw. zu nah) sein.")
         n_ori = vektor_laenge(orientierung)
         if not (0.999 <= n_ori <= 1.001):
@@ -67,23 +69,30 @@ def _validate_inputs(
             raise ValueError("Für TRAVERSE sind voelligkeitsgrad und reynoldszahl erforderlich.")
         if not (0.0 <= voelligkeitsgrad <= 1.0):
             raise ValueError("voelligkeitsgrad muss in [0, 1] liegen.")
-        if not (0.0 < reynoldszahl <= 2e5):
-            raise ValueError("reynoldszahl muss in (0, 2e5] liegen.")
-    else:
-        if not isinstance(punkte, (list, tuple)) or len(punkte) == 0:
-            raise ValueError("punkte darf nicht leer sein.")
+        if reynoldszahl <= 0:
+            raise ValueError("reynoldszahl muss > 0 sein.")
+    elif objekttyp == ObjektTyp.ROHR:
+        if reynoldszahl is not None and reynoldszahl <= 0:
+            raise ValueError("reynoldszahl muss > 0 sein (falls übergeben).")
 
-def _grundkraftbeiwert_default(
+    else:
+        # Für andere Typen aktuell keine Pflichtparameter definiert
+        pass
+
+def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
     objekttyp: ObjektTyp,
-    objekt_name_intern: Optional[str],
-    punkte: Sequence[Vec3],
-    abschnitt: Optional[str],
-    windrichtung: Vec3,
-    voelligkeitsgrad: Optional[float],
-    reynoldszahl: Optional[float],
+    objekt_name_intern: Optional[str] = None,
+    punkte: Optional[Sequence[Vec3]] = None,
+    abschnitt: Optional[str] = None,
+    windrichtung: Optional[Vec3] = None,
+    voelligkeitsgrad: Optional[float] = None,
+    reynoldszahl: Optional[float] = None,
 ) -> Zwischenergebnis:
 
     if objekttyp == ObjektTyp.TRAVERSE:
+        if reynoldszahl > 2e5:
+            raise ValueError(f"Reynoldszahl {reynoldszahl} > 2e5: Grundkraftbeiwert nicht definiert.")
+        
         startpunkt, endpunkt, orientierung = punkte[0], punkte[1], punkte[2]
 
         traversenachse = vektor_zwischen_punkten(startpunkt, endpunkt)
@@ -152,29 +161,41 @@ def _grundkraftbeiwert_default(
         )
 
     elif objekttyp == ObjektTyp.ROHR:
-        # TODO: Später 'abschnitt' (z.B. Dach/Wand) verwenden, falls relevant
-        raise NotImplementedError("Grundkraftbeiwert für ROHR ist noch nicht implementiert.")
+        if reynoldszahl > 1.8e5:
+            warnings.warn(f"Reynoldszahl {reynoldszahl} > 1.8e5: Grundkraftbeiwert wird auf 1.2 (ungünstigster Wert) gesetzt.")
+        
+        wert = 1.2
+        return Zwischenergebnis(
+            wert=wert,
+            formel="---",
+            quelle_formel="---",
+            formelzeichen=["---", "---", "---"],
+            quelle_formelzeichen=["---"]
+        )
 
     else:
         raise NotImplementedError(f"Objekttyp '{objekttyp}' wird aktuell nicht unterstützt.")
 
+# --- Callable-Typ & Dispatch anpassen ---
 _DISPATCH: Dict[Norm, Callable[
-    [ObjektTyp, Optional[str], Sequence[Vec3], Optional[str], Vec3, Optional[float], Optional[float]],
+    [ObjektTyp, Optional[str], Optional[Sequence[Vec3]], Optional[str], Optional[Vec3], Optional[float], Optional[float]],
     Zwischenergebnis
 ]] = {
-    Norm.DEFAULT: _grundkraftbeiwert_default,
+    Norm.DEFAULT: _grundkraftbeiwert_DinEn1991_1_4_2010_12,
+    Norm.DIN_EN_1991_1_4_2010_12: _grundkraftbeiwert_DinEn1991_1_4_2010_12,
 }
 
+# --- Öffentliche API: nur norm & objekttyp verpflichtend ---
 def grundkraftbeiwert(
     norm: Norm,
     objekttyp: ObjektTyp,
-    objekt_name_intern: Optional[str],
-    punkte: Sequence[Vec3],                # TRAVERSE: [start, ende, orientierung]
-    abschnitt: Optional[str],
-    windrichtung: Vec3,                    # Einheitsvektor
+    objekt_name_intern: Optional[str] = None,
+    punkte: Optional[Sequence[Vec3]] = None,   # TRAVERSE: [start, ende, orientierung]
+    abschnitt: Optional[str] = None,
+    windrichtung: Optional[Vec3] = None,       # Einheitsvektor
     voelligkeitsgrad: Optional[float] = None,
     reynoldszahl: Optional[float] = None,
 ) -> Zwischenergebnis:
     _validate_inputs(objekttyp, objekt_name_intern, punkte, abschnitt, windrichtung, voelligkeitsgrad, reynoldszahl)
-    funktion = _DISPATCH.get(norm, _grundkraftbeiwert_default)
+    funktion = _DISPATCH.get(norm, _DISPATCH[Norm.DEFAULT])
     return funktion(objekttyp, objekt_name_intern, punkte, abschnitt, windrichtung, voelligkeitsgrad, reynoldszahl)
