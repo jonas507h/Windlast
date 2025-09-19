@@ -36,7 +36,9 @@ class Rohr:
         laenge = abstand_punkte(self.start, self.ende)
 
         specs = catalog.get_rohr(self.rohr_name_intern)
-        gewichtskraft_lin = float(specs.gewicht_linear) * aktuelle_konstanten().erdbeschleunigung  # [N/m]
+        di = specs.d_aussen - 2 * specs.t_wand
+        querschnitt = math.pi * (specs.d_aussen**2 - di**2) / 4.0
+        gewichtskraft_lin = querschnitt * specs.dichte * aktuelle_konstanten().erdbeschleunigung  # [N/m]
 
         Fz = -laenge * gewichtskraft_lin
         einzelkraefte_vektoren: list[Vec3] = [(0.0, 0.0, Fz)]
