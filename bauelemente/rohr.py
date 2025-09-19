@@ -105,12 +105,9 @@ class Rohr:
                 norm, _projizierte_Flaeche.wert, _eingeschlossene_Flaeche.wert
             )
             _grundkraftbeiwert = grundkraftbeiwert(
-                norm, self.objekttyp, self.rohr_name_intern,
-                [start_lokal, ende_lokal],
-                None,
-                windrichtung,
-                _voelligkeitsgrad.wert,
-                _reynoldszahl.wert,
+                norm,
+                self.objekttyp,
+                reynoldszahl=_reynoldszahl.wert,
             )
             _abminderungsfaktor_schlankheit = abminderungsfaktor_schlankheit(
                 norm, self.objekttyp, _schlankheit.wert, _voelligkeitsgrad.wert
