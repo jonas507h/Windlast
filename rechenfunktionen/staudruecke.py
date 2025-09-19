@@ -259,19 +259,82 @@ def _geschwindigkeitsdruck_DinEn1991_1_4_2010_12(
     zustand: Schutzmassnahmen,
     aufstelldauer: Optional[Dauer],
     windzone: Optional[Windzone],
-) -> Zwischenergebnis_Liste:
-    return Zwischenergebnis_Liste(
-        wert=[],
-        formel="q = ---",
-        quelle_formel="DIN EN 1991-1-4:2010-12",
+) -> Tuple[Zwischenergebnis_Liste, Zwischenergebnis_Liste]:
+    if windzone is None:
+        raise ValueError("Windzone muss für DIN EN 1991-1-4:2010-12 gesetzt sein.")
+
+    # 1) Höhenklassen & q für die gegebene Windzone holen
+    try:
+        zonen_daten = GESCHWINDIGKEITSDRUCK_EN_1991_1_4_2010_12[windzone]
+    except KeyError as e:
+        raise KeyError(f"Keine Geschwindigkeitsdruck-Daten für Windzone '{windzone.value}'.") from e
+
+    obergrenzen_sorted: List[float] = sorted(zonen_daten.keys())  # z. B. [10.0, 18.0, 25.0]
+
+    # 2) Gesamthöhe → passende Höhenklasse suchen (erste Obergrenze >= h)
+    h = float(konstruktion.gesamthoehe())
+    gueltige_obergrenze = next((z for z in obergrenzen_sorted if h <= z + _EPS), None)
+    if gueltige_obergrenze is None:
+        max_og = obergrenzen_sorted[-1]
+        raise ValueError(
+            f"Gesamthöhe {h:.3f} m überschreitet die höchste definierte Obergrenze {max_og:.3f} m "
+            f"für DIN EN 1991-1-4:2010-12 (Zone: {windzone.value})."
+        )
+
+    q_basis = zonen_daten[gueltige_obergrenze]  # N/m²
+
+    # 3) Optional: Abminderung
+    q_eff = q_basis
+    if aufstelldauer is not None:
+        dauer_monate = convert_dauer(aufstelldauer.wert, aufstelldauer.einheit, Zeitfaktor.MONAT)
+
+        # Obergrenzen (Monate) sortieren und erste passende "bis zu …" Kategorie wählen
+        grenzen_sorted = sorted(
+            FAKTOREN_VORUEBERGENDER_ZUSTAND.keys(),
+            key=lambda d: convert_dauer(d.wert, d.einheit, Zeitfaktor.MONAT)
+        )
+
+        faktor = None
+        for grenze in grenzen_sorted:
+            grenze_monate = convert_dauer(grenze.wert, grenze.einheit, Zeitfaktor.MONAT)
+            if dauer_monate <= grenze_monate + 1e-9:
+                faktor = FAKTOREN_VORUEBERGENDER_ZUSTAND[grenze][zustand]
+                break
+
+        if faktor is not None:
+            # Nur wenn innerhalb der Tabellenobergrenzen → Faktor anwenden und warnen
+            warnings.warn(
+                "Abminderungen der Windlasten sind bei fliegenden Bauten nicht zulässig. "
+                "Der Abminderungsfaktor wird hier nur auf ausdrücklichen Wunsch angewendet."
+            )
+            q_eff = q_basis * faktor
+        # else: Dauer oberhalb der höchsten Obergrenze → faktor=1.0 implizit, keine Warnung
+
+    # 4) Zwei Zwischenergebnisse: (a) [q_eff], (b) [z_max]
+    zl_staudruck = Zwischenergebnis_Liste(
+        wert=[q_eff],
+        formel="q(z=h)",
+        quelle_formel="DIN EN 1991-1-4:2010-12 (Zonen-Tabelle); ggf. Faktor für vorübergehenden Zustand",
         formelzeichen=["q"],
         quelle_formelzeichen=["DIN EN 1991-1-4:2010-12"],
-        einzelwerte=[],
-        quelle_einzelwerte=[],
+        einzelwerte=None,
+        quelle_einzelwerte=None,
     )
 
+    zl_obergrenze = Zwischenergebnis_Liste(
+        wert=[gueltige_obergrenze],
+        formel="z_max (Klassen-Obergrenze zu h)",
+        quelle_formel="DIN EN 1991-1-4:2010-12 (Zonen-Tabelle)",
+        formelzeichen=["z_max"],
+        quelle_formelzeichen=["DIN EN 1991-1-4:2010-12"],
+        einzelwerte=None,
+        quelle_einzelwerte=None,
+    )
+
+    return zl_staudruck, zl_obergrenze
+
 # ----------------------------
-# Dispatch (schön & direkt)
+# Dispatch
 # ----------------------------
 
 _DISPATCH: Dict[Norm, Callable[..., Tuple[Zwischenergebnis_Liste, Zwischenergebnis_Liste]]] = {
