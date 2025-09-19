@@ -22,7 +22,7 @@ def _validate_inputs(
         raise ValueError(f"windrichtung soll Einheitsvektor sein (||v||≈1), ist {n:.6f}.")
 
     # Objekt-spezifische Mindestanforderungen
-    if objekttyp == ObjektTyp.TRAVERSE:
+    if objekttyp == ObjektTyp.TRAVERSE or objekttyp == ObjektTyp.ROHR:
         if objekt_name_intern is None:
             raise ValueError("Für TRAVERSE wird objekt_name_intern benötigt.")
         if not isinstance(punkte, (list, tuple)) or len(punkte) < 2:
@@ -66,8 +66,21 @@ def _projizierte_flaeche_default(
         )
 
     elif objekttyp == ObjektTyp.ROHR:
-        # TODO: Definition/Quelle (Durchmesser?) noch unklar -> später ergänzen
-        raise NotImplementedError("ROHR noch nicht implementiert. Durchmesser-/Modell-Quelle festlegen.")
+        startpunkt, endpunkt = punkte[0], punkte[1]
+        laenge = abstand_punkte(startpunkt, endpunkt)
+
+        rohr = catalog.get_rohr(objekt_name_intern)
+        d_aussen = rohr.d_aussen
+
+        wert = laenge * d_aussen
+
+        return Zwischenergebnis(
+            wert=wert,
+            formel="---",
+            quelle_formel="---",
+            formelzeichen=["---", "---", "---"],
+            quelle_formelzeichen=["---"]
+        )
 
     else:
         raise NotImplementedError(f"Objekttyp '{objekttyp}' wird aktuell nicht unterstützt.")

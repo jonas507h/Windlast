@@ -15,10 +15,9 @@ def _validate_inputs(
         raise TypeError("objekttyp muss vom Typ ObjektTyp sein.")
     if not isinstance(punkte, (list, tuple)) or len(punkte) < 2:
         raise ValueError("punkte muss eine Sequenz aus mindestens 2 Punkten sein.")
-    # Spezifisch für TRAVERSE: genau 2 Punkte (Start/Ende) und nicht identisch
-    if objekttyp == ObjektTyp.TRAVERSE:
+    if objekttyp == ObjektTyp.TRAVERSE or objekttyp == ObjektTyp.ROHR:
         if len(punkte) != 2:
-            raise ValueError("Für TRAVERSE werden genau 2 Punkte (Start- und Endpunkt) erwartet.")
+            raise ValueError(f"Für {objekttyp.name} werden genau 2 Punkte (Start- und Endpunkt) erwartet.")
         if abstand_punkte(punkte[0], punkte[1]) <= _EPS:
             raise ValueError("Start- und Endpunkt dürfen nicht identisch (bzw. zu nah) sein.")
 
@@ -42,11 +41,22 @@ def _eingeschlossene_flaeche_default(
             formelzeichen=["---", "---", "---"],
             quelle_formelzeichen=["---"]
         )
-
+    
     elif objekttyp == ObjektTyp.ROHR:
-        # TODO: Erwartung klären (z.B. projizierte Fläche? Umfang*Länge?).
-        # Platzhalter:
-        raise NotImplementedError("ROHR noch nicht implementiert.")
+        startpunkt, endpunkt = punkte[0], punkte[1]
+        laenge = abstand_punkte(startpunkt, endpunkt)
+
+        rohr = catalog.get_rohr(objekt_name_intern)
+        d_aussen = rohr.d_aussen
+        wert = laenge * d_aussen
+
+        return Zwischenergebnis(
+            wert=wert,
+            formel="---",
+            quelle_formel="---",
+            formelzeichen=["---", "---", "---"],
+            quelle_formelzeichen=["---"]
+        )
 
     else:
         raise NotImplementedError(f"Objekttyp '{objekttyp}' wird aktuell nicht unterstützt.")
