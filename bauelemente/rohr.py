@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import Tuple, List, Sequence, Optional
+import math
 from datenstruktur.konstanten import PhysikKonstanten, aktuelle_konstanten
 from materialdaten.catalog import catalog
 from rechenfunktionen import (

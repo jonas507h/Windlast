@@ -53,6 +53,27 @@ def _schlankheit_default(
             formelzeichen=["---", "---", "---"],
             quelle_formelzeichen=["---"]
         )
+    elif objekttyp == ObjektTyp.ROHR:
+        start, ende = punkte[0], punkte[1]
+        laenge = abstand_punkte(start, ende)
+
+        rohr = catalog.get_rohr(objekt_name_intern)
+        d_aussen = rohr.d_aussen
+        if d_aussen is None or d_aussen <= 0:
+            raise ValueError(f"Rohr '{objekt_name_intern}': ungültiger Außendurchmesser ({d_aussen}).")
+
+        faktor = interpol_2D([15.0, 50.0], [2.0, 1.4], laenge)
+
+        rechenwert = faktor * (laenge / d_aussen)
+        wert = min(rechenwert, 70.0)
+
+        return Zwischenergebnis(
+            wert=wert,
+            formel="---",
+            quelle_formel="---",
+            formelzeichen=["---", "---", "---"],
+            quelle_formelzeichen=["---"]
+        )
 
     # Andere Objekttypen:
     raise NotImplementedError(f"Schlankheit für Objekttyp '{objekttyp}' ist noch nicht implementiert.")
