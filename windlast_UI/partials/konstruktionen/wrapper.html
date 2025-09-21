@@ -3,20 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <title>Konstruktionen · Wrapper</title>
-  <style>
-    body{ margin:0; font-family: system-ui, sans-serif; }
-    .wrap{ padding:10px; }
-    nav{ display:flex; gap:8px; margin:0 0 10px; }
-    .tab{ padding:6px 10px; border:1px solid #ccc; border-radius:8px; background:#f3f3f3; cursor:pointer; }
-    .tab[aria-current="page"]{ border-color:#5577ff; box-shadow: inset 0 0 0 1px #5577ff; }
-    iframe{ width:100%; height:300px; border:0; background:#f8f8f8; }
-  </style>
+  <link rel="stylesheet" href="../../static/css/style.css">
 </head>
 <body>
   <section class="wrap">
     <h2 style="margin:0 0 8px;">Konstruktionen</h2>
 
-    <nav>
+    <nav class="tabs">
       <button type="button" class="tab" data-view="tor" aria-current="page"
               onclick="switch_konstruktion('tor')">Tor</button>
       <button type="button" class="tab" data-view="steher"

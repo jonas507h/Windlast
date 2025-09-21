@@ -1,9 +1,43 @@
 <!doctype html>
 <html lang="de">
-<head><meta charset="utf-8"><title>Footer</title></head>
-<body>
-  <div>
-    <h3>Footer (Beispiel)</h3>
-  </div>
+<head>
+  <meta charset="utf-8" />
+  <title>Footer · Ergebnisse</title>
+  <link rel="stylesheet" href="../static/css/style.css">
+</head>
+<body class="wrap">
+  <section class="panel">
+    <h2 style="margin:0 0 10px;">Ergebnisse</h2>
+
+    <table class="results-table" aria-describedby="results-caption">
+      <caption id="results-caption" style="text-align:left; margin-bottom:6px;">
+        Staudrücke / Sicherheiten (Platzhalter)
+      </caption>
+      <thead>
+        <tr>
+          <th>DIN EN 13814:2005-06</th>
+          <th>DIN EN 17879:2024-08</th>
+          <th>DIN EN 1991-1-4:2010-12</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="value" id="kipp_en13814_2005">–</td>
+          <td class="value" id="kipp_en17879_2024">–</td>
+          <td class="value" id="kipp_en1991_2010">–</td>
+        </tr>
+        <tr>
+          <td class="value" id="gleit_en13814_2005">–</td>
+          <td class="value" id="gleit_en17879_2024">–</td>
+          <td class="value" id="gleit_en1991_2010">–</td>
+        </tr>
+        <tr>
+          <td class="value" id="abhebe_en13814_2005">–</td>
+          <td class="value" id="abhebe_en17879_2024">–</td>
+          <td class="value" id="abhebe_en1991_2010">–</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
 </body>
 </html>

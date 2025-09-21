@@ -1,10 +1,79 @@
 <!doctype html>
 <html lang="de">
-<head><meta charset="utf-8"><title>Konstruktion · Tor</title></head>
-<body>
+<head>
+  <meta charset="utf-8" />
+  <title>Konstruktion · Steher</title>
+  <link rel="stylesheet" href="../../static/css/style.css">
+</head>
+<body class="wrap">
   <section>
-    <h2>Konstruktion · Steher (Beispiel)</h2>
-    <p>Hier kommt später das Formular / die UI-Elemente rein.</p>
+    <h2 style="margin:0 0 12px;">Konstruktion · Steher</h2>
+
+    <form id="steher-form" onsubmit="return false;">
+      <!-- Reihe 1: Dropdowns (Traverse, Rohr, Bodenplatte, Untergrund) -->
+      <div class="row row-4">
+        <div class="field">
+          <label for="traverse">Traverse</label>
+          <select id="traverse" name="traverse_name_intern" required>
+            <option value="">Bitte wählen …</option>
+            <option value="prolyte_h30v">Prolyte H30V</option>
+            <option value="prolyte_h40v">Prolyte H40V</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="rohr">Rohr</label>
+          <select id="rohr" name="rohr_name_intern" required>
+            <option value="">Bitte wählen …</option>
+            <option value="rohr_48">Rohr Ø 48 mm</option>
+            <option value="rohr_60">Rohr Ø 60 mm</option>
+            <!-- später dynamisch -->
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="bodenplatte">Bodenplatte</label>
+          <select id="bodenplatte" name="bodenplatte_name_intern" required>
+            <option value="">Bitte wählen …</option>
+            <option value="bp_1m">Bodenplatte 1×1 m</option>
+            <option value="bp_08m">Bodenplatte 0.8×0.8 m</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="untergrund">Untergrund</label>
+          <select id="untergrund" name="untergrund_typ" required>
+            <option value="">Bitte wählen …</option>
+            <option value="beton">Beton</option>
+            <option value="asphalt">Asphalt</option>
+            <option value="rasen">Rasen</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Reihe 2: Eingabefelder (Höhe, Länge Rohr, Höhe Rohr) -->
+      <div class="row row-3">
+        <div class="field">
+          <label for="hoehe">Höhe [m]</label>
+          <input id="hoehe" name="hoehe_m" type="number" step="0.01" min="0" placeholder="z. B. 6.00" />
+        </div>
+
+        <div class="field">
+          <label for="rohr_laenge">Länge Rohr [m]</label>
+          <input id="rohr_laenge" name="rohr_laenge_m" type="number" step="0.01" min="0" placeholder="z. B. 2.00" />
+        </div>
+
+        <div class="field">
+          <label for="rohr_hoehe">Höhe Rohr [m]</label>
+          <input id="rohr_hoehe" name="rohr_hoehe_m" type="number" step="0.01" min="0" placeholder="z. B. 1.50" />
+        </div>
+      </div>
+
+      <!-- Reihe 3: Button -->
+      <div class="actions">
+        <button type="button" class="btn" id="btn-berechnen-steher">Berechnen</button>
+      </div>
+    </form>
   </section>
 </body>
 </html>
