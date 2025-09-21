@@ -1,73 +1,112 @@
-/* --- Basis / Reset light --- */
+/* ====== Theme Vars ====== */
+:root{
+  /* Light defaults */
+  --bg: #ffffff;
+  --text: #111111;
+  --panel: #ffffff;
+  --border: #dddddd;
+  --muted: #555555;
+  --button-bg: #2d6cdf;
+  --button-text: #ffffff;
+  --tab-bg: #f3f3f3;
+  --tab-active-border: #5577ff;
+  --table-head: #f3f3f3;
+  --field-bg: #ffffff;
+  --field-border: #cccccc;
+}
+/* Auto-Dark (wenn kein explizites Theme gesetzt wurde) */
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0b0e13; --text:#e8eef9;
+    --panel:#121823; --border:#1f2a3a; --muted:#a6b1c2;
+    --button-bg:#6aa2ff; --button-text:#0b0e13;
+    --tab-bg:#0f141d; --tab-active-border:#6aa2ff;
+    --table-head:#0f141d; --field-bg:#0f141d; --field-border:#1f2a3a;
+  }
+}
+/* Explizite Overrides via data-theme */
+[data-theme="light"]{
+  --bg: #ffffff; --text: #111111; --panel:#ffffff; --border:#dddddd; --muted:#555555;
+  --button-bg:#2d6cdf; --button-text:#ffffff; --tab-bg:#f3f3f3; --tab-active-border:#5577ff;
+  --table-head:#f3f3f3; --field-bg:#ffffff; --field-border:#cccccc;
+}
+[data-theme="dark"]{
+  --bg:#0b0e13; --text:#e8eef9; --panel:#121823; --border:#1f2a3a; --muted:#a6b1c2;
+  --button-bg:#6aa2ff; --button-text:#0b0e13; --tab-bg:#0f141d; --tab-active-border:#6aa2ff;
+  --table-head:#0f141d; --field-bg:#0f141d; --field-border:#1f2a3a;
+}
+
+/* ====== Base ====== */
 * { box-sizing: border-box; }
 html, body { height: 100%; }
 body {
   margin: 0;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   line-height: 1.4;
-  color: #111;
+  color: var(--text);
+  background: var(--bg);
 }
 
-/* --- Layout-Helfer --- */
+/* ====== Helpers/Layout ====== */
 .wrap { padding: 10px; }
+.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 10px; }
 
-/* Panel / Container (optional) */
-.panel { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 10px; }
-
-/* --- Form-Grid & Felder --- */
+/* ====== Forms ====== */
 form { display: grid; gap: 12px; }
 .row { display: grid; gap: 10px; }
 .row-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .row-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .row-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .field { display: flex; flex-direction: column; gap: 4px; }
-label { font-size: 12px; color: #555; }
-input[type="number"], select, input[type="text"] {
+label { font-size: 12px; color: var(--muted); }
+input[type="number"], select, input[type="text"]{
   padding: 8px 10px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--field-border);
   border-radius: 8px;
-  background: #fff;
+  background: var(--field-bg);
+  color: var(--text);
 }
 
-/* --- Buttons --- */
+/* ====== Buttons ====== */
 .actions { margin-top: 4px; }
-.btn {
+.btn{
   appearance: none;
   padding: 10px 14px;
-  border: 1px solid #2d6cdf;
+  border: 1px solid var(--button-bg);
   border-radius: 10px;
-  background: #2d6cdf;
-  color: #fff;
+  background: var(--button-bg);
+  color: var(--button-text);
   font-weight: 600;
   cursor: pointer;
 }
-.btn:hover { filter: brightness(0.95); }
+.btn:hover{ filter: brightness(0.95); }
 
-/* --- Tabs für den Konstruktionen-Wrapper --- */
+/* ====== Tabs (Wrapper) ====== */
 nav.tabs { display:flex; gap:8px; margin:0 0 10px; }
-.tab {
+.tab{
   padding: 6px 10px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border);
   border-radius: 8px;
-  background: #f3f3f3;
+  background: var(--tab-bg);
+  color: var(--text);
   cursor: pointer;
 }
-.tab[aria-current="page"] {
-  border-color: #5577ff;
-  box-shadow: inset 0 0 0 1px #5577ff;
+.tab[aria-current="page"]{
+  border-color: var(--tab-active-border);
+  box-shadow: inset 0 0 0 1px var(--tab-active-border);
 }
 
-/* --- Wrapper-View-Fläche --- */
-#konstruktions_iframe { width: 100%; height: 300px; border: 0; background: #f8f8f8; }
-
-/* --- Responsive Fallback --- */
-@media (max-width: 700px) {
-  .row-3, .row-2 { grid-template-columns: 1fr; }
-}
-
-/* Ergebnisse/Tabellen */
+/* ====== Results table ====== */
 .results-table { width: 100%; border-collapse: collapse; }
-.results-table th, .results-table td { border: 1px solid #ddd; padding: 8px; }
-.results-table thead th { background: #f3f3f3; text-align: left; }
+.results-table th, .results-table td { border: 1px solid var(--border); padding: 8px; }
+.results-table thead th { background: var(--table-head); text-align: left; }
 .results-table td.value { text-align: right; font-weight: 700; }
-.results-table caption { font-size: 12px; color: #555; }
+.results-table caption { font-size: 12px; color: var(--muted); }
+
+/* ====== Iframe helper (falls genutzt) ====== */
+#konstruktions_iframe { width: 100%; height: 300px; border: 0; background: var(--panel); }
+
+/* ====== Responsive ====== */
+@media (max-width: 700px){
+  .row-4, .row-3, .row-2 { grid-template-columns: 1fr; }
+}
