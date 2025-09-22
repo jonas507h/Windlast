@@ -31,5 +31,30 @@
   <div class="slot">
     <iframe src="partials/footer.html" title="Ergebnisse" data-theme-sync></iframe>
   </div>
+  <script>
+    // Map API-Normkeys -> Footer-ID-Suffix
+    const NORM_ID = {
+      "EN_13814_2005": "en13814_2005",
+      "EN_17879_2024": "en17879_2024",
+      "EN_1991_1_4_2010": "en1991_2010",
+    };
+
+    function forwardResultsToFooter(payload) {
+      const footer = document.querySelector('iframe[src*="partials/footer.html"]');
+      footer?.contentWindow?.postMessage({ type: "results/update", payload }, "*");
+    }
+
+    window.addEventListener("message", (ev) => {
+      const msg = ev.data;
+      if (!msg || typeof msg !== "object") return;
+
+      if (msg.type === "results" && msg.source === "tor") {
+        forwardResultsToFooter(msg.payload);
+      }
+      if (msg.type === "toast") {
+        console[msg.payload?.level === "error" ? "error" : "log"](msg.payload?.text);
+      }
+    });
+  </script>
 </body>
 </html>

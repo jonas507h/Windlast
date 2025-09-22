@@ -18,7 +18,7 @@ from .windkraft import windkraft
 from .windkraft_zu_vektor import windkraft_zu_vektor
 from .segmentierung import segmentiere_strecke_nach_hoehenbereichen
 from .reibwert import reibwert
-from staudruecke import staudruecke
+from .staudruecke import staudruecke
 
 __all__ = [
     # Standsicherheit

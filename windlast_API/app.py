@@ -3,10 +3,11 @@
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]              # .../Windlast
-CORE_DIR = ROOT / "windlast_CORE"                       # .../Windlast/windlast_CORE
+ROOT = Path(__file__).resolve().parents[1]      # .../Windlast
+CORE_DIR = ROOT / "windlast_CORE"               # .../Windlast/windlast_CORE
+API_DIR  = Path(__file__).resolve().parent      # .../Windlast/windlast_API
 
-for p in (str(ROOT), str(CORE_DIR)):
+for p in (str(ROOT), str(CORE_DIR), str(API_DIR)):
     if p not in sys.path:
         sys.path.insert(0, p)
 # --- Ende Shim ---
