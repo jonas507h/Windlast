@@ -16,7 +16,7 @@ from rechenfunktionen import (
     vektor_multiplizieren,
     reibwert,
 )
-from datenstruktur.enums import ObjektTyp, MaterialTyp, Lasttyp, Variabilitaet, FormTyp
+from datenstruktur.enums import ObjektTyp, MaterialTyp, Lasttyp, Variabilitaet, FormTyp, Norm
 from datenstruktur.kraefte import Kraefte
 from datenstruktur.konstanten import _EPS
 
@@ -55,9 +55,9 @@ class Bodenplatte:
             Schwerpunkt=schwerpunkt,
         )]
     
-    def reibwert(self) -> float:
+    def reibwert(self, norm: Norm) -> float:
         _materialfolge = [self.material, self.gummimatte, self.untergrund]
-        _reibwert = reibwert(_materialfolge).wert
+        _reibwert = reibwert(norm,_materialfolge).wert
         return _reibwert
     
     def reibkraefte(self, belastung: Vec3) -> List[Kraefte]:

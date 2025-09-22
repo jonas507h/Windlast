@@ -83,7 +83,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
         )
 
     if methode is RechenmethodeGleiten.MIN_REIBWERT:
-        reibwert_min = ermittle_min_reibwert(konstruktion)
+        reibwert_min = ermittle_min_reibwert(norm,konstruktion)
         sicherheit_min_global = inf
         pool = obtain_pool(konstruktion, reset_berechnungen)
 
@@ -148,7 +148,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
         )
 
     if methode is RechenmethodeGleiten.MIN_REIBWERT:
-        reibwert_min = ermittle_min_reibwert(konstruktion)
+        reibwert_min = ermittle_min_reibwert(norm,konstruktion)
         sicherheit_min_global = inf
         pool = obtain_pool(konstruktion, reset_berechnungen)
 

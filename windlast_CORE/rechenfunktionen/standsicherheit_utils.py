@@ -240,14 +240,14 @@ def kipp_envelope_pro_bauelement(
 
 # Gleitsicherheit Utils ------------------------------
 
-def ermittle_min_reibwert(konstruktion) -> float:
+def ermittle_min_reibwert(norm: Norm,konstruktion) -> float:
     """Liest μ aus allen Bodenplatten (Elem hat Methode reibwert()) und gibt das Minimum zurück.
        Falls keine Platte gefunden → 0.0 (konservativ)."""
     mu_werte: List[float] = []
     for elem in getattr(konstruktion, "bauelemente", []):
         reib_fn = getattr(elem, "reibwert", None)
         if callable(reib_fn):
-            mu = reib_fn()
+            mu = reib_fn(norm)
             if mu:
                 mu_werte.append(float(mu))
     return min(mu_werte) if mu_werte else 0.0

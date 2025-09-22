@@ -91,7 +91,7 @@ def standsicherheit(
         zl1, zl2 = staudruecke(
             Norm.DIN_EN_13814_2005_06,
             konstruktion,
-            Betriebszustand.IN_BETRIEB,
+            Betriebszustand.AUSSER_BETRIEB,
             aufstelldauer=aufstelldauer,
             windzone=None,
         )
@@ -192,7 +192,7 @@ def standsicherheit(
         zl1, zl2 = staudruecke(
             Norm.DIN_EN_17879_2024_08,
             konstruktion,
-            Betriebszustand.IN_BETRIEB,
+            Betriebszustand.AUSSER_BETRIEB,
             aufstelldauer=aufstelldauer,
             windzone=None,
         )
