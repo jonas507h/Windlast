@@ -1,4 +1,5 @@
 from typing import Dict, Any
+from math import isfinite
 from windlast_CORE.konstruktionen.tor import Tor
 from windlast_CORE.datenstruktur.enums import (
     MaterialTyp, Zeitfaktor, Windzone as WindzoneEnum, Norm, Nachweis
@@ -12,6 +13,16 @@ _NORM_KEY = {
     Norm.DIN_EN_17879_2024_08: "EN_17879_2024",
     Norm.DIN_EN_1991_1_4_2010_12: "EN_1991_1_4_2010",
 }
+
+def _jsonify_number(x):
+    try:
+        v = float(x)
+    except Exception:
+        return None
+    if isfinite(v):
+        return v
+    # Information erhalten, aber JSON-sicher
+    return "INF" if v > 0 else "-INF"
 
 def _set_untergrund_bodenplatten(tor: Tor, mat: MaterialTyp) -> None:
     for el in getattr(tor, "bauelemente", []):
@@ -61,9 +72,9 @@ def berechne_tor(payload: Dict[str, Any]) -> Dict[str, Any]:
         if not key:
             continue
         out[key] = {
-            "kipp":   nres.werte.get(Nachweis.KIPP).wert if Nachweis.KIPP in nres.werte else None,
-            "gleit":  nres.werte.get(Nachweis.GLEIT).wert if Nachweis.GLEIT in nres.werte else None,
-            "abhebe": nres.werte.get(Nachweis.ABHEBE).wert if Nachweis.ABHEBE in nres.werte else None,
+            "kipp":   _jsonify_number(nres.werte.get(Nachweis.KIPP).wert)   if Nachweis.KIPP   in nres.werte else None,
+            "gleit":  _jsonify_number(nres.werte.get(Nachweis.GLEIT).wert)  if Nachweis.GLEIT  in nres.werte else None,
+            "abhebe": _jsonify_number(nres.werte.get(Nachweis.ABHEBE).wert) if Nachweis.ABHEBE in nres.werte else None,
         }
 
     return {

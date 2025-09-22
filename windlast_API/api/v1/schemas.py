@@ -17,9 +17,9 @@ class TorInput(BaseModel):
 
 # Output-Minimalformat
 class ResultNormVals(BaseModel):
-    kipp: float | None
-    gleit: float | None
-    abhebe: float | None
+    kipp:  str | float | None  # "INF" | "-INF" | Zahl | null
+    gleit: str | float | None
+    abhebe: str | float | None
 
 class Result(BaseModel):
     normen: Dict[str, ResultNormVals]

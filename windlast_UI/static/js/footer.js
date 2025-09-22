@@ -7,10 +7,21 @@ const NORM_ID = {
 function setCell(id, val) {
   const el = document.getElementById(id);
   if (!el) return;
-  if (val === null || val === undefined || Number.isNaN(val)) {
+
+  // ∞-Darstellung
+  if (val === "INF" || val === "-INF") {
+    el.textContent = val === "INF" ? "∞" : "−∞";
+    el.title = "Keine ungünstigen Kräfte → Sicherheit → ∞";
+    return;
+  }
+
+  const num = typeof val === "string" ? Number(val) : val;
+  if (num === null || num === undefined || Number.isNaN(num)) {
     el.textContent = "—";
+    el.title = "";
   } else {
-    el.textContent = (Math.round(val * 100) / 100).toFixed(2);
+    el.textContent = (Math.round(num * 100) / 100).toFixed(2);
+    el.title = "";
   }
 }
 
