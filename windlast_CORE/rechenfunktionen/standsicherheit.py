@@ -139,7 +139,7 @@ def standsicherheit(
         try:
             r_gleit = konstruktion.berechne_gleitsicherheit(
                 Norm.DIN_EN_13814_2005_06, q_13814, z_13814,
-                konst=konst, reset_berechnungen=True,
+                konst=konst, reset_berechnungen=False,
                 methode=meth_gleit, vereinfachung_konstruktion=vereinfachung_konstruktion,
                 anzahl_windrichtungen=anzahl_windrichtungen,
             )
@@ -158,7 +158,7 @@ def standsicherheit(
         try:
             r_abhebe = konstruktion.berechne_abhebesicherheit(
                 Norm.DIN_EN_13814_2005_06, q_13814, z_13814,
-                konst=konst, reset_berechnungen=True,
+                konst=konst, reset_berechnungen=False,
                 methode=meth_abhebe, vereinfachung_konstruktion=vereinfachung_konstruktion,
                 anzahl_windrichtungen=anzahl_windrichtungen,
             )
@@ -237,7 +237,7 @@ def standsicherheit(
         try:
             r_gleit = konstruktion.berechne_gleitsicherheit(
                 Norm.DIN_EN_17879_2024_08, q_17879, z_17879,
-                konst=konst, reset_berechnungen=True,
+                konst=konst, reset_berechnungen=False,
                 methode=meth_gleit, vereinfachung_konstruktion=vereinfachung_konstruktion,
                 anzahl_windrichtungen=anzahl_windrichtungen,
             )
@@ -255,7 +255,7 @@ def standsicherheit(
         try:
             r_abhebe = konstruktion.berechne_abhebesicherheit(
                 Norm.DIN_EN_17879_2024_08, q_17879, z_17879,
-                konst=konst, reset_berechnungen=True,
+                konst=konst, reset_berechnungen=False,
                 methode=meth_abhebe, vereinfachung_konstruktion=vereinfachung_konstruktion,
                 anzahl_windrichtungen=anzahl_windrichtungen,
             )
@@ -333,7 +333,7 @@ def standsicherheit(
         try:
             r_gleit = konstruktion.berechne_gleitsicherheit(
                 Norm.DIN_EN_1991_1_4_2010_12, q_1991, z_1991,
-                konst=konst, reset_berechnungen=True,
+                konst=konst, reset_berechnungen=False,
                 methode=meth_gleit, vereinfachung_konstruktion=vereinfachung_konstruktion,
                 anzahl_windrichtungen=anzahl_windrichtungen,
             )
@@ -351,7 +351,7 @@ def standsicherheit(
         try:
             r_abhebe = konstruktion.berechne_abhebesicherheit(
                 Norm.DIN_EN_1991_1_4_2010_12, q_1991, z_1991,
-                konst=konst, reset_berechnungen=True,
+                konst=konst, reset_berechnungen=False,
                 methode=meth_abhebe, vereinfachung_konstruktion=vereinfachung_konstruktion,
                 anzahl_windrichtungen=anzahl_windrichtungen,
             )
