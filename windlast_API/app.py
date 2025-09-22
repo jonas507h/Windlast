@@ -1,9 +1,17 @@
 # windlast_API/app.py
-from flask import Flask, send_from_directory, abort
+# --- Pfad-Shim: Projektwurzel in sys.path, damit windlast_CORE importierbar ist ---
+import sys
 from pathlib import Path
+ROOT = Path(__file__).resolve().parents[1]   # .../Windlast
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+# --- Ende Shim ---
 
-# Pfade relativ zum API-Ordner:
-UI_ROOT = (Path(__file__).resolve().parents[1] / "windlast_UI").resolve()
+from flask import Flask, send_from_directory, abort
+from api.v1 import bp_v1
+
+# Pfade relativ zur Projektwurzel:
+UI_ROOT = (ROOT / "windlast_UI").resolve()
 STATIC_DIR = (UI_ROOT / "static").resolve()
 PARTIALS_DIR = (UI_ROOT / "partials").resolve()
 
@@ -14,13 +22,15 @@ def create_app():
     def index():
         return send_from_directory(UI_ROOT, "index.html")
 
-    # Partials (inkl. Unterordner wie konstruktionen/)
     @app.get("/partials/<path:filename>")
     def serve_partials(filename: str):
         target = (PARTIALS_DIR / filename).resolve()
-        if not target.is_file() or PARTIALS_DIR not in target.parents and target != PARTIALS_DIR:
+        if not target.is_file() or (PARTIALS_DIR not in target.parents and target != PARTIALS_DIR):
             abort(404)
         return send_from_directory(PARTIALS_DIR, filename)
+    
+    # API v1 mounten
+    app.register_blueprint(bp_v1, url_prefix="/api/v1")
 
     @app.get("/healthz")
     def healthz():
@@ -29,5 +39,4 @@ def create_app():
     return app
 
 if __name__ == "__main__":
-    # Direkter Start: python windlast_API/app.py
     create_app().run(debug=True)

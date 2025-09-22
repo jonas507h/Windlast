@@ -17,24 +17,11 @@
       <label for="aufstelldauer_wert">Aufstelldauer</label>
       <input id="aufstelldauer_wert" name="aufstelldauer_wert"
              type="number" min="0" step="1" placeholder="z. B. 30" />
-      <select id="aufstelldauer_einheit" name="aufstelldauer_einheit">
-        <option value="">Bitte wählen …</option>
-        <option value="tage">Tage</option>
-        <option value="monate">Monate</option>
-        <option value="jahre">Jahre</option>
-        <!-- wird später dynamisch befüllt -->
-      </select>
+      <select id="aufstelldauer_einheit"></select>
 
       <!-- Windzone -->
       <label for="windzone">Windzone</label>
-      <select id="windzone" name="windzone">
-        <option value="">Bitte wählen …</option>
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-        <option value="4">4</option>
-        <!-- wird später dynamisch befüllt -->
-      </select>
+      <select id="windzone"></select>
     </form>
 
     <!-- Rechte Seite: Theme -->
@@ -43,11 +30,6 @@
     </div>
   </header>
 
-  <script>
-    function toggleTheme(){
-      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-      window.__setTheme(isDark ? 'light' : 'dark');
-    }
-  </script>
+  <script src="/static/js/header.js"></script>
 </body>
 </html>
