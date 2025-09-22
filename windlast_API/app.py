@@ -2,9 +2,13 @@
 # --- Pfad-Shim: Projektwurzel in sys.path, damit windlast_CORE importierbar ist ---
 import sys
 from pathlib import Path
-ROOT = Path(__file__).resolve().parents[1]   # .../Windlast
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
+
+ROOT = Path(__file__).resolve().parents[1]              # .../Windlast
+CORE_DIR = ROOT / "windlast_CORE"                       # .../Windlast/windlast_CORE
+
+for p in (str(ROOT), str(CORE_DIR)):
+    if p not in sys.path:
+        sys.path.insert(0, p)
 # --- Ende Shim ---
 
 from flask import Flask, send_from_directory, abort
