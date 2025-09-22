@@ -110,3 +110,19 @@ nav.tabs { display:flex; gap:8px; margin:0 0 10px; }
 @media (max-width: 700px){
   .row-4, .row-3, .row-2 { grid-template-columns: 1fr; }
 }
+
+/* ====== Header Controls ====== */
+.header-bar{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+}
+.header-controls{
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+}
+.header-controls label{
+  margin:0 6px 0 12px; font-size:12px; color:var(--muted);
+}
+.header-controls label:first-child{ margin-left:0; }
+.header-controls input[type="number"],
+.header-controls select{
+  height:34px; padding:6px 10px;
+}
