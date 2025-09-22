@@ -87,3 +87,34 @@ class Zeitfaktor(str, Enum):
     TAG = "Tag"
     MONAT = "Monat"
     JAHR = "Jahr"
+
+# --- Ergänzungen für Standsicherheits-Strukturen ---
+
+class Nachweis(str, Enum):
+    """Arten der Nachweise, werden auch als Keys verwendet."""
+    KIPP = "kipp"
+    GLEIT = "gleit"
+    ABHEBE = "abhebe"
+
+
+class Severity(str, Enum):
+    """Schweregrad von Meldungen/Hinweisen."""
+    INFO = "info"
+    HINT = "hint"
+    WARN = "warn"
+    ERROR = "error"
+
+
+class ValueSource(str, Enum):
+    """Herkunft eines Safety-Wertes (für Transparenz/Debugging)."""
+    COMPUTED = "computed"
+    ASSUMED = "assumed"
+    NOT_APPLICABLE = "not_applicable"
+    ERROR = "error"
+
+
+class NormStatus(str, Enum):
+    """Gesamtstatus der Berechnung für eine Norm."""
+    CALCULATED = "calculated"
+    NOT_APPLICABLE = "not_applicable"
+    ERROR = "error"
