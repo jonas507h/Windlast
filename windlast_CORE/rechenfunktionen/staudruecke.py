@@ -311,7 +311,16 @@ def _geschwindigkeitsdruck_DinEn1991_1_4_2010_12(
         # else: Dauer oberhalb der höchsten Obergrenze → faktor=1.0 implizit, keine Warnung
 
     # 4) Zwei Zwischenergebnisse: (a) [q_eff], (b) [z_max]
-    zl_staudruck = Zwischenergebnis_Liste(
+    zl_obergrenzen = Zwischenergebnis_Liste(
+        wert=[gueltige_obergrenze],
+        formel="z_max (Klassen-Obergrenze zu h)",
+        quelle_formel="DIN EN 1991-1-4:2010-12 (Zonen-Tabelle)",
+        formelzeichen=["z_max"],
+        quelle_formelzeichen=["DIN EN 1991-1-4:2010-12"],
+        einzelwerte=None,
+        quelle_einzelwerte=None,
+    )
+    zl_staudruecke = Zwischenergebnis_Liste(
         wert=[q_eff],
         formel="q(z=h)",
         quelle_formel="DIN EN 1991-1-4:2010-12 (Zonen-Tabelle); ggf. Faktor für vorübergehenden Zustand",
@@ -321,17 +330,7 @@ def _geschwindigkeitsdruck_DinEn1991_1_4_2010_12(
         quelle_einzelwerte=None,
     )
 
-    zl_obergrenze = Zwischenergebnis_Liste(
-        wert=[gueltige_obergrenze],
-        formel="z_max (Klassen-Obergrenze zu h)",
-        quelle_formel="DIN EN 1991-1-4:2010-12 (Zonen-Tabelle)",
-        formelzeichen=["z_max"],
-        quelle_formelzeichen=["DIN EN 1991-1-4:2010-12"],
-        einzelwerte=None,
-        quelle_einzelwerte=None,
-    )
-
-    return zl_staudruck, zl_obergrenze
+    return zl_obergrenzen, zl_staudruecke
 
 # ----------------------------
 # Dispatch
@@ -347,7 +346,7 @@ _DISPATCH: Dict[Norm, Callable[..., Tuple[Zwischenergebnis_Liste, Zwischenergebn
 # ----------------------------
 # Hauptfunktion
 # ----------------------------
-def winddruck(
+def staudruecke(
     norm: Norm,
     konstruktion: Any,
     zustand: Union[Betriebszustand, Schutzmassnahmen],
