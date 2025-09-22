@@ -5,6 +5,12 @@
   <title>Header</title>
   <link rel="stylesheet" href="../static/css/style.css">
   <script src="../static/js/theme.js"></script>
+  <script>
+    function toggleTheme(){
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      window.__setTheme(isDark ? 'light' : 'dark');
+    }
+  </script>
 </head>
 <body class="wrap">
   <header class="panel header-bar">
