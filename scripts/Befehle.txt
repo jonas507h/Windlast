@@ -3,3 +3,6 @@ python -m scripts.run_windkraft
 App ausführen
 .venv\Scripts\activate
 python app.py
+
+App ausführen neu
+python .\windlast_API\app.py
