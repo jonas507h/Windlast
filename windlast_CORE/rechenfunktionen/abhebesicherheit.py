@@ -1,12 +1,14 @@
 # rechenfunktionen/abhebesicherheit.py
 from __future__ import annotations
 from math import inf
-from typing import Dict, Callable, Sequence
+from typing import Dict, Callable, Sequence, List
 from collections.abc import Sequence as _SeqABC
 
 from datenstruktur.zwischenergebnis import Zwischenergebnis
-from datenstruktur.enums import Norm, RechenmethodeAbheben, VereinfachungKonstruktion
-from datenstruktur.konstanten import _EPS
+from datenstruktur.enums import Norm, RechenmethodeAbheben, VereinfachungKonstruktion, Lasttyp, Variabilitaet
+from datenstruktur.konstanten import _EPS, aktuelle_konstanten
+from datenstruktur.kraefte import Kraefte
+from rechenfunktionen.sicherheitsbeiwert import sicherheitsbeiwert
 
 from rechenfunktionen.standsicherheit_utils import (
     generiere_windrichtungen,
@@ -74,7 +76,7 @@ def _abhebesicherheit_DinEn13814_2005_06(
     methode: RechenmethodeAbheben = RechenmethodeAbheben.STANDARD,
     vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
     anzahl_windrichtungen: int = 4,
-) -> Zwischenergebnis:
+) -> List[Zwischenergebnis]:
     if vereinfachung_konstruktion is not VereinfachungKonstruktion.KEINE:
         raise NotImplementedError(
             f"Vereinfachung '{vereinfachung_konstruktion.value}' ({vereinfachung_konstruktion.name}) ist noch nicht implementiert."
@@ -83,6 +85,14 @@ def _abhebesicherheit_DinEn13814_2005_06(
     if methode is RechenmethodeAbheben.STANDARD:
         pool = obtain_pool(konstruktion, reset_berechnungen)
         sicherheit_min_global = inf
+        ballast_erforderlich_max = 0.0
+        ballastkraft_dummy = Kraefte(
+            typ = Lasttyp.GEWICHT,
+            variabilitaet = Variabilitaet.STAENDIG,
+            Einzelkraefte = [(0.0, 0.0, 0.0)],
+            Angriffsflaeche_Einzelkraefte=[[(0.0, 0.0, 0.0)]],
+        )
+        sicherheitsbeiwert_ballast = sicherheitsbeiwert(norm, ballastkraft_dummy, ist_guenstig=True)
 
         for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen):
             lastset = get_or_create_lastset(
@@ -109,13 +119,34 @@ def _abhebesicherheit_DinEn13814_2005_06(
             if sicherheit < sicherheit_min_global:
                 sicherheit_min_global = sicherheit
 
-        return Zwischenergebnis(
+            if total_normal_up <= _EPS:
+                ballastkraft = 0.0
+            else:
+                ballastkraft = max(0.0, total_normal_up - total_normal_down) / sicherheitsbeiwert_ballast.wert
+            
+            if ballastkraft > ballast_erforderlich_max:
+                ballast_erforderlich_max = ballastkraft
+            
+        erdbeschleunigung = aktuelle_konstanten().erdbeschleunigung
+        ballast_kg = ballast_erforderlich_max / erdbeschleunigung  # in N -> in kg
+
+        sicherheit_Z = Zwischenergebnis(
             wert=sicherheit_min_global,
             formel="S = ΣN_down / ΣN_up",
             quelle_formel="---",
             formelzeichen=["N_down", "N_up"],
             quelle_formelzeichen=["---"],
         )
+
+        ballast_Z = Zwischenergebnis(
+            wert=ballast_kg,
+            formel="M_erf = (η_req·ΣN_up − ΣN_down) / (γ_g·g)",
+            quelle_formel="---",
+            formelzeichen=["η_req", "N_up", "N_down", "γ_g", "g"],
+            quelle_formelzeichen=["---"],
+        )
+
+        return [sicherheit_Z, ballast_Z]
 
     else:
         raise NotImplementedError(f"Methode '{methode.value}' ({methode.name}) ist noch nicht implementiert.")
@@ -132,7 +163,7 @@ def _abhebesicherheit_DinEn17879_2024_08(
     methode: RechenmethodeAbheben = RechenmethodeAbheben.STANDARD,
     vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
     anzahl_windrichtungen: int = 4,
-) -> Zwischenergebnis:
+) -> List[Zwischenergebnis]:
     if vereinfachung_konstruktion is not VereinfachungKonstruktion.KEINE:
         raise NotImplementedError(
             f"Vereinfachung '{vereinfachung_konstruktion.value}' ({vereinfachung_konstruktion.name}) ist noch nicht implementiert."
@@ -141,6 +172,14 @@ def _abhebesicherheit_DinEn17879_2024_08(
     if methode is RechenmethodeAbheben.STANDARD:
         pool = obtain_pool(konstruktion, reset_berechnungen)
         sicherheit_min_global = inf
+        ballast_erforderlich_max = 0.0
+        ballastkraft_dummy = Kraefte(
+            typ = Lasttyp.GEWICHT,
+            variabilitaet = Variabilitaet.STAENDIG,
+            Einzelkraefte = [(0.0, 0.0, 0.0)],
+            Angriffsflaeche_Einzelkraefte=[[(0.0, 0.0, 0.0)]],
+        )
+        sicherheitsbeiwert_ballast = sicherheitsbeiwert(norm, ballastkraft_dummy, ist_guenstig=True)
 
         for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen):
             lastset = get_or_create_lastset(
@@ -167,7 +206,18 @@ def _abhebesicherheit_DinEn17879_2024_08(
             if sicherheit < sicherheit_min_global:
                 sicherheit_min_global = sicherheit
 
-        return Zwischenergebnis(
+            if total_normal_up <= _EPS:
+                ballastkraft = 0.0
+            else:
+                ballastkraft = max(0.0, total_normal_up - total_normal_down) / sicherheitsbeiwert_ballast.wert
+            
+            if ballastkraft > ballast_erforderlich_max:
+                ballast_erforderlich_max = ballastkraft
+            
+        erdbeschleunigung = aktuelle_konstanten().erdbeschleunigung
+        ballast_kg = ballast_erforderlich_max / erdbeschleunigung  # in N -> in kg
+
+        sicherheit_Z = Zwischenergebnis(
             wert=sicherheit_min_global,
             formel="S = ΣN_down / ΣN_up",
             quelle_formel="---",
@@ -175,13 +225,23 @@ def _abhebesicherheit_DinEn17879_2024_08(
             quelle_formelzeichen=["---"],
         )
 
+        ballast_Z = Zwischenergebnis(
+            wert=ballast_kg,
+            formel="M_erf = (η_req·ΣN_up − ΣN_down) / (γ_g·g)",
+            quelle_formel="---",
+            formelzeichen=["η_req", "N_up", "N_down", "γ_g", "g"],
+            quelle_formelzeichen=["---"],
+        )
+
+        return [sicherheit_Z, ballast_Z]
+
     else:
         raise NotImplementedError(f"Methode '{methode.value}' ({methode.name}) ist noch nicht implementiert.")
 
 
 # --- Dispatch ---------------------------------------------------------------
 
-_DISPATCH: Dict[Norm, Callable[..., Zwischenergebnis]] = {
+_DISPATCH: Dict[Norm, Callable[..., List[Zwischenergebnis]]] = {
     Norm.DEFAULT: _abhebesicherheit_DinEn13814_2005_06,
     Norm.DIN_EN_13814_2005_06: _abhebesicherheit_DinEn13814_2005_06,
     Norm.DIN_EN_17879_2024_08: _abhebesicherheit_DinEn17879_2024_08,
@@ -200,7 +260,7 @@ def abhebesicherheit(
     methode: RechenmethodeAbheben = RechenmethodeAbheben.STANDARD,
     vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
     anzahl_windrichtungen: int = 4,
-) -> Zwischenergebnis:
+) -> List[Zwischenergebnis]:
     """
     Norm-dispatchte Abhebe-Sicherheitsbewertung.
     Gibt ein Zwischenergebnis mit der minimalen Sicherheit über alle Windrichtungen zurück.
