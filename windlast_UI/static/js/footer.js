@@ -4,6 +4,20 @@ const NORM_ID = {
   "EN_1991_1_4_2010": "en1991_2010",
 };
 
+function klassifizierung_anwenden(el, good) {
+  if (!el) return;
+  el.classList.remove("val-ok", "val-bad");
+  el.classList.add(good ? "val-ok" : "val-bad");
+}
+
+function sicherheit_klassifizieren(val) {
+  if (val === "INF") return true;
+  if (val === "-INF") return false;
+  const num = typeof val === "string" ? Number(val) : val;
+  if (num === null || num === undefined || Number.isNaN(num)) return false;
+  return num >= 1.0;
+}
+
 function formatBallast(val_kg) {
   if (val_kg === "INF" || val_kg === "-INF") return val_kg === "INF" ? "∞" : "−∞";
   const n = typeof val_kg === "string" ? Number(val_kg) : val_kg;
@@ -41,21 +55,23 @@ function setCell(id, val) {
   const el = document.getElementById(id);
   if (!el) return;
 
-  // ∞-Darstellung
+  // Text setzen
   if (val === "INF" || val === "-INF") {
     el.textContent = val === "INF" ? "∞" : "−∞";
-    el.title = "Keine ungünstigen Kräfte → Sicherheit → ∞";
-    return;
-  }
-
-  const num = typeof val === "string" ? Number(val) : val;
-  if (num === null || num === undefined || Number.isNaN(num)) {
-    el.textContent = "—";
     el.title = "";
   } else {
-    el.textContent = (Math.round(num * 100) / 100).toFixed(2);
-    el.title = "";
+    const num = typeof val === "string" ? Number(val) : val;
+    if (num === null || num === undefined || Number.isNaN(num)) {
+      el.textContent = "—";
+      el.title = "";
+    } else {
+      el.textContent = (Math.round(num * 100) / 100).toFixed(2);
+      el.title = "";
+    }
   }
+
+  // Klasse setzen (grün/rot)
+  klassifizierung_anwenden(el, sicherheit_klassifizieren(val));
 }
 
 function updateFooter(payload) {

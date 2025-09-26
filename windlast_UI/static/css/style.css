@@ -102,6 +102,8 @@ nav.tabs { display:flex; gap:8px; margin:0 0 10px; }
 .results-table thead th { background: var(--table-head); text-align: left; }
 .results-table td.value { text-align: right; font-weight: 700; }
 .results-table caption { font-size: 12px; color: var(--muted); }
+.results-table th.rowhead-stub { text-align:left; opacity:.7; font-weight:600; }
+.results-table th.rowhead      { text-align:left; white-space:nowrap; font-weight:600; }
 
 /* ====== Iframe helper (falls genutzt) ====== */
 #konstruktions_iframe { width: 100%; height: 300px; border: 0; background: var(--panel); }
@@ -126,3 +128,23 @@ nav.tabs { display:flex; gap:8px; margin:0 0 10px; }
 .header-controls select{
   height:34px; padding:6px 10px;
 }
+
+/* ==== Safety cell coloring ==== */
+:root{
+  --ok-bg: rgba(16, 185, 129, 0.18);   /* grün, transparent */
+  --bad-bg: rgba(239, 68, 68, 0.18);   /* rot, transparent */
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    /* in dark etwas kräftiger */
+    --ok-bg: rgba(16, 185, 129, 0.25);
+    --bad-bg: rgba(239, 68, 68, 0.25);
+  }
+}
+[data-theme="dark"]{
+  --ok-bg: rgba(16, 185, 129, 0.25);
+  --bad-bg: rgba(239, 68, 68, 0.25);
+}
+
+.results-table td.value.val-ok  { background: var(--ok-bg);  transition: background .2s ease; }
+.results-table td.value.val-bad { background: var(--bad-bg); transition: background .2s ease; }
