@@ -95,6 +95,7 @@ class Nachweis(str, Enum):
     KIPP = "kipp"
     GLEIT = "gleit"
     ABHEBE = "abhebe"
+    BALLAST = "ballast"
 
 
 class Severity(str, Enum):

@@ -112,10 +112,12 @@ def standsicherheit(
                 Nachweis.KIPP:   SafetyValue(None, meth_kipp, ValueSource.ERROR, []),
                 Nachweis.GLEIT:  SafetyValue(None, meth_gleit, ValueSource.ERROR, []),
                 Nachweis.ABHEBE: SafetyValue(None, meth_abhebe, ValueSource.ERROR, []),
+                Nachweis.BALLAST: SafetyValue(None, "MAX_BALLAST_KIPP_GLEIT_ABHEBE", ValueSource.ERROR, []),
             },
         )
     else:
         ballast_kipp = ballast_gleit = ballast_abhebe = None
+        v_kipp = v_gleit = v_abhebe = None
         # drei Nachweise
         # Kipp
         try:
@@ -136,6 +138,7 @@ def standsicherheit(
                 context={},
             ))
             sv_kipp = SafetyValue(None, meth_kipp, ValueSource.ERROR, [])
+            ballast_kipp = None
 
         # Gleit
         try:
@@ -156,6 +159,7 @@ def standsicherheit(
                 context={},
             ))
             sv_gleit = SafetyValue(None, meth_gleit, ValueSource.ERROR, [])
+            ballast_gleit = None
 
         # Abhebe
         try:
@@ -176,9 +180,109 @@ def standsicherheit(
                 context={},
             ))
             sv_abhebe = SafetyValue(None, meth_abhebe, ValueSource.ERROR, [])
+            ballast_abhebe = None
 
         status_13814 = NormStatus.ERROR if reasons_13814 else NormStatus.CALCULATED
-        ballast_13814 = max(ballast_kipp or 0, ballast_gleit or 0, ballast_abhebe or 0) or None
+
+        # max-Ballast (kg) bilden – nur vorhandene Werte berücksichtigen
+        ballast_vals = [b for b in (ballast_kipp, ballast_gleit, ballast_abhebe) if b is not None]
+        sv_ballast = SafetyValue(
+            wert=(max(ballast_vals) if ballast_vals else None),
+            methode="MAX_BALLAST_KIPP_GLEIT_ABHEBE",
+            source=ValueSource.COMPUTED if ballast_vals else ValueSource.ERROR,
+            messages=[],
+        )
+
+        # --- Fallback IN_BETRIEB, falls eine Sicherheit < 1 ---
+        alternativen_13814: Dict[str, Dict[Nachweis, SafetyValue]] = {}  # << TYP angepasst
+        try_in_betrieb = any((x is not None and x < 1.0) for x in (v_kipp, v_gleit, v_abhebe))
+
+        if try_in_betrieb:
+            try:
+                zl1_b, zl2_b = staudruecke(
+                    Norm.DIN_EN_13814_2005_06,
+                    konstruktion,
+                    Betriebszustand.IN_BETRIEB,
+                    aufstelldauer=aufstelldauer,
+                    windzone=None,
+                )
+                z_b = list(zl1_b.wert)
+                q_b = list(zl2_b.wert)
+
+                vals_b: Dict[Nachweis, SafetyValue] = {}  # << TYP angepasst
+                b_kipp = b_gleit = b_abhebe = None
+
+                # Kipp (reset True, analog Hauptrechnung)
+                try:
+                    r = konstruktion.berechne_kippsicherheit(
+                        Norm.DIN_EN_13814_2005_06, q_b, z_b,
+                        konst=konst, reset_berechnungen=True,
+                        methode=meth_kipp, vereinfachung_konstruktion=vereinfachung_konstruktion,
+                        anzahl_windrichtungen=anzahl_windrichtungen,
+                    )
+                    vals_b[Nachweis.KIPP] = SafetyValue(float(r[0].wert), meth_kipp, ValueSource.COMPUTED, [])
+                    b_kipp = float(r[1].wert)
+                except Exception as e:
+                    reasons_13814.append(Message(
+                        code="KIPP_IN_BETRIEB_FAILED", severity=Severity.WARNING,
+                        text=f"Kipp (IN_BETRIEB, 13814) fehlgeschlagen: {e}", context={}
+                    ))
+                    vals_b[Nachweis.KIPP] = SafetyValue(None, meth_kipp, ValueSource.ERROR, [])
+                    b_kipp = None
+
+                # Gleit
+                try:
+                    r = konstruktion.berechne_gleitsicherheit(
+                        Norm.DIN_EN_13814_2005_06, q_b, z_b,
+                        konst=konst, reset_berechnungen=False,
+                        methode=meth_gleit, vereinfachung_konstruktion=vereinfachung_konstruktion,
+                        anzahl_windrichtungen=anzahl_windrichtungen,
+                    )
+                    vals_b[Nachweis.GLEIT] = SafetyValue(float(r[0].wert), meth_gleit, ValueSource.COMPUTED, [])
+                    b_gleit = float(r[1].wert)
+                except Exception as e:
+                    reasons_13814.append(Message(
+                        code="GLEIT_IN_BETRIEB_FAILED", severity=Severity.WARNING,
+                        text=f"Gleit (IN_BETRIEB, 13814) fehlgeschlagen: {e}", context={}
+                    ))
+                    vals_b[Nachweis.GLEIT] = SafetyValue(None, meth_gleit, ValueSource.ERROR, [])
+                    b_gleit = None
+
+                # Abhebe
+                try:
+                    r = konstruktion.berechne_abhebesicherheit(
+                        Norm.DIN_EN_13814_2005_06, q_b, z_b,
+                        konst=konst, reset_berechnungen=False,
+                        methode=meth_abhebe, vereinfachung_konstruktion=vereinfachung_konstruktion,
+                        anzahl_windrichtungen=anzahl_windrichtungen,
+                    )
+                    vals_b[Nachweis.ABHEBE] = SafetyValue(float(r[0].wert), meth_abhebe, ValueSource.COMPUTED, [])
+                    b_abhebe = float(r[1].wert)
+                except Exception as e:
+                    reasons_13814.append(Message(
+                        code="ABHEBE_IN_BETRIEB_FAILED", severity=Severity.WARNING,
+                        text=f"Abhebe (IN_BETRIEB, 13814) fehlgeschlagen: {e}", context={}
+                    ))
+                    vals_b[Nachweis.ABHEBE] = SafetyValue(None, meth_abhebe, ValueSource.ERROR, [])
+                    b_abhebe = None
+
+                # Ballast (kg) für Alternative bilden
+                bc = [b for b in (b_kipp, b_gleit, b_abhebe) if b is not None]
+                vals_b[Nachweis.BALLAST] = SafetyValue(
+                    wert=(max(bc) if bc else None),
+                    methode="MAX_BALLAST_KIPP_GLEIT_ABHEBE",
+                    source=ValueSource.COMPUTED if bc else ValueSource.ERROR,
+                    messages=[],
+                )
+
+                alternativen_13814["IN_BETRIEB"] = vals_b
+
+            except Exception as e:
+                reasons_13814.append(Message(
+                    code="STAUDRUECKE_IN_BETRIEB_FAILED", severity=Severity.WARNING,
+                    text=f"Staudrücke (IN_BETRIEB, 13814) fehlgeschlagen: {e}", context={}
+                ))
+
         normen[Norm.DIN_EN_13814_2005_06] = NormErgebnis(
             status=status_13814,
             reasons=reasons_13814,
@@ -186,8 +290,9 @@ def standsicherheit(
                 Nachweis.KIPP: sv_kipp,
                 Nachweis.GLEIT: sv_gleit,
                 Nachweis.ABHEBE: sv_abhebe,
+                Nachweis.BALLAST: sv_ballast,
             },
-            ballast=ballast_13814,
+            alternativen=alternativen_13814,
         )
 
     # --------------------------
@@ -218,10 +323,13 @@ def standsicherheit(
                 Nachweis.KIPP:   SafetyValue(None, meth_kipp, ValueSource.ERROR, []),
                 Nachweis.GLEIT:  SafetyValue(None, meth_gleit, ValueSource.ERROR, []),
                 Nachweis.ABHEBE: SafetyValue(None, meth_abhebe, ValueSource.ERROR, []),
+                Nachweis.BALLAST: SafetyValue(None, "MAX_BALLAST_KIPP_GLEIT_ABHEBE", ValueSource.ERROR, []),
             },
         )
     else:
         ballast_kipp = ballast_gleit = ballast_abhebe = None
+        v_kipp = v_gleit = v_abhebe = None
+        # drei Nachweise
         # Kipp
         try:
             r_kipp = konstruktion.berechne_kippsicherheit(
@@ -230,8 +338,9 @@ def standsicherheit(
                 methode=meth_kipp, vereinfachung_konstruktion=vereinfachung_konstruktion,
                 anzahl_windrichtungen=anzahl_windrichtungen,
             )
+            v_kipp = float(r_kipp[0].wert)
             ballast_kipp = float(r_kipp[1].wert)
-            sv_kipp = SafetyValue(float(r_kipp[0].wert), meth_kipp, ValueSource.COMPUTED, [])
+            sv_kipp = SafetyValue(v_kipp, meth_kipp, ValueSource.COMPUTED, [])
         except Exception as e:
             reasons_17879.append(Message(
                 code="KIPP_FAILED",
@@ -240,6 +349,7 @@ def standsicherheit(
                 context={},
             ))
             sv_kipp = SafetyValue(None, meth_kipp, ValueSource.ERROR, [])
+            ballast_kipp = None
 
         # Gleit
         try:
@@ -249,8 +359,9 @@ def standsicherheit(
                 methode=meth_gleit, vereinfachung_konstruktion=vereinfachung_konstruktion,
                 anzahl_windrichtungen=anzahl_windrichtungen,
             )
+            v_gleit = float(r_gleit[0].wert)
             ballast_gleit = float(r_gleit[1].wert)
-            sv_gleit = SafetyValue(float(r_gleit[0].wert), meth_gleit, ValueSource.COMPUTED, [])
+            sv_gleit = SafetyValue(v_gleit, meth_gleit, ValueSource.COMPUTED, [])
         except Exception as e:
             reasons_17879.append(Message(
                 code="GLEIT_FAILED",
@@ -259,6 +370,7 @@ def standsicherheit(
                 context={},
             ))
             sv_gleit = SafetyValue(None, meth_gleit, ValueSource.ERROR, [])
+            ballast_gleit = None
 
         # Abhebe
         try:
@@ -268,8 +380,9 @@ def standsicherheit(
                 methode=meth_abhebe, vereinfachung_konstruktion=vereinfachung_konstruktion,
                 anzahl_windrichtungen=anzahl_windrichtungen,
             )
+            v_abhebe = float(r_abhebe[0].wert)
             ballast_abhebe = float(r_abhebe[1].wert)
-            sv_abhebe = SafetyValue(float(r_abhebe[0].wert), meth_abhebe, ValueSource.COMPUTED, [])
+            sv_abhebe = SafetyValue(v_abhebe, meth_abhebe, ValueSource.COMPUTED, [])
         except Exception as e:
             reasons_17879.append(Message(
                 code="ABHEBE_FAILED",
@@ -278,9 +391,109 @@ def standsicherheit(
                 context={},
             ))
             sv_abhebe = SafetyValue(None, meth_abhebe, ValueSource.ERROR, [])
+            ballast_abhebe = None
 
         status_17879 = NormStatus.ERROR if reasons_17879 else NormStatus.CALCULATED
-        ballast_17879 = max(ballast_kipp or 0, ballast_gleit or 0, ballast_abhebe or 0) or None
+        # max-Ballast (kg) bilden – nur vorhandene Werte berücksichtigen
+        ballast_vals = [b for b in (ballast_kipp, ballast_gleit, ballast_abhebe) if b is not None]
+        sv_ballast = SafetyValue(
+            wert=(max(ballast_vals) if ballast_vals else None),
+            methode="MAX_BALLAST_KIPP_GLEIT_ABHEBE",
+            source=ValueSource.COMPUTED if ballast_vals else ValueSource.ERROR,
+            messages=[],
+        )
+
+        # --- Fallback IN_BETRIEB, falls eine Sicherheit < 1 ---
+        alternativen_17879: Dict[str, Dict[Nachweis, SafetyValue]] = {}  # ← TYP: SafetyValue
+        try_in_betrieb = any((x is not None and x < 1.0) for x in (v_kipp, v_gleit, v_abhebe))
+
+        if try_in_betrieb:
+            try:
+                zl1_b, zl2_b = staudruecke(
+                    Norm.DIN_EN_17879_2024_08,
+                    konstruktion,
+                    Betriebszustand.IN_BETRIEB,
+                    aufstelldauer=aufstelldauer,
+                    windzone=None,
+                )
+                z_b = list(zl1_b.wert)
+                q_b = list(zl2_b.wert)
+
+                vals_b: Dict[Nachweis, SafetyValue] = {}  # ← TYP: SafetyValue
+                b_kipp = b_gleit = b_abhebe = None
+
+                # Kipp
+                try:
+                    r = konstruktion.berechne_kippsicherheit(
+                        Norm.DIN_EN_17879_2024_08, q_b, z_b,
+                        konst=konst, reset_berechnungen=True,
+                        methode=meth_kipp, vereinfachung_konstruktion=vereinfachung_konstruktion,
+                        anzahl_windrichtungen=anzahl_windrichtungen,
+                    )
+                    vals_b[Nachweis.KIPP] = SafetyValue(float(r[0].wert), meth_kipp, ValueSource.COMPUTED, [])
+                    b_kipp = float(r[1].wert)
+                except Exception as e:
+                    reasons_17879.append(Message(
+                        code="KIPP_IN_BETRIEB_FAILED", severity=Severity.WARNING,
+                        text=f"Kipp (IN_BETRIEB, 17879) fehlgeschlagen: {e}", context={}
+                    ))
+                    vals_b[Nachweis.KIPP] = SafetyValue(None, meth_kipp, ValueSource.ERROR, [])
+                    b_kipp = None
+
+                # Gleit
+                try:
+                    r = konstruktion.berechne_gleitsicherheit(
+                        Norm.DIN_EN_17879_2024_08, q_b, z_b,
+                        konst=konst, reset_berechnungen=False,
+                        methode=meth_gleit, vereinfachung_konstruktion=vereinfachung_konstruktion,
+                        anzahl_windrichtungen=anzahl_windrichtungen,
+                    )
+                    vals_b[Nachweis.GLEIT] = SafetyValue(float(r[0].wert), meth_gleit, ValueSource.COMPUTED, [])
+                    b_gleit = float(r[1].wert)
+                except Exception as e:
+                    reasons_17879.append(Message(
+                        code="GLEIT_IN_BETRIEB_FAILED", severity=Severity.WARNING,
+                        text=f"Gleit (IN_BETRIEB, 17879) fehlgeschlagen: {e}", context={}
+                    ))
+                    vals_b[Nachweis.GLEIT] = SafetyValue(None, meth_gleit, ValueSource.ERROR, [])
+                    b_gleit = None
+
+                # Abhebe
+                try:
+                    r = konstruktion.berechne_abhebesicherheit(
+                        Norm.DIN_EN_17879_2024_08, q_b, z_b,
+                        konst=konst, reset_berechnungen=False,
+                        methode=meth_abhebe, vereinfachung_konstruktion=vereinfachung_konstruktion,
+                        anzahl_windrichtungen=anzahl_windrichtungen,
+                    )
+                    vals_b[Nachweis.ABHEBE] = SafetyValue(float(r[0].wert), meth_abhebe, ValueSource.COMPUTED, [])
+                    b_abhebe = float(r[1].wert)
+                except Exception as e:
+                    reasons_17879.append(Message(
+                        code="ABHEBE_IN_BETRIEB_FAILED", severity=Severity.WARNING,
+                        text=f"Abhebe (IN_BETRIEB, 17879) fehlgeschlagen: {e}", context={}
+                    ))
+                    vals_b[Nachweis.ABHEBE] = SafetyValue(None, meth_abhebe, ValueSource.ERROR, [])
+                    b_abhebe = None
+
+                # Ballast (kg) für Alternative bilden (max über Teil-Ballaste)
+                bc = [b for b in (b_kipp, b_gleit, b_abhebe) if b is not None]
+                vals_b[Nachweis.BALLAST] = SafetyValue(
+                    wert=(max(bc) if bc else None),
+                    methode="MAX_BALLAST_KIPP_GLEIT_ABHEBE",
+                    source=ValueSource.COMPUTED if bc else ValueSource.ERROR,
+                    messages=[],
+                )
+
+                alternativen_17879["IN_BETRIEB"] = vals_b
+
+            except Exception as e:
+                reasons_17879.append(Message(
+                    code="STAUDRUECKE_IN_BETRIEB_FAILED", severity=Severity.WARNING,
+                    text=f"Staudrücke (IN_BETRIEB, 17879) fehlgeschlagen: {e}", context={}
+                ))
+
+
         normen[Norm.DIN_EN_17879_2024_08] = NormErgebnis(
             status=status_17879,
             reasons=reasons_17879,
@@ -288,8 +501,9 @@ def standsicherheit(
                 Nachweis.KIPP: sv_kipp,
                 Nachweis.GLEIT: sv_gleit,
                 Nachweis.ABHEBE: sv_abhebe,
+                Nachweis.BALLAST: sv_ballast,
             },
-            ballast=ballast_17879,
+            alternativen=alternativen_17879,
         )
 
     # --------------------------
@@ -320,10 +534,12 @@ def standsicherheit(
                 Nachweis.KIPP:   SafetyValue(None, meth_kipp, ValueSource.ERROR, []),
                 Nachweis.GLEIT:  SafetyValue(None, meth_gleit, ValueSource.ERROR, []),
                 Nachweis.ABHEBE: SafetyValue(None, meth_abhebe, ValueSource.ERROR, []),
+                Nachweis.BALLAST: SafetyValue(None, "MAX_BALLAST_KIPP_GLEIT_ABHEBE", ValueSource.ERROR, []),
             },
         )
     else:
         ballast_kipp = ballast_gleit = ballast_abhebe = None
+        v_kipp = v_gleit = v_abhebe = None
         # drei Nachweise
         # Kipp
         try:
@@ -333,8 +549,9 @@ def standsicherheit(
                 methode=meth_kipp, vereinfachung_konstruktion=vereinfachung_konstruktion,
                 anzahl_windrichtungen=anzahl_windrichtungen,
             )
+            v_kipp = float(r_kipp[0].wert)
             ballast_kipp = float(r_kipp[1].wert)
-            sv_kipp = SafetyValue(float(r_kipp[0].wert), meth_kipp, ValueSource.COMPUTED, [])
+            sv_kipp = SafetyValue(v_kipp, meth_kipp, ValueSource.COMPUTED, [])
         except Exception as e:
             reasons_1991.append(Message(
                 code="KIPP_FAILED",
@@ -343,6 +560,7 @@ def standsicherheit(
                 context={},
             ))
             sv_kipp = SafetyValue(None, meth_kipp, ValueSource.ERROR, [])
+            ballast_kipp = None
 
         # Gleit
         try:
@@ -352,8 +570,9 @@ def standsicherheit(
                 methode=meth_gleit, vereinfachung_konstruktion=vereinfachung_konstruktion,
                 anzahl_windrichtungen=anzahl_windrichtungen,
             )
+            v_gleit = float(r_gleit[0].wert)
             ballast_gleit = float(r_gleit[1].wert)
-            sv_gleit = SafetyValue(float(r_gleit[0].wert), meth_gleit, ValueSource.COMPUTED, [])
+            sv_gleit = SafetyValue(v_gleit, meth_gleit, ValueSource.COMPUTED, [])
         except Exception as e:
             reasons_1991.append(Message(
                 code="GLEIT_FAILED",
@@ -362,6 +581,7 @@ def standsicherheit(
                 context={},
             ))
             sv_gleit = SafetyValue(None, meth_gleit, ValueSource.ERROR, [])
+            ballast_gleit = None
 
         # Abhebe
         try:
@@ -371,8 +591,9 @@ def standsicherheit(
                 methode=meth_abhebe, vereinfachung_konstruktion=vereinfachung_konstruktion,
                 anzahl_windrichtungen=anzahl_windrichtungen,
             )
+            v_abhebe = float(r_abhebe[0].wert)
             ballast_abhebe = float(r_abhebe[1].wert)
-            sv_abhebe = SafetyValue(float(r_abhebe[0].wert), meth_abhebe, ValueSource.COMPUTED, [])
+            sv_abhebe = SafetyValue(v_abhebe, meth_abhebe, ValueSource.COMPUTED, [])
         except Exception as e:
             reasons_1991.append(Message(
                 code="ABHEBE_FAILED",
@@ -381,6 +602,7 @@ def standsicherheit(
                 context={},
             ))
             sv_abhebe = SafetyValue(None, meth_abhebe, ValueSource.ERROR, [])
+            ballast_abhebe = None
 
         status_1991 = NormStatus.ERROR if reasons_1991 else NormStatus.CALCULATED
         ballast_1991 = max(ballast_kipp or 0, ballast_gleit or 0, ballast_abhebe or 0) or None
