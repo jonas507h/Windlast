@@ -16,12 +16,18 @@ class TorInput(BaseModel):
     windzone: str  # Windzone Enum-Name (z.B. "III_Binnenland")
 
 # Output-Minimalformat
-class ResultNormVals(BaseModel):
-    kipp:  str | float | None  # "INF" | "-INF" | Zahl | null
-    gleit: str | float | None
-    abhebe: str | float | None
-    ballast: str |float | None = None
+class ResultNormAltVals(BaseModel):
+    kipp:    str | float | None
+    gleit:   str | float | None
+    abhebe:  str | float | None
+    ballast: str | float | None = None  # kg
 
+class ResultNormVals(BaseModel):
+    kipp:    str | float | None
+    gleit:   str | float | None
+    abhebe:  str | float | None
+    ballast: str | float | None = None  # kg
+    alternativen: Dict[str, ResultNormAltVals] | None = None  # z.B. {"IN_BETRIEB": {...}}
 class Result(BaseModel):
     normen: Dict[str, ResultNormVals]
     meta: dict
