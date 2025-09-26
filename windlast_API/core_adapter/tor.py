@@ -78,6 +78,7 @@ def berechne_tor(payload: Dict[str, Any]) -> Dict[str, Any]:
             "kipp":   _jsonify_number(nres.werte.get(Nachweis.KIPP).wert)   if Nachweis.KIPP   in nres.werte else None,
             "gleit":  _jsonify_number(nres.werte.get(Nachweis.GLEIT).wert)  if Nachweis.GLEIT  in nres.werte else None,
             "abhebe": _jsonify_number(nres.werte.get(Nachweis.ABHEBE).wert) if Nachweis.ABHEBE in nres.werte else None,
+            "ballast": _jsonify_number(nres.ballast),
         }
 
     return {

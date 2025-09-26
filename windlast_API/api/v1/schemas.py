@@ -20,6 +20,7 @@ class ResultNormVals(BaseModel):
     kipp:  str | float | None  # "INF" | "-INF" | Zahl | null
     gleit: str | float | None
     abhebe: str | float | None
+    ballast: str |float | None = None
 
 class Result(BaseModel):
     normen: Dict[str, ResultNormVals]

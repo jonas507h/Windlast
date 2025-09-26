@@ -25,6 +25,24 @@ function setCell(id, val) {
   }
 }
 
+function setCellWithUnit(id, val, unit) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (val === "INF" || val === "-INF") {
+    el.textContent = val === "INF" ? "∞" : "−∞";
+    el.title = "";
+    return;
+  }
+  const num = typeof val === "string" ? Number(val) : val;
+  if (num === null || num === undefined || Number.isNaN(num)) {
+    el.textContent = "—";
+    el.title = "";
+  } else {
+    el.textContent = `${(Math.round(num * 100) / 100).toFixed(2)} ${unit}`;
+    el.title = "";
+  }
+}
+
 function updateFooter(payload) {
   const normen = payload?.normen || {};
   for (const [normKey, vals] of Object.entries(normen)) {
@@ -33,6 +51,7 @@ function updateFooter(payload) {
     setCell(`kipp_${suf}`,   vals.kipp);
     setCell(`gleit_${suf}`,  vals.gleit);
     setCell(`abhebe_${suf}`, vals.abhebe);
+    setCellWithUnit(`ballast_${suf}`, vals.ballast, "kg");
   }
 }
 
