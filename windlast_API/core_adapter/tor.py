@@ -14,6 +14,7 @@ _NORM_KEY = {
     Norm.DIN_EN_1991_1_4_2010_12: "EN_1991_1_4_2010",
 }
 
+# Hilfsfunktion: float -> JSON-sicherer float (extra Behandlung für Inf)
 def _jsonify_number(x):
     try:
         v = float(x)
@@ -24,11 +25,13 @@ def _jsonify_number(x):
     # Information erhalten, aber JSON-sicher
     return "INF" if v > 0 else "-INF"
 
+# Hilfsfunktion: Untergrund für alle Bodenplatten im Tor setzen
 def _set_untergrund_bodenplatten(tor: Tor, mat: MaterialTyp) -> None:
     for el in getattr(tor, "bauelemente", []):
         if el.__class__.__name__ == "Bodenplatte":
             el.untergrund = mat
 
+# Hauptfunktion: Tor berechnen
 def berechne_tor(payload: Dict[str, Any]) -> Dict[str, Any]:
     # 1) Tor bauen
     tor = Tor(
