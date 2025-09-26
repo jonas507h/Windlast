@@ -605,7 +605,15 @@ def standsicherheit(
             ballast_abhebe = None
 
         status_1991 = NormStatus.ERROR if reasons_1991 else NormStatus.CALCULATED
-        ballast_1991 = max(ballast_kipp or 0, ballast_gleit or 0, ballast_abhebe or 0) or None
+        # max-Ballast (kg) bilden – nur vorhandene Werte berücksichtigen
+        ballast_vals = [b for b in (ballast_kipp, ballast_gleit, ballast_abhebe) if b is not None]
+        sv_ballast = SafetyValue(
+            wert=(max(ballast_vals) if ballast_vals else None),
+            methode="MAX_BALLAST_KIPP_GLEIT_ABHEBE",
+            source=ValueSource.COMPUTED if ballast_vals else ValueSource.ERROR,
+            messages=[],
+        )
+
         normen[Norm.DIN_EN_1991_1_4_2010_12] = NormErgebnis(
             status=status_1991,
             reasons=reasons_1991,
@@ -613,8 +621,8 @@ def standsicherheit(
                 Nachweis.KIPP: sv_kipp,
                 Nachweis.GLEIT: sv_gleit,
                 Nachweis.ABHEBE: sv_abhebe,
+                Nachweis.BALLAST: sv_ballast,
             },
-            ballast=ballast_1991,
         )
 
     # Top-Level Ergebnis
