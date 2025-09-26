@@ -1,12 +1,15 @@
 # rechenfunktionen/kippsicherheit.py
 from __future__ import annotations
 from math import inf
-from typing import Dict, Callable, Sequence
+from typing import Dict, Callable, Sequence, List
 from collections.abc import Sequence as _SeqABC
 
 from datenstruktur.zwischenergebnis import Zwischenergebnis
-from datenstruktur.enums import Norm, RechenmethodeKippen, VereinfachungKonstruktion
-from datenstruktur.konstanten import _EPS
+from datenstruktur.enums import Norm, RechenmethodeKippen, VereinfachungKonstruktion, Lasttyp, Variabilitaet
+from datenstruktur.konstanten import _EPS, aktuelle_konstanten
+from datenstruktur.kraefte import Kraefte
+from rechenfunktionen.sicherheitsbeiwert import sicherheitsbeiwert
+from rechenfunktionen.geom3d import flaechenschwerpunkt, moment_einzelkraft_um_achse
 
 from rechenfunktionen.standsicherheit_utils import (
     generiere_windrichtungen,
@@ -75,16 +78,27 @@ def _kippsicherheit_DinEn13814_2005_06(
     methode: RechenmethodeKippen = RechenmethodeKippen.STANDARD,
     vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
     anzahl_windrichtungen: int = 4,
-) -> Zwischenergebnis:
+) -> List[Zwischenergebnis]:
     if vereinfachung_konstruktion is not VereinfachungKonstruktion.KEINE:
         raise NotImplementedError(f"Vereinfachung '{vereinfachung_konstruktion.value}' ({vereinfachung_konstruktion.name}) ist noch nicht implementiert.")
 
     if methode == RechenmethodeKippen.STANDARD:
         # 1) Eckpunkte sammeln → Kippachsen bestimmen
         achsen = sammle_kippachsen(konstruktion)
+        # 1.1) Grundgrößen für Ballast bestimmen
+        ballastkraft_dummy = Kraefte(
+            typ=Lasttyp.GEWICHT,
+            variabilitaet=Variabilitaet.STAENDIG,
+            Einzelkraefte=[(0.0, 0.0, 0.0)],
+            Angriffsflaeche_Einzelkraefte=[[(0.0, 0.0, 0.0)]],
+        )
+        sicherheitsbeiwert_ballast = sicherheitsbeiwert(norm, ballastkraft_dummy, ist_guenstig=True)
+        huelle_punkte = [a.punkt for a in achsen]
+        schwerpunkt_ballast = flaechenschwerpunkt(huelle_punkte)
 
         # 2) Minimum der Sicherheit über alle (Windrichtung × Achse)
         sicherheit_min_global = inf
+        ballast_erforderlich_max = 0.0
 
         pool = obtain_pool(konstruktion, reset_berechnungen)
 
@@ -120,13 +134,47 @@ def _kippsicherheit_DinEn13814_2005_06(
                 if sicherheit < sicherheit_min_global:
                     sicherheit_min_global = sicherheit
 
-        return Zwischenergebnis(
+                moment_defizit = max(0.0, total_kipp - total_stand)
+
+                if moment_defizit > _EPS:
+                    ballast_kippmoment_einheit = moment_einzelkraft_um_achse(
+                        achse,
+                        (0.0, 0.0, -1.0),  # Einheitliche Abwärtskraft
+                        schwerpunkt_ballast,
+                    )
+                    ballast_standmoment_proN = max(0.0, -ballast_kippmoment_einheit)
+
+                    if ballast_standmoment_proN <= _EPS:
+                        ballastkraft = inf  # kein Standsicherheitsbeitrag durch Ballast möglich     
+                    else:
+                        ballastkraft = moment_defizit / (ballast_standmoment_proN * sicherheitsbeiwert_ballast.wert)
+                
+                else:
+                    ballastkraft = 0.0
+
+                if ballastkraft > ballast_erforderlich_max:
+                    ballast_erforderlich_max = ballastkraft
+
+        erdbeschleunigung = aktuelle_konstanten().erdbeschleunigung
+        ballast_kg = ballast_erforderlich_max / erdbeschleunigung
+
+        sicherheit_Z = Zwischenergebnis(
             wert=sicherheit_min_global,
-            formel="---",
+            formel="S = ΣM_stand / ΣM_kipp",
             quelle_formel="---",
-            formelzeichen=["---", "---", "---"],
-            quelle_formelzeichen=["---"]
+            formelzeichen=["M_stand", "M_kipp"],
+            quelle_formelzeichen=["---"],
         )
+
+        ballast_Z = Zwischenergebnis(
+            wert=ballast_kg,
+            formel="ΔW = max(0, ΣM_kipp − ΣM_stand) / (γ_g · m_stand,1N)",
+            quelle_formel="---",
+            formelzeichen=["M_kipp", "M_stand", "γ_g", "m_stand,1N", "g"],
+            quelle_formelzeichen=["---"],
+        )
+
+        return [sicherheit_Z, ballast_Z]
     
     else:
         raise NotImplementedError(f"Methode '{methode.value}' ({methode.name}) ist noch nicht implementiert.")
@@ -142,16 +190,27 @@ def _kippsicherheit_DinEn17879_2024_08(
     methode: RechenmethodeKippen = RechenmethodeKippen.STANDARD,
     vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
     anzahl_windrichtungen: int = 4,
-) -> Zwischenergebnis:
+) -> List[Zwischenergebnis]:
     if vereinfachung_konstruktion is not VereinfachungKonstruktion.KEINE:
         raise NotImplementedError(f"Vereinfachung '{vereinfachung_konstruktion.value}' ({vereinfachung_konstruktion.name}) ist noch nicht implementiert.")
 
     if methode == RechenmethodeKippen.STANDARD:
         # 1) Eckpunkte sammeln → Kippachsen bestimmen
         achsen = sammle_kippachsen(konstruktion)
+        # 1.1) Grundgrößen für Ballast bestimmen
+        ballastkraft_dummy = Kraefte(
+            typ=Lasttyp.GEWICHT,
+            variabilitaet=Variabilitaet.STAENDIG,
+            Einzelkraefte=[(0.0, 0.0, 0.0)],
+            Angriffsflaeche_Einzelkraefte=[[(0.0, 0.0, 0.0)]],
+        )
+        sicherheitsbeiwert_ballast = sicherheitsbeiwert(norm, ballastkraft_dummy, ist_guenstig=True)
+        huelle_punkte = [a.punkt for a in achsen]
+        schwerpunkt_ballast = flaechenschwerpunkt(huelle_punkte)
 
         # 2) Minimum der Sicherheit über alle (Windrichtung × Achse)
         sicherheit_min_global = inf
+        ballast_erforderlich_max = 0.0
 
         pool = obtain_pool(konstruktion, reset_berechnungen)
 
@@ -187,18 +246,52 @@ def _kippsicherheit_DinEn17879_2024_08(
                 if sicherheit < sicherheit_min_global:
                     sicherheit_min_global = sicherheit
 
-        return Zwischenergebnis(
+                moment_defizit = max(0.0, total_kipp - total_stand)
+
+                if moment_defizit > _EPS:
+                    ballast_kippmoment_einheit = moment_einzelkraft_um_achse(
+                        achse,
+                        (0.0, 0.0, -1.0),  # Einheitliche Abwärtskraft
+                        schwerpunkt_ballast,
+                    )
+                    ballast_standmoment_proN = max(0.0, -ballast_kippmoment_einheit)
+
+                    if ballast_standmoment_proN <= _EPS:
+                        ballastkraft = inf  # kein Standsicherheitsbeitrag durch Ballast möglich     
+                    else:
+                        ballastkraft = moment_defizit / (ballast_standmoment_proN * sicherheitsbeiwert_ballast.wert)
+                
+                else:
+                    ballastkraft = 0.0
+
+                if ballastkraft > ballast_erforderlich_max:
+                    ballast_erforderlich_max = ballastkraft
+
+        erdbeschleunigung = aktuelle_konstanten().erdbeschleunigung
+        ballast_kg = ballast_erforderlich_max / erdbeschleunigung
+
+        sicherheit_Z = Zwischenergebnis(
             wert=sicherheit_min_global,
-            formel="---",
+            formel="S = ΣM_stand / ΣM_kipp",
             quelle_formel="---",
-            formelzeichen=["---", "---", "---"],
-            quelle_formelzeichen=["---"]
+            formelzeichen=["M_stand", "M_kipp"],
+            quelle_formelzeichen=["---"],
         )
+
+        ballast_Z = Zwischenergebnis(
+            wert=ballast_kg,
+            formel="ΔW = max(0, ΣM_kipp − ΣM_stand) / (γ_g · m_stand,1N)",
+            quelle_formel="---",
+            formelzeichen=["M_kipp", "M_stand", "γ_g", "m_stand,1N", "g"],
+            quelle_formelzeichen=["---"],
+        )
+
+        return [sicherheit_Z, ballast_Z]
     
     else:
         raise NotImplementedError(f"Methode '{methode.value}' ({methode.name}) ist noch nicht implementiert.")
     
-_DISPATCH: Dict[Norm, Callable[..., Zwischenergebnis]] = {
+_DISPATCH: Dict[Norm, Callable[..., List[Zwischenergebnis]]] = {
     Norm.DEFAULT: _kippsicherheit_DinEn13814_2005_06,
     Norm.DIN_EN_13814_2005_06: _kippsicherheit_DinEn13814_2005_06,
     Norm.DIN_EN_17879_2024_08: _kippsicherheit_DinEn17879_2024_08,
@@ -215,7 +308,7 @@ def kippsicherheit(
     methode: RechenmethodeKippen = RechenmethodeKippen.STANDARD,
     vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
     anzahl_windrichtungen: int = 4,
-) -> Zwischenergebnis:
+) -> List[Zwischenergebnis]:
     """
     Norm-dispatchte Kipp-Sicherheitsbewertung.
     Gibt ein Zwischenergebnis mit der minimalen Sicherheit über alle Windrichtungen/Achsen zurück.
