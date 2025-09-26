@@ -128,7 +128,7 @@ class Tor:
         methode: RechenmethodeKippen = RechenmethodeKippen.STANDARD,
         vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
         anzahl_windrichtungen: int = 4,
-    ) -> Zwischenergebnis:
+    ) -> List[Zwischenergebnis]:
         return _kippsicherheit(
             self,
             norm,
@@ -152,7 +152,7 @@ class Tor:
         methode: RechenmethodeGleiten = RechenmethodeGleiten.MIN_REIBWERT,
         vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
         anzahl_windrichtungen: int = 4,
-    ) -> Zwischenergebnis:
+    ) -> List[Zwischenergebnis]:
         return _gleitsicherheit(
             self,
             norm,
@@ -176,7 +176,7 @@ class Tor:
         methode: RechenmethodeAbheben = RechenmethodeAbheben.STANDARD,
         vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
         anzahl_windrichtungen: int = 4,
-    ) -> Zwischenergebnis:
+    ) -> List[Zwischenergebnis]:
         return _abhebesicherheit(
             self,
             norm,

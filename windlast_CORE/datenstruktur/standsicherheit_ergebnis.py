@@ -85,12 +85,14 @@ class NormErgebnis:
     - status: Gesamtstatus (berechnet/nicht anwendbar/Fehler)
     - reasons: Begründungen für not_applicable/error
     - werte: die drei Nachweise (Nachweis -> SafetyValue)
+    - ballast: optionaler Ballastwert
     - alternativen: z.B. {"evakuierung": {Nachweis.KIPP: 1.12, ...}, "gummimatte": {...}}
     - details: optionaler Debug-Block
     """
     status: NormStatus
     reasons: List[Message] = field(default_factory=list)
     werte: Dict[Nachweis, SafetyValue] = field(default_factory=dict)
+    ballast: Optional[float] = None
     alternativen: Dict[str, Dict[Nachweis, Optional[float]]] = field(default_factory=dict)
     details: Optional[NormDetails] = None
 
