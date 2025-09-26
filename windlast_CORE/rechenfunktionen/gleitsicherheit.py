@@ -1,12 +1,14 @@
 # rechenfunktionen/gleitsicherheit.py
 from __future__ import annotations
 from math import inf
-from typing import Dict, Callable, Sequence
+from typing import Dict, Callable, Sequence, List
 from collections.abc import Sequence as _SeqABC
 
 from datenstruktur.zwischenergebnis import Zwischenergebnis
-from datenstruktur.enums import Norm, RechenmethodeGleiten, VereinfachungKonstruktion
-from datenstruktur.konstanten import _EPS
+from datenstruktur.enums import Norm, RechenmethodeGleiten, VereinfachungKonstruktion, Lasttyp, Variabilitaet
+from datenstruktur.konstanten import _EPS, aktuelle_konstanten
+from rechenfunktionen.sicherheitsbeiwert import sicherheitsbeiwert
+from datenstruktur.kraefte import Kraefte
 
 from rechenfunktionen.standsicherheit_utils import (
     generiere_windrichtungen,
@@ -76,7 +78,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
     methode: RechenmethodeGleiten = RechenmethodeGleiten.MIN_REIBWERT,
     vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
     anzahl_windrichtungen: int = 4,
-) -> Zwischenergebnis:
+) -> List[Zwischenergebnis]:
     if vereinfachung_konstruktion is not VereinfachungKonstruktion.KEINE:
         raise NotImplementedError(
             f"Vereinfachung '{vereinfachung_konstruktion.value}' ({vereinfachung_konstruktion.name}) ist noch nicht implementiert."
@@ -85,6 +87,14 @@ def _gleitsicherheit_DinEn13814_2005_06(
     if methode is RechenmethodeGleiten.MIN_REIBWERT:
         reibwert_min = ermittle_min_reibwert(norm,konstruktion)
         sicherheit_min_global = inf
+        ballast_erforderlich_max = 0.0
+        ballastkraft_dummy = Kraefte(
+            typ = Lasttyp.GEWICHT,
+            variabilitaet = Variabilitaet.STAENDIG,
+            Einzelkraefte = [(0.0, 0.0, 0.0)],
+            Angriffsflaeche_Einzelkraefte=[[(0.0, 0.0, 0.0)]],
+        )
+        sicherheitsbeiwert_ballast = sicherheitsbeiwert(norm, ballastkraft_dummy, ist_guenstig=True)
         pool = obtain_pool(konstruktion, reset_berechnungen)
 
         for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen):
@@ -118,13 +128,37 @@ def _gleitsicherheit_DinEn13814_2005_06(
                 sicherheit = reibkraft / horizontal_betrag
                 sicherheit_min_global = min(sicherheit_min_global, sicherheit)
 
-        return Zwischenergebnis(
+            if reibwert_min <= _EPS:
+                if horizontal_betrag > _EPS:
+                    ballastkraft = inf
+                else:
+                    ballastkraft = max(0.0, total_normal_up - total_normal_down) / sicherheitsbeiwert_ballast.wert
+            else:
+                ballastkraft = max(0.0, horizontal_betrag / reibwert_min + total_normal_up - total_normal_down) / sicherheitsbeiwert_ballast.wert
+
+            if ballastkraft > ballast_erforderlich_max:
+                ballast_erforderlich_max = ballastkraft
+
+        erdbeschleunigung = aktuelle_konstanten().erdbeschleunigung
+        ballast_kg = ballast_erforderlich_max / erdbeschleunigung  # in N -> in kg
+
+        sicherheit_Z = Zwischenergebnis(
             wert=sicherheit_min_global,
             formel="S = R / T",
             quelle_formel="---",
             formelzeichen=["R", "T"],
             quelle_formelzeichen=["---"],
         )
+
+        ballast_Z = Zwischenergebnis(
+            wert=ballast_kg,
+            formel="ΔN_down,erf = T/μ + ΣN_up − ΣN_down",
+            quelle_formel="---",
+            formelzeichen=["T", "μ", "N_up", "N_down"],
+            quelle_formelzeichen=["---"],
+        )
+
+        return [sicherheit_Z, ballast_Z]
 
     else:
         raise NotImplementedError(f"Methode '{methode.value}' ({methode.name}) ist noch nicht implementiert.")
@@ -141,7 +175,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
     methode: RechenmethodeGleiten = RechenmethodeGleiten.MIN_REIBWERT,
     vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
     anzahl_windrichtungen: int = 4,
-) -> Zwischenergebnis:
+) -> List[Zwischenergebnis]:
     if vereinfachung_konstruktion is not VereinfachungKonstruktion.KEINE:
         raise NotImplementedError(
             f"Vereinfachung '{vereinfachung_konstruktion.value}' ({vereinfachung_konstruktion.name}) ist noch nicht implementiert."
@@ -150,6 +184,14 @@ def _gleitsicherheit_DinEn17879_2024_08(
     if methode is RechenmethodeGleiten.MIN_REIBWERT:
         reibwert_min = ermittle_min_reibwert(norm,konstruktion)
         sicherheit_min_global = inf
+        ballast_erforderlich_max = 0.0
+        ballastkraft_dummy = Kraefte(
+            typ = Lasttyp.GEWICHT,
+            variabilitaet = Variabilitaet.STAENDIG,
+            Einzelkraefte = [(0.0, 0.0, 0.0)],
+            Angriffsflaeche_Einzelkraefte=[[(0.0, 0.0, 0.0)]],
+        )
+        sicherheitsbeiwert_ballast = sicherheitsbeiwert(norm, ballastkraft_dummy, ist_guenstig=True)
         pool = obtain_pool(konstruktion, reset_berechnungen)
 
         for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen):
@@ -183,7 +225,21 @@ def _gleitsicherheit_DinEn17879_2024_08(
                 sicherheit = reibkraft / horizontal_betrag
                 sicherheit_min_global = min(sicherheit_min_global, sicherheit)
 
-        return Zwischenergebnis(
+            if reibwert_min <= _EPS:
+                if horizontal_betrag > _EPS:
+                    ballastkraft = inf
+                else:
+                    ballastkraft = max(0.0, total_normal_up - total_normal_down) / sicherheitsbeiwert_ballast.wert
+            else:
+                ballastkraft = max(0.0, horizontal_betrag / reibwert_min + total_normal_up - total_normal_down) / sicherheitsbeiwert_ballast.wert
+
+            if ballastkraft > ballast_erforderlich_max:
+                ballast_erforderlich_max = ballastkraft
+
+        erdbeschleunigung = aktuelle_konstanten().erdbeschleunigung
+        ballast_kg = ballast_erforderlich_max / erdbeschleunigung  # in N -> in kg
+
+        sicherheit_Z = Zwischenergebnis(
             wert=sicherheit_min_global,
             formel="S = R / T",
             quelle_formel="---",
@@ -191,10 +247,20 @@ def _gleitsicherheit_DinEn17879_2024_08(
             quelle_formelzeichen=["---"],
         )
 
+        ballast_Z = Zwischenergebnis(
+            wert=ballast_kg,
+            formel="ΔN_down,erf = T/μ + ΣN_up − ΣN_down",
+            quelle_formel="---",
+            formelzeichen=["T", "μ", "N_up", "N_down"],
+            quelle_formelzeichen=["---"],
+        )
+
+        return [sicherheit_Z, ballast_Z]
+
     else:
         raise NotImplementedError(f"Methode '{methode.value}' ({methode.name}) ist noch nicht implementiert.")
     
-_DISPATCH: Dict[Norm, Callable[..., Zwischenergebnis]] = {
+_DISPATCH: Dict[Norm, Callable[..., List[Zwischenergebnis]]] = {
     Norm.DEFAULT: _gleitsicherheit_DinEn13814_2005_06,
     Norm.DIN_EN_13814_2005_06: _gleitsicherheit_DinEn13814_2005_06,
     Norm.DIN_EN_17879_2024_08: _gleitsicherheit_DinEn17879_2024_08,
@@ -211,11 +277,7 @@ def gleitsicherheit(
     methode: RechenmethodeGleiten = RechenmethodeGleiten.MIN_REIBWERT,
     vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
     anzahl_windrichtungen: int = 4,
-) -> Zwischenergebnis:
-    """
-    Norm-dispatchte Gleit-Sicherheitsbewertung (Stufe: min_reibwert).
-    Gibt ein Zwischenergebnis mit der minimalen Sicherheit über alle Windrichtungen zurück.
-    """
+) -> List[Zwischenergebnis]:
     _validate_inputs(
         konstruktion,
         norm=norm,
