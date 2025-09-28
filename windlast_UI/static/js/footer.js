@@ -10,6 +10,14 @@ const ROWS = [
   { key: "abhebe",  label: "Abhebesicherheit", isSafety: true  },
   { key: "ballast", label: "erforderlicher Ballast", isSafety: false },
 ];
+// Anzeige-Aliase für Alternativ-Namen
+const ALT_LABELS = {
+  IN_BETRIEB: "mit Schutzmaßnahmen",
+};
+
+function displayAltName(name) {
+  return (name && ALT_LABELS[name]) || name || "";
+}
 
 function klassifizierung_anwenden(el, good) {
   if (!el) return;
@@ -149,6 +157,120 @@ function renderAlternativen(payload) {
   }
 }
 
+// --- NEU: Helpers für dynamisch erzeugte Zellen (Alternativen) ---
+function _clearAltRows() {
+  const tbody = document.querySelector(".results-table tbody");
+  if (!tbody) return;
+  tbody.querySelectorAll('tr[data-alt-row="1"]').forEach(tr => tr.remove());
+}
+
+function _setSafetyOnTdAlt(td, val) {
+  // Alternative: fehlende Werte -> leer & keine Klasse
+  if (val === "INF" || val === "-INF") {
+    td.textContent = val === "INF" ? "∞" : "−∞";
+    klassifizierung_anwenden(td, sicherheit_klassifizieren(val));
+    return;
+  }
+  const num = typeof val === "string" ? Number(val) : val;
+  if (num === null || num === undefined || Number.isNaN(num)) {
+    td.textContent = "";
+    td.title = "";
+    td.classList.remove("val-ok", "val-bad");
+  } else {
+    td.textContent = (Math.round(num * 100) / 100).toFixed(2);
+    td.title = "";
+    klassifizierung_anwenden(td, sicherheit_klassifizieren(num));
+  }
+}
+
+function _setBallastOnTdAlt(td, valKg) {
+  // Alternative: fehlende Werte -> leer & keine Klasse
+  if (valKg === null || valKg === undefined) {
+    td.textContent = "";
+    td.title = "";
+    td.classList.remove("val-ok", "val-bad");
+    return;
+  }
+  if (typeof valKg === "string" && Number.isNaN(Number(valKg))) {
+    td.textContent = "";
+    td.title = "";
+    td.classList.remove("val-ok", "val-bad");
+    return;
+  }
+  td.textContent = formatBallast(valKg);
+  td.title = "";
+}
+
+// --- NEU: Alternativen unten anhängen (mit Zwischentitel pro Block) ---
+function renderAlternativenBlocks(payload) {
+  const tbody = document.querySelector(".results-table tbody");
+  if (!tbody) return;
+
+  // Alte Alternativ-Zeilen entfernen
+  _clearAltRows();
+
+  const normen = payload?.normen || {};
+
+  // Pro Norm die Liste der Alternativ-Namen (Reihenfolge aus dem JSON)
+  const altLists = {};
+  let maxCount = 0;
+  for (const normKey of COLS) {
+    const names = Object.keys(normen[normKey]?.alternativen || {});
+    altLists[normKey] = names;
+    if (names.length > maxCount) maxCount = names.length;
+  }
+
+  // Für jeden "Index" einen Block aufbauen:
+  for (let i = 0; i < maxCount; i++) {
+    // Titelzeile: "Nachweis" + je Norm der Alt-Name an Position i
+    const trTitle = document.createElement("tr");
+    trTitle.setAttribute("data-alt-row", "1");
+    trTitle.className = "alt-title";
+
+    const thHead = document.createElement("th");
+    thHead.scope = "col";
+    thHead.className = "rowhead";
+    thHead.textContent = "Nachweis";
+    trTitle.appendChild(thHead);
+
+    for (const normKey of COLS) {
+      const th = document.createElement("th");
+      th.scope = "col";
+      th.className = "colhead-alt";
+      const rawName = (altLists[normKey] && altLists[normKey][i]) ? altLists[normKey][i] : "";
+      th.textContent = displayAltName(rawName);
+      trTitle.appendChild(th);
+    }
+    tbody.appendChild(trTitle);
+
+    // Vier Zeilen für diesen Alternativen-Index (Kipp/Gleit/Abhebe/Ballast)
+    for (const row of ROWS) {
+      const tr = document.createElement("tr");
+      tr.setAttribute("data-alt-row", "1");
+
+      const th = document.createElement("th");
+      th.scope = "row";
+      th.className = "rowhead";
+      th.textContent = row.label;
+      tr.appendChild(th);
+
+      for (const normKey of COLS) {
+        const td = document.createElement("td");
+        td.className = "value";
+        const altName = (altLists[normKey] && altLists[normKey][i]) ? altLists[normKey][i] : null;
+        const v = altName ? (normen[normKey]?.alternativen?.[altName]?.[row.key]) : undefined;
+
+        if (row.isSafety) _setSafetyOnTdAlt(td, v);
+        else _setBallastOnTdAlt(td, v);
+
+        tr.appendChild(td);
+      }
+
+      tbody.appendChild(tr);
+    }
+  }
+}
+
 function updateFooter(payload) {
   const normen = payload?.normen || {};
   for (const [normKey, vals] of Object.entries(normen)) {
@@ -159,7 +281,7 @@ function updateFooter(payload) {
     setCell(`abhebe_${suf}`, vals.abhebe);
     setBallastCell(`ballast_${suf}`, vals.ballast);
   }
-  renderAlternativen(payload);
+  renderAlternativenBlocks(payload);
 }
 
 window.addEventListener("message", (ev) => {
