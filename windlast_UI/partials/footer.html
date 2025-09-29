@@ -72,77 +72,110 @@
   </style>
 
   <script>
-    // Minimal: zeigt IMMER den Text "Test" für jedes Element mit [data-tt]
     (function () {
-      const OFFSET = 10;
+      console.log("[tt] init");
+      const OFFSET_X = 14, OFFSET_Y = 12, MARGIN = 4;
+      let ttActive = false;
 
       function ensureRoot() {
         let el = document.getElementById('tt-root');
         if (!el) {
+          console.log("[tt] creating root");
           el = document.createElement('div');
           el.id = 'tt-root';
-          el.textContent = 'Test'; // <- fester Test-Text
+          el.textContent = 'Test';
+          el.style.position = 'fixed';                   // Cursor-Koordinaten
+          el.style.left = '-9999px';                     // initial offscreen
+          el.style.top = '-9999px';
+          el.style.zIndex = '2147483647';                // ganz nach oben
+          el.style.pointerEvents = 'none';
+          el.style.background = '#111';
+          el.style.color = '#fff';
+          el.style.padding = '6px 10px';
+          el.style.borderRadius = '8px';
+          el.style.font = '14px/1.35 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif';
+          el.style.boxShadow = '0 8px 24px rgba(0,0,0,.25)';
+          el.style.opacity = '0';
+          el.style.transition = 'opacity .08s ease';
+          el.style.willChange = 'left, top, opacity';
+          // Debug-Hilfe: Rahmen, bis es sitzt
+          el.style.outline = '2px solid fuchsia';
           document.body.appendChild(el);
         }
         return el;
       }
 
-      function place(root, rect) {
-        const vw = window.innerWidth, vh = window.innerHeight;
-        // bevorzugt oben, sonst unten
-        root.style.transform = 'translate(-9999px,-9999px)'; // reset für korrekte Größe
-        const tt = root.getBoundingClientRect();
-        let top = rect.top - tt.height - OFFSET;
-        let left = rect.left + (rect.width - tt.width) / 2;
-        if (top < 4) top = rect.bottom + OFFSET;
-        left = Math.min(Math.max(4, left), vw - tt.width - 4);
-        top  = Math.min(Math.max(4, top ), vh - tt.height - 4);
-        root.style.transform = `translate(${Math.round(left)}px, ${Math.round(top)}px)`;
-      }
-
-      function showFor(el) {
+      function updateAt(x, y) {
         const root = ensureRoot();
-        root.classList.add('tt-visible');
-        place(root, el.getBoundingClientRect());
+        console.log("[tt] updateAt", x, y);
+
+        // kurz offscreen, dann Größe messen
+        root.style.left = '-9999px';
+        root.style.top  = '-9999px';
+        const tt = root.getBoundingClientRect();
+
+        const vw = document.documentElement.clientWidth;
+        const vh = document.documentElement.clientHeight;
+
+        const OFFSET_X = 14;
+        const OFFSET_Y = 12;
+        const MARGIN   = 4;
+
+        // Standard: rechts/unten
+        let left = x + OFFSET_X;
+        let top  = y + OFFSET_Y;
+
+        // Flippen, falls nicht genug Platz
+        if (left + tt.width + MARGIN > vw)  left = x - OFFSET_X - tt.width;
+        if (top  + tt.height + MARGIN > vh) top  = y - OFFSET_Y - tt.height;
+
+        // Clampen
+        left = Math.min(Math.max(MARGIN, left), vw - tt.width  - MARGIN);
+        top  = Math.min(Math.max(MARGIN, top ), vh - tt.height - MARGIN);
+
+        root.style.left = `${Math.round(left)}px`;
+        root.style.top  = `${Math.round(top)}px`;
+        root.style.opacity = '1';
       }
 
       function hide() {
+        console.log("[tt] hide");
         const root = ensureRoot();
-        root.classList.remove('tt-visible');
+        root.style.opacity = '0';
         root.style.transform = 'translate(-9999px,-9999px)';
       }
 
-      // Events (nur Elementen mit data-tt)
       document.addEventListener('mouseover', (ev) => {
-        const t = ev.target;
-        if (!(t instanceof Element)) return;
-        const el = t.closest('[data-tt]');
+        console.log("[tt] mouseover", ev.target);
+        if (!(ev.target instanceof Element)) return;
+        const el = ev.target.closest('[data-tt]');
         if (!el) return;
-        showFor(el);
+        console.log("[tt] found data-tt element", el);
+        ttActive = true;
+        updateAt(ev.clientX, ev.clientY);
+      }, true);
+
+      document.addEventListener('mousemove', (ev) => {
+        if (!ttActive) return;
+        console.log("[tt] mousemove", ev.clientX, ev.clientY);
+        updateAt(ev.clientX, ev.clientY);
       }, true);
 
       document.addEventListener('mouseout', (ev) => {
-        const t = ev.target;
-        if (!(t instanceof Element)) return;
-        if (t.closest('[data-tt]')) hide();
+        console.log("[tt] mouseout", ev.target);
+        if (!(ev.target instanceof Element)) return;
+        if (ev.target.closest('[data-tt]')) {
+          ttActive = false;
+          hide();
+        }
       }, true);
 
-      // Tastatur-Fokus (barriereärmer)
       document.addEventListener('focusin', (ev) => {
-        const t = ev.target;
-        if (!(t instanceof Element)) return;
-        const el = t.closest('[data-tt]');
-        if (!el) return;
-        showFor(el);
+        console.log("[tt] focusin", ev.target);
       });
-
       document.addEventListener('focusout', (ev) => {
+        console.log("[tt] focusout", ev.target);
         hide();
-      });
-
-      // ESC schließt
-      document.addEventListener('keydown', (ev) => {
-        if (ev.key === 'Escape') hide();
       });
     })();
   </script>
