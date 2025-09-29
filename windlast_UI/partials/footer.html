@@ -4,27 +4,7 @@
   <meta charset="utf-8" />
   <title>Footer · Ergebnisse</title>
   <link rel="stylesheet" href="../static/css/style.css">
-  <style>
-    /* Root-Container für Tooltip */
-    #tt-root {
-      position: fixed;
-      left: 0; top: 0;
-      z-index: 2147483647; /* ganz nach vorne */
-      pointer-events: none; /* nie Maus abfangen */
-      display: none;
-    }
-    /* Die Blase selbst */
-    #tt-root .tt-bubble {
-      background: var(--panel);
-      color: var(--text);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 6px 8px;
-      font-size: 12px;
-      box-shadow: 0 6px 20px rgba(0,0,0,.25);
-      white-space: nowrap;
-    }
-  </style>
+  <link rel="stylesheet" href="/static/css/tooltip.css">
   <script src="../static/js/theme.js"></script>
 </head>
 <body class="wrap">
@@ -71,6 +51,7 @@
       </tbody>
     </table>
   </section>
+  <script src="/static/js/tooltip.js"></script>
   <script src="/static/js/footer.js"></script>
 </body>
 </html>

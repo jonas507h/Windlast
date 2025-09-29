@@ -1,0 +1,34 @@
+/* Root-Container: ein einziges, globales Element */
+#tt-root {
+  position: fixed;
+  left: 0; top: 0;
+  z-index: 2147483647;
+  pointer-events: none;
+  display: none;
+  transform: translate3d(0,0,0);
+}
+
+#tt-root .tt-bubble {
+  background: var(--panel, #fff);
+  color: var(--text, #111);
+  border: 1px solid var(--border, #ddd);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 12px;
+  line-height: 1.25;
+  box-shadow: 0 8px 24px rgba(0,0,0,.18);
+  max-width: 360px;
+  white-space: normal; /* bricht, wenn Text lang ist */
+}
+
+/* Optional: kleine Lade-Optik für async Inhalte */
+#tt-root .tt-loading::after {
+  content: " …";
+  opacity: .6;
+}
+
+/* Modifier-Klassen, die du per Options setzen kannst */
+#tt-root.is-visible { display: block; }
+#tt-root.tt-danger  .tt-bubble { border-color: #ff6b6b; }
+#tt-root.tt-warn    .tt-bubble { border-color: #f0ad4e; }
+#tt-root.tt-info    .tt-bubble { border-color: #2d6cdf; }
