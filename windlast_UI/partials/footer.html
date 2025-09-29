@@ -18,7 +18,7 @@
         <tr>
           <th scope="col" class="rowhead-stub">Nachweis</th>
           <th>DIN EN 13814:2005-06</th>
-          <th>DIN EN 17879:2024-08</th>
+          <th data-tt="test">DIN EN 17879:2024-08</th>
           <th>DIN EN 1991-1-4:2010-12</th>
         </tr>
       </thead>
@@ -51,5 +51,100 @@
     </table>
   </section>
   <script src="/static/js/footer.js"></script>
+  <style>
+    /* Minimaler Tooltip */
+    #tt-root {
+      position: fixed;
+      z-index: 9999;
+      pointer-events: none;
+      max-width: 36ch;
+      background: #111;       /* dunkel, damit man’s sieht – später per Theme-Variablen */
+      color: #fff;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font: 14px/1.35 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      box-shadow: 0 8px 24px rgba(0,0,0,.25);
+      opacity: 0;
+      transform: translate(-9999px,-9999px);
+      transition: opacity .12s ease;
+    }
+    #tt-root.tt-visible { opacity: 1; }
+  </style>
+
+  <script>
+    // Minimal: zeigt IMMER den Text "Test" für jedes Element mit [data-tt]
+    (function () {
+      const OFFSET = 10;
+
+      function ensureRoot() {
+        let el = document.getElementById('tt-root');
+        if (!el) {
+          el = document.createElement('div');
+          el.id = 'tt-root';
+          el.textContent = 'Test'; // <- fester Test-Text
+          document.body.appendChild(el);
+        }
+        return el;
+      }
+
+      function place(root, rect) {
+        const vw = window.innerWidth, vh = window.innerHeight;
+        // bevorzugt oben, sonst unten
+        root.style.transform = 'translate(-9999px,-9999px)'; // reset für korrekte Größe
+        const tt = root.getBoundingClientRect();
+        let top = rect.top - tt.height - OFFSET;
+        let left = rect.left + (rect.width - tt.width) / 2;
+        if (top < 4) top = rect.bottom + OFFSET;
+        left = Math.min(Math.max(4, left), vw - tt.width - 4);
+        top  = Math.min(Math.max(4, top ), vh - tt.height - 4);
+        root.style.transform = `translate(${Math.round(left)}px, ${Math.round(top)}px)`;
+      }
+
+      function showFor(el) {
+        const root = ensureRoot();
+        root.classList.add('tt-visible');
+        place(root, el.getBoundingClientRect());
+      }
+
+      function hide() {
+        const root = ensureRoot();
+        root.classList.remove('tt-visible');
+        root.style.transform = 'translate(-9999px,-9999px)';
+      }
+
+      // Events (nur Elementen mit data-tt)
+      document.addEventListener('mouseover', (ev) => {
+        const t = ev.target;
+        if (!(t instanceof Element)) return;
+        const el = t.closest('[data-tt]');
+        if (!el) return;
+        showFor(el);
+      }, true);
+
+      document.addEventListener('mouseout', (ev) => {
+        const t = ev.target;
+        if (!(t instanceof Element)) return;
+        if (t.closest('[data-tt]')) hide();
+      }, true);
+
+      // Tastatur-Fokus (barriereärmer)
+      document.addEventListener('focusin', (ev) => {
+        const t = ev.target;
+        if (!(t instanceof Element)) return;
+        const el = t.closest('[data-tt]');
+        if (!el) return;
+        showFor(el);
+      });
+
+      document.addEventListener('focusout', (ev) => {
+        hide();
+      });
+
+      // ESC schließt
+      document.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Escape') hide();
+      });
+    })();
+  </script>
 </body>
 </html>
