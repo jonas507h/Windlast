@@ -222,3 +222,54 @@ window.addEventListener("message", (ev) => {
     updateFooter(msg.payload);
   }
 });
+
+// ---- Tooltip "Test" für DIN EN 17879:2024-08 ----
+(function setupHoverTooltip17879() {
+  // 1) Root erzeugen (einmalig)
+  let root = document.getElementById("tt-root");
+  if (!root) {
+    root = document.createElement("div");
+    root.id = "tt-root";
+    const bubble = document.createElement("div");
+    bubble.className = "tt-bubble";
+    bubble.textContent = "Test";
+    root.appendChild(bubble);
+    document.body.appendChild(root);
+  }
+
+  const SHOW_OFFSET_X = 12; // kleiner Versatz vom Cursor
+  const SHOW_OFFSET_Y = 16;
+
+  // 2) Ziel-Headerzellen finden (genauer Textmatch)
+  const targetHeaders = Array.from(
+    document.querySelectorAll(".results-table thead th")
+  ).filter(th => th.textContent.trim() === "DIN EN 17879:2024-08");
+
+  // Falls in Zukunft weitere Blöcke/Alt-Header mit gleichem Text auftauchen,
+  // werden sie automatisch mit erfasst.
+  if (targetHeaders.length === 0) return;
+
+  // 3) Handler
+  function onEnter() {
+    root.style.display = "block";
+  }
+  function onMove(ev) {
+    // Position an Maus kleben lassen
+    const x = ev.clientX + SHOW_OFFSET_X;
+    const y = ev.clientY + SHOW_OFFSET_Y;
+    root.style.transform = `translate(${x}px, ${y}px)`;
+  }
+  function onLeave() {
+    root.style.display = "none";
+  }
+
+  // 4) Events binden
+  for (const th of targetHeaders) {
+    th.addEventListener("mouseenter", onEnter);
+    th.addEventListener("mousemove", onMove);
+    th.addEventListener("mouseleave", onLeave);
+  }
+
+  // 5) Defensive: Wenn die Tabelle später neu gerendert würde,
+  // könntest du setupHoverTooltip17879() einfach erneut aufrufen.
+})();
