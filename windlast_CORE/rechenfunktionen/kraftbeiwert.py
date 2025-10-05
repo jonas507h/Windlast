@@ -3,8 +3,15 @@ from __future__ import annotations
 from typing import Dict, Callable, Optional
 import math
 
-from datenstruktur.enums import Norm, ObjektTyp
-from datenstruktur.zwischenergebnis import Zwischenergebnis
+from datenstruktur.enums import Norm, ObjektTyp, Severity
+from datenstruktur.zwischenergebnis import (
+    Zwischenergebnis,
+    Protokoll,
+    merge_kontext,
+    make_docbundle,
+    protokolliere_msg,
+    protokolliere_doc,
+)
 
 def _validate_inputs(
     objekttyp: ObjektTyp,
@@ -26,21 +33,34 @@ def _kraftbeiwert_default(
     objekttyp: ObjektTyp,
     grundkraftbeiwert: float,
     abminderungsfaktor_schlankheit: Optional[float],
+    *,
+    protokoll: Optional[Protokoll] = None,
+    kontext: Optional[dict] = None,
 ) -> Zwischenergebnis:
+    
+    base_ctx = merge_kontext(kontext, {
+        "funktion": "kraftbeiwert",
+        "objekttyp": getattr(objekttyp, "name", str(objekttyp)),
+    })
+
     if objekttyp == ObjektTyp.TRAVERSE:
         wert = grundkraftbeiwert * abminderungsfaktor_schlankheit
-        return Zwischenergebnis(
-            wert=wert,
-            formel="---",
-            quelle_formel="---",
-            formelzeichen=["---", "---", "---"],
-            quelle_formelzeichen=["---"]
-    )
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(
+                titel="Kraftbeiwert c",
+                wert=wert,
+                einzelwerte=[grundkraftbeiwert, abminderungsfaktor_schlankheit],
+                formel="c = c₀ · η_schlank",
+            ),
+            kontext=base_ctx,
+        )
+        return Zwischenergebnis(wert=wert)
 
     # Andere Objekttypen:
     raise NotImplementedError(f"Schlankheit für Objekttyp '{objekttyp}' ist noch nicht implementiert.")
 
-_DISPATCH: Dict[Norm, Callable[[ObjektTyp, float, Optional[float]], Zwischenergebnis]] = {
+_DISPATCH: Dict[Norm, Callable[..., Zwischenergebnis]] = {
     Norm.DEFAULT: _kraftbeiwert_default,
 }
 
@@ -49,7 +69,38 @@ def kraftbeiwert(
     objekttyp: ObjektTyp,
     grundkraftbeiwert: float,
     abminderungsfaktor_schlankheit: Optional[float] = None,
+    *,
+    protokoll: Optional[Protokoll] = None,
+    kontext: Optional[dict] = None,
 ) -> Zwischenergebnis:
-    _validate_inputs(objekttyp, grundkraftbeiwert, abminderungsfaktor_schlankheit)
-    funktion = _DISPATCH.get(norm, _kraftbeiwert_default)
-    return funktion(objekttyp, grundkraftbeiwert, abminderungsfaktor_schlankheit)
+    
+    base_ctx = merge_kontext(kontext, {
+        "funktion": "kraftbeiwert",
+        "objekttyp": getattr(objekttyp, "name", str(objekttyp)),
+        "norm": getattr(norm, "name", str(norm)),
+    })
+
+    try:
+        _validate_inputs(objekttyp, grundkraftbeiwert, abminderungsfaktor_schlankheit)
+    except NotImplementedError:
+        raise
+    except ValueError as e:
+        protokolliere_msg(
+            protokoll,
+            severity=Severity.ERROR,
+            code="KRAFT/INPUT_INVALID",
+            text=str(e),
+            kontext=base_ctx,
+        )
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(titel="Kraftbeiwert c", wert=float("nan")),
+            kontext=merge_kontext(base_ctx, {"nan": True}),
+        )
+        return Zwischenergebnis(wert=float("nan"))
+    
+    funktion = _DISPATCH.get(norm, _DISPATCH[Norm.DEFAULT])
+    return funktion(
+        objekttyp, grundkraftbeiwert, abminderungsfaktor_schlankheit,
+        protokoll=protokoll, kontext=base_ctx,
+    )
