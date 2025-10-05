@@ -1,10 +1,17 @@
 # reibwert.py
 from __future__ import annotations
 
-from typing import List, Optional, Sequence
+from typing import List, Optional, Sequence, Dict, Tuple
 
-from datenstruktur.enums import MaterialTyp, Norm
-from datenstruktur.zwischenergebnis import Zwischenergebnis
+from datenstruktur.enums import MaterialTyp, Norm, Severity
+from datenstruktur.zwischenergebnis import (
+    Zwischenergebnis,
+    Protokoll,
+    merge_kontext,
+    make_docbundle,
+    protokolliere_msg,
+    protokolliere_doc,
+)
 from materialdaten.catalog import catalog
 
 # Typ-Hinweis: Dict[Norm, Dict[Tuple[MaterialTyp, MaterialTyp], Tuple[float, str]]]
@@ -78,33 +85,99 @@ def get_reibwert(a: MaterialTyp, b: MaterialTyp, norm: Norm,
             return mu, quelle, n
     raise KeyError(f"Kein Reibwert für Paarung {a}–{b} in den bekannten Normen vorhanden.")
 
-def reibwert(norm: Norm, materialfolge: Sequence[Optional[MaterialTyp]]) -> Zwischenergebnis:
+def reibwert(
+    norm: Norm,
+    materialfolge: Sequence[Optional[MaterialTyp]],
+    *,
+    protokoll: Optional[Protokoll] = None,
+    kontext: Optional[dict] = None,
+) -> Zwischenergebnis:
+    
+    base_ctx = merge_kontext(kontext, {
+        "funktion": "reibwert",
+        "norm": getattr(norm, "name", str(norm)),
+    })
+
     # 1) None rausfiltern
     cleaned: List[MaterialTyp] = [m for m in materialfolge if m is not None]
     if len(cleaned) < 2:
-        raise ValueError("Es werden mindestens zwei reale Materialien benötigt.")
+        protokolliere_msg(
+            protokoll,
+            severity=Severity.ERROR,
+            code="REIB/INPUT_INVALID",
+            text="Es werden mindestens zwei reale Materialien benötigt.",
+            kontext=base_ctx,
+        )
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(titel="Effektiver Reibwert μ_eff", wert=float("nan")),
+            kontext=merge_kontext(base_ctx, {"nan": True}),
+        )
+        return Zwischenergebnis(wert=float("nan"))
 
     # 2) Reibwerte Quellen ermitteln
     einzelwerte: List[float] = []
     quelle_einzelwerte: List[str] = []
+    norm_einzelwerte: List[Norm] = []
 
-    for i in range(len(cleaned) - 1):
-        a, b = cleaned[i], cleaned[i + 1]
+    try:
+        for i in range(len(cleaned) - 1):
+            a, b = cleaned[i], cleaned[i + 1]
 
-        mu, quelle, _ = get_reibwert(a, b, norm)
-        einzelwerte.append(mu)
-        quelle_einzelwerte.append(quelle)
+            mu, quelle, used_norm = get_reibwert(a, b, norm)
+            einzelwerte.append(mu)
+            quelle_einzelwerte.append(quelle)
+            norm_einzelwerte.append(used_norm)
+
+            if used_norm != norm:
+                    protokolliere_msg(
+                        protokoll,
+                        severity=Severity.HINT,
+                        code="REIB/FALLBACK_NORM",
+                        text=f"Für Paarung {a.name}–{b.name} wurde auf {used_norm.name} zurückgegriffen.",
+                        kontext=merge_kontext(base_ctx, {"paarung": (a.name, b.name), "norm_used": used_norm.name}),
+                    )
+    except KeyError as e:
+        protokolliere_msg(
+            protokoll,
+            severity=Severity.ERROR,
+            code="REIB/PAIR_UNKNOWN",
+            text=str(e),
+            kontext=base_ctx,
+        )
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(titel="Effektiver Reibwert μ_eff", wert=float("nan")),
+            kontext=merge_kontext(base_ctx, {"nan": True}),
+        )
+        return Zwischenergebnis(wert=float("nan"))
 
     # 3) effektiver Reibwert ist das Minimum
     reibwert_eff = min(einzelwerte)
+    idx_min = einzelwerte.index(reibwert_eff)
+    # maßgebende Übergangspaarung (nur Hinweis)
+    a_gov = cleaned[idx_min]
+    b_gov = cleaned[idx_min + 1]
+    protokolliere_msg(
+        protokoll,
+        severity=Severity.HINT,
+        code="REIB/PAIR_GOVERNING",
+        text=f"Maßgebend ist die Paarung {a_gov.name}–{b_gov.name} mit μ={reibwert_eff:.3f}.",
+        kontext=merge_kontext(base_ctx, {"paarung": (a_gov.name, b_gov.name)}),
+    )
 
     # 4) in Zwischenergebnis schreiben
-    return Zwischenergebnis(
-        wert=reibwert_eff,
-        formel="µ_eff = min(µ_i)",
-        quelle_formel="Konservatives Verfahren: kleinster Reibwert maßgebend.",
-        formelzeichen=["---", "---"],
-        quelle_formelzeichen=["---"],
-        einzelwerte=einzelwerte,
-        quelle_einzelwerte=quelle_einzelwerte,
+    protokolliere_doc(
+        protokoll,
+        bundle=make_docbundle(
+            titel="Effektiver Reibwert μ_eff",
+            wert=reibwert_eff,
+            formel="μ_eff = min(μ_i)",
+            quelle_formel="Konservatives Verfahren: kleinster Reibwert maßgebend.",
+            einzelwerte=einzelwerte,
+            quelle_einzelwerte=quelle_einzelwerte,
+        ),
+        kontext=base_ctx,
     )
+
+    return Zwischenergebnis(wert=reibwert_eff)
