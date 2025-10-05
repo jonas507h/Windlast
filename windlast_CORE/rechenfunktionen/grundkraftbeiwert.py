@@ -5,8 +5,15 @@ from enum import Enum
 import math
 import warnings
 
-from datenstruktur.enums import Norm, TraversenTyp, ObjektTyp
-from datenstruktur.zwischenergebnis import Zwischenergebnis
+from datenstruktur.enums import Norm, TraversenTyp, ObjektTyp, Severity
+from datenstruktur.zwischenergebnis import (                              # + Protokoll & Helpers
+    Zwischenergebnis,
+    Protokoll,
+    merge_kontext,
+    make_docbundle,
+    protokolliere_msg,
+    protokolliere_doc,
+)
 from materialdaten.catalog import catalog
 from rechenfunktionen.geom3d import (
     Vec3,
@@ -87,11 +94,34 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
     windrichtung: Optional[Vec3] = None,
     voelligkeitsgrad: Optional[float] = None,
     reynoldszahl: Optional[float] = None,
+    *,
+    protokoll: Optional[Protokoll] = None,
+    kontext: Optional[dict] = None,
 ) -> Zwischenergebnis:
+    
+    base_ctx = merge_kontext(kontext, {
+        "funktion": "grundkraftbeiwert",
+        "objekttyp": getattr(objekttyp, "name", str(objekttyp)),
+        "objekt_name_intern": objekt_name_intern,
+        "abschnitt": abschnitt,
+    })
 
     if objekttyp == ObjektTyp.TRAVERSE:
-        if reynoldszahl > 2e5:
-            raise ValueError(f"Reynoldszahl {reynoldszahl} > 2e5: Grundkraftbeiwert nicht definiert.")
+        if reynoldszahl is not None and reynoldszahl > 2e5:
+            protokolliere_msg(
+                protokoll,
+                severity=Severity.ERROR,
+                code="GRUNDKRAFT/RE_OUT_OF_RANGE",
+                text=f"Reynoldszahl {reynoldszahl:.3g} > 2·10^5: c₀ nicht definiert.",
+                kontext=base_ctx,
+            )
+            protokolliere_doc(
+                protokoll,
+                bundle=make_docbundle(titel="Grundkraftbeiwert c₀", wert=float("nan"),
+                                      einzelwerte=[voelligkeitsgrad, reynoldszahl]),
+                kontext=merge_kontext(base_ctx, {"nan": True}),
+            )
+            return Zwischenergebnis(wert=float("nan"))
         
         startpunkt, endpunkt, orientierung = punkte[0], punkte[1], punkte[2]
 
@@ -129,6 +159,12 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
             elif anstroemrichtung == Anstroemrichtung.ECKE:
                 x = [0.2, 0.35, 0.55]
                 y = [0.7, 0.6, 0.5]
+                if not (x[0] - _EPS <= voelligkeitsgrad <= x[-1] + _EPS):
+                    protokolliere_msg(
+                        protokoll, severity=Severity.WARN, code="GRUNDKRAFT/EXTRAPOLATION_V",
+                        text=f"Völligkeitsgrad {voelligkeitsgrad:.3f} außerhalb [{x[0]}, {x[-1]}] – Interpolation extrapoliert.",
+                        kontext=merge_kontext(base_ctx, {"bereich": [x[0], x[-1]]}),
+                    )
                 wert = interpol_2D(x, y, voelligkeitsgrad)
 
         elif traversentyp == TraversenTyp.DREI_PUNKT:
@@ -141,51 +177,82 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
             if anstroemrichtung in (Anstroemrichtung.FLAECHE, Anstroemrichtung.PARALLEL):
                 x = [0.2, 0.35, 0.55]
                 y = [1.85, 1.6, 1.4]
+                if not (x[0] - _EPS <= voelligkeitsgrad <= x[-1] + _EPS):
+                    protokolliere_msg(
+                        protokoll, severity=Severity.WARN, code="GRUNDKRAFT/EXTRAPOLATION_V",
+                        text=f"Völligkeitsgrad {voelligkeitsgrad:.3f} außerhalb [{x[0]}, {x[-1]}] – Interpolation extrapoliert.",
+                        kontext=merge_kontext(base_ctx, {"bereich": [x[0], x[-1]]}),
+                    )
                 wert = interpol_2D(x, y, voelligkeitsgrad)
             elif anstroemrichtung == Anstroemrichtung.ECKE:
                 x = [0.25, 0.5]
                 y = [2.0, 1.9]
+                if not (x[0] - _EPS <= voelligkeitsgrad <= x[-1] + _EPS):
+                    protokolliere_msg(
+                        protokoll, severity=Severity.WARN, code="GRUNDKRAFT/EXTRAPOLATION_V",
+                        text=f"Völligkeitsgrad {voelligkeitsgrad:.3f} außerhalb [{x[0]}, {x[-1]}] – Interpolation extrapoliert.",
+                        kontext=merge_kontext(base_ctx, {"bereich": [x[0], x[-1]]}),
+                    )
                 wert = interpol_2D(x, y, voelligkeitsgrad)
 
         if wert is None:
-            raise NotImplementedError(
-                f"Keine Zuordnung für TraversenTyp={traversentyp.value} und Anströmung={anstroemrichtung.value}."
+            protokolliere_msg(
+                protokoll,
+                severity=Severity.ERROR,
+                code="GRUNDKRAFT/NICHT_ZUGEORDNET",
+                text=f"Keine Zuordnung für {traversentyp.name} bei Anströmung {anstroemrichtung.name}.",
+                kontext=base_ctx,
             )
+            protokolliere_doc(
+                protokoll,
+                bundle=make_docbundle(titel="Grundkraftbeiwert c₀", wert=float("nan"),
+                                      einzelwerte=[voelligkeitsgrad, reynoldszahl, str(anstroemrichtung)]),
+                kontext=merge_kontext(base_ctx, {"nan": True}),
+            )
+            return Zwischenergebnis(wert=float("nan"))
 
-        return Zwischenergebnis(
-            wert=wert,
-            formel="---",
-            quelle_formel="---",
-            formelzeichen=["---", "---", "---"],
-            quelle_formelzeichen=["---"]
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(
+                titel="Grundkraftbeiwert c₀",
+                wert=wert,
+                einzelwerte=[voelligkeitsgrad, reynoldszahl, str(anstroemrichtung), traversentyp.name],
+                # formel/quelle kannst du ergänzen, sobald referenziert
+            ),
+            kontext=base_ctx,
         )
+        return Zwischenergebnis(wert=wert)
 
     elif objekttyp == ObjektTyp.ROHR:
-        if reynoldszahl > 1.8e5:
-            warnings.warn(f"Reynoldszahl {reynoldszahl} > 1.8e5: Grundkraftbeiwert wird auf 1.2 (ungünstigster Wert) gesetzt.")
+        if reynoldszahl is not None and reynoldszahl > 1.8e5:
+            protokolliere_msg(
+                protokoll,
+                severity=Severity.WARN,
+                code="GRUNDKRAFT/RE_HIGH_SET_1_2",
+                text=f"Re={reynoldszahl:.3g} > 1,8·10^5: setze c₀ = 1,2 (ungünstigster Wert).",
+                kontext=base_ctx,
+            )
         
         wert = 1.2
-        return Zwischenergebnis(
-            wert=wert,
-            formel="---",
-            quelle_formel="---",
-            formelzeichen=["---", "---", "---"],
-            quelle_formelzeichen=["---"]
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(
+                titel="Grundkraftbeiwert c₀",
+                wert=wert,
+                einzelwerte=[reynoldszahl],
+            ),
+            kontext=base_ctx,
         )
+        return Zwischenergebnis(wert=wert)
 
     else:
         raise NotImplementedError(f"Objekttyp '{objekttyp}' wird aktuell nicht unterstützt.")
 
-# --- Callable-Typ & Dispatch anpassen ---
-_DISPATCH: Dict[Norm, Callable[
-    [ObjektTyp, Optional[str], Optional[Sequence[Vec3]], Optional[str], Optional[Vec3], Optional[float], Optional[float]],
-    Zwischenergebnis
-]] = {
+_DISPATCH: Dict[Norm, Callable[..., Zwischenergebnis]] = {
     Norm.DEFAULT: _grundkraftbeiwert_DinEn1991_1_4_2010_12,
     Norm.DIN_EN_1991_1_4_2010_12: _grundkraftbeiwert_DinEn1991_1_4_2010_12,
 }
 
-# --- Öffentliche API: nur norm & objekttyp verpflichtend ---
 def grundkraftbeiwert(
     norm: Norm,
     objekttyp: ObjektTyp,
@@ -195,7 +262,39 @@ def grundkraftbeiwert(
     windrichtung: Optional[Vec3] = None,       # Einheitsvektor
     voelligkeitsgrad: Optional[float] = None,
     reynoldszahl: Optional[float] = None,
+    *,
+    protokoll: Optional[Protokoll] = None,
+    kontext: Optional[dict] = None,   
 ) -> Zwischenergebnis:
-    _validate_inputs(objekttyp, objekt_name_intern, punkte, abschnitt, windrichtung, voelligkeitsgrad, reynoldszahl)
+    
+    base_ctx = merge_kontext(kontext, {
+        "funktion": "grundkraftbeiwert",
+        "objekttyp": getattr(objekttyp, "name", str(objekttyp)),
+        "objekt_name_intern": objekt_name_intern,
+        "norm": getattr(norm, "name", str(norm)),
+    })
+
+    try:
+        _validate_inputs(objekttyp, objekt_name_intern, punkte, abschnitt, windrichtung, voelligkeitsgrad, reynoldszahl)
+    except NotImplementedError:
+        raise
+    except ValueError as e:
+        protokolliere_msg(
+            protokoll,
+            severity=Severity.ERROR,
+            code="GRUNDKRAFT/INPUT_INVALID",
+            text=str(e),
+            kontext=base_ctx,
+        )
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(titel="Grundkraftbeiwert c₀", wert=float("nan")),
+            kontext=merge_kontext(base_ctx, {"nan": True}),
+        )
+        return Zwischenergebnis(wert=float("nan"))
+    
     funktion = _DISPATCH.get(norm, _DISPATCH[Norm.DEFAULT])
-    return funktion(objekttyp, objekt_name_intern, punkte, abschnitt, windrichtung, voelligkeitsgrad, reynoldszahl)
+    return funktion(
+        objekttyp, objekt_name_intern, punkte, abschnitt, windrichtung, voelligkeitsgrad, reynoldszahl,
+        protokoll=protokoll, kontext=base_ctx,
+    )
