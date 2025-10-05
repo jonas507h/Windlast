@@ -1,10 +1,17 @@
 # rechenfunktionen/windkraft.py
 from __future__ import annotations
-from typing import Dict, Callable
+from typing import Dict, Callable, Optional
 import math
 
-from datenstruktur.enums import Norm, ObjektTyp
-from datenstruktur.zwischenergebnis import Zwischenergebnis
+from datenstruktur.enums import Norm, ObjektTyp, Severity
+from datenstruktur.zwischenergebnis import (
+    Zwischenergebnis,
+    Protokoll,
+    merge_kontext,
+    make_docbundle,
+    protokolliere_msg,
+    protokolliere_doc,
+)
 
 def _validate_inputs(
     objekttyp: ObjektTyp,
@@ -30,22 +37,34 @@ def _windkraft_default(
     kraftbeiwert: float,
     staudruck: float,
     projizierte_flaeche: float,
+    *,
+    protokoll: Optional[Protokoll] = None,
+    kontext: Optional[dict] = None,
 ) -> Zwischenergebnis:
     if objekttyp == ObjektTyp.TRAVERSE:
         wert = kraftbeiwert * staudruck * projizierte_flaeche
 
-        return Zwischenergebnis(
-            wert=wert,
-            formel="---",
-            quelle_formel="---",
-            formelzeichen=["---", "---", "---"],
-            quelle_formelzeichen=["---"]
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(
+                titel="Windkraft F_w",
+                wert=wert,
+                einzelwerte=[kraftbeiwert, staudruck, projizierte_flaeche],
+                formel="F = c · q · A",
+                formelzeichen=["F", "c", "q", "A"],
+                quelle_formelzeichen=["Projektinterne Bezeichnungen"],
+            ),
+            kontext=merge_kontext(kontext, {
+                "funktion": "windkraft",
+                "objekttyp": getattr(objekttyp, "name", str(objekttyp)),
+            }),
         )
+        return Zwischenergebnis(wert=wert)
     
     # Andere Objekttypen:
     raise NotImplementedError(f"Schlankheit für Objekttyp '{objekttyp}' ist noch nicht implementiert.")
 
-_DISPATCH: Dict[Norm, Callable[[ObjektTyp, float, float, float], Zwischenergebnis]] = {
+_DISPATCH: Dict[Norm, Callable[..., Zwischenergebnis]] = {
     Norm.DEFAULT: _windkraft_default,
 }
 
@@ -55,7 +74,37 @@ def windkraft(
     kraftbeiwert: float,
     staudruck: float,
     projizierte_flaeche: float,
+    *,
+    protokoll: Optional[Protokoll] = None,
+    kontext: Optional[dict] = None,
 ) -> Zwischenergebnis:
-    _validate_inputs(objekttyp, kraftbeiwert, staudruck, projizierte_flaeche)
-    funktion = _DISPATCH.get(norm, _windkraft_default)
-    return funktion(objekttyp, kraftbeiwert, staudruck, projizierte_flaeche)
+    base_ctx = merge_kontext(kontext, {
+        "funktion": "windkraft",
+        "objekttyp": getattr(objekttyp, "name", str(objekttyp)),
+        "norm": getattr(norm, "name", str(norm)),
+    })
+
+    try:
+        _validate_inputs(objekttyp, kraftbeiwert, staudruck, projizierte_flaeche)
+    except NotImplementedError:
+        raise
+    except ValueError as e:
+        protokolliere_msg(
+            protokoll,
+            severity=Severity.ERROR,
+            code="WINDKRAFT/INPUT_INVALID",
+            text=str(e),
+            kontext=base_ctx,
+        )
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(titel="Windkraft F_w", wert=float("nan")),
+            kontext=merge_kontext(base_ctx, {"nan": True}),
+        )
+        return Zwischenergebnis(wert=float("nan"))
+    
+    funktion = _DISPATCH.get(norm, _DISPATCH[Norm.DEFAULT])
+    return funktion(
+        objekttyp, kraftbeiwert, staudruck, projizierte_flaeche,
+        protokoll=protokoll, kontext=base_ctx,
+    )
