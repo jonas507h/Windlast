@@ -1,8 +1,15 @@
 # rechenfunktionen/abminderungsfaktor_schlankheit.py
 from __future__ import annotations
-from typing import Tuple, Dict, Callable
-from datenstruktur.zwischenergebnis import Zwischenergebnis
-from datenstruktur.enums import Norm, ObjektTyp
+from typing import Tuple, Dict, Callable, Optional
+from datenstruktur.zwischenergebnis import (
+    Zwischenergebnis,
+    Protokoll,
+    merge_kontext,
+    make_docbundle,
+    protokolliere_msg,
+    protokolliere_doc,
+)
+from datenstruktur.enums import Norm, ObjektTyp, Severity
 
 from rechenfunktionen.interpolation import (
     clamp_range,
@@ -31,14 +38,34 @@ def _abminderungsfaktor_schlankheit_default(
     objekttyp: ObjektTyp,
     schlankheit: float,
     voelligkeitsgrad: float,
+    *,
+    protokoll: Optional[Protokoll] = None,
+    kontext: Optional[dict] = None,
 ) -> Zwischenergebnis:
     """
     Bilineare Interpolation des Abminderungsfaktors auf Tabelle (λ vs. φ).
     Werte außerhalb des Tabellenbereichs werden auf den Randbereich geklemmt.
     Der Objekttyp ist zzt. ohne Einfluss (Platzhalter für zukünftige Spezialisierungen).
     """
+    base_ctx = merge_kontext(kontext, {
+        "funktion": "abminderungsfaktor_schlankheit",
+        "objekttyp": getattr(objekttyp, "name", str(objekttyp)),
+    })
+
+    # Originale Eingaben merken für Logging
+    lam_orig = schlankheit
+    phi_orig = voelligkeitsgrad
+
     # Clamp auf Tabellenbereiche
     x = clamp_range(schlankheit, _X_Schlankheit[0], _X_Schlankheit[-1])
+    if x != lam_orig:
+        protokolliere_msg(
+            protokoll,
+            severity=Severity.WARN,
+            code="ABM_SCHL/CLAMP_LAMBDA",
+            text=f"Schlankheit λ von {lam_orig:.3f} auf {x:.3f} geklemmt.",
+            kontext=merge_kontext(base_ctx, {"bounds_lambda": [_X_Schlankheit[0], _X_Schlankheit[-1]]}),
+        )
 
     # Y-Achse für Interpolation aufsteigend sortieren
     y_desc = _Y_Voelligkeitsgrad
@@ -47,18 +74,34 @@ def _abminderungsfaktor_schlankheit_default(
     z_inc = tuple(_Z_Abminderungsfaktor[i] for i in idx_map)
 
     y = clamp_range(voelligkeitsgrad, y_inc[0], y_inc[-1])
+    if y != phi_orig:
+        protokolliere_msg(
+            protokoll,
+            severity=Severity.WARN,
+            code="ABM_SCHL/CLAMP_VOELLIGKEIT",
+            text=f"Völligkeitsgrad φ von {phi_orig:.3f} auf {y:.3f} geklemmt.",
+            kontext=merge_kontext(base_ctx, {"bounds_phi": [y_inc[0], y_inc[-1]]}),
+        )
 
     wert = bilinear_interpolate_grid(_X_Schlankheit, y_inc, z_inc, x, y)
 
-    return Zwischenergebnis(
-        wert=wert,
-        formel="bilinear λ–φ → η",
-        quelle_formel="Projekt-/Tabellenwerte (λ×φ → Abminderungsfaktor)",
-        formelzeichen=["η", "λ", "φ"],
-        quelle_formelzeichen=["Projektinterne Bezeichnungen"],
+    protokolliere_doc(
+        protokoll,
+        bundle=make_docbundle(
+            titel="Abminderungsfaktor η_schlank",
+            wert=wert,
+            formel="bilinear λ–φ → η",
+            quelle_formel="Projekt-/Tabellenwerte (λ×φ → Abminderungsfaktor)",
+            formelzeichen=["η", "λ", "φ"],
+            quelle_formelzeichen=["Projektinterne Bezeichnungen"],
+            einzelwerte=[x, y],
+        ),
+        kontext=base_ctx,
     )
 
-_DISPATCH: Dict[Norm, Callable[[ObjektTyp, float, float], Zwischenergebnis]] = {
+    return Zwischenergebnis(wert=wert)
+
+_DISPATCH: Dict[Norm, Callable[..., Zwischenergebnis]] = {
     Norm.DEFAULT: _abminderungsfaktor_schlankheit_default,
 }
 
@@ -67,7 +110,37 @@ def abminderungsfaktor_schlankheit(
     objekttyp: ObjektTyp,
     schlankheit: float,
     voelligkeitsgrad: float,
+    *,
+    protokoll: Optional[Protokoll] = None,
+    kontext: Optional[dict] = None,
 ) -> Zwischenergebnis:
-    _validate_inputs(objekttyp, voelligkeitsgrad=voelligkeitsgrad, schlankheit=schlankheit)
-    funktion = _DISPATCH.get(norm, _abminderungsfaktor_schlankheit_default)
-    return funktion(objekttyp, schlankheit, voelligkeitsgrad)
+    base_ctx = merge_kontext(kontext, {
+        "funktion": "abminderungsfaktor_schlankheit",
+        "objekttyp": getattr(objekttyp, "name", str(objekttyp)),
+        "norm": getattr(norm, "name", str(norm)),
+    })
+
+    try:
+        _validate_inputs(objekttyp, schlankheit, voelligkeitsgrad)
+    except NotImplementedError:
+        raise
+    except ValueError as e:
+        protokolliere_msg(
+            protokoll,
+            severity=Severity.ERROR,
+            code="ABM_SCHL/INPUT_INVALID",
+            text=str(e),
+            kontext=base_ctx,
+        )
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(titel="Abminderungsfaktor η_schlank", wert=float("nan")),
+            kontext=merge_kontext(base_ctx, {"nan": True}),
+        )
+        return Zwischenergebnis(wert=float("nan"))
+    
+    funktion = _DISPATCH.get(norm, _DISPATCH[Norm.DEFAULT])
+    return funktion(
+        objekttyp, schlankheit, voelligkeitsgrad,
+        protokoll=protokoll, kontext=base_ctx,
+    )
