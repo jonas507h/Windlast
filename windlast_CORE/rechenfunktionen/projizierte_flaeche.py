@@ -1,7 +1,14 @@
 from typing import Dict, Callable, Optional, Sequence, Tuple
 import math
-from datenstruktur.zwischenergebnis import Zwischenergebnis
-from datenstruktur.enums import Norm, TraversenTyp, ObjektTyp
+from datenstruktur.zwischenergebnis import (
+    Zwischenergebnis,
+    Protokoll,
+    merge_kontext,
+    make_docbundle,
+    protokolliere_msg,
+    protokolliere_doc,
+)
+from datenstruktur.enums import Norm, TraversenTyp, ObjektTyp, Severity
 from materialdaten.catalog import catalog
 from rechenfunktionen.geom3d import Vec3, vektor_laenge, abstand_punkte
 
@@ -39,7 +46,17 @@ def _projizierte_flaeche_default(
     objekt_name_intern: Optional[str],
     punkte: Sequence[Vec3],
     windrichtung: Vec3,
+    *,
+    protokoll: Optional[Protokoll] = None,
+    kontext: Optional[dict] = None,
 ) -> Zwischenergebnis:
+    
+    base_ctx = merge_kontext(kontext, {
+        "funktion": "projizierte_flaeche",
+        "objekttyp": getattr(objekttyp, "name", str(objekttyp)),
+        "objekt_name_intern": objekt_name_intern,
+        "windrichtung": windrichtung,
+    })
 
     if objekttyp == ObjektTyp.TRAVERSE:
         # Punkte interpretieren: [start, ende, (optional) orientierung]
@@ -48,22 +65,64 @@ def _projizierte_flaeche_default(
 
         traverse = catalog.get_traverse(objekt_name_intern)
         try:
-            traversentyp = TraversenTyp.from_points(traverse.anzahl_gurtrohre)
+            _ = TraversenTyp.from_points(traverse.anzahl_gurtrohre)
         except ValueError as e:
-            raise ValueError(f"Ungültige Gurtanzahl für Traverse '{objekt_name_intern}': {e}")
+            protokolliere_msg(
+                protokoll,
+                severity=Severity.ERROR,
+                code="PROJ/TRAVERSENTYP_INVALID",
+                text=f"Traverse '{objekt_name_intern}': ungültige Gurtanzahl – {e}",
+                kontext=merge_kontext(base_ctx, {"input_source": "catalog"}),
+            )
+            protokolliere_doc(
+                protokoll,
+                bundle=make_docbundle(
+                    titel="Projizierte Fläche A_p",
+                    wert=float("nan"),
+                    einzelwerte=[laenge, getattr(traverse, 'd_gurt', None), getattr(traverse, 'd_diagonalen', None)],
+                    formel="A_p = 2·L·d_gurt + 3,2·L·d_diag (Ebner-Vereinfachung)",
+                ),
+                kontext=merge_kontext(base_ctx, {"nan": True}),
+            )
+            return Zwischenergebnis(wert=float("nan"))
 
-        # Vereinfachter Ansatz nach Ebner
         d_gurt = traverse.d_gurt
         d_diag = traverse.d_diagonalen
+
+        if not d_gurt or d_gurt <= 0 or not d_diag or d_diag <= 0:
+            protokolliere_msg(
+                protokoll,
+                severity=Severity.ERROR,
+                code="PROJ/CATALOG_MISSING",
+                text=f"Traverse '{objekt_name_intern}': ungültige Durchmesser (d_gurt={d_gurt}, d_diag={d_diag}).",
+                kontext=merge_kontext(base_ctx, {"input_source": "catalog"}),
+            )
+            protokolliere_doc(
+                protokoll,
+                bundle=make_docbundle(
+                    titel="Projizierte Fläche A_p",
+                    wert=float("nan"),
+                    einzelwerte=[laenge, d_gurt, d_diag],
+                    formel="A_p = 2·L·d_gurt + 3,2·L·d_diag",
+                ),
+                kontext=merge_kontext(base_ctx, {"nan": True}),
+            )
+            return Zwischenergebnis(wert=float("nan"))
+        
+        # Vereinfachter Ansatz nach Ebner
         wert = (2.0 * laenge * d_gurt) + (3.2 * laenge * d_diag)
 
-        return Zwischenergebnis(
-            wert=wert,
-            formel="---",
-            quelle_formel="---",
-            formelzeichen=["---", "---", "---"],
-            quelle_formelzeichen=["---"]
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(
+                titel="Projizierte Fläche A_p",
+                wert=wert,
+                einzelwerte=[laenge, d_gurt, d_diag],
+                formel="A_p = 2·L·d_gurt + 3,2·L·d_diag",
+            ),
+            kontext=base_ctx,
         )
+        return Zwischenergebnis(wert=wert)
 
     elif objekttyp == ObjektTyp.ROHR:
         startpunkt, endpunkt = punkte[0], punkte[1]
@@ -72,20 +131,44 @@ def _projizierte_flaeche_default(
         rohr = catalog.get_rohr(objekt_name_intern)
         d_aussen = rohr.d_aussen
 
+        if not d_aussen or d_aussen <= 0:
+            protokolliere_msg(
+                protokoll,
+                severity=Severity.ERROR,
+                code="PROJ/CATALOG_MISSING",
+                text=f"Rohr '{objekt_name_intern}': ungültiger Außendurchmesser ({d_aussen}).",
+                kontext=merge_kontext(base_ctx, {"input_source": "catalog"}),
+            )
+            protokolliere_doc(
+                protokoll,
+                bundle=make_docbundle(
+                    titel="Projizierte Fläche A_p",
+                    wert=float("nan"),
+                    einzelwerte=[laenge, d_aussen],
+                    formel="A_p = L·d_aussen",
+                ),
+                kontext=merge_kontext(base_ctx, {"nan": True}),
+            )
+            return Zwischenergebnis(wert=float("nan"))
+
         wert = laenge * d_aussen
 
-        return Zwischenergebnis(
-            wert=wert,
-            formel="---",
-            quelle_formel="---",
-            formelzeichen=["---", "---", "---"],
-            quelle_formelzeichen=["---"]
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(
+                titel="Projizierte Fläche A_p",
+                wert=wert,
+                einzelwerte=[laenge, d_aussen],
+                formel="A_p = L·d_aussen",
+            ),
+            kontext=base_ctx,
         )
+        return Zwischenergebnis(wert=wert)
 
     else:
         raise NotImplementedError(f"Objekttyp '{objekttyp}' wird aktuell nicht unterstützt.")
 
-_DISPATCH_PROJ: Dict[Norm, Callable[[ObjektTyp, Optional[str], Sequence[Vec3], Vec3], Zwischenergebnis]] = {
+_DISPATCH_PROJ: Dict[Norm, Callable[..., Zwischenergebnis]] = {
     Norm.DEFAULT: _projizierte_flaeche_default,
 }
 
@@ -93,9 +176,41 @@ def projizierte_flaeche(
     norm: Norm,
     objekttyp: ObjektTyp,
     objekt_name_intern: Optional[str],
-    punkte: Sequence[Vec3],          # TRAVERSE: [start, ende, (optional) orientierung]
-    windrichtung: Vec3,              # Einheitsvektor
+    punkte: Sequence[Vec3],   # TRAVERSE: [start, ende, (optional) orientierung]
+    windrichtung: Vec3,       # Einheitsvektor
+    *,
+    protokoll: Optional[Protokoll] = None,
+    kontext: Optional[dict] = None,
 ) -> Zwischenergebnis:
-    _validate_inputs(objekttyp, objekt_name_intern, punkte, windrichtung)
-    funktion = _DISPATCH_PROJ.get(norm, _projizierte_flaeche_default)
-    return funktion(objekttyp, objekt_name_intern, punkte, windrichtung)
+    base_ctx = merge_kontext(kontext, {
+        "funktion": "projizierte_flaeche",
+        "objekttyp": getattr(objekttyp, "name", str(objekttyp)),
+        "objekt_name_intern": objekt_name_intern,
+        "norm": getattr(norm, "name", str(norm)),
+        "windrichtung": windrichtung,
+    })
+
+    try:
+        _validate_inputs(objekttyp, objekt_name_intern, punkte, windrichtung)
+    except NotImplementedError:
+        raise
+    except ValueError as e:
+        protokolliere_msg(
+            protokoll,
+            severity=Severity.ERROR,
+            code="PROJ/INPUT_INVALID",
+            text=str(e),
+            kontext=base_ctx,
+        )
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(titel="Projizierte Fläche A_p", wert=float("nan")),
+            kontext=merge_kontext(base_ctx, {"nan": True}),
+        )
+        return Zwischenergebnis(wert=float("nan"))
+
+    funktion = _DISPATCH_PROJ.get(norm, _DISPATCH_PROJ[Norm.DEFAULT])
+    return funktion(
+        objekttyp, objekt_name_intern, punkte, windrichtung,
+        protokoll=protokoll, kontext=base_ctx,
+    )
