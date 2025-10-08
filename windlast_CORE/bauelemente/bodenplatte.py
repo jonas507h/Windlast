@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from materialdaten.catalog import catalog
 from datenstruktur.konstanten import PhysikKonstanten, aktuelle_konstanten
+from datenstruktur.zwischenergebnis import Protokoll, merge_kontext, protokolliere_msg
 from typing import List, Optional
 from rechenfunktionen import (
     Vec3,
@@ -14,9 +15,9 @@ from rechenfunktionen import (
     senkrechter_vektor,
     vektoren_addieren,
     vektor_multiplizieren,
-    reibwert,
+    reibwert as reibwert_fn,
 )
-from datenstruktur.enums import ObjektTyp, MaterialTyp, Lasttyp, Variabilitaet, FormTyp, Norm
+from datenstruktur.enums import ObjektTyp, MaterialTyp, Lasttyp, Variabilitaet, FormTyp, Norm, Severity
 from datenstruktur.kraefte import Kraefte
 from datenstruktur.konstanten import _EPS
 
@@ -36,15 +37,40 @@ class Bodenplatte:
     def gesamthoehe(self) -> float:
         return self.mittelpunkt[2]
     
-    def gewichtskraefte(self) -> List[Kraefte]:
-        specs = catalog.get_bodenplatte(self.name_intern)
-        gewichtskraft = -1 * float(specs.gewicht) * aktuelle_konstanten().erdbeschleunigung  # [N/m]
+    def gewichtskraefte(
+        self, *, protokoll: Optional[Protokoll] = None, kontext: Optional[dict] = None
+    ) -> List[Kraefte]:
+        base_ctx = merge_kontext(kontext, {
+            "funktion": "gewichtskraefte",
+            "element_id": self.element_id_intern,
+            "objekttyp": self.objekttyp.name,
+            "bodenplatte_name_intern": self.name_intern,
+        })
+        try:
+            specs = catalog.get_bodenplatte(self.name_intern)
+            gewichtskraft = -1 * float(specs.gewicht) * aktuelle_konstanten().erdbeschleunigung  # [N]
+        except Exception as e:
+            protokolliere_msg(
+                protokoll, severity=Severity.ERROR, code="BOP/LOOKUP_FAILED",
+                text=f"Bodenplatte '{self.name_intern}': Katalogzugriff fehlgeschlagen ({e}).",
+                kontext=base_ctx,
+            )
+            return []
+
+        try:
+            ecken = self.eckpunkte(protokoll=protokoll, kontext=base_ctx)
+            schwerpunkt = flaechenschwerpunkt(ecken) if ecken else self.mittelpunkt
+        except Exception as e:
+            protokolliere_msg(
+                protokoll, severity=Severity.ERROR, code="BOP/ECKPUNKTE_FAILED",
+                text=f"Eckpunkte/Schwerpunkt konnten nicht ermittelt werden ({e}).",
+                kontext=base_ctx,
+            )
+            ecken = []
+            schwerpunkt = self.mittelpunkt
 
         einzelkraefte_vektoren: list[Vec3] = [(0.0, 0.0, gewichtskraft)]
-
-        angriffsbereiche: list[list[Vec3]] = [self.eckpunkte()]
-
-        schwerpunkt = flaechenschwerpunkt(self.eckpunkte())
+        angriffsbereiche: list[list[Vec3]] = [ecken]
 
         return [Kraefte(
             element_id_intern=self.element_id_intern,
@@ -55,15 +81,33 @@ class Bodenplatte:
             Schwerpunkt=schwerpunkt,
         )]
     
-    def reibwert(self, norm: Norm) -> float:
-        _materialfolge = [self.material, self.gummimatte, self.untergrund]
-        _reibwert = reibwert(norm,_materialfolge).wert
-        return _reibwert
+    def reibwert_effektiv(
+        self, norm: Norm, *, protokoll: Optional[Protokoll] = None, kontext: Optional[dict] = None
+    ) -> float:
+        base_ctx = merge_kontext(kontext, {
+            "funktion": "reibwert",
+            "element_id": self.element_id_intern,
+            "bodenplatte_name_intern": self.name_intern,
+        })
+        materialfolge = [self.material, self.gummimatte, self.untergrund]
+        return reibwert_fn(
+            norm, materialfolge, protokoll=protokoll, kontext=base_ctx
+        ).wert
     
-    def reibkraefte(self, belastung: Vec3) -> List[Kraefte]:
+    def reibkraefte(
+        self, norm: Norm, belastung: Vec3, *,
+        protokoll: Optional[Protokoll] = None, kontext: Optional[dict] = None
+    ) -> List[Kraefte]:
+        base_ctx = merge_kontext(kontext, {
+            "funktion": "reibkraefte",
+            "element_id": self.element_id_intern,
+            "objekttyp": self.objekttyp.name,
+            "bodenplatte_name_intern": self.name_intern,
+            "belastung": belastung,
+        })
         # Reibwert ermitteln
         _materialfolge = [self.material, self.gummimatte, self.untergrund]
-        _reibwert = reibwert(_materialfolge).wert
+        _reibwert = reibwert_fn(_materialfolge).wert
 
         # Belastungsrichtung prüfen
         _belastungsrichtung = vektor_skalarprodukt(belastung, self.orientierung)
@@ -87,23 +131,46 @@ class Bodenplatte:
                 _reibkraft_richtung[1] * _reibkraft_betrag,
                 _reibkraft_richtung[2] * _reibkraft_betrag,
             )
+        
+        try:
+            angriffsbereich = self.eckpunkte(protokoll=protokoll, kontext=base_ctx)
+        except Exception as e:
+            protokolliere_msg(
+                protokoll, severity=Severity.ERROR, code="BOP/ECKPUNKTE_FAILED",
+                text=f"Eckpunkte konnten für Reibkraft nicht ermittelt werden ({e}).",
+                kontext=base_ctx,
+            )
+            angriffsbereich = []
+
         return [Kraefte(
             element_id_intern=self.element_id_intern,
             typ=Lasttyp.REIBUNG,
             variabilitaet=Variabilitaet.VERAENDERLICH,
             Einzelkraefte=[_reibkraft],
-            Angriffsflaeche_Einzelkraefte=[self.eckpunkte()],
+            Angriffsflaeche_Einzelkraefte=[angriffsbereich],
         )]
     
-    def eckpunkte(self) -> List[Vec3]:
-        if self.form != FormTyp.RECHTECK:
-            raise NotImplementedError(f"Eckpunkte für Form {self.form} noch nicht implementiert.")
+    def eckpunkte(
+        self, *, protokoll: Optional[Protokoll] = None, kontext: Optional[dict] = None
+    ) -> List[Vec3]:
+        base_ctx = merge_kontext(kontext, {
+            "funktion": "eckpunkte",
+            "element_id": self.element_id_intern,
+            "objekttyp": self.objekttyp.name,
+            "bodenplatte_name_intern": self.name_intern,
+            "form": self.form.name,
+        })
 
         if self.form == FormTyp.RECHTECK:
             spec = catalog.get_bodenplatte(self.name_intern)
             kantenlaenge = spec.kantenlaenge
             if kantenlaenge is None or kantenlaenge <= 0:
-                raise ValueError(f"Bodenplatte '{self.name_intern}' hat keine gültige Kantenlänge.")
+                protokolliere_msg(
+                    protokoll, severity=Severity.ERROR, code="BOP/KANTENLAENGE_INVALID",
+                    text=f"Bodenplatte '{self.name_intern}' hat keine gültige Kantenlänge.",
+                    kontext=merge_kontext(base_ctx, {"kantenlaenge": kantenlaenge}),
+                )
+                return []
             halbe_kante = kantenlaenge / 2.0
 
             richtung1 = vektor_normieren(self.drehung)
@@ -117,3 +184,10 @@ class Bodenplatte:
             ecke4 = vektoren_addieren([self.mittelpunkt, vektor_invertieren(halbe_kante1), halbe_kante2])
 
             return [ecke1, ecke2, ecke3, ecke4]
+        else:
+            protokolliere_msg(
+                protokoll, severity=Severity.ERROR, code="BOP/FORM_UNSUPPORTED",
+                text=f"Eckpunkte für Form {self.form.name} noch nicht implementiert.",
+                kontext=base_ctx,
+            )
+            return []
