@@ -3,7 +3,8 @@ from typing import List, Tuple, Optional, Sequence, Iterable, Dict
 from rechenfunktionen.geom3d import Vec3, vektor_zwischen_punkten, vektor_normieren, einheitsvektor_aus_winkeln, konvexe_huelle_xy, moment_einzelkraft_um_achse, vektor_laenge
 from datenstruktur.objekte3d import Achse
 from datenstruktur.kraefte import Kraefte
-from datenstruktur.enums import Norm, Lasttyp, Variabilitaet
+from datenstruktur.enums import Norm, Lasttyp, Variabilitaet, Severity
+from datenstruktur.zwischenergebnis import Protokoll, merge_kontext, protokolliere_msg, protokolliere_doc, make_docbundle
 from rechenfunktionen.sicherheitsbeiwert import sicherheitsbeiwert
 from datenstruktur.lastpool import LastPool, LastSet
 from datenstruktur.konstanten import _EPS
@@ -12,15 +13,30 @@ def generiere_windrichtungen(
     anzahl: int = 4,
     *,
     startwinkel: float = 0.0,
-    winkel: Optional[Sequence[float]] = None
-    ) -> List[Tuple[float, Vec3]]:
+    winkel: Optional[Sequence[float]] = None,
+    protokoll: Optional[Protokoll] = None,
+    kontext: Optional[dict] = None,
+) -> List[Tuple[float, Vec3]]:
+    base_ctx = merge_kontext(kontext, {"funktion": "generiere_windrichtungen"})
     
     if winkel is not None:
-        return [(w, einheitsvektor_aus_winkeln(w, 0.0)) for w in winkel]
-    if anzahl < 1:
-        raise ValueError("Anzahl der Windrichtungen muss mindestens 1 sein.")
-    winkelabstand = 360.0 / anzahl
-    return [(i * winkelabstand + startwinkel, einheitsvektor_aus_winkeln(i * winkelabstand + startwinkel, 0.0)) for i in range(anzahl)]
+        result = [(w, einheitsvektor_aus_winkeln(w, 0.0)) for w in winkel]
+    else:
+        if anzahl < 1:
+            protokolliere_msg(protokoll, severity=Severity.ERROR,
+                code="UTILS/WINDRICHTUNG_ANZAHL",
+                text="Anzahl der Windrichtungen muss ≥ 1 sein.",
+                kontext=base_ctx
+                )
+        winkelabstand = 360.0 / anzahl
+        result = [(i * winkelabstand + startwinkel, einheitsvektor_aus_winkeln(i * winkelabstand + startwinkel, 0.0)) for i in range(anzahl)]
+
+    protokolliere_doc(
+        protokoll,
+        bundle=make_docbundle(titel="Windrichtungen (deg)", wert=[w for w, _ in result]),
+        kontext=base_ctx,
+    )
+    return result
 
 def ermittle_kraefte_pro_windrichtung(
     konstruktion,
@@ -28,31 +44,63 @@ def ermittle_kraefte_pro_windrichtung(
     windrichtung: Vec3,
     staudruecke: Sequence[float],
     obergrenzen: Sequence[float],
-    konst
-) -> Dict[str, List[Kraefte]]:  # <- Rückgabetyp korrigiert
+    konst,
+    *,
+    protokoll: Optional[Protokoll] = None,
+    kontext: Optional[dict] = None,
+) -> Dict[str, List[Kraefte]]:
+    base_ctx = merge_kontext(kontext, {
+        "funktion": "ermittle_kraefte_pro_windrichtung",
+        "norm": getattr(norm, "name", str(norm)),
+        "windrichtung": windrichtung,
+    })
+
     # 1)Wind- & Gewichtskräfte aller Bauelemente holen
     kraefte_windrichtung: List[Kraefte] = []
 
-    for elem in (getattr(konstruktion, "bauelemente", None) or []):
+    for idx, elem in enumerate(getattr(konstruktion, "bauelemente", []) or []):
+        elem_ctx = merge_kontext(base_ctx, {
+            "element_index": idx,
+            "element_id": getattr(elem, "element_id_intern", None),
+            "objekttyp": getattr(getattr(elem, "objekttyp", None), "name", None),
+        })
         # Gewicht
         fn_gewicht = getattr(elem, "gewichtskraefte", None)
         if callable(fn_gewicht):
-            kraefte_gewicht = fn_gewicht()  # -> List[Kraefte]
-            if kraefte_gewicht:
-                kraefte_windrichtung.extend(kraefte_gewicht)
+            try:
+                kraefte_gewicht = fn_gewicht(protokoll=protokoll, kontext=elem_ctx)
+                if kraefte_gewicht:
+                    kraefte_windrichtung.extend(kraefte_gewicht)
+            except Exception as e:
+                protokolliere_msg(
+                    protokoll, severity=Severity.ERROR,
+                    code="UTILS/GEWICHT_FAIL",
+                    text=f"gewichtskraefte() für Element {idx} fehlgeschlagen: {e}",
+                    kontext=elem_ctx,
+                )
 
         # Wind
         fn_wind = getattr(elem, "windkraefte", None)
         if callable(fn_wind):
-            kraefte_wind = fn_wind(
-                norm=norm,
-                windrichtung=windrichtung,
-                staudruecke=staudruecke,
-                obergrenzen=obergrenzen,
-                konst=konst,
-            )  # -> List[Kraefte]
-            if kraefte_wind:
-                kraefte_windrichtung.extend(kraefte_wind)
+            try:
+                kraefte_wind = fn_wind(
+                    norm=norm,
+                    windrichtung=windrichtung,
+                    staudruecke=staudruecke,
+                    obergrenzen=obergrenzen,
+                    konst=konst,
+                    protokoll=protokoll,
+                    kontext=elem_ctx,
+                )
+                if kraefte_wind:
+                    kraefte_windrichtung.extend(kraefte_wind)
+            except Exception as e:
+                protokolliere_msg(
+                    protokoll, severity=Severity.ERROR,
+                    code="UTILS/WIND_FAIL",
+                    text=f"windkraefte() für Element {idx} fehlgeschlagen: {e}",
+                    kontext=elem_ctx,
+                )
     
     # 2) Nach Bauelement gruppieren (erwartet: element_id_intern gesetzt)
     kraefte_nach_element: Dict[str, List[Kraefte]] = {}
@@ -65,9 +113,14 @@ def ermittle_kraefte_pro_windrichtung(
 def _angle_key(winkel_deg: float) -> int:
     return int(round(winkel_deg * 1e4))
 
-def obtain_pool(konstruktion, reset_berechnungen: bool) -> LastPool:
+def obtain_pool(konstruktion, reset_berechnungen: bool, *, protokoll: Optional[Protokoll]=None, kontext: Optional[dict]=None) -> LastPool:
+    base_ctx = merge_kontext(kontext, {"funktion": "obtain_pool"})
     if reset_berechnungen or not hasattr(konstruktion, "_lastpool") or konstruktion._lastpool is None:
         konstruktion._lastpool = LastPool()
+        protokolliere_msg(protokoll, severity=Severity.HINT,
+                          code="UTILS/POOL_RESET",
+                          text="Lastpool neu angelegt/gesetzt (reset_berechnungen=True oder fehlte).",
+                          kontext=base_ctx)
     return konstruktion._lastpool
 
 
@@ -80,8 +133,16 @@ def get_or_create_lastset(
     norm: Norm,
     staudruecke: Sequence[float],
     obergrenzen: Sequence[float],
-    konst
+    konst,
+    protokoll: Optional[Protokoll] = None,
+    kontext: Optional[dict] = None,
 ) -> LastSet:
+    base_ctx = merge_kontext(kontext, {
+        "funktion": "get_or_create_lastset",
+        "winkel_deg": winkel_deg,
+        "windrichtung": windrichtung,
+    })
+
     key = _angle_key(winkel_deg)
     ls = pool.nach_winkel.get(key)
     if ls is None:
@@ -92,9 +153,17 @@ def get_or_create_lastset(
             staudruecke=staudruecke,
             obergrenzen=obergrenzen,
             konst=konst,
+            protokoll=protokoll,
+            kontext=base_ctx,
         )
         ls = LastSet(winkel_deg=winkel_deg, windrichtung=windrichtung, kraefte_nach_element=kbe)
         pool.nach_winkel[key] = ls
+        
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(titel="LastSet erstellt", wert={"winkel_deg": winkel_deg, "anzahl_elemente": len(kbe)}),
+            kontext=base_ctx,
+        )
     return ls
 
 # Kippsicherheit Utils --------------------------------------------
