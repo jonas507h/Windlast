@@ -9,7 +9,7 @@ from rechenfunktionen import (
     gesamtgewicht as _gesamtgewicht,
 )
 from datenstruktur.enums import Norm, MaterialTyp, FormTyp, RechenmethodeKippen, RechenmethodeGleiten, RechenmethodeAbheben, VereinfachungKonstruktion
-from datenstruktur.zwischenergebnis import Zwischenergebnis 
+from datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_kontext
 
 # TODO: ID-Vergabe
 @dataclass
@@ -91,8 +91,14 @@ class Tor:
             )
             self.bauelemente.extend([left, right])
 
-    def gesamthoehe(self) -> float:
+    def gesamthoehe(
+        self, *, protokoll: Optional[Protokoll] = None, kontext: Optional[dict] = None
+    ) -> float:
         """Maximale Gesamthöhe über alle Bauelemente mit .gesamthoehe()."""
+        base_ctx = merge_kontext(kontext, {
+            "funktion": "tor.gesamthoehe",
+            "tor_name": self.name,
+        })
         max_h = 0.0
         found = False
 
@@ -128,7 +134,14 @@ class Tor:
         methode: RechenmethodeKippen = RechenmethodeKippen.STANDARD,
         vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
         anzahl_windrichtungen: int = 4,
+        protokoll: Optional[Protokoll] = None,
+        kontext: Optional[dict] = None,
     ) -> List[Zwischenergebnis]:
+        base_ctx = merge_kontext(kontext, {
+            "funktion": "tor.berechne_kippsicherheit",
+            "tor_name": self.name,
+        })
+        
         return _kippsicherheit(
             self,
             norm,
@@ -139,6 +152,8 @@ class Tor:
             methode=methode,
             vereinfachung_konstruktion=vereinfachung_konstruktion,
             anzahl_windrichtungen=anzahl_windrichtungen,
+            protokoll=protokoll,
+            kontext=base_ctx,
         )
 
     def berechne_gleitsicherheit(
@@ -152,7 +167,14 @@ class Tor:
         methode: RechenmethodeGleiten = RechenmethodeGleiten.MIN_REIBWERT,
         vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
         anzahl_windrichtungen: int = 4,
+        protokoll: Optional[Protokoll] = None,
+        kontext: Optional[dict] = None,
     ) -> List[Zwischenergebnis]:
+        base_ctx = merge_kontext(kontext, {
+            "funktion": "tor.berechne_gleitsicherheit",
+            "tor_name": self.name,
+        })
+        
         return _gleitsicherheit(
             self,
             norm,
@@ -163,6 +185,8 @@ class Tor:
             methode=methode,
             vereinfachung_konstruktion=vereinfachung_konstruktion,
             anzahl_windrichtungen=anzahl_windrichtungen,
+            protokoll=protokoll,
+            kontext=base_ctx,
         )
 
     def berechne_abhebesicherheit(
@@ -176,7 +200,14 @@ class Tor:
         methode: RechenmethodeAbheben = RechenmethodeAbheben.STANDARD,
         vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
         anzahl_windrichtungen: int = 4,
+        protokoll: Optional[Protokoll] = None,
+        kontext: Optional[dict] = None,
     ) -> List[Zwischenergebnis]:
+        base_ctx = merge_kontext(kontext, {
+            "funktion": "tor.berechne_abhebesicherheit",
+            "tor_name": self.name,
+        })
+
         return _abhebesicherheit(
             self,
             norm,
@@ -187,6 +218,8 @@ class Tor:
             methode=methode,
             vereinfachung_konstruktion=vereinfachung_konstruktion,
             anzahl_windrichtungen=anzahl_windrichtungen,
+            protokoll=protokoll,
+            kontext=base_ctx,
         )
     
     def gesamtgewicht(self) -> float:
