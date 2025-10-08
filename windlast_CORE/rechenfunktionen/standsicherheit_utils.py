@@ -158,7 +158,7 @@ def get_or_create_lastset(
         )
         ls = LastSet(winkel_deg=winkel_deg, windrichtung=windrichtung, kraefte_nach_element=kbe)
         pool.nach_winkel[key] = ls
-        
+
         protokolliere_doc(
             protokoll,
             bundle=make_docbundle(titel="LastSet erstellt", wert={"winkel_deg": winkel_deg, "anzahl_elemente": len(kbe)}),
@@ -168,27 +168,60 @@ def get_or_create_lastset(
 
 # Kippsicherheit Utils --------------------------------------------
 
-def sammle_kippachsen(konstruktion) -> List[Achse]:
+def sammle_kippachsen(konstruktion, *, protokoll: Optional[Protokoll] = None, kontext: Optional[dict] = None) -> List[Achse]:
+    base_ctx = merge_kontext(kontext, {"funktion": "sammle_kippachsen"})
     eckpunkte: List[Vec3] = []
 
-    for obj in getattr(konstruktion, "bauelemente", []):
+    for idx, obj in enumerate(getattr(konstruktion, "bauelemente", [])):
         ep = getattr(obj, "eckpunkte", None)
         if callable(ep):
-            punkte = ep()
+            try:
+                punkte = ep(protokoll=protokoll, kontext=merge_kontext(base_ctx, {"element_index": idx}))
+            except TypeError:
+                # alte Signatur ohne protokoll/kontext
+                punkte = ep()
             if punkte:
                 eckpunkte.extend(punkte)
 
+    if len(eckpunkte) < 3:
+        protokolliere_msg(
+            protokoll, severity=Severity.ERROR, code="KIPP/NO_POINTS",
+            text="Zu wenige Eckpunkte für die Bestimmung von Kippachsen (min. 3).",
+            kontext=merge_kontext(base_ctx, {"anzahl_punkte": len(eckpunkte)}),
+        )
+        return []
+
     achsen = kippachsen_aus_eckpunkten(eckpunkte, include_Randpunkte=False)
+    protokolliere_doc(
+        protokoll,
+        bundle=make_docbundle(titel="Anzahl Kippachsen", wert=len(achsen)),
+        kontext=base_ctx,
+    )
     return achsen
 
-def kippachsen_aus_eckpunkten(punkte: List[Vec3], *, include_Randpunkte: bool = False) -> List[Achse]:
+def kippachsen_aus_eckpunkten(
+    punkte: List[Vec3], *, include_Randpunkte: bool = False,
+    protokoll: Optional[Protokoll] = None, kontext: Optional[dict] = None
+) -> List[Achse]:
+    base_ctx = merge_kontext(kontext, {"funktion": "kippachsen_aus_eckpunkten"})
+
     if len(punkte) < 3:
-        raise ValueError("Mindestens 3 Punkte sind erforderlich, um Kippachsen zu bestimmen.")
+        protokolliere_msg(
+            protokoll, severity=Severity.ERROR, code="KIPP/POINTS_LT3",
+            text="Mindestens 3 Punkte erforderlich, um Kippachsen zu bestimmen.",
+            kontext=merge_kontext(base_ctx, {"anzahl_punkte": len(punkte)}),
+        )
+        return []
     
     huelle = konvexe_huelle_xy(punkte)
 
     if len(huelle) < 2:
-        raise ValueError("Die konvexe Hülle muss mindestens 2 Punkte enthalten.")
+        protokolliere_msg(
+            protokoll, severity=Severity.ERROR, code="KIPP/HULL_LT2",
+            text="Konvexe Hülle enthält weniger als 2 Eckpunkte.",
+            kontext=merge_kontext(base_ctx, {"anzahl_huelle": len(huelle)}),
+        )
+        return []
     
     kippachsen: List[Achse] = []
     for i in range(len(huelle)):
@@ -201,9 +234,17 @@ def kippachsen_aus_eckpunkten(punkte: List[Vec3], *, include_Randpunkte: bool = 
             continue
         kippachsen.append(Achse(punkt=p1, richtung=richtung_norm))
     
+    protokolliere_doc(
+        protokoll,
+        bundle=make_docbundle(titel="Konvexe Hülle (Eckpunkte)", wert=huelle),
+        kontext=base_ctx,
+    )
     return kippachsen
 
-def bewerte_lastfall_fuer_achse(norm: Norm, achse: Achse, lastfall: Kraefte) -> Tuple[float, float]:
+def bewerte_lastfall_fuer_achse(
+    norm: Norm, achse: Achse, lastfall: Kraefte,
+    *, protokoll: Optional[Protokoll] = None, kontext: Optional[dict] = None
+) -> Tuple[float, float]:
     """
     Aggregiert das Moment eines Lastfalls (Objekt 'Kraefte') um die gegebene Achse.
 
@@ -219,14 +260,25 @@ def bewerte_lastfall_fuer_achse(norm: Norm, achse: Achse, lastfall: Kraefte) -> 
       (kipp_sum, stand_sum) für diesen Lastfall.
     """
 
+    base_ctx = merge_kontext(kontext, {
+        "funktion": "bewerte_lastfall_fuer_achse",
+        "lasttyp": getattr(lastfall, "typ", None),
+    })
+
     Einzelkraefte: Sequence[Vec3] = lastfall.Einzelkraefte
     Angriffspunkte: Sequence[Vec3] = lastfall.Angriffspunkte_Einzelkraefte
 
     if Angriffspunkte is None or len(Angriffspunkte) != len(Einzelkraefte):
-        raise ValueError(
-            "Kraefte.angriffspunkte_einzelkraefte fehlt oder passt nicht zu Einzelkraefte."
+        protokolliere_msg(
+            protokoll, severity=Severity.ERROR, code="KIPP/NO_ATTACK_POINTS",
+            text="Angriffspunkte der Einzelkräfte fehlen oder ungleich lang.",
+            kontext=merge_kontext(base_ctx, {
+                "anzahl_kraefte": len(Einzelkraefte),
+                "anzahl_punkte": 0 if Angriffspunkte is None else len(Angriffspunkte),
+            }),
         )
-
+        return 0.0, 0.0
+    
     kipp_sum = 0.0
     stand_sum = 0.0
 
@@ -252,7 +304,11 @@ def kipp_envelope_pro_bauelement(
     norm: Norm,
     achse: Achse,
     lastfaelle: Iterable[Kraefte],
+    *,
+    protokoll: Optional[Protokoll] = None,
+    kontext: Optional[dict] = None
 ) -> Tuple[float, float]:
+    base_ctx = merge_kontext(kontext, {"funktion": "kipp_envelope_pro_bauelement"})
     """
     Bildet je Bauelement den ungünstigen „Envelope“ über seine Lastfälle.
 

@@ -1,11 +1,11 @@
 # rechenfunktionen/kippsicherheit.py
 from __future__ import annotations
 from math import inf
-from typing import Dict, Callable, Sequence, List
+from typing import Dict, Callable, Sequence, List, Optional, Tuple, Iterable
 from collections.abc import Sequence as _SeqABC
 
-from datenstruktur.zwischenergebnis import Zwischenergebnis
-from datenstruktur.enums import Norm, RechenmethodeKippen, VereinfachungKonstruktion, Lasttyp, Variabilitaet
+from datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_kontext, protokolliere_msg, protokolliere_doc, make_docbundle
+from datenstruktur.enums import Norm, RechenmethodeKippen, VereinfachungKonstruktion, Lasttyp, Variabilitaet, Severity
 from datenstruktur.konstanten import _EPS, aktuelle_konstanten
 from datenstruktur.kraefte import Kraefte
 from rechenfunktionen.sicherheitsbeiwert import sicherheitsbeiwert
@@ -78,13 +78,28 @@ def _kippsicherheit_DinEn13814_2005_06(
     methode: RechenmethodeKippen = RechenmethodeKippen.STANDARD,
     vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
     anzahl_windrichtungen: int = 4,
+    protokoll: Optional[Protokoll] = None,
+    kontext: Optional[dict] = None,
 ) -> List[Zwischenergebnis]:
+    base_ctx = merge_kontext(kontext, {
+        "funktion": "_kippsicherheit",
+        "norm": "DIN_EN_13814_2005_06",
+        "methode": methode.name,
+    })
+
     if vereinfachung_konstruktion is not VereinfachungKonstruktion.KEINE:
-        raise NotImplementedError(f"Vereinfachung '{vereinfachung_konstruktion.value}' ({vereinfachung_konstruktion.name}) ist noch nicht implementiert.")
+        protokolliere_msg(
+            protokoll, severity=Severity.ERROR, code="KIPP/NOT_IMPLEMENTED",
+            text=f"Vereinfachung '{vereinfachung_konstruktion.value}' ist noch nicht implementiert.",
+            kontext=base_ctx,
+        )
+        return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
 
     if methode == RechenmethodeKippen.STANDARD:
         # 1) Eckpunkte sammeln → Kippachsen bestimmen
-        achsen = sammle_kippachsen(konstruktion)
+        achsen = sammle_kippachsen(konstruktion, protokoll=protokoll, kontext=base_ctx)
+        if not achsen:
+            return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
         # 1.1) Grundgrößen für Ballast bestimmen
         ballastkraft_dummy = Kraefte(
             typ=Lasttyp.GEWICHT,
@@ -102,7 +117,7 @@ def _kippsicherheit_DinEn13814_2005_06(
 
         pool = obtain_pool(konstruktion, reset_berechnungen)
 
-        for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen):
+        for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen, protokoll=protokoll, kontext=base_ctx):
             lastset = get_or_create_lastset(
                 pool,
                 konstruktion,
@@ -112,6 +127,8 @@ def _kippsicherheit_DinEn13814_2005_06(
                 staudruecke=staudruecke,
                 obergrenzen=obergrenzen,
                 konst=konst,
+                protokoll=protokoll,
+                kontext=base_ctx,
             )
             kraefte_nach_element = lastset.kraefte_nach_element
 
@@ -121,7 +138,7 @@ def _kippsicherheit_DinEn13814_2005_06(
                 total_stand = 0.0
 
                 for _, lastfaelle_elem in kraefte_nach_element.items():
-                    kipp_b, stand_b = kipp_envelope_pro_bauelement(norm, achse, lastfaelle_elem)
+                    kipp_b, stand_b = kipp_envelope_pro_bauelement(norm, achse, lastfaelle_elem, protokoll=protokoll, kontext=base_ctx)
                     total_kipp += kipp_b
                     total_stand += stand_b
 
@@ -158,26 +175,41 @@ def _kippsicherheit_DinEn13814_2005_06(
         erdbeschleunigung = aktuelle_konstanten().erdbeschleunigung
         ballast_kg = ballast_erforderlich_max / erdbeschleunigung
 
-        sicherheit_Z = Zwischenergebnis(
-            wert=sicherheit_min_global,
-            formel="S = ΣM_stand / ΣM_kipp",
-            quelle_formel="---",
-            formelzeichen=["M_stand", "M_kipp"],
-            quelle_formelzeichen=["---"],
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(
+                titel="Kippsicherheit S",
+                wert=sicherheit_min_global,
+                formel="S = ΣM_stand / ΣM_kipp",
+                quelle_formel="---",
+                formelzeichen=["M_stand", "M_kipp"],
+                quelle_formelzeichen=["---"],
+            ),
+            kontext=base_ctx,
+        )
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(
+                titel="Erforderlicher Ballast ΔW",
+                wert=ballast_kg,
+                formel="ΔW = max(0, ΣM_kipp − ΣM_stand) / (γ_g · m_stand,1N)",
+                quelle_formel="---",
+                formelzeichen=["M_kipp", "M_stand", "γ_g", "m_stand,1N", "g"],
+                quelle_formelzeichen=["---"],
+            ),
+            kontext=base_ctx,
         )
 
-        ballast_Z = Zwischenergebnis(
-            wert=ballast_kg,
-            formel="ΔW = max(0, ΣM_kipp − ΣM_stand) / (γ_g · m_stand,1N)",
-            quelle_formel="---",
-            formelzeichen=["M_kipp", "M_stand", "γ_g", "m_stand,1N", "g"],
-            quelle_formelzeichen=["---"],
-        )
-
-        return [sicherheit_Z, ballast_Z]
+        return [Zwischenergebnis(wert=sicherheit_min_global), Zwischenergebnis(wert=ballast_kg)]
     
     else:
-        raise NotImplementedError(f"Methode '{methode.value}' ({methode.name}) ist noch nicht implementiert.")
+        # (andere Methoden:)
+        protokolliere_msg(
+            protokoll, severity=Severity.ERROR, code="KIPP/METHOD_NI",
+            text=f"Methode '{methode.value}' ({methode.name}) ist noch nicht implementiert.",
+            kontext=base_ctx,
+        )
+        return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
     
 def _kippsicherheit_DinEn17879_2024_08(
     konstruktion,
@@ -190,13 +222,28 @@ def _kippsicherheit_DinEn17879_2024_08(
     methode: RechenmethodeKippen = RechenmethodeKippen.STANDARD,
     vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
     anzahl_windrichtungen: int = 4,
+    protokoll: Optional[Protokoll] = None,
+    kontext: Optional[dict] = None,
 ) -> List[Zwischenergebnis]:
+    base_ctx = merge_kontext(kontext, {
+        "funktion": "_kippsicherheit",
+        "norm": "DIN_EN_13814_2005_06",
+        "methode": methode.name,
+    })
+
     if vereinfachung_konstruktion is not VereinfachungKonstruktion.KEINE:
-        raise NotImplementedError(f"Vereinfachung '{vereinfachung_konstruktion.value}' ({vereinfachung_konstruktion.name}) ist noch nicht implementiert.")
+        protokolliere_msg(
+            protokoll, severity=Severity.ERROR, code="KIPP/NOT_IMPLEMENTED",
+            text=f"Vereinfachung '{vereinfachung_konstruktion.value}' ist noch nicht implementiert.",
+            kontext=base_ctx,
+        )
+        return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
 
     if methode == RechenmethodeKippen.STANDARD:
         # 1) Eckpunkte sammeln → Kippachsen bestimmen
         achsen = sammle_kippachsen(konstruktion)
+        if not achsen:
+            return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
         # 1.1) Grundgrößen für Ballast bestimmen
         ballastkraft_dummy = Kraefte(
             typ=Lasttyp.GEWICHT,
@@ -214,7 +261,7 @@ def _kippsicherheit_DinEn17879_2024_08(
 
         pool = obtain_pool(konstruktion, reset_berechnungen)
 
-        for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen):
+        for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen, protokoll=protokoll, kontext=base_ctx):
             lastset = get_or_create_lastset(
                 pool,
                 konstruktion,
@@ -224,6 +271,8 @@ def _kippsicherheit_DinEn17879_2024_08(
                 staudruecke=staudruecke,
                 obergrenzen=obergrenzen,
                 konst=konst,
+                protokoll=protokoll,
+                kontext=base_ctx,
             )
             kraefte_nach_element = lastset.kraefte_nach_element
 
@@ -233,7 +282,7 @@ def _kippsicherheit_DinEn17879_2024_08(
                 total_stand = 0.0
 
                 for _, lastfaelle_elem in kraefte_nach_element.items():
-                    kipp_b, stand_b = kipp_envelope_pro_bauelement(norm, achse, lastfaelle_elem)
+                    kipp_b, stand_b = kipp_envelope_pro_bauelement(norm, achse, lastfaelle_elem, protokoll=protokoll, kontext=base_ctx)
                     total_kipp += kipp_b
                     total_stand += stand_b
 
@@ -270,26 +319,40 @@ def _kippsicherheit_DinEn17879_2024_08(
         erdbeschleunigung = aktuelle_konstanten().erdbeschleunigung
         ballast_kg = ballast_erforderlich_max / erdbeschleunigung
 
-        sicherheit_Z = Zwischenergebnis(
-            wert=sicherheit_min_global,
-            formel="S = ΣM_stand / ΣM_kipp",
-            quelle_formel="---",
-            formelzeichen=["M_stand", "M_kipp"],
-            quelle_formelzeichen=["---"],
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(
+                titel="Kippsicherheit S",
+                wert=sicherheit_min_global,
+                formel="S = ΣM_stand / ΣM_kipp",
+                quelle_formel="---",
+                formelzeichen=["M_stand", "M_kipp"],
+                quelle_formelzeichen=["---"],
+            ),
+            kontext=base_ctx,
+        )
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(
+                titel="Erforderlicher Ballast ΔW",
+                wert=ballast_kg,
+                formel="ΔW = max(0, ΣM_kipp − ΣM_stand) / (γ_g · m_stand,1N)",
+                quelle_formel="---",
+                formelzeichen=["M_kipp", "M_stand", "γ_g", "m_stand,1N", "g"],
+                quelle_formelzeichen=["---"],
+            ),
+            kontext=base_ctx,
         )
 
-        ballast_Z = Zwischenergebnis(
-            wert=ballast_kg,
-            formel="ΔW = max(0, ΣM_kipp − ΣM_stand) / (γ_g · m_stand,1N)",
-            quelle_formel="---",
-            formelzeichen=["M_kipp", "M_stand", "γ_g", "m_stand,1N", "g"],
-            quelle_formelzeichen=["---"],
-        )
-
-        return [sicherheit_Z, ballast_Z]
+        return [Zwischenergebnis(wert=sicherheit_min_global), Zwischenergebnis(wert=ballast_kg)]
     
     else:
-        raise NotImplementedError(f"Methode '{methode.value}' ({methode.name}) ist noch nicht implementiert.")
+        protokolliere_msg(
+            protokoll, severity=Severity.ERROR, code="KIPP/METHOD_NI",
+            text=f"Methode '{methode.value}' ({methode.name}) ist noch nicht implementiert.",
+            kontext=base_ctx,
+        )
+        return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
     
 _DISPATCH: Dict[Norm, Callable[..., List[Zwischenergebnis]]] = {
     Norm.DEFAULT: _kippsicherheit_DinEn13814_2005_06,
@@ -308,22 +371,40 @@ def kippsicherheit(
     methode: RechenmethodeKippen = RechenmethodeKippen.STANDARD,
     vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
     anzahl_windrichtungen: int = 4,
+    protokoll: Optional[Protokoll] = None,
+    kontext: Optional[dict] = None,
 ) -> List[Zwischenergebnis]:
+    base_ctx = merge_kontext(kontext, {
+        "funktion": "kippsicherheit",
+        "norm": getattr(norm, "name", str(norm)),
+        "anzahl_windrichtungen": anzahl_windrichtungen,
+    })
     """
     Norm-dispatchte Kipp-Sicherheitsbewertung.
     Gibt ein Zwischenergebnis mit der minimalen Sicherheit über alle Windrichtungen/Achsen zurück.
     """
-    _validate_inputs(
-    konstruktion,
-    norm=norm,
-    staudruecke=staudruecke,
-    obergrenzen=obergrenzen,
-    konst=konst,
-    reset_berechnungen=reset_berechnungen,
-    methode=methode,
-    vereinfachung_konstruktion=vereinfachung_konstruktion,
-    anzahl_windrichtungen=anzahl_windrichtungen,
-)
+    try:
+        _validate_inputs(
+            konstruktion,
+            norm=norm,
+            staudruecke=staudruecke,
+            obergrenzen=obergrenzen,
+            konst=konst,
+            reset_berechnungen=reset_berechnungen,
+            methode=methode,
+            vereinfachung_konstruktion=vereinfachung_konstruktion,
+            anzahl_windrichtungen=anzahl_windrichtungen,
+        )
+    except Exception as e:
+        protokolliere_msg(
+            protokoll, severity=Severity.ERROR,
+            code="KIPP/INPUT_INVALID",
+            text=str(e),
+            kontext=base_ctx,
+        )
+        # NaN-Placeholder zurück (wie vereinbart: Zwischenergebnis nur mit wert)
+        return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
+    
     funktion = _DISPATCH.get(norm, _DISPATCH[Norm.DEFAULT])
     return funktion(
         konstruktion,
@@ -335,4 +416,6 @@ def kippsicherheit(
         methode=methode,
         vereinfachung_konstruktion=vereinfachung_konstruktion,
         anzahl_windrichtungen=anzahl_windrichtungen,
+        protokoll=protokoll,
+        kontext=base_ctx,
     )
