@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Tuple, List, Sequence, Optional
 from datenstruktur.konstanten import PhysikKonstanten, aktuelle_konstanten
+from datenstruktur.zwischenergebnis import Protokoll, merge_kontext, protokolliere_msg
 from materialdaten.catalog import catalog
 from rechenfunktionen import (
     Vec3,
@@ -19,7 +20,7 @@ from rechenfunktionen import (
     segmentiere_strecke_nach_hoehenbereichen,
 )
 from datenstruktur.kraefte import Kraefte
-from datenstruktur.enums import Lasttyp, Variabilitaet, ObjektTyp, Norm
+from datenstruktur.enums import Lasttyp, Variabilitaet, ObjektTyp, Norm, Severity
 
 @dataclass
 class Traversenstrecke:
@@ -33,7 +34,13 @@ class Traversenstrecke:
     def gesamthoehe(self) -> float:
         return max(self.start[2], self.ende[2])
 
-    def gewichtskraefte(self) -> List[Kraefte]:
+    def gewichtskraefte(self, *, protokoll: Optional[Protokoll] = None, kontext: Optional[dict] = None) -> List[Kraefte]:
+        base_ctx = merge_kontext(kontext, {
+            "funktion": "gewichtskraefte",
+            "element_id": self.element_id_intern,
+            "objekttyp": self.objekttyp.name,
+            "traverse_name_intern": self.traverse_name_intern,
+        })
         laenge = abstand_punkte(self.start, self.ende)
 
         specs = catalog.get_traverse(self.traverse_name_intern)
@@ -61,15 +68,28 @@ class Traversenstrecke:
         windrichtung: Vec3,
         staudruecke: Sequence[float],
         obergrenzen: Sequence[float],
-        konst: PhysikKonstanten | None = None,   # optional: Defaults oder Override-Set
+        konst: PhysikKonstanten | None = None,
+        *,
+        protokoll: Optional[Protokoll] = None,
+        kontext: Optional[dict] = None,
     ) -> List[Kraefte]:
         k = konst or aktuelle_konstanten()
         _zaehigkeit = k.zaehigkeit_kin
         _luftdichte = k.luftdichte
 
+        base_ctx = merge_kontext(kontext, {
+            "funktion": "windkraefte",
+            "norm": norm.name,
+            "element_id": self.element_id_intern,
+            "objekttyp": self.objekttyp.name,
+            "traverse_name_intern": self.traverse_name_intern,
+            "windrichtung": windrichtung,
+        })
+
         # 1) Gesamt (einmalig)
         _schlankheit = schlankheit(
-            norm, self.objekttyp, self.traverse_name_intern, [self.start, self.ende]
+            norm, self.objekttyp, self.traverse_name_intern, [self.start, self.ende],
+            protokoll=protokoll, kontext=base_ctx,
         )
 
         # 2) Segmentierung nach Höhenbereichen
@@ -77,30 +97,45 @@ class Traversenstrecke:
             self.start, self.ende, staudruecke, obergrenzen
         )
         if not segmente:
-            raise ValueError("Traverse liegt in keinem Windbereich.")
+            protokolliere_msg(
+                protokoll, severity=Severity.ERROR, code="TRAV/NO_WIND_SEGMENTS",
+                text="Traverse liegt in keinem Windbereich.",
+                kontext=base_ctx,
+            )
+            # Fallback: keine Windkräfte zurückgeben (wird durch ERROR später verworfen)
+            return []
 
         # 3) Pro Abschnitt rechnen
         einzelkraefte_vektoren: list[Vec3] = []
         angriffsbereiche: list[list[Vec3]] = []
 
-        for seg in segmente:
+        for i, seg in enumerate(segmente):
             start_lokal = seg["start_lokal"]
             ende_lokal  = seg["ende_lokal"]
             staudruck   = seg["staudruck"]
+            seg_ctx = merge_kontext(base_ctx, {
+                "segment_index": i,
+                "segment_z": (start_lokal[2], ende_lokal[2]),
+                "staudruck": staudruck,
+            })
 
             # Abschnittsweise Größen (abhängig von lokaler Geometrie / staudruck)
             _reynoldszahl = reynoldszahl(
-                norm, self.objekttyp, self.traverse_name_intern, staudruck, _zaehigkeit, _luftdichte
+                norm, self.objekttyp, self.traverse_name_intern, staudruck, _zaehigkeit, _luftdichte,
+                protokoll=protokoll, kontext=seg_ctx,
             )
             _projizierte_Flaeche = projizierte_flaeche(
                 norm, self.objekttyp, self.traverse_name_intern,
-                [start_lokal, ende_lokal, self.orientierung], windrichtung
+                [start_lokal, ende_lokal, self.orientierung], windrichtung,
+                protokoll=protokoll, kontext=seg_ctx,
             )
             _eingeschlossene_Flaeche = eingeschlossene_flaeche(
-                norm, self.objekttyp, self.traverse_name_intern, [start_lokal, ende_lokal]
+                norm, self.objekttyp, self.traverse_name_intern, [start_lokal, ende_lokal],
+                protokoll=protokoll, kontext=seg_ctx,
             )
             _voelligkeitsgrad = voelligkeitsgrad(
-                norm, _projizierte_Flaeche.wert, _eingeschlossene_Flaeche.wert
+                norm, _projizierte_Flaeche.wert, _eingeschlossene_Flaeche.wert,
+                protokoll=protokoll, kontext=seg_ctx,
             )
             _grundkraftbeiwert = grundkraftbeiwert(
                 norm, self.objekttyp, self.traverse_name_intern,
@@ -109,18 +144,23 @@ class Traversenstrecke:
                 windrichtung,
                 _voelligkeitsgrad.wert,
                 _reynoldszahl.wert,
+                protokoll=protokoll, kontext=seg_ctx,
             )
             _abminderungsfaktor_schlankheit = abminderungsfaktor_schlankheit(
-                norm, self.objekttyp, _schlankheit.wert, _voelligkeitsgrad.wert
+                norm, self.objekttyp, _schlankheit.wert, _voelligkeitsgrad.wert,
+                protokoll=protokoll, kontext=seg_ctx,
             )
             _kraftbeiwert = kraftbeiwert(
-                norm, self.objekttyp, _grundkraftbeiwert.wert, _abminderungsfaktor_schlankheit.wert
+                norm, self.objekttyp, _grundkraftbeiwert.wert, _abminderungsfaktor_schlankheit.wert,
+                protokoll=protokoll, kontext=seg_ctx,
             )
             _windkraft = windkraft(
-                norm, self.objekttyp, _kraftbeiwert.wert, staudruck, _projizierte_Flaeche.wert
+                norm, self.objekttyp, _kraftbeiwert.wert, staudruck, _projizierte_Flaeche.wert,
+                protokoll=protokoll, kontext=seg_ctx,
             )
             _windkraft_vec = windkraft_zu_vektor(
-                norm, self.objekttyp, None, _windkraft.wert, windrichtung
+                norm, self.objekttyp, None, _windkraft.wert, windrichtung,
+                protokoll=protokoll, kontext=seg_ctx,
             )
 
             einzelkraefte_vektoren.append(_windkraft_vec.wert)
