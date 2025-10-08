@@ -2,6 +2,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional, Sequence, Mapping, Any, Protocol, runtime_checkable, Dict, List, Tuple, Union, TYPE_CHECKING
 from datenstruktur.enums import Severity
+from datenstruktur.standsicherheit_ergebnis import Message
 
 if TYPE_CHECKING:
     # nur für Typprüfung, NICHT zur Laufzeit:
@@ -33,6 +34,53 @@ class Protokoll(Protocol):
         kontext: Optional[dict] = None,
     ) -> None: ...
 
+# ========== Runtime-Implementierung des Protokolls ==========
+
+class ListProtokoll:
+    """
+    Einfache Protokoll-Implementierung:
+    - speichert Messages als List[Message]
+    - speichert DocBundles als List[tuple[bundle, kontext]]
+    """
+    def __init__(self) -> None:
+        self.messages: List[Message] = []
+        self.docs: List[Tuple[Mapping[str, Any], dict]] = []
+
+    def add_message(
+        self,
+        *,
+        severity: Severity,
+        code: str,
+        text: str,
+        kontext: Optional[dict] = None,
+    ) -> None:
+        # Message-Struktur aus standsicherheit_ergebnis.py verwenden
+        self.messages.append(
+            Message(code=code, severity=severity, text=str(text), context=dict(kontext or {}))
+        )
+
+    def add_doc(
+        self,
+        *,
+        bundle: Mapping[str, Any],
+        kontext: Optional[dict] = None,
+    ) -> None:
+        self.docs.append( (dict(bundle), dict(kontext or {})) )
+
+
+def make_protokoll() -> Protokoll:
+    """Factory für ein nutzbares Protokoll-Objekt (kein typing.Protocol!)."""
+    return ListProtokoll()
+
+
+def collect_messages(protokoll: Optional[Protokoll]) -> List[Message]:
+    """Helper, um Messages generisch aus einem Protokoll zu ziehen (oder [])."""
+    return list(getattr(protokoll, "messages", []) or [])
+
+
+def collect_docs(protokoll: Optional[Protokoll]) -> List[Tuple[Mapping[str, Any], dict]]:
+    """Helper, um DocBundles generisch aus einem Protokoll zu ziehen (oder [])."""
+    return list(getattr(protokoll, "docs", []) or [])
 
 # ========= Kontext-/Doc-Helfer =========
 

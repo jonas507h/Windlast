@@ -14,7 +14,7 @@ from datenstruktur.standsicherheit_ergebnis import (
     StandsicherheitErgebnis, NormErgebnis, SafetyValue, Message, Meta,
 )
 from rechenfunktionen.staudruecke import staudruecke  # type: ignore
-from datenstruktur.zwischenergebnis import Protokoll, merge_kontext
+from datenstruktur.zwischenergebnis import make_protokoll, collect_messages, merge_kontext, Protokoll
 
 
 # -----------------------------
@@ -52,7 +52,7 @@ def _ermittle_staudruecke(
     except Exception as e:
         # Einheitliche Fehlercodes/Texte pro Normfamilie
         code = "STAUDRUECKE_FAILED" if s.label != "IN_BETRIEB" else "STAUDRUECKE_IN_BETRIEB_FAILED"
-        sev  = Severity.ERROR if s.label not in ("IN_BETRIEB",) else Severity.WARNING
+        sev  = Severity.ERROR if s.label not in ("IN_BETRIEB",) else Severity.WARN
         txt  = ("Geschwindigkeitsdruck/Obergrenze" if s.norm == Norm.DIN_EN_1991_1_4_2010_12
                 else "Staudrücke/Obergrenzen")
         reasons.append(Message(
@@ -201,7 +201,7 @@ def standsicherheit(
     ) -> NormErgebnis:
         # Primär-Szenario ist szenarien[0]; alle weiteren werden als alternativen[...] abgelegt
         reasons_all: List[Message] = []
-        prot = Protokoll()
+        prot = make_protokoll()
 
         # Primär
         s_primary = szenarien[0]
@@ -249,7 +249,7 @@ def standsicherheit(
                 alternativen[s.label] = vals_b
 
         try:
-            reasons_all.extend(getattr(prot, "messages", []))
+            reasons_all.extend(collect_messages(prot))
         except Exception:
             pass
 
