@@ -1,11 +1,11 @@
 # rechenfunktionen/abhebesicherheit.py
 from __future__ import annotations
 from math import inf
-from typing import Dict, Callable, Sequence, List
+from typing import Dict, Callable, Sequence, List, Optional
 from collections.abc import Sequence as _SeqABC
 
-from datenstruktur.zwischenergebnis import Zwischenergebnis
-from datenstruktur.enums import Norm, RechenmethodeAbheben, VereinfachungKonstruktion, Lasttyp, Variabilitaet
+from datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_kontext, protokolliere_msg, protokolliere_doc, make_docbundle
+from datenstruktur.enums import Norm, RechenmethodeAbheben, VereinfachungKonstruktion, Lasttyp, Variabilitaet, Severity
 from datenstruktur.konstanten import _EPS, aktuelle_konstanten
 from datenstruktur.kraefte import Kraefte
 from rechenfunktionen.sicherheitsbeiwert import sicherheitsbeiwert
@@ -76,14 +76,25 @@ def _abhebesicherheit_DinEn13814_2005_06(
     methode: RechenmethodeAbheben = RechenmethodeAbheben.STANDARD,
     vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
     anzahl_windrichtungen: int = 4,
+    protokoll: Optional[Protokoll] = None,
+    kontext: Optional[dict] = None,
 ) -> List[Zwischenergebnis]:
+    base_ctx = merge_kontext(kontext, {
+        "funktion": "_abhebesicherheit",
+        "norm": "DIN_EN_13814_2005_06",
+        "methode": methode.name,
+    })
+
     if vereinfachung_konstruktion is not VereinfachungKonstruktion.KEINE:
-        raise NotImplementedError(
-            f"Vereinfachung '{vereinfachung_konstruktion.value}' ({vereinfachung_konstruktion.name}) ist noch nicht implementiert."
+        protokolliere_msg(
+            protokoll, severity=Severity.ERROR, code="ABHEB/NOT_IMPLEMENTED",
+            text=f"Vereinfachung '{vereinfachung_konstruktion.value}' ist noch nicht implementiert.",
+            kontext=base_ctx,
         )
+        return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
 
     if methode is RechenmethodeAbheben.STANDARD:
-        pool = obtain_pool(konstruktion, reset_berechnungen)
+        pool = obtain_pool(konstruktion, reset_berechnungen, protokoll=protokoll, kontext=base_ctx)
         sicherheit_min_global = inf
         ballast_erforderlich_max = 0.0
         ballastkraft_dummy = Kraefte(
@@ -92,9 +103,9 @@ def _abhebesicherheit_DinEn13814_2005_06(
             Einzelkraefte = [(0.0, 0.0, 0.0)],
             Angriffsflaeche_Einzelkraefte=[[(0.0, 0.0, 0.0)]],
         )
-        sicherheitsbeiwert_ballast = sicherheitsbeiwert(norm, ballastkraft_dummy, ist_guenstig=True)
+        sicherheitsbeiwert_ballast = sicherheitsbeiwert(norm, ballastkraft_dummy, ist_guenstig=True, protokoll=protokoll, kontext=base_ctx)
 
-        for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen):
+        for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen, protokoll=protokoll, kontext=base_ctx):
             lastset = get_or_create_lastset(
                 pool,
                 konstruktion,
@@ -104,6 +115,8 @@ def _abhebesicherheit_DinEn13814_2005_06(
                 staudruecke=staudruecke,
                 obergrenzen=obergrenzen,
                 konst=konst,
+                protokoll=protokoll,
+                kontext=base_ctx,
             )
             kraefte_nach_element = lastset.kraefte_nach_element
 
@@ -111,7 +124,7 @@ def _abhebesicherheit_DinEn13814_2005_06(
             total_normal_up = 0.0
 
             for _, lastfaelle_elem in kraefte_nach_element.items():
-                N_down_b, N_up_b = abhebe_envelope_pro_bauelement(norm, lastfaelle_elem)
+                N_down_b, N_up_b = abhebe_envelope_pro_bauelement(norm, lastfaelle_elem, protokoll=protokoll, kontext=base_ctx)
                 total_normal_down += N_down_b
                 total_normal_up += N_up_b
 
@@ -130,27 +143,41 @@ def _abhebesicherheit_DinEn13814_2005_06(
         erdbeschleunigung = aktuelle_konstanten().erdbeschleunigung
         ballast_kg = ballast_erforderlich_max / erdbeschleunigung  # in N -> in kg
 
-        sicherheit_Z = Zwischenergebnis(
-            wert=sicherheit_min_global,
-            formel="S = ΣN_down / ΣN_up",
-            quelle_formel="---",
-            formelzeichen=["N_down", "N_up"],
-            quelle_formelzeichen=["---"],
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(
+                titel="Abhebesicherheit S",
+                wert=sicherheit_min_global,
+                formel="S = ΣN_down / ΣN_up",
+                formelzeichen=["N_down", "N_up"],
+                quelle_formel="---",
+                quelle_formelzeichen=["---"],
+            ),
+            kontext=base_ctx,
+        )
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(
+                titel="Erforderlicher zusätzlicher Ballast ΔN_down",
+                wert=ballast_kg,
+                formel="ΔN_down = max(0, ΣN_up − ΣN_down) / γ_g",
+                formelzeichen=["N_up", "N_down", "γ_g"],
+                quelle_formel="---",
+                quelle_formelzeichen=["---"],
+            ),
+            kontext=base_ctx,
         )
 
-        ballast_Z = Zwischenergebnis(
-            wert=ballast_kg,
-            formel="M_erf = (η_req·ΣN_up − ΣN_down) / (γ_g·g)",
-            quelle_formel="---",
-            formelzeichen=["η_req", "N_up", "N_down", "γ_g", "g"],
-            quelle_formelzeichen=["---"],
-        )
-
-        return [sicherheit_Z, ballast_Z]
+        return [Zwischenergebnis(wert=sicherheit_min_global),
+                Zwischenergebnis(wert=ballast_kg)]
 
     else:
-        raise NotImplementedError(f"Methode '{methode.value}' ({methode.name}) ist noch nicht implementiert.")
-
+        protokolliere_msg(
+            protokoll, severity=Severity.ERROR, code="ABHEB/METHOD_NI",
+            text=f"Methode '{methode.value}' ({methode.name}) ist noch nicht implementiert.",
+            kontext=base_ctx,
+        )
+        return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
 
 def _abhebesicherheit_DinEn17879_2024_08(
     konstruktion,
@@ -163,14 +190,25 @@ def _abhebesicherheit_DinEn17879_2024_08(
     methode: RechenmethodeAbheben = RechenmethodeAbheben.STANDARD,
     vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
     anzahl_windrichtungen: int = 4,
+    protokoll: Optional[Protokoll] = None,
+    kontext: Optional[dict] = None,
 ) -> List[Zwischenergebnis]:
+    base_ctx = merge_kontext(kontext, {
+        "funktion": "_abhebesicherheit",
+        "norm": "DIN_EN_13814_2005_06",
+        "methode": methode.name,
+    })
+
     if vereinfachung_konstruktion is not VereinfachungKonstruktion.KEINE:
-        raise NotImplementedError(
-            f"Vereinfachung '{vereinfachung_konstruktion.value}' ({vereinfachung_konstruktion.name}) ist noch nicht implementiert."
+        protokolliere_msg(
+            protokoll, severity=Severity.ERROR, code="ABHEB/NOT_IMPLEMENTED",
+            text=f"Vereinfachung '{vereinfachung_konstruktion.value}' ist noch nicht implementiert.",
+            kontext=base_ctx,
         )
+        return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
 
     if methode is RechenmethodeAbheben.STANDARD:
-        pool = obtain_pool(konstruktion, reset_berechnungen)
+        pool = obtain_pool(konstruktion, reset_berechnungen, protokoll=protokoll, kontext=base_ctx)
         sicherheit_min_global = inf
         ballast_erforderlich_max = 0.0
         ballastkraft_dummy = Kraefte(
@@ -179,9 +217,9 @@ def _abhebesicherheit_DinEn17879_2024_08(
             Einzelkraefte = [(0.0, 0.0, 0.0)],
             Angriffsflaeche_Einzelkraefte=[[(0.0, 0.0, 0.0)]],
         )
-        sicherheitsbeiwert_ballast = sicherheitsbeiwert(norm, ballastkraft_dummy, ist_guenstig=True)
+        sicherheitsbeiwert_ballast = sicherheitsbeiwert(norm, ballastkraft_dummy, ist_guenstig=True, protokoll=protokoll, kontext=base_ctx)
 
-        for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen):
+        for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen, protokoll=protokoll, kontext=base_ctx):
             lastset = get_or_create_lastset(
                 pool,
                 konstruktion,
@@ -191,6 +229,8 @@ def _abhebesicherheit_DinEn17879_2024_08(
                 staudruecke=staudruecke,
                 obergrenzen=obergrenzen,
                 konst=konst,
+                protokoll=protokoll,
+                kontext=base_ctx,
             )
             kraefte_nach_element = lastset.kraefte_nach_element
 
@@ -198,7 +238,7 @@ def _abhebesicherheit_DinEn17879_2024_08(
             total_normal_up = 0.0
 
             for _, lastfaelle_elem in kraefte_nach_element.items():
-                N_down_b, N_up_b = abhebe_envelope_pro_bauelement(norm, lastfaelle_elem)
+                N_down_b, N_up_b = abhebe_envelope_pro_bauelement(norm, lastfaelle_elem, protokoll=protokoll, kontext=base_ctx)
                 total_normal_down += N_down_b
                 total_normal_up += N_up_b
 
@@ -217,27 +257,41 @@ def _abhebesicherheit_DinEn17879_2024_08(
         erdbeschleunigung = aktuelle_konstanten().erdbeschleunigung
         ballast_kg = ballast_erforderlich_max / erdbeschleunigung  # in N -> in kg
 
-        sicherheit_Z = Zwischenergebnis(
-            wert=sicherheit_min_global,
-            formel="S = ΣN_down / ΣN_up",
-            quelle_formel="---",
-            formelzeichen=["N_down", "N_up"],
-            quelle_formelzeichen=["---"],
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(
+                titel="Abhebesicherheit S",
+                wert=sicherheit_min_global,
+                formel="S = ΣN_down / ΣN_up",
+                formelzeichen=["N_down", "N_up"],
+                quelle_formel="---",
+                quelle_formelzeichen=["---"],
+            ),
+            kontext=base_ctx,
+        )
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(
+                titel="Erforderlicher zusätzlicher Ballast ΔN_down",
+                wert=ballast_kg,
+                formel="ΔN_down = max(0, ΣN_up − ΣN_down) / γ_g",
+                formelzeichen=["N_up", "N_down", "γ_g"],
+                quelle_formel="---",
+                quelle_formelzeichen=["---"],
+            ),
+            kontext=base_ctx,
         )
 
-        ballast_Z = Zwischenergebnis(
-            wert=ballast_kg,
-            formel="M_erf = (η_req·ΣN_up − ΣN_down) / (γ_g·g)",
-            quelle_formel="---",
-            formelzeichen=["η_req", "N_up", "N_down", "γ_g", "g"],
-            quelle_formelzeichen=["---"],
-        )
-
-        return [sicherheit_Z, ballast_Z]
+        return [Zwischenergebnis(wert=sicherheit_min_global),
+                Zwischenergebnis(wert=ballast_kg)]
 
     else:
-        raise NotImplementedError(f"Methode '{methode.value}' ({methode.name}) ist noch nicht implementiert.")
-
+        protokolliere_msg(
+            protokoll, severity=Severity.ERROR, code="ABHEB/METHOD_NI",
+            text=f"Methode '{methode.value}' ({methode.name}) ist noch nicht implementiert.",
+            kontext=base_ctx,
+        )
+        return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
 
 # --- Dispatch ---------------------------------------------------------------
 
@@ -260,22 +314,37 @@ def abhebesicherheit(
     methode: RechenmethodeAbheben = RechenmethodeAbheben.STANDARD,
     vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
     anzahl_windrichtungen: int = 4,
+    protokoll: Optional[Protokoll] = None,
+    kontext: Optional[dict] = None,
 ) -> List[Zwischenergebnis]:
+    base_ctx = merge_kontext(kontext, {
+        "funktion": "abhebesicherheit",
+        "norm": getattr(norm, "name", str(norm)),
+        "anzahl_windrichtungen": anzahl_windrichtungen,
+    })
     """
     Norm-dispatchte Abhebe-Sicherheitsbewertung.
     Gibt ein Zwischenergebnis mit der minimalen Sicherheit über alle Windrichtungen zurück.
     """
-    _validate_inputs(
-        konstruktion,
-        norm=norm,
-        staudruecke=staudruecke,
-        obergrenzen=obergrenzen,
-        konst=konst,
-        reset_berechnungen=reset_berechnungen,
-        methode=methode,
-        vereinfachung_konstruktion=vereinfachung_konstruktion,
-        anzahl_windrichtungen=anzahl_windrichtungen,
-    )
+    try:
+        _validate_inputs(
+            konstruktion,
+            norm=norm,
+            staudruecke=staudruecke,
+            obergrenzen=obergrenzen,
+            konst=konst,
+            reset_berechnungen=reset_berechnungen,
+            methode=methode,
+            vereinfachung_konstruktion=vereinfachung_konstruktion,
+            anzahl_windrichtungen=anzahl_windrichtungen,
+        )
+    except Exception as e:
+        protokolliere_msg(
+            protokoll, severity=Severity.ERROR, code="ABHEB/INPUT_INVALID",
+            text=str(e), kontext=base_ctx,
+        )
+        return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
+    
     funktion = _DISPATCH.get(norm, _DISPATCH[Norm.DEFAULT])
     return funktion(
         konstruktion,
@@ -287,4 +356,6 @@ def abhebesicherheit(
         methode=methode,
         vereinfachung_konstruktion=vereinfachung_konstruktion,
         anzahl_windrichtungen=anzahl_windrichtungen,
+        protokoll=protokoll,
+        kontext=base_ctx,
     )

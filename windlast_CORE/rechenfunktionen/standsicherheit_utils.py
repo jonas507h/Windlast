@@ -485,7 +485,12 @@ def gleit_envelope_pro_bauelement(
 
 # Abhebesicherheit Utils -----------------------------------
 
-def bewerte_lastfall_fuer_abheben(norm: Norm, lastfall: Kraefte) -> Tuple[float, float]:
+def bewerte_lastfall_fuer_abheben(
+    norm: Norm, lastfall: Kraefte, *,
+    protokoll: Optional[Protokoll] = None, kontext: Optional[dict] = None
+) -> Tuple[float, float]:
+    base_ctx = merge_kontext(kontext, {"funktion": "bewerte_lastfall_fuer_abheben",
+                                       "lasttyp": getattr(lastfall, "typ", None)})
     """
     Zerlegt einen Lastfall in:
       N_down (günstig, NACH UNTEN; nur aus GEWICHT mit γ_günstig, als positive Größe),
@@ -495,8 +500,8 @@ def bewerte_lastfall_fuer_abheben(norm: Norm, lastfall: Kraefte) -> Tuple[float,
     N_down = 0.0
     N_up = 0.0
 
-    gamma_unguenstig = sicherheitsbeiwert(norm, lastfall, ist_guenstig=False).wert
-    gamma_guenstig = sicherheitsbeiwert(norm, lastfall, ist_guenstig=True).wert
+    gamma_unguenstig = sicherheitsbeiwert(norm, lastfall, ist_guenstig=False, protokoll=protokoll, kontext=base_ctx).wert
+    gamma_guenstig = sicherheitsbeiwert(norm, lastfall, ist_guenstig=True, protokoll=protokoll, kontext=base_ctx).wert
 
     for F in lastfall.Einzelkraefte:
         fz = F[2]
@@ -511,9 +516,10 @@ def bewerte_lastfall_fuer_abheben(norm: Norm, lastfall: Kraefte) -> Tuple[float,
 
 
 def abhebe_envelope_pro_bauelement(
-    norm: Norm,
-    lastfaelle: Iterable[Kraefte],
+    norm: Norm, lastfaelle: Iterable[Kraefte], *,
+    protokoll: Optional[Protokoll] = None, kontext: Optional[dict] = None
 ) -> Tuple[float, float]:
+    base_ctx = merge_kontext(kontext, {"funktion": "abhebe_envelope_pro_bauelement"})
     """
     Element-konsistent:
       - N_up_bauteil = max (Auftrieb) über ALLE Lastfälle.
@@ -524,7 +530,7 @@ def abhebe_envelope_pro_bauelement(
     best_N_down = None  # min über GEWICHT
 
     for k in lastfaelle:
-        N_down, N_up = bewerte_lastfall_fuer_abheben(norm, k)
+        N_down, N_up = bewerte_lastfall_fuer_abheben(norm, k, protokoll=protokoll, kontext=base_ctx)
 
         if N_up > best_N_up:
             best_N_up = N_up

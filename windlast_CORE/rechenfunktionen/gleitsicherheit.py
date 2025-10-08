@@ -180,12 +180,13 @@ def _gleitsicherheit_DinEn13814_2005_06(
 
         return [Zwischenergebnis(wert=sicherheit_min_global), Zwischenergebnis(wert=ballast_kg)]
 
-    protokolliere_msg(
-        protokoll, severity=Severity.ERROR, code="GLEIT/METHOD_NI",
-        text=f"Methode '{methode.value}' ({methode.name}) ist noch nicht implementiert.",
-        kontext=base_ctx,
-    )
-    return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
+    else:
+        protokolliere_msg(
+            protokoll, severity=Severity.ERROR, code="GLEIT/METHOD_NI",
+            text=f"Methode '{methode.value}' ({methode.name}) ist noch nicht implementiert.",
+            kontext=base_ctx,
+        )
+        return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
 
 def _gleitsicherheit_DinEn17879_2024_08(
     konstruktion,
@@ -299,13 +300,14 @@ def _gleitsicherheit_DinEn17879_2024_08(
         )
 
         return [Zwischenergebnis(wert=sicherheit_min_global), Zwischenergebnis(wert=ballast_kg)]
-
-    protokolliere_msg(
-        protokoll, severity=Severity.ERROR, code="GLEIT/METHOD_NI",
-        text=f"Methode '{methode.value}' ({methode.name}) ist noch nicht implementiert.",
-        kontext=base_ctx,
-    )
-    return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
+    
+    else:
+        protokolliere_msg(
+            protokoll, severity=Severity.ERROR, code="GLEIT/METHOD_NI",
+            text=f"Methode '{methode.value}' ({methode.name}) ist noch nicht implementiert.",
+            kontext=base_ctx,
+        )
+        return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
     
 _DISPATCH: Dict[Norm, Callable[..., List[Zwischenergebnis]]] = {
     Norm.DEFAULT: _gleitsicherheit_DinEn13814_2005_06,
