@@ -365,19 +365,57 @@ def kipp_envelope_pro_bauelement(
 
 # Gleitsicherheit Utils ------------------------------
 
-def ermittle_min_reibwert(norm: Norm,konstruktion) -> float:
+def ermittle_min_reibwert(
+    norm: Norm, konstruktion,
+    *, protokoll: Optional[Protokoll] = None, kontext: Optional[dict] = None
+) -> float:
+    base_ctx = merge_kontext(kontext, {"funktion": "ermittle_min_reibwert"})
     """Liest μ aus allen Bodenplatten (Elem hat Methode reibwert()) und gibt das Minimum zurück.
        Falls keine Platte gefunden → 0.0 (konservativ)."""
     mu_werte: List[float] = []
-    for elem in getattr(konstruktion, "bauelemente", []):
-        reib_fn = getattr(elem, "reibwert", None)
-        if callable(reib_fn):
-            mu = reib_fn(norm)
-            if mu:
-                mu_werte.append(float(mu))
-    return min(mu_werte) if mu_werte else 0.0
+    for idx, elem in enumerate(getattr(konstruktion, "bauelemente", []) or []):
+        elem_ctx = merge_kontext(base_ctx, {
+            "element_index": idx,
+            "element_id": getattr(elem, "element_id_intern", None),
+        })
 
-def bewerte_lastfall_fuer_gleiten(norm: Norm, lastfall: Kraefte) -> Tuple[Vec3, float, float]:
+        reib_fn = getattr(elem, "reibwert_effektiv", None)
+        if not callable(reib_fn):
+            continue
+
+        try:
+            mu = reib_fn(norm, protokoll=protokoll, kontext=elem_ctx)
+            if mu is not None:
+                mu_werte.append(float(mu))
+        except Exception as e:
+            protokolliere_msg(
+                protokoll, severity=Severity.ERROR, code="GLEIT/MU_READ_FAIL",
+                text=f"Reibwert-Ermittlung für Element {idx} fehlgeschlagen: {e}",
+                kontext=elem_ctx,
+            )
+
+    if not mu_werte:
+        protokolliere_msg(
+            protokoll, severity=Severity.WARN, code="GLEIT/NO_PLATE_MU",
+            text="Kein Reibwert gefunden – setze konservativ μ=0.",
+            kontext=base_ctx,
+        )
+        return 0.0
+
+    mu_min = min(mu_werte)
+    protokolliere_doc(
+        protokoll,
+        bundle=make_docbundle(titel="Reibwerte μ (min)", wert={"min": mu_min, "alle": mu_werte}),
+        kontext=base_ctx,
+    )
+    return mu_min
+
+def bewerte_lastfall_fuer_gleiten(
+    norm: Norm, lastfall: Kraefte,
+    *, protokoll: Optional[Protokoll] = None, kontext: Optional[dict] = None
+) -> Tuple[Vec3, float, float]:
+    base_ctx = merge_kontext(kontext, {"funktion": "bewerte_lastfall_fuer_gleiten",
+                                       "lasttyp": getattr(lastfall, "typ", None)})
     """
     Zerlegt einen Lastfall in:
       H_vec (treibend, horizontal, γ_ungünstig),
@@ -413,9 +451,10 @@ def bewerte_lastfall_fuer_gleiten(norm: Norm, lastfall: Kraefte) -> Tuple[Vec3, 
     return H_vec, N_down, N_up
 
 def gleit_envelope_pro_bauelement(
-    norm: Norm,
-    lastfaelle: Iterable[Kraefte],
+    norm: Norm, lastfaelle: Iterable[Kraefte],
+    *, protokoll: Optional[Protokoll] = None, kontext: Optional[dict] = None
 ) -> Tuple[Vec3, float, float]:
+    base_ctx = merge_kontext(kontext, {"funktion": "gleit_envelope_pro_bauelement"})
     """
     Element-konsistent:
       - Wähle den Lastfall mit maximaler ||H_vec|| ⇒ dessen H_vec und N_up zählen.

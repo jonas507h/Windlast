@@ -1,11 +1,11 @@
 # rechenfunktionen/gleitsicherheit.py
 from __future__ import annotations
 from math import inf
-from typing import Dict, Callable, Sequence, List
+from typing import Dict, Callable, Sequence, List, Optional
 from collections.abc import Sequence as _SeqABC
 
-from datenstruktur.zwischenergebnis import Zwischenergebnis
-from datenstruktur.enums import Norm, RechenmethodeGleiten, VereinfachungKonstruktion, Lasttyp, Variabilitaet
+from datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_kontext, protokolliere_msg, protokolliere_doc, make_docbundle
+from datenstruktur.enums import Norm, RechenmethodeGleiten, VereinfachungKonstruktion, Lasttyp, Variabilitaet, Severity
 from datenstruktur.konstanten import _EPS, aktuelle_konstanten
 from rechenfunktionen.sicherheitsbeiwert import sicherheitsbeiwert
 from datenstruktur.kraefte import Kraefte
@@ -78,14 +78,25 @@ def _gleitsicherheit_DinEn13814_2005_06(
     methode: RechenmethodeGleiten = RechenmethodeGleiten.MIN_REIBWERT,
     vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
     anzahl_windrichtungen: int = 4,
+    protokoll: Optional[Protokoll] = None,
+    kontext: Optional[dict] = None,
 ) -> List[Zwischenergebnis]:
+    base_ctx = merge_kontext(kontext, {
+        "funktion": "_gleitsicherheit",
+        "norm": "DIN_EN_13814_2005_06",
+        "methode": methode.name,
+    })
+
     if vereinfachung_konstruktion is not VereinfachungKonstruktion.KEINE:
-        raise NotImplementedError(
-            f"Vereinfachung '{vereinfachung_konstruktion.value}' ({vereinfachung_konstruktion.name}) ist noch nicht implementiert."
+        protokolliere_msg(
+            protokoll, severity=Severity.ERROR, code="GLEIT/NOT_IMPLEMENTED",
+            text=f"Vereinfachung '{vereinfachung_konstruktion.value}' ist noch nicht implementiert.",
+            kontext=base_ctx,
         )
+        return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
 
     if methode is RechenmethodeGleiten.MIN_REIBWERT:
-        reibwert_min = ermittle_min_reibwert(norm,konstruktion)
+        reibwert_min = ermittle_min_reibwert(norm,konstruktion, protokoll=protokoll, kontext=base_ctx)
         sicherheit_min_global = inf
         ballast_erforderlich_max = 0.0
         ballastkraft_dummy = Kraefte(
@@ -94,10 +105,10 @@ def _gleitsicherheit_DinEn13814_2005_06(
             Einzelkraefte = [(0.0, 0.0, 0.0)],
             Angriffsflaeche_Einzelkraefte=[[(0.0, 0.0, 0.0)]],
         )
-        sicherheitsbeiwert_ballast = sicherheitsbeiwert(norm, ballastkraft_dummy, ist_guenstig=True)
+        sicherheitsbeiwert_ballast = sicherheitsbeiwert(norm, ballastkraft_dummy, ist_guenstig=True, protokoll=protokoll, kontext=base_ctx)
         pool = obtain_pool(konstruktion, reset_berechnungen)
 
-        for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen):
+        for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen, protokoll=protokoll, kontext=base_ctx):
             lastset = get_or_create_lastset(
                 pool,
                 konstruktion,
@@ -107,6 +118,8 @@ def _gleitsicherheit_DinEn13814_2005_06(
                 staudruecke=staudruecke,
                 obergrenzen=obergrenzen,
                 konst=konst,
+                protokoll=protokoll,
+                kontext=base_ctx,
             )
             kraefte_nach_element = lastset.kraefte_nach_element
 
@@ -142,27 +155,37 @@ def _gleitsicherheit_DinEn13814_2005_06(
         erdbeschleunigung = aktuelle_konstanten().erdbeschleunigung
         ballast_kg = ballast_erforderlich_max / erdbeschleunigung  # in N -> in kg
 
-        sicherheit_Z = Zwischenergebnis(
-            wert=sicherheit_min_global,
-            formel="S = R / T",
-            quelle_formel="---",
-            formelzeichen=["R", "T"],
-            quelle_formelzeichen=["---"],
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(
+                titel="Gleitsicherheit S",
+                wert=sicherheit_min_global,
+                formel="S = R / T",
+                formelzeichen=["R", "T"],
+                quelle_formel="---",
+            ),
+            kontext=base_ctx,
+        )
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(
+                titel="Erforderlicher Ballast ΔN_down,erf",
+                wert=ballast_kg,
+                formel="ΔN_down,erf = T/μ + ΣN_up − ΣN_down",
+                formelzeichen=["T", "μ", "N_up", "N_down"],
+                quelle_formel="---",
+            ),
+            kontext=base_ctx,
         )
 
-        ballast_Z = Zwischenergebnis(
-            wert=ballast_kg,
-            formel="ΔN_down,erf = T/μ + ΣN_up − ΣN_down",
-            quelle_formel="---",
-            formelzeichen=["T", "μ", "N_up", "N_down"],
-            quelle_formelzeichen=["---"],
-        )
+        return [Zwischenergebnis(wert=sicherheit_min_global), Zwischenergebnis(wert=ballast_kg)]
 
-        return [sicherheit_Z, ballast_Z]
-
-    else:
-        raise NotImplementedError(f"Methode '{methode.value}' ({methode.name}) ist noch nicht implementiert.")
-
+    protokolliere_msg(
+        protokoll, severity=Severity.ERROR, code="GLEIT/METHOD_NI",
+        text=f"Methode '{methode.value}' ({methode.name}) ist noch nicht implementiert.",
+        kontext=base_ctx,
+    )
+    return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
 
 def _gleitsicherheit_DinEn17879_2024_08(
     konstruktion,
@@ -175,14 +198,25 @@ def _gleitsicherheit_DinEn17879_2024_08(
     methode: RechenmethodeGleiten = RechenmethodeGleiten.MIN_REIBWERT,
     vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
     anzahl_windrichtungen: int = 4,
+    protokoll: Optional[Protokoll] = None,
+    kontext: Optional[dict] = None
 ) -> List[Zwischenergebnis]:
+    base_ctx = merge_kontext(kontext, {
+        "funktion": "_gleitsicherheit",
+        "norm": "DIN_EN_13814_2005_06",
+        "methode": methode.name,
+    })
+
     if vereinfachung_konstruktion is not VereinfachungKonstruktion.KEINE:
-        raise NotImplementedError(
-            f"Vereinfachung '{vereinfachung_konstruktion.value}' ({vereinfachung_konstruktion.name}) ist noch nicht implementiert."
+        protokolliere_msg(
+            protokoll, severity=Severity.ERROR, code="GLEIT/NOT_IMPLEMENTED",
+            text=f"Vereinfachung '{vereinfachung_konstruktion.value}' ist noch nicht implementiert.",
+            kontext=base_ctx,
         )
+        return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
 
     if methode is RechenmethodeGleiten.MIN_REIBWERT:
-        reibwert_min = ermittle_min_reibwert(norm,konstruktion)
+        reibwert_min = ermittle_min_reibwert(norm,konstruktion, protokoll=protokoll, kontext=base_ctx)
         sicherheit_min_global = inf
         ballast_erforderlich_max = 0.0
         ballastkraft_dummy = Kraefte(
@@ -191,10 +225,10 @@ def _gleitsicherheit_DinEn17879_2024_08(
             Einzelkraefte = [(0.0, 0.0, 0.0)],
             Angriffsflaeche_Einzelkraefte=[[(0.0, 0.0, 0.0)]],
         )
-        sicherheitsbeiwert_ballast = sicherheitsbeiwert(norm, ballastkraft_dummy, ist_guenstig=True)
+        sicherheitsbeiwert_ballast = sicherheitsbeiwert(norm, ballastkraft_dummy, ist_guenstig=True, protokoll=protokoll, kontext=base_ctx)
         pool = obtain_pool(konstruktion, reset_berechnungen)
 
-        for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen):
+        for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen, protokoll=protokoll, kontext=base_ctx):
             lastset = get_or_create_lastset(
                 pool,
                 konstruktion,
@@ -204,6 +238,8 @@ def _gleitsicherheit_DinEn17879_2024_08(
                 staudruecke=staudruecke,
                 obergrenzen=obergrenzen,
                 konst=konst,
+                protokoll=protokoll,
+                kontext=base_ctx,
             )
             kraefte_nach_element = lastset.kraefte_nach_element
 
@@ -212,7 +248,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
             total_normal_down = 0.0
 
             for _, lastfaelle_elem in kraefte_nach_element.items():
-                H_vec, N_down, N_up = gleit_envelope_pro_bauelement(norm, lastfaelle_elem)
+                H_vec, N_down, N_up = gleit_envelope_pro_bauelement(norm, lastfaelle_elem, protokoll=protokoll, kontext=base_ctx)
                 total_horizontal = vektoren_addieren([total_horizontal, H_vec])
                 total_normal_up += N_up
                 total_normal_down += N_down
@@ -239,26 +275,37 @@ def _gleitsicherheit_DinEn17879_2024_08(
         erdbeschleunigung = aktuelle_konstanten().erdbeschleunigung
         ballast_kg = ballast_erforderlich_max / erdbeschleunigung  # in N -> in kg
 
-        sicherheit_Z = Zwischenergebnis(
-            wert=sicherheit_min_global,
-            formel="S = R / T",
-            quelle_formel="---",
-            formelzeichen=["R", "T"],
-            quelle_formelzeichen=["---"],
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(
+                titel="Gleitsicherheit S",
+                wert=sicherheit_min_global,
+                formel="S = R / T",
+                formelzeichen=["R", "T"],
+                quelle_formel="---",
+            ),
+            kontext=base_ctx,
+        )
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(
+                titel="Erforderlicher Ballast ΔN_down,erf",
+                wert=ballast_kg,
+                formel="ΔN_down,erf = T/μ + ΣN_up − ΣN_down",
+                formelzeichen=["T", "μ", "N_up", "N_down"],
+                quelle_formel="---",
+            ),
+            kontext=base_ctx,
         )
 
-        ballast_Z = Zwischenergebnis(
-            wert=ballast_kg,
-            formel="ΔN_down,erf = T/μ + ΣN_up − ΣN_down",
-            quelle_formel="---",
-            formelzeichen=["T", "μ", "N_up", "N_down"],
-            quelle_formelzeichen=["---"],
-        )
+        return [Zwischenergebnis(wert=sicherheit_min_global), Zwischenergebnis(wert=ballast_kg)]
 
-        return [sicherheit_Z, ballast_Z]
-
-    else:
-        raise NotImplementedError(f"Methode '{methode.value}' ({methode.name}) ist noch nicht implementiert.")
+    protokolliere_msg(
+        protokoll, severity=Severity.ERROR, code="GLEIT/METHOD_NI",
+        text=f"Methode '{methode.value}' ({methode.name}) ist noch nicht implementiert.",
+        kontext=base_ctx,
+    )
+    return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
     
 _DISPATCH: Dict[Norm, Callable[..., List[Zwischenergebnis]]] = {
     Norm.DEFAULT: _gleitsicherheit_DinEn13814_2005_06,
@@ -277,18 +324,34 @@ def gleitsicherheit(
     methode: RechenmethodeGleiten = RechenmethodeGleiten.MIN_REIBWERT,
     vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
     anzahl_windrichtungen: int = 4,
+    protokoll: Optional[Protokoll] = None,
+    kontext: Optional[dict] = None,
 ) -> List[Zwischenergebnis]:
-    _validate_inputs(
-        konstruktion,
-        norm=norm,
-        staudruecke=staudruecke,
-        obergrenzen=obergrenzen,
-        konst=konst,
-        reset_berechnungen=reset_berechnungen,
-        methode=methode,
-        vereinfachung_konstruktion=vereinfachung_konstruktion,
-        anzahl_windrichtungen=anzahl_windrichtungen,
-    )
+    base_ctx = merge_kontext(kontext, {
+        "funktion": "gleitsicherheit",
+        "norm": getattr(norm, "name", str(norm)),
+        "anzahl_windrichtungen": anzahl_windrichtungen,
+    })
+
+    try:
+        _validate_inputs(
+            konstruktion,
+            norm=norm,
+            staudruecke=staudruecke,
+            obergrenzen=obergrenzen,
+            konst=konst,
+            reset_berechnungen=reset_berechnungen,
+            methode=methode,
+            vereinfachung_konstruktion=vereinfachung_konstruktion,
+            anzahl_windrichtungen=anzahl_windrichtungen,
+        )
+    except Exception as e:
+        protokolliere_msg(
+            protokoll, severity=Severity.ERROR, code="GLEIT/INPUT_INVALID",
+            text=str(e), kontext=base_ctx,
+        )
+        return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
+    
     funktion = _DISPATCH.get(norm, _DISPATCH[Norm.DEFAULT])
     return funktion(
         konstruktion,
@@ -300,5 +363,7 @@ def gleitsicherheit(
         methode=methode,
         vereinfachung_konstruktion=vereinfachung_konstruktion,
         anzahl_windrichtungen=anzahl_windrichtungen,
+        protokoll=protokoll,
+        kontext=base_ctx,
     )
     
