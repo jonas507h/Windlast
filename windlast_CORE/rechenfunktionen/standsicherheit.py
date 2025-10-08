@@ -14,6 +14,7 @@ from datenstruktur.standsicherheit_ergebnis import (
     StandsicherheitErgebnis, NormErgebnis, SafetyValue, Message, Meta,
 )
 from rechenfunktionen.staudruecke import staudruecke  # type: ignore
+from datenstruktur.zwischenergebnis import Protokoll, merge_kontext
 
 
 # -----------------------------
@@ -78,7 +79,11 @@ def _rechne_drei_nachweise(
     anzahl_windrichtungen: int,
     reasons: List[Message],
     norm_label: str,
+    protokoll: Optional[Protokoll] = None,
+    kontext: Optional[dict] = None,
 ) -> Tuple[Dict[Nachweis, SafetyValue], Tuple[Optional[float], Optional[float], Optional[float]]]:
+    base_ctx = merge_kontext(kontext, {"funktion": "_rechne_drei_nachweise", "norm": norm.name, "norm_label": norm_label})
+
     """
     Führt Kipp/Gleit/Abhebe durch (inkl. Fehlermeldungen im gleichen Stil wie bisher)
     und liefert SafetyValues + die drei Rohwerte (für Fallback-Trigger).
@@ -93,6 +98,8 @@ def _rechne_drei_nachweise(
             norm, q, z, konst=konst, reset_berechnungen=True,
             methode=meth_kipp, vereinfachung_konstruktion=vereinfachung_konstruktion,
             anzahl_windrichtungen=anzahl_windrichtungen,
+            protokoll=protokoll,
+            kontext=base_ctx,
         )
         v_kipp = float(r[0].wert); b_kipp = float(r[1].wert)
         out[Nachweis.KIPP] = SafetyValue(v_kipp, meth_kipp, ValueSource.COMPUTED, [])
@@ -107,6 +114,8 @@ def _rechne_drei_nachweise(
             norm, q, z, konst=konst, reset_berechnungen=False,
             methode=meth_gleit, vereinfachung_konstruktion=vereinfachung_konstruktion,
             anzahl_windrichtungen=anzahl_windrichtungen,
+            protokoll=protokoll,
+            kontext=base_ctx,
         )
         v_gleit = float(r[0].wert); b_gleit = float(r[1].wert)
         out[Nachweis.GLEIT] = SafetyValue(v_gleit, meth_gleit, ValueSource.COMPUTED, [])
@@ -121,6 +130,8 @@ def _rechne_drei_nachweise(
             norm, q, z, konst=konst, reset_berechnungen=False,
             methode=meth_abhebe, vereinfachung_konstruktion=vereinfachung_konstruktion,
             anzahl_windrichtungen=anzahl_windrichtungen,
+            protokoll=protokoll,
+            kontext=base_ctx,
         )
         v_abhebe = float(r[0].wert); b_abhebe = float(r[1].wert)
         out[Nachweis.ABHEBE] = SafetyValue(v_abhebe, meth_abhebe, ValueSource.COMPUTED, [])
@@ -190,9 +201,11 @@ def standsicherheit(
     ) -> NormErgebnis:
         # Primär-Szenario ist szenarien[0]; alle weiteren werden als alternativen[...] abgelegt
         reasons_all: List[Message] = []
+        prot = Protokoll()
 
         # Primär
-        z, q, reasons = _ermittle_staudruecke(konstruktion, szenarien[0], aufstelldauer=aufstelldauer)
+        s_primary = szenarien[0]
+        z, q, reasons = _ermittle_staudruecke(konstruktion, s_primary, aufstelldauer=aufstelldauer)
         reasons_all.extend(reasons)
         if z is None or q is None:
             # Ohne q/z: ERROR + Platzhalterwerte wie bisher
@@ -212,6 +225,7 @@ def standsicherheit(
             konst=konst, meth_kipp=meth_kipp, meth_gleit=meth_gleit, meth_abhebe=meth_abhebe,
             vereinfachung_konstruktion=vereinfachung_konstruktion, anzahl_windrichtungen=anzahl_windrichtungen,
             reasons=reasons_all, norm_label=normtitel,
+            protokoll=prot, kontext={"szenario": s_primary.label},
         )
 
         alternativen: Dict[str, Dict[Nachweis, SafetyValue]] = {}
@@ -230,8 +244,14 @@ def standsicherheit(
                     konst=konst, meth_kipp=meth_kipp, meth_gleit=meth_gleit, meth_abhebe=meth_abhebe,
                     vereinfachung_konstruktion=vereinfachung_konstruktion, anzahl_windrichtungen=anzahl_windrichtungen,
                     reasons=reasons_all, norm_label=f"{s.norm.name} ({s.label})",
+                    protokoll=prot, kontext={"szenario": s.label},
                 )
                 alternativen[s.label] = vals_b
+
+        try:
+            reasons_all.extend(getattr(prot, "messages", []))
+        except Exception:
+            pass
 
         status = NormStatus.ERROR if any(m.severity == Severity.ERROR for m in reasons_all) else NormStatus.CALCULATED
         return NormErgebnis(status=status, reasons=reasons_all, werte=werte, alternativen=alternativen)
