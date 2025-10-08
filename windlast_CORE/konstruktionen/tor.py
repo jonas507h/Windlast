@@ -3,11 +3,11 @@ from typing import List, Optional, Sequence
 from bauelemente import Bodenplatte, Traversenstrecke
 from materialdaten.catalog import catalog
 from rechenfunktionen import (
-    kippsicherheit as _kippsicherheit,
-    gleitsicherheit as _gleitsicherheit,
-    abhebesicherheit as _abhebesicherheit,
     gesamtgewicht as _gesamtgewicht,
 )
+from rechenfunktionen.kippsicherheit import kippsicherheit as _kippsicherheit
+from rechenfunktionen.gleitsicherheit import gleitsicherheit as _gleitsicherheit
+from rechenfunktionen.abhebesicherheit import abhebesicherheit as _abhebesicherheit
 from datenstruktur.enums import Norm, MaterialTyp, FormTyp, RechenmethodeKippen, RechenmethodeGleiten, RechenmethodeAbheben, VereinfachungKonstruktion
 from datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_kontext
 

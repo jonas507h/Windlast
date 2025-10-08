@@ -1,8 +1,14 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import Optional, Sequence, Mapping, Any, Protocol, runtime_checkable, Dict, List, Tuple, Union
-from rechenfunktionen.geom3d import Vec3  # (x,y,z)
+from typing import Optional, Sequence, Mapping, Any, Protocol, runtime_checkable, Dict, List, Tuple, Union, TYPE_CHECKING
 from datenstruktur.enums import Severity
+
+if TYPE_CHECKING:
+    # nur für Typprüfung, NICHT zur Laufzeit:
+    from rechenfunktionen.geom3d import Vec3
+else:
+    # Laufzeit-Placeholder – reicht für Typannotationen und Dataklassen
+    Vec3 = Tuple[float, float, float]
 
 # ========= Protokoll-Schnittstelle =========
 
