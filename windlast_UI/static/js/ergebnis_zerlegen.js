@@ -27,7 +27,8 @@
           const sev = normalizeSeverity(m?.severity);
           if (!sev) continue;
           const ctx = m?.context || {};
-          const scen = String(ctx.szenario ?? ctx.scenario ?? "_gesamt");
+          const rawScen = (ctx.szenario ?? ctx.scenario);
+          const scen = (rawScen === undefined || rawScen === null || String(rawScen).trim() === "") ? "_gesamt" : String(rawScen);
           ensure(scen)[sev] += 1;
         }
         idx.counts[normKey] = c;
@@ -66,6 +67,18 @@
         const byNorm = this.counts?.[normKey] || {};
         const sum = createZeroCounts();
         for (const c of Object.values(byNorm)) {
+          sum.error += c.error; sum.warn += c.warn; sum.hint += c.hint; sum.info += c.info;
+        }
+        return sum;
+      },
+
+      // Summe NUR Hauptberechnung: alle Szenarien außer den Alternativen
+      getCountsMainOnly(normKey) {
+        const byNorm = this.counts?.[normKey] || {};
+        const altNames = Object.keys(this.payload?.normen?.[normKey]?.alternativen || {});
+        const sum = createZeroCounts();
+        for (const [sc, c] of Object.entries(byNorm)) {
+          if (altNames.includes(sc)) continue; // Alternativen überspringen
           sum.error += c.error; sum.warn += c.warn; sum.hint += c.hint; sum.info += c.info;
         }
         return sum;

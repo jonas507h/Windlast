@@ -248,7 +248,7 @@ Tooltip.register('.results-table thead th', {
     const key = el.dataset.normKey;
     if (!ResultsVM) return "Keine Daten";
 
-    const c = ResultsVM.getCountsAllScenarios(key); // Gesamt je Norm
+    const c = ResultsVM.getCountsMainOnly(key); // Gesamt je Norm
     // hübsches Node bauen (mehrzeilig, gut lesbar)
     const wrap = document.createElement("div");
     const lines = [
