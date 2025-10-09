@@ -15,6 +15,18 @@ const ALT_LABELS = {
   IN_BETRIEB: "mit Schutzmaßnahmen",
 };
 
+let ResultsVM = null; // hält das von ResultsIndex.build(...) erzeugte ViewModel
+
+function attachNormKeysToHeader() {
+  // ordnet thead-ths der COLS-Reihenfolge zu
+  const ths = document.querySelectorAll('.results-table thead th');
+  // th[0] ist der Stub "Nachweis"
+  for (let i = 1; i < ths.length && i <= COLS.length; i++) {
+    const th = ths[i];
+    th.dataset.normKey = COLS[i - 1]; // "EN_13814_2005" etc.
+  }
+}
+
 function displayAltName(name) {
   return (name && ALT_LABELS[name]) || name || "";
 }
@@ -133,28 +145,23 @@ function _setBallastOnTdAlt(td, valKg) {
   td.title = "";
 }
 
-// --- NEU: Alternativen unten anhängen (mit Zwischentitel pro Block) ---
-function renderAlternativenBlocks(payload) {
+function renderAlternativenBlocksVM(vm) {
   const tbody = document.querySelector(".results-table tbody");
   if (!tbody) return;
 
-  // Alte Alternativ-Zeilen entfernen
   _clearAltRows();
 
-  const normen = payload?.normen || {};
-
-  // Pro Norm die Liste der Alternativ-Namen (Reihenfolge aus dem JSON)
+  // Pro Norm: Liste alternativer Namen
   const altLists = {};
   let maxCount = 0;
   for (const normKey of COLS) {
-    const names = Object.keys(normen[normKey]?.alternativen || {});
+    const names = vm.listAlternativen(normKey);
     altLists[normKey] = names;
     if (names.length > maxCount) maxCount = names.length;
   }
 
-  // Für jeden "Index" einen Block aufbauen:
   for (let i = 0; i < maxCount; i++) {
-    // Titelzeile: "Nachweis" + je Norm der Alt-Name an Position i
+    // Titelzeile für diesen Alternativen-Index
     const trTitle = document.createElement("tr");
     trTitle.setAttribute("data-alt-row", "1");
     trTitle.className = "alt-title";
@@ -171,11 +178,13 @@ function renderAlternativenBlocks(payload) {
       th.className = "colhead-alt";
       const rawName = (altLists[normKey] && altLists[normKey][i]) ? altLists[normKey][i] : "";
       th.textContent = displayAltName(rawName);
+      // optional: dem Alt-Titel das Norm-Key + Szenario mitgeben (kannst du später für Tooltips nutzen)
+      if (rawName) { th.dataset.normKey = normKey; th.dataset.szenario = rawName; }
       trTitle.appendChild(th);
     }
     tbody.appendChild(trTitle);
 
-    // Vier Zeilen für diesen Alternativen-Index (Kipp/Gleit/Abhebe/Ballast)
+    // Vier Zeilen: Kipp/Gleit/Abhebe/Ballast
     for (const row of ROWS) {
       const tr = document.createElement("tr");
       tr.setAttribute("data-alt-row", "1");
@@ -190,30 +199,38 @@ function renderAlternativenBlocks(payload) {
         const td = document.createElement("td");
         td.className = "value";
         const altName = (altLists[normKey] && altLists[normKey][i]) ? altLists[normKey][i] : null;
-        const v = altName ? (normen[normKey]?.alternativen?.[altName]?.[row.key]) : undefined;
+        const v = altName ? vm.getAltValue(normKey, altName, row.key) : undefined;
 
         if (row.isSafety) _setSafetyOnTdAlt(td, v);
         else _setBallastOnTdAlt(td, v);
 
         tr.appendChild(td);
       }
-
       tbody.appendChild(tr);
     }
   }
 }
 
 function updateFooter(payload) {
-  const normen = payload?.normen || {};
-  for (const [normKey, vals] of Object.entries(normen)) {
+  // ViewModel bauen
+  ResultsVM = ResultsIndex.build(payload);
+
+  // Header-Zellen einmal markieren (falls noch nicht)
+  attachNormKeysToHeader();
+
+  // Hauptwerte setzen (über VM, nicht direkt aus payload)
+  for (const normKey of COLS) {
     const suf = NORM_ID[normKey];
     if (!suf) continue;
-    setCell(`kipp_${suf}`,   vals.kipp);
-    setCell(`gleit_${suf}`,  vals.gleit);
-    setCell(`abhebe_${suf}`, vals.abhebe);
-    setBallastCell(`ballast_${suf}`, vals.ballast);
+
+    setCell(`kipp_${suf}`,   ResultsVM.getMainValue(normKey, "kipp"));
+    setCell(`gleit_${suf}`,  ResultsVM.getMainValue(normKey, "gleit"));
+    setCell(`abhebe_${suf}`, ResultsVM.getMainValue(normKey, "abhebe"));
+    setBallastCell(`ballast_${suf}`, ResultsVM.getMainValue(normKey, "ballast"));
   }
-  renderAlternativenBlocks(payload);
+
+  // Alternativen rendern (neu: auf Basis der VM)
+  renderAlternativenBlocksVM(ResultsVM);
 }
 
 window.addEventListener("message", (ev) => {
@@ -223,10 +240,66 @@ window.addEventListener("message", (ev) => {
   }
 });
 
-// ---- Tooltip "Test" für DIN EN 17879:2024-08 ----
+// ---- Tooltip: Summen pro Norm im Kopf anzeigen ----
+// normale Berechnung
 Tooltip.register('.results-table thead th', {
-  predicate: el => el.textContent.trim() === "DIN EN 17879:2024-08",
-  content: "Test",
+  predicate: el => !!el.dataset.normKey,  // nur echte Norm-Spalten
+  content: (_ev, el) => {
+    const key = el.dataset.normKey;
+    if (!ResultsVM) return "Keine Daten";
+
+    const c = ResultsVM.getCountsAllScenarios(key); // Gesamt je Norm
+    // hübsches Node bauen (mehrzeilig, gut lesbar)
+    const wrap = document.createElement("div");
+    const lines = [
+      [c.error, "Fehler"],
+      [c.warn,  "Warnungen"],
+      [c.hint,  "Hinweise"],
+      [c.info,  "Infos"],
+    ];
+    for (const [n, label] of lines) {
+      const div = document.createElement("div");
+      div.textContent = `${n} ${label}`;
+      wrap.appendChild(div);
+    }
+    return wrap;
+  },
   className: "tt-info",
-  priority: 100  // hoch, damit er gegen generische Regeln gewinnt
+  priority: 50,
+  delay: 120
+});
+
+// Alternativen-Berechnung
+Tooltip.register('.results-table .alt-title th[data-szenario]', {
+  predicate: el => !!el.dataset.normKey && !!el.dataset.szenario,
+  content: (_ev, el) => {
+    if (!ResultsVM) return "Keine Daten";
+    const normKey = el.dataset.normKey;
+    const szenario = el.dataset.szenario;
+
+    const c = ResultsVM.getCounts(normKey, szenario); // nur diese Alternative
+    // hübsches Node mit 4 Zeilen zurückgeben
+    const wrap = document.createElement("div");
+    const header = document.createElement("div");
+    header.style.fontWeight = "600";
+    header.textContent = displayAltName ? `Alternative: ${displayAltName(szenario)}` : `Alternative: ${szenario}`;
+    wrap.appendChild(header);
+
+    const lines = [
+      [c.error, "Fehler"],
+      [c.warn,  "Warnungen"],
+      [c.hint,  "Hinweise"],
+      [c.info,  "Infos"],
+    ];
+    for (const [n, label] of lines) {
+      const row = document.createElement("div");
+      row.textContent = `${n} ${label}`;
+      wrap.appendChild(row);
+    }
+
+    return wrap;
+  },
+  className: "tt-info",
+  priority: 50,
+  delay: 120
 });
