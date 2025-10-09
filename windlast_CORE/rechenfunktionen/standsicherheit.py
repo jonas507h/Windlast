@@ -3,6 +3,9 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional, Tuple, Any, List, Dict, Literal
+from enum import Enum
+from dataclasses import asdict, is_dataclass
+import json
 
 from datenstruktur.enums import (
     Norm, Windzone, Betriebszustand, Schutzmassnahmen,
@@ -16,6 +19,28 @@ from datenstruktur.standsicherheit_ergebnis import (
 from rechenfunktionen.staudruecke import staudruecke  # type: ignore
 from datenstruktur.zwischenergebnis import make_protokoll, collect_messages, merge_kontext, Protokoll
 
+def dataclass_to_json(obj):
+    """
+    Wandelt verschachtelte Dataclasses in dicts um und ersetzt Enum-Werte durch .value.
+    """
+    if is_dataclass(obj):
+        return {k: dataclass_to_json(v) for k, v in asdict(obj).items()}
+    if isinstance(obj, dict):
+        return {dataclass_to_json(k): dataclass_to_json(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [dataclass_to_json(v) for v in obj]
+    if isinstance(obj, Enum):
+        return obj.value
+    return obj
+
+def save_ergebnis_to_file(ergebnis, pfad="ergebnis_dump.json"):
+    from pathlib import Path
+    import json
+    Path(pfad).write_text(
+        json.dumps(dataclass_to_json(ergebnis), indent=2, ensure_ascii=False),
+        encoding="utf-8"
+    )
+    print(f"✅ Ergebnis gespeichert unter: {Path(pfad).resolve()}")
 
 # -----------------------------
 # 1) Staudruck-Ermittlung
@@ -294,6 +319,9 @@ def standsicherheit(
             #                   schutz=Schutzmassnahmen.KEINE, windzone=windzone),
         ],
         normtitel="DIN EN 1991-1-4:2010-12",
-)
+    )
+
+    # Ergebnis speichern (Debug)
+    # save_ergebnis_to_file(StandsicherheitErgebnis(normen=normen, messages=[], meta=meta))
 
     return StandsicherheitErgebnis(normen=normen, messages=[], meta=meta)

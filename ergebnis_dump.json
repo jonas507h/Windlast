@@ -1,0 +1,5398 @@
+{
+  "normen": {
+    "DIN EN 13814:2005-06": {
+      "status": "calculated",
+      "reasons": [
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 0.0,
+            "windrichtung": [
+              1.0,
+              0.0,
+              0.0
+            ],
+            "element_index": 0,
+            "element_id": "Strecke_Links",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=4.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 0.0,
+            "windrichtung": [
+              1.0,
+              0.0,
+              0.0
+            ],
+            "element_index": 1,
+            "element_id": "Strecke_Oben",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 4.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 0.0,
+            "windrichtung": [
+              1.0,
+              0.0,
+              0.0
+            ],
+            "element_index": 2,
+            "element_id": "Strecke_Rechts",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 90.0,
+            "windrichtung": [
+              6.123233995736766e-17,
+              1.0,
+              0.0
+            ],
+            "element_index": 0,
+            "element_id": "Strecke_Links",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=4.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 90.0,
+            "windrichtung": [
+              6.123233995736766e-17,
+              1.0,
+              0.0
+            ],
+            "element_index": 1,
+            "element_id": "Strecke_Oben",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 4.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 90.0,
+            "windrichtung": [
+              6.123233995736766e-17,
+              1.0,
+              0.0
+            ],
+            "element_index": 2,
+            "element_id": "Strecke_Rechts",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 180.0,
+            "windrichtung": [
+              -1.0,
+              1.2246467991473532e-16,
+              0.0
+            ],
+            "element_index": 0,
+            "element_id": "Strecke_Links",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=4.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 180.0,
+            "windrichtung": [
+              -1.0,
+              1.2246467991473532e-16,
+              0.0
+            ],
+            "element_index": 1,
+            "element_id": "Strecke_Oben",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 4.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 180.0,
+            "windrichtung": [
+              -1.0,
+              1.2246467991473532e-16,
+              0.0
+            ],
+            "element_index": 2,
+            "element_id": "Strecke_Rechts",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 270.0,
+            "windrichtung": [
+              -1.8369701987210297e-16,
+              -1.0,
+              0.0
+            ],
+            "element_index": 0,
+            "element_id": "Strecke_Links",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=4.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 270.0,
+            "windrichtung": [
+              -1.8369701987210297e-16,
+              -1.0,
+              0.0
+            ],
+            "element_index": 1,
+            "element_id": "Strecke_Oben",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 4.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 270.0,
+            "windrichtung": [
+              -1.8369701987210297e-16,
+              -1.0,
+              0.0
+            ],
+            "element_index": 2,
+            "element_id": "Strecke_Rechts",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "REIB/FALLBACK_NORM",
+          "severity": "hint",
+          "text": "Für Paarung STAHL–GUMMI wurde auf DIN_EN_17879_2024_08 zurückgegriffen.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "reibwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "MIN_REIBWERT",
+            "element_index": 3,
+            "element_id": "Bodenplatte_Links",
+            "bodenplatte_name_intern": "bp_stahl_100x100",
+            "paarung": [
+              "STAHL",
+              "GUMMI"
+            ],
+            "norm_used": "DIN_EN_17879_2024_08"
+          }
+        },
+        {
+          "code": "REIB/FALLBACK_NORM",
+          "severity": "hint",
+          "text": "Für Paarung GUMMI–BETON wurde auf DIN_EN_17879_2024_08 zurückgegriffen.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "reibwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "MIN_REIBWERT",
+            "element_index": 3,
+            "element_id": "Bodenplatte_Links",
+            "bodenplatte_name_intern": "bp_stahl_100x100",
+            "paarung": [
+              "GUMMI",
+              "BETON"
+            ],
+            "norm_used": "DIN_EN_17879_2024_08"
+          }
+        },
+        {
+          "code": "REIB/PAIR_GOVERNING",
+          "severity": "hint",
+          "text": "Maßgebend ist die Paarung STAHL–GUMMI mit μ=0.600.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "reibwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "MIN_REIBWERT",
+            "element_index": 3,
+            "element_id": "Bodenplatte_Links",
+            "bodenplatte_name_intern": "bp_stahl_100x100",
+            "paarung": [
+              "STAHL",
+              "GUMMI"
+            ]
+          }
+        },
+        {
+          "code": "REIB/FALLBACK_NORM",
+          "severity": "hint",
+          "text": "Für Paarung STAHL–GUMMI wurde auf DIN_EN_17879_2024_08 zurückgegriffen.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "reibwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "MIN_REIBWERT",
+            "element_index": 4,
+            "element_id": "Bodenplatte_Rechts",
+            "bodenplatte_name_intern": "bp_stahl_100x100",
+            "paarung": [
+              "STAHL",
+              "GUMMI"
+            ],
+            "norm_used": "DIN_EN_17879_2024_08"
+          }
+        },
+        {
+          "code": "REIB/FALLBACK_NORM",
+          "severity": "hint",
+          "text": "Für Paarung GUMMI–BETON wurde auf DIN_EN_17879_2024_08 zurückgegriffen.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "reibwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "MIN_REIBWERT",
+            "element_index": 4,
+            "element_id": "Bodenplatte_Rechts",
+            "bodenplatte_name_intern": "bp_stahl_100x100",
+            "paarung": [
+              "GUMMI",
+              "BETON"
+            ],
+            "norm_used": "DIN_EN_17879_2024_08"
+          }
+        },
+        {
+          "code": "REIB/PAIR_GOVERNING",
+          "severity": "hint",
+          "text": "Maßgebend ist die Paarung STAHL–GUMMI mit μ=0.600.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "reibwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "MIN_REIBWERT",
+            "element_index": 4,
+            "element_id": "Bodenplatte_Rechts",
+            "bodenplatte_name_intern": "bp_stahl_100x100",
+            "paarung": [
+              "STAHL",
+              "GUMMI"
+            ]
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "MIN_REIBWERT",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN EN 13814:2005-06",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 0.0,
+            "windrichtung": [
+              1.0,
+              0.0,
+              0.0
+            ],
+            "element_index": 0,
+            "element_id": "Strecke_Links",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=4.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 0.0,
+            "windrichtung": [
+              1.0,
+              0.0,
+              0.0
+            ],
+            "element_index": 1,
+            "element_id": "Strecke_Oben",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 4.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 0.0,
+            "windrichtung": [
+              1.0,
+              0.0,
+              0.0
+            ],
+            "element_index": 2,
+            "element_id": "Strecke_Rechts",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 90.0,
+            "windrichtung": [
+              6.123233995736766e-17,
+              1.0,
+              0.0
+            ],
+            "element_index": 0,
+            "element_id": "Strecke_Links",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=4.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 90.0,
+            "windrichtung": [
+              6.123233995736766e-17,
+              1.0,
+              0.0
+            ],
+            "element_index": 1,
+            "element_id": "Strecke_Oben",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 4.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 90.0,
+            "windrichtung": [
+              6.123233995736766e-17,
+              1.0,
+              0.0
+            ],
+            "element_index": 2,
+            "element_id": "Strecke_Rechts",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 180.0,
+            "windrichtung": [
+              -1.0,
+              1.2246467991473532e-16,
+              0.0
+            ],
+            "element_index": 0,
+            "element_id": "Strecke_Links",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=4.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 180.0,
+            "windrichtung": [
+              -1.0,
+              1.2246467991473532e-16,
+              0.0
+            ],
+            "element_index": 1,
+            "element_id": "Strecke_Oben",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 4.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 180.0,
+            "windrichtung": [
+              -1.0,
+              1.2246467991473532e-16,
+              0.0
+            ],
+            "element_index": 2,
+            "element_id": "Strecke_Rechts",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 270.0,
+            "windrichtung": [
+              -1.8369701987210297e-16,
+              -1.0,
+              0.0
+            ],
+            "element_index": 0,
+            "element_id": "Strecke_Links",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=4.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 270.0,
+            "windrichtung": [
+              -1.8369701987210297e-16,
+              -1.0,
+              0.0
+            ],
+            "element_index": 1,
+            "element_id": "Strecke_Oben",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 4.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 270.0,
+            "windrichtung": [
+              -1.8369701987210297e-16,
+              -1.0,
+              0.0
+            ],
+            "element_index": 2,
+            "element_id": "Strecke_Rechts",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "REIB/FALLBACK_NORM",
+          "severity": "hint",
+          "text": "Für Paarung STAHL–GUMMI wurde auf DIN_EN_17879_2024_08 zurückgegriffen.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "reibwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "MIN_REIBWERT",
+            "element_index": 3,
+            "element_id": "Bodenplatte_Links",
+            "bodenplatte_name_intern": "bp_stahl_100x100",
+            "paarung": [
+              "STAHL",
+              "GUMMI"
+            ],
+            "norm_used": "DIN_EN_17879_2024_08"
+          }
+        },
+        {
+          "code": "REIB/FALLBACK_NORM",
+          "severity": "hint",
+          "text": "Für Paarung GUMMI–BETON wurde auf DIN_EN_17879_2024_08 zurückgegriffen.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "reibwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "MIN_REIBWERT",
+            "element_index": 3,
+            "element_id": "Bodenplatte_Links",
+            "bodenplatte_name_intern": "bp_stahl_100x100",
+            "paarung": [
+              "GUMMI",
+              "BETON"
+            ],
+            "norm_used": "DIN_EN_17879_2024_08"
+          }
+        },
+        {
+          "code": "REIB/PAIR_GOVERNING",
+          "severity": "hint",
+          "text": "Maßgebend ist die Paarung STAHL–GUMMI mit μ=0.600.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "reibwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "MIN_REIBWERT",
+            "element_index": 3,
+            "element_id": "Bodenplatte_Links",
+            "bodenplatte_name_intern": "bp_stahl_100x100",
+            "paarung": [
+              "STAHL",
+              "GUMMI"
+            ]
+          }
+        },
+        {
+          "code": "REIB/FALLBACK_NORM",
+          "severity": "hint",
+          "text": "Für Paarung STAHL–GUMMI wurde auf DIN_EN_17879_2024_08 zurückgegriffen.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "reibwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "MIN_REIBWERT",
+            "element_index": 4,
+            "element_id": "Bodenplatte_Rechts",
+            "bodenplatte_name_intern": "bp_stahl_100x100",
+            "paarung": [
+              "STAHL",
+              "GUMMI"
+            ],
+            "norm_used": "DIN_EN_17879_2024_08"
+          }
+        },
+        {
+          "code": "REIB/FALLBACK_NORM",
+          "severity": "hint",
+          "text": "Für Paarung GUMMI–BETON wurde auf DIN_EN_17879_2024_08 zurückgegriffen.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "reibwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "MIN_REIBWERT",
+            "element_index": 4,
+            "element_id": "Bodenplatte_Rechts",
+            "bodenplatte_name_intern": "bp_stahl_100x100",
+            "paarung": [
+              "GUMMI",
+              "BETON"
+            ],
+            "norm_used": "DIN_EN_17879_2024_08"
+          }
+        },
+        {
+          "code": "REIB/PAIR_GOVERNING",
+          "severity": "hint",
+          "text": "Maßgebend ist die Paarung STAHL–GUMMI mit μ=0.600.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "reibwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "MIN_REIBWERT",
+            "element_index": 4,
+            "element_id": "Bodenplatte_Rechts",
+            "bodenplatte_name_intern": "bp_stahl_100x100",
+            "paarung": [
+              "STAHL",
+              "GUMMI"
+            ]
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "MIN_REIBWERT",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_13814_2005_06",
+            "norm_label": "DIN_EN_13814_2005_06 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        }
+      ],
+      "werte": {
+        "kipp": {
+          "wert": 0.6128802480842775,
+          "methode": "Standard",
+          "source": "computed",
+          "messages": []
+        },
+        "gleit": {
+          "wert": 1.5040220715903674,
+          "methode": "Minimaler Reibwert",
+          "source": "computed",
+          "messages": []
+        },
+        "abhebe": {
+          "wert": Infinity,
+          "methode": "Standard",
+          "source": "computed",
+          "messages": []
+        },
+        "ballast": {
+          "wert": 134.53934502831333,
+          "methode": "MAX_BALLAST_KIPP_GLEIT_ABHEBE",
+          "source": "computed",
+          "messages": []
+        }
+      },
+      "alternativen": {
+        "IN_BETRIEB": {
+          "kipp": {
+            "wert": 1.0725404341474856,
+            "methode": "Standard",
+            "source": "computed",
+            "messages": []
+          },
+          "gleit": {
+            "wert": 2.632038625283143,
+            "methode": "Minimaler Reibwert",
+            "source": "computed",
+            "messages": []
+          },
+          "abhebe": {
+            "wert": Infinity,
+            "methode": "Standard",
+            "source": "computed",
+            "messages": []
+          },
+          "ballast": {
+            "wert": 0.0,
+            "methode": "MAX_BALLAST_KIPP_GLEIT_ABHEBE",
+            "source": "computed",
+            "messages": []
+          }
+        }
+      },
+      "details": null
+    },
+    "DIN EN 17879:2024-08": {
+      "status": "calculated",
+      "reasons": [
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 0.0,
+            "windrichtung": [
+              1.0,
+              0.0,
+              0.0
+            ],
+            "element_index": 0,
+            "element_id": "Strecke_Links",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=4.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 0.0,
+            "windrichtung": [
+              1.0,
+              0.0,
+              0.0
+            ],
+            "element_index": 1,
+            "element_id": "Strecke_Oben",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 4.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 0.0,
+            "windrichtung": [
+              1.0,
+              0.0,
+              0.0
+            ],
+            "element_index": 2,
+            "element_id": "Strecke_Rechts",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 90.0,
+            "windrichtung": [
+              6.123233995736766e-17,
+              1.0,
+              0.0
+            ],
+            "element_index": 0,
+            "element_id": "Strecke_Links",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=4.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 90.0,
+            "windrichtung": [
+              6.123233995736766e-17,
+              1.0,
+              0.0
+            ],
+            "element_index": 1,
+            "element_id": "Strecke_Oben",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 4.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 90.0,
+            "windrichtung": [
+              6.123233995736766e-17,
+              1.0,
+              0.0
+            ],
+            "element_index": 2,
+            "element_id": "Strecke_Rechts",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 180.0,
+            "windrichtung": [
+              -1.0,
+              1.2246467991473532e-16,
+              0.0
+            ],
+            "element_index": 0,
+            "element_id": "Strecke_Links",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=4.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 180.0,
+            "windrichtung": [
+              -1.0,
+              1.2246467991473532e-16,
+              0.0
+            ],
+            "element_index": 1,
+            "element_id": "Strecke_Oben",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 4.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 180.0,
+            "windrichtung": [
+              -1.0,
+              1.2246467991473532e-16,
+              0.0
+            ],
+            "element_index": 2,
+            "element_id": "Strecke_Rechts",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 270.0,
+            "windrichtung": [
+              -1.8369701987210297e-16,
+              -1.0,
+              0.0
+            ],
+            "element_index": 0,
+            "element_id": "Strecke_Links",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=4.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 270.0,
+            "windrichtung": [
+              -1.8369701987210297e-16,
+              -1.0,
+              0.0
+            ],
+            "element_index": 1,
+            "element_id": "Strecke_Oben",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 4.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 270.0,
+            "windrichtung": [
+              -1.8369701987210297e-16,
+              -1.0,
+              0.0
+            ],
+            "element_index": 2,
+            "element_id": "Strecke_Rechts",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "REIB/PAIR_GOVERNING",
+          "severity": "hint",
+          "text": "Maßgebend ist die Paarung STAHL–GUMMI mit μ=0.600.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "reibwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "MIN_REIBWERT",
+            "element_index": 3,
+            "element_id": "Bodenplatte_Links",
+            "bodenplatte_name_intern": "bp_stahl_100x100",
+            "paarung": [
+              "STAHL",
+              "GUMMI"
+            ]
+          }
+        },
+        {
+          "code": "REIB/PAIR_GOVERNING",
+          "severity": "hint",
+          "text": "Maßgebend ist die Paarung STAHL–GUMMI mit μ=0.600.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "reibwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "MIN_REIBWERT",
+            "element_index": 4,
+            "element_id": "Bodenplatte_Rechts",
+            "bodenplatte_name_intern": "bp_stahl_100x100",
+            "paarung": [
+              "STAHL",
+              "GUMMI"
+            ]
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "MIN_REIBWERT",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "AUSSER_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN EN 17879:2024-08",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 0.0,
+            "windrichtung": [
+              1.0,
+              0.0,
+              0.0
+            ],
+            "element_index": 0,
+            "element_id": "Strecke_Links",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=4.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 0.0,
+            "windrichtung": [
+              1.0,
+              0.0,
+              0.0
+            ],
+            "element_index": 1,
+            "element_id": "Strecke_Oben",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 4.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 0.0,
+            "windrichtung": [
+              1.0,
+              0.0,
+              0.0
+            ],
+            "element_index": 2,
+            "element_id": "Strecke_Rechts",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 90.0,
+            "windrichtung": [
+              6.123233995736766e-17,
+              1.0,
+              0.0
+            ],
+            "element_index": 0,
+            "element_id": "Strecke_Links",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=4.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 90.0,
+            "windrichtung": [
+              6.123233995736766e-17,
+              1.0,
+              0.0
+            ],
+            "element_index": 1,
+            "element_id": "Strecke_Oben",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 4.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 90.0,
+            "windrichtung": [
+              6.123233995736766e-17,
+              1.0,
+              0.0
+            ],
+            "element_index": 2,
+            "element_id": "Strecke_Rechts",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 180.0,
+            "windrichtung": [
+              -1.0,
+              1.2246467991473532e-16,
+              0.0
+            ],
+            "element_index": 0,
+            "element_id": "Strecke_Links",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=4.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 180.0,
+            "windrichtung": [
+              -1.0,
+              1.2246467991473532e-16,
+              0.0
+            ],
+            "element_index": 1,
+            "element_id": "Strecke_Oben",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 4.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 180.0,
+            "windrichtung": [
+              -1.0,
+              1.2246467991473532e-16,
+              0.0
+            ],
+            "element_index": 2,
+            "element_id": "Strecke_Rechts",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 270.0,
+            "windrichtung": [
+              -1.8369701987210297e-16,
+              -1.0,
+              0.0
+            ],
+            "element_index": 0,
+            "element_id": "Strecke_Links",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=4.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 270.0,
+            "windrichtung": [
+              -1.8369701987210297e-16,
+              -1.0,
+              0.0
+            ],
+            "element_index": 1,
+            "element_id": "Strecke_Oben",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 4.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 270.0,
+            "windrichtung": [
+              -1.8369701987210297e-16,
+              -1.0,
+              0.0
+            ],
+            "element_index": 2,
+            "element_id": "Strecke_Rechts",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "REIB/PAIR_GOVERNING",
+          "severity": "hint",
+          "text": "Maßgebend ist die Paarung STAHL–GUMMI mit μ=0.600.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "reibwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "MIN_REIBWERT",
+            "element_index": 3,
+            "element_id": "Bodenplatte_Links",
+            "bodenplatte_name_intern": "bp_stahl_100x100",
+            "paarung": [
+              "STAHL",
+              "GUMMI"
+            ]
+          }
+        },
+        {
+          "code": "REIB/PAIR_GOVERNING",
+          "severity": "hint",
+          "text": "Maßgebend ist die Paarung STAHL–GUMMI mit μ=0.600.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "reibwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "MIN_REIBWERT",
+            "element_index": 4,
+            "element_id": "Bodenplatte_Rechts",
+            "bodenplatte_name_intern": "bp_stahl_100x100",
+            "paarung": [
+              "STAHL",
+              "GUMMI"
+            ]
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "MIN_REIBWERT",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "IN_BETRIEB",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_17879_2024_08",
+            "norm_label": "DIN_EN_17879_2024_08 (IN_BETRIEB)",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        }
+      ],
+      "werte": {
+        "kipp": {
+          "wert": 0.4766846373988825,
+          "methode": "Standard",
+          "source": "computed",
+          "messages": []
+        },
+        "gleit": {
+          "wert": 1.169794944570286,
+          "methode": "Minimaler Reibwert",
+          "source": "computed",
+          "messages": []
+        },
+        "abhebe": {
+          "wert": Infinity,
+          "methode": "Standard",
+          "source": "computed",
+          "messages": []
+        },
+        "ballast": {
+          "wert": 233.8363007506886,
+          "methode": "MAX_BALLAST_KIPP_GLEIT_ABHEBE",
+          "source": "computed",
+          "messages": []
+        }
+      },
+      "alternativen": {
+        "IN_BETRIEB": {
+          "kipp": {
+            "wert": 1.1917115934972065,
+            "methode": "Standard",
+            "source": "computed",
+            "messages": []
+          },
+          "gleit": {
+            "wert": 2.9244873614257143,
+            "methode": "Minimaler Reibwert",
+            "source": "computed",
+            "messages": []
+          },
+          "abhebe": {
+            "wert": Infinity,
+            "methode": "Standard",
+            "source": "computed",
+            "messages": []
+          },
+          "ballast": {
+            "wert": 0.0,
+            "methode": "MAX_BALLAST_KIPP_GLEIT_ABHEBE",
+            "source": "computed",
+            "messages": []
+          }
+        }
+      },
+      "details": null
+    },
+    "EN 1991-1-4:2010-12": {
+      "status": "calculated",
+      "reasons": [
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 0.0,
+            "windrichtung": [
+              1.0,
+              0.0,
+              0.0
+            ],
+            "element_index": 0,
+            "element_id": "Strecke_Links",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=4.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 0.0,
+            "windrichtung": [
+              1.0,
+              0.0,
+              0.0
+            ],
+            "element_index": 1,
+            "element_id": "Strecke_Oben",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 4.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 0.0,
+            "windrichtung": [
+              1.0,
+              0.0,
+              0.0
+            ],
+            "element_index": 2,
+            "element_id": "Strecke_Rechts",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 90.0,
+            "windrichtung": [
+              6.123233995736766e-17,
+              1.0,
+              0.0
+            ],
+            "element_index": 0,
+            "element_id": "Strecke_Links",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=4.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 90.0,
+            "windrichtung": [
+              6.123233995736766e-17,
+              1.0,
+              0.0
+            ],
+            "element_index": 1,
+            "element_id": "Strecke_Oben",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 4.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 90.0,
+            "windrichtung": [
+              6.123233995736766e-17,
+              1.0,
+              0.0
+            ],
+            "element_index": 2,
+            "element_id": "Strecke_Rechts",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 180.0,
+            "windrichtung": [
+              -1.0,
+              1.2246467991473532e-16,
+              0.0
+            ],
+            "element_index": 0,
+            "element_id": "Strecke_Links",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=4.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 180.0,
+            "windrichtung": [
+              -1.0,
+              1.2246467991473532e-16,
+              0.0
+            ],
+            "element_index": 1,
+            "element_id": "Strecke_Oben",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 4.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 180.0,
+            "windrichtung": [
+              -1.0,
+              1.2246467991473532e-16,
+              0.0
+            ],
+            "element_index": 2,
+            "element_id": "Strecke_Rechts",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 270.0,
+            "windrichtung": [
+              -1.8369701987210297e-16,
+              -1.0,
+              0.0
+            ],
+            "element_index": 0,
+            "element_id": "Strecke_Links",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=4.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 270.0,
+            "windrichtung": [
+              -1.8369701987210297e-16,
+              -1.0,
+              0.0
+            ],
+            "element_index": 1,
+            "element_id": "Strecke_Oben",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 4.0
+          }
+        },
+        {
+          "code": "SCHLANKHEIT/EXTRAPOLATION",
+          "severity": "warn",
+          "text": "Faktor via Extrapolation für L=3.000 außerhalb [15, 50].",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "schlankheit",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "winkel_deg": 270.0,
+            "windrichtung": [
+              -1.8369701987210297e-16,
+              -1.0,
+              0.0
+            ],
+            "element_index": 2,
+            "element_id": "Strecke_Rechts",
+            "objekttyp": "TRAVERSE",
+            "traverse_name_intern": "prolyte_h30v",
+            "objekt_name_intern": "prolyte_h30v",
+            "phase": "ZWISCHENWERTE",
+            "bounds": [
+              15.0,
+              50.0
+            ],
+            "laenge": 3.0
+          }
+        },
+        {
+          "code": "REIB/FALLBACK_NORM",
+          "severity": "hint",
+          "text": "Für Paarung STAHL–GUMMI wurde auf DIN_EN_17879_2024_08 zurückgegriffen.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "reibwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "MIN_REIBWERT",
+            "element_index": 3,
+            "element_id": "Bodenplatte_Links",
+            "bodenplatte_name_intern": "bp_stahl_100x100",
+            "paarung": [
+              "STAHL",
+              "GUMMI"
+            ],
+            "norm_used": "DIN_EN_17879_2024_08"
+          }
+        },
+        {
+          "code": "REIB/FALLBACK_NORM",
+          "severity": "hint",
+          "text": "Für Paarung GUMMI–BETON wurde auf DIN_EN_17879_2024_08 zurückgegriffen.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "reibwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "MIN_REIBWERT",
+            "element_index": 3,
+            "element_id": "Bodenplatte_Links",
+            "bodenplatte_name_intern": "bp_stahl_100x100",
+            "paarung": [
+              "GUMMI",
+              "BETON"
+            ],
+            "norm_used": "DIN_EN_17879_2024_08"
+          }
+        },
+        {
+          "code": "REIB/PAIR_GOVERNING",
+          "severity": "hint",
+          "text": "Maßgebend ist die Paarung STAHL–GUMMI mit μ=0.600.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "reibwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "MIN_REIBWERT",
+            "element_index": 3,
+            "element_id": "Bodenplatte_Links",
+            "bodenplatte_name_intern": "bp_stahl_100x100",
+            "paarung": [
+              "STAHL",
+              "GUMMI"
+            ]
+          }
+        },
+        {
+          "code": "REIB/FALLBACK_NORM",
+          "severity": "hint",
+          "text": "Für Paarung STAHL–GUMMI wurde auf DIN_EN_17879_2024_08 zurückgegriffen.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "reibwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "MIN_REIBWERT",
+            "element_index": 4,
+            "element_id": "Bodenplatte_Rechts",
+            "bodenplatte_name_intern": "bp_stahl_100x100",
+            "paarung": [
+              "STAHL",
+              "GUMMI"
+            ],
+            "norm_used": "DIN_EN_17879_2024_08"
+          }
+        },
+        {
+          "code": "REIB/FALLBACK_NORM",
+          "severity": "hint",
+          "text": "Für Paarung GUMMI–BETON wurde auf DIN_EN_17879_2024_08 zurückgegriffen.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "reibwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "MIN_REIBWERT",
+            "element_index": 4,
+            "element_id": "Bodenplatte_Rechts",
+            "bodenplatte_name_intern": "bp_stahl_100x100",
+            "paarung": [
+              "GUMMI",
+              "BETON"
+            ],
+            "norm_used": "DIN_EN_17879_2024_08"
+          }
+        },
+        {
+          "code": "REIB/PAIR_GOVERNING",
+          "severity": "hint",
+          "text": "Maßgebend ist die Paarung STAHL–GUMMI mit μ=0.600.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "reibwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "MIN_REIBWERT",
+            "element_index": 4,
+            "element_id": "Bodenplatte_Rechts",
+            "bodenplatte_name_intern": "bp_stahl_100x100",
+            "paarung": [
+              "STAHL",
+              "GUMMI"
+            ]
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "MIN_REIBWERT",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "WIND",
+            "variabilitaet": "VERAENDERLICH",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        },
+        {
+          "code": "SICHB/CASE",
+          "severity": "hint",
+          "text": "Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
+          "context": {
+            "szenario": "STANDARD",
+            "funktion": "sicherheitsbeiwert",
+            "norm": "DIN_EN_1991_1_4_2010_12",
+            "norm_label": "DIN EN 1991-1-4:2010-12",
+            "tor_name": "Tor",
+            "anzahl_windrichtungen": 4,
+            "methode": "STANDARD",
+            "lasttyp": "GEWICHT",
+            "variabilitaet": "STAENDIG",
+            "ist_guenstig": true
+          }
+        }
+      ],
+      "werte": {
+        "kipp": {
+          "wert": 0.42901617365899425,
+          "methode": "Standard",
+          "source": "computed",
+          "messages": []
+        },
+        "gleit": {
+          "wert": 1.0528154501132574,
+          "methode": "Minimaler Reibwert",
+          "source": "computed",
+          "messages": []
+        },
+        "abhebe": {
+          "wert": Infinity,
+          "methode": "Standard",
+          "source": "computed",
+          "messages": []
+        },
+        "ballast": {
+          "wert": 283.48477861187627,
+          "methode": "MAX_BALLAST_KIPP_GLEIT_ABHEBE",
+          "source": "computed",
+          "messages": []
+        }
+      },
+      "alternativen": {},
+      "details": null
+    }
+  },
+  "messages": [],
+  "meta": {
+    "version": "core-dev",
+    "inputs": {
+      "konstruktion_typ": "Tor",
+      "windzone": "I_BINNENLAND",
+      "aufstelldauer": null
+    },
+    "methoden": {
+      "kipp": "Standard",
+      "gleit": "Minimaler Reibwert",
+      "abhebe": "Standard"
+    },
+    "vereinfachung_konstruktion": "keine",
+    "anzahl_windrichtungen": 4,
+    "konst_overrides": {}
+  }
+}
