@@ -1,0 +1,202 @@
+# api_mapper.py
+from typing import Dict, Any, Mapping, Iterable
+from math import isfinite
+from dataclasses import is_dataclass, asdict
+from windlast_CORE.datenstruktur.enums import Norm, Nachweis
+
+# ---------- API keys (same as before) ----------
+_NORM_KEY = {
+    Norm.DIN_EN_13814_2005_06:    "EN_13814_2005",
+    Norm.DIN_EN_17879_2024_08:    "EN_17879_2024",
+    Norm.DIN_EN_1991_1_4_2010_12: "EN_1991_1_4_2010",
+}
+
+# ---------- helpers ----------
+def _enum_to_str(x):
+    return getattr(x, "name", str(x))
+
+def _to_primitive(obj):
+    """
+    Safe serializer for enums/dataclasses/mappings/lists (used for CONTEXT only).
+    We do NOT touch numbers here (numbers go through _jsonify_number elsewhere),
+    this is just to turn arbitrary context into JSON-safe primitives.
+    """
+    if obj is None:
+        return None
+    # enums
+    if hasattr(obj, "__class__") and hasattr(obj.__class__, "__members__"):
+        return _enum_to_str(obj)
+    # dataclass
+    if is_dataclass(obj):
+        return {k: _to_primitive(v) for k, v in asdict(obj).items()}
+    # mapping
+    if isinstance(obj, Mapping):
+        out = {}
+        for k, v in obj.items():
+            kk = _enum_to_str(k) if not isinstance(k, str) else k
+            out[kk] = _to_primitive(v)
+        return out
+    # iterable
+    if isinstance(obj, (list, tuple, set)):
+        return [_to_primitive(v) for v in obj]
+    # primitives
+    return obj
+
+def _jsonify_number(x):
+    """float -> JSON-safe (keep +/-INF info as strings)."""
+    try:
+        v = float(x)
+    except Exception:
+        return None
+    if isfinite(v):
+        return v
+    return "INF" if v > 0 else "-INF"
+
+def _collect_messages_from_list(items: Iterable[Any], fallback_szenario: str | None = None):
+    """
+    Normalize a list of message-like objects to:
+      { "severity": "warn|error|hint|info", "text": "...", "context": { ... } }
+    Expected attributes (best effort): .severity, .text (or .message), .code (optional), .context (mapping-like).
+    """
+    out = []
+    if not items:
+        return out
+
+    for m in items:
+        # try attribute access, then dict-style
+        severity = getattr(m, "severity", None) or (isinstance(m, Mapping) and m.get("severity"))
+        text     = getattr(m, "text", None)     or (isinstance(m, Mapping) and (m.get("text") or m.get("message")))
+        code     = getattr(m, "code", None)     or (isinstance(m, Mapping) and m.get("code"))
+        context  = getattr(m, "context", None)  or (isinstance(m, Mapping) and m.get("context")) or {}
+
+        # normalize context (make it JSON-safe, normalize enums to names)
+        ctx = _to_primitive(context) or {}
+        # ensure there is a scenario key if we got a fallback (useful for messages without explicit scenario)
+        if fallback_szenario and "szenario" not in ctx and "scenario" not in ctx:
+            ctx["szenario"] = fallback_szenario
+
+        # normalize severity to lower string if present
+        if isinstance(severity, str):
+            sev = severity.lower()
+        else:
+            sev = _enum_to_str(severity).lower() if severity is not None else None
+
+        if text is None and code is not None:
+            text = str(code)
+
+        out.append({
+            "severity": sev,
+            "text": None if text is None else str(text),
+            "code": None if code is None else str(code),
+            "context": ctx
+        })
+    return out
+
+# ---------- main mapper ----------
+def build_api_output(ergebnis, input_payload: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Mappt das reiche Ergebnisobjekt (z. B. StandsicherheitErgebnis) auf das API-Ausgabeformat:
+      {
+        "normen": {
+          "EN_17879_2024": {
+            "kipp": <float|"INF"|"-INF"|None>,
+            "gleit": ...,
+            "abhebe": ...,
+            "ballast": ...,
+            "alternativen": {
+               "IN_BETRIEB": { ... }, ...
+            },
+            "messages": [
+              {"severity":"warn","text":"...","code":"...","context":{"szenario":"IN_BETRIEB", ...}},
+              ...
+            ]
+          },
+          ...
+        },
+        "meta": {...}
+      }
+    WICHTIG: Werte bleiben wie bisher (float/None/"INF"/"-INF").
+    Zusätzlich geben wir je Norm eine flache Liste "messages" zurück (Text, Severity, Kontext).
+    """
+    out_normen: Dict[str, Dict[str, Any]] = {}
+
+    for norm, nres in ergebnis.normen.items():
+        key = _NORM_KEY.get(norm)
+        if not key:
+            continue
+
+        # --- numeric main values (unchanged behavior) ---
+        main = {
+            "kipp":    _jsonify_number(nres.werte.get(Nachweis.KIPP).wert)    if Nachweis.KIPP    in nres.werte else None,
+            "gleit":   _jsonify_number(nres.werte.get(Nachweis.GLEIT).wert)   if Nachweis.GLEIT   in nres.werte else None,
+            "abhebe":  _jsonify_number(nres.werte.get(Nachweis.ABHEBE).wert)  if Nachweis.ABHEBE  in nres.werte else None,
+            "ballast": _jsonify_number(nres.werte.get(Nachweis.BALLAST).wert) if Nachweis.BALLAST in nres.werte else None,
+        }
+
+        # --- alternatives (same handling for numbers) ---
+        alts: Dict[str, Dict[str, float | str | None]] = {}
+        for alt_name, vals in (nres.alternativen or {}).items():
+            alts[alt_name] = {
+                "kipp":    _jsonify_number(vals.get(Nachweis.KIPP).wert)    if Nachweis.KIPP    in vals else None,
+                "gleit":   _jsonify_number(vals.get(Nachweis.GLEIT).wert)   if Nachweis.GLEIT   in vals else None,
+                "abhebe":  _jsonify_number(vals.get(Nachweis.ABHEBE).wert)  if Nachweis.ABHEBE  in vals else None,
+                "ballast": _jsonify_number(vals.get(Nachweis.BALLAST).wert) if Nachweis.BALLAST in vals else None,
+            }
+        if alts:
+            main["alternativen"] = alts
+
+        # --- messages per norm (flat list) ---
+        messages = []
+
+        # 1) norm-level reasons
+        messages += _collect_messages_from_list(getattr(nres, "reasons", None))
+
+        # 2) SafetyValue.messages on main values (if you attach messages to values)
+        for nachweis in (Nachweis.KIPP, Nachweis.GLEIT, Nachweis.ABHEBE, Nachweis.BALLAST):
+            if nachweis in nres.werte:
+                sv = nres.werte[nachweis]
+                # we add nachweis to context if missing
+                msgs = _collect_messages_from_list(
+                    getattr(sv, "messages", None)
+                )
+                # ensure nachweis key is in context for these
+                for m in msgs:
+                    m["context"] = dict(m["context"] or {})
+                    m["context"].setdefault("nachweis", _enum_to_str(nachweis))
+                messages += msgs
+
+        # 3) messages attached to alternatives' values
+        for alt_name, vals in (nres.alternativen or {}).items():
+            for nachweis, sv in vals.items():
+                msgs = _collect_messages_from_list(getattr(sv, "messages", None), fallback_szenario=alt_name)
+                for m in msgs:
+                    m["context"] = dict(m["context"] or {})
+                    m["context"].setdefault("nachweis", _enum_to_str(nachweis))
+                    m["context"].setdefault("szenario", alt_name)
+                messages += msgs
+
+        # 4) optional: details.notes
+        details = getattr(nres, "details", None)
+        if details is not None:
+            messages += _collect_messages_from_list(getattr(details, "notes", None))
+
+        # (You can add more sources here if your model has them)
+
+        out_normen[key] = { **main, "messages": messages }
+
+    # ---- meta unchanged ----
+    return {
+        "normen": out_normen,
+        "meta": {
+            "version": ergebnis.meta.version,
+            "eingaben": {
+                "breite_m":               input_payload["breite_m"],
+                "hoehe_m":                input_payload["hoehe_m"],
+                "traverse_name_intern":   input_payload["traverse_name_intern"],
+                "bodenplatte_name_intern":input_payload["bodenplatte_name_intern"],
+                "untergrund_typ":         input_payload["untergrund_typ"],
+                "aufstelldauer":          input_payload.get("aufstelldauer"),
+                "windzone":               input_payload["windzone"],
+            },
+        },
+    }

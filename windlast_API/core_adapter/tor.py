@@ -6,24 +6,7 @@ from windlast_CORE.datenstruktur.enums import (
 )
 from windlast_CORE.datenstruktur.zeit import Dauer
 from windlast_CORE.rechenfunktionen.standsicherheit import standsicherheit
-
-# Norm-Key-Mapping für API-Ausgabe
-_NORM_KEY = {
-    Norm.DIN_EN_13814_2005_06: "EN_13814_2005",
-    Norm.DIN_EN_17879_2024_08: "EN_17879_2024",
-    Norm.DIN_EN_1991_1_4_2010_12: "EN_1991_1_4_2010",
-}
-
-# Hilfsfunktion: float -> JSON-sicherer float (extra Behandlung für Inf)
-def _jsonify_number(x):
-    try:
-        v = float(x)
-    except Exception:
-        return None
-    if isfinite(v):
-        return v
-    # Information erhalten, aber JSON-sicher
-    return "INF" if v > 0 else "-INF"
+from .ergebnis_mapper import build_api_output
 
 # Hilfsfunktion: Untergrund für alle Bodenplatten im Tor setzen
 def _set_untergrund_bodenplatten(tor: Tor, mat: MaterialTyp) -> None:
@@ -69,47 +52,4 @@ def berechne_tor(payload: Dict[str, Any]) -> Dict[str, Any]:
     )
 
     # 5) Auf Minimalformat mappen
-    out: Dict[str, Dict[str, float | str | None]] = {}
-    for norm, nres in er.normen.items():
-        key = _NORM_KEY.get(norm)
-        if not key:
-            continue
-
-        # Hauptzustand
-        main = {
-            "kipp":    _jsonify_number(nres.werte.get(Nachweis.KIPP).wert)    if Nachweis.KIPP    in nres.werte else None,
-            "gleit":   _jsonify_number(nres.werte.get(Nachweis.GLEIT).wert)   if Nachweis.GLEIT   in nres.werte else None,
-            "abhebe":  _jsonify_number(nres.werte.get(Nachweis.ABHEBE).wert)  if Nachweis.ABHEBE  in nres.werte else None,
-            "ballast": _jsonify_number(nres.werte.get(Nachweis.BALLAST).wert) if Nachweis.BALLAST in nres.werte else None,
-        }
-
-        # Alternativen (z. B. IN_BETRIEB)
-        alts: Dict[str, Dict[str, float | str | None]] = {}
-        for alt_name, vals in (nres.alternativen or {}).items():
-            alts[alt_name] = {
-                "kipp":    _jsonify_number(vals.get(Nachweis.KIPP).wert)    if Nachweis.KIPP    in vals else None,
-                "gleit":   _jsonify_number(vals.get(Nachweis.GLEIT).wert)   if Nachweis.GLEIT   in vals else None,
-                "abhebe":  _jsonify_number(vals.get(Nachweis.ABHEBE).wert)  if Nachweis.ABHEBE  in vals else None,
-                "ballast": _jsonify_number(vals.get(Nachweis.BALLAST).wert) if Nachweis.BALLAST in vals else None,
-            }
-
-        if alts:
-            main["alternativen"] = alts  # ins JSON hängen
-
-        out[key] = main
-
-    return {
-        "normen": out,
-        "meta": {
-            "version": er.meta.version,
-            "eingaben": {
-                "breite_m": payload["breite_m"],
-                "hoehe_m": payload["hoehe_m"],
-                "traverse_name_intern": payload["traverse_name_intern"],
-                "bodenplatte_name_intern": payload["bodenplatte_name_intern"],
-                "untergrund_typ": payload["untergrund_typ"],
-                "aufstelldauer": payload.get("aufstelldauer"),
-                "windzone": payload["windzone"],
-            },
-        },
-    }
+    return build_api_output(er, payload)
