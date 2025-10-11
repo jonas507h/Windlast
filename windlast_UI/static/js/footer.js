@@ -320,3 +320,28 @@ Tooltip.register('.results-table .alt-title th[data-szenario]', {
   priority: 50,
   delay: 120
 });
+
+// ---- Modal-Trigger: beim Klick auf die Tooltip-Zellen ein Modal öffnen ----
+(function setupMessageModalOnce(){
+  if (window.__messageModalSetup) return; // Guard gegen Doppel-Registrierung
+  window.__messageModalSetup = true;
+
+  document.addEventListener("click", (ev) => {
+    const target = ev.target;
+
+    // 1) Kopfzellen je Norm (gleichen Selektor wie Tooltip-Logik verwenden)
+    const thHead = target.closest(".results-table thead th");
+    if (thHead && thHead.dataset && thHead.dataset.normKey) {
+      // Später dynamischer Inhalt; jetzt: "Testfenster"
+      Modal.open("Testfenster");
+      return;
+    }
+
+    // 2) Alternativ-Titelzellen (gleicher Selektor wie Tooltip-Alternative)
+    const thAlt = target.closest(".results-table .alt-title th[data-szenario]");
+    if (thAlt) {
+      Modal.open("Testfenster");
+      return;
+    }
+  }, { passive: true });
+})();

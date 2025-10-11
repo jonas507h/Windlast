@@ -1,0 +1,38 @@
+/* Modal */
+.modal-root { 
+  position: fixed; inset: 0; z-index: 1000; 
+  display: none;
+}
+.modal-root.is-open { display: block; }
+.modal-open { overflow: hidden; }
+
+.modal-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.45);
+}
+
+.modal-dialog {
+  position: absolute;
+  max-width: min(720px, 90vw);
+  max-height: min(80vh, 1000px);
+  overflow: auto;
+  top: 10vh; left: 50%; transform: translateX(-50%);
+  background: var(--panel, #fff);
+  color: var(--text, #111);
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+  padding: 20px 24px 24px;
+}
+
+.modal-close {
+  position: absolute; top: 8px; right: 12px;
+  font-size: 22px; line-height: 1;
+  background: transparent; border: none; cursor: pointer;
+  color: var(--muted, #555);
+}
+
+.modal-content { 
+  margin-top: 8px; 
+  font-size: 14px; 
+  line-height: 1.5; 
+}
