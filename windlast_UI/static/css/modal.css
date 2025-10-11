@@ -29,6 +29,15 @@
   font-size: 22px; line-height: 1;
   background: transparent; border: none; cursor: pointer;
   color: var(--muted, #555);
+  outline: none;
+}
+.modal-close:focus,
+.modal-close:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+.modal-close::-moz-focus-inner { /* Firefox */
+  border: 0;
 }
 
 .modal-content { 

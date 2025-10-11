@@ -15,6 +15,18 @@ const ALT_LABELS = {
   IN_BETRIEB: "mit Schutzmaßnahmen",
 };
 
+// ===== Offizielle Anzeigenamen für Normen =====
+const NORM_DISPLAY_NAMES = {
+  EN_13814_2005: "DIN EN 13814:2005-06",
+  EN_17879_2024: "DIN EN 17879:2024-08",
+  EN_1991_1_4_2010: "DIN EN 1991-1-4:2010-12"
+};
+
+// Fallback, falls mal keine Zuordnung existiert
+function getNormDisplayName(normKey) {
+  return NORM_DISPLAY_NAMES[normKey] || normKey.replace(/_/g, " ");
+}
+
 let ResultsVM = null; // hält das von ResultsIndex.build(...) erzeugte ViewModel
 
 function attachNormKeysToHeader() {
@@ -331,12 +343,12 @@ function openMessagesModalFor(normKey, szenario = null) {
     : (ResultsVM.listMessagesMainOnly ? ResultsVM.listMessagesMainOnly(normKey) : []);
 
   // Normname hübsch machen
-  const niceNorm = normKey.replace(/^EN_/, "DIN EN ").replace(/_/g, " ");
+  const normName = getNormDisplayName(normKey);
   const niceScenario = szenario ? (displayAltName ? displayAltName(szenario) : szenario) : null;
 
   const title = szenario
-    ? `Meldungen – ${niceNorm} (${niceScenario})`
-    : `Meldungen – ${niceNorm} (Hauptberechnung)`;
+    ? `Meldungen – ${normName} (${niceScenario})`
+    : `Meldungen – ${normName} (Hauptberechnung)`;
 
   // DOM für Modal
   const wrap = document.createElement("div");
@@ -365,21 +377,42 @@ function openMessagesModalFor(normKey, szenario = null) {
       li.appendChild(line);
 
       // Kontext generisch sammeln -> Tooltip-Attribut
-      const ctx = m?.context || {};
+      // Kontext generisch (Original-Reihenfolge, keine Sortierung)
       let ctxText = "";
       try {
-        const entries = Object.entries(ctx);
-        if (entries.length > 0) {
-          ctxText = entries
-            .map(([k, v]) => (v && typeof v === "object") ? `${k}: ${JSON.stringify(v)}` : `${k}: ${v}`)
-            .join("\n"); // 1 Eintrag pro Zeile
+        const ctx = m?.context || {};
+        const parts = [];
+
+        if (ctx instanceof Map) {
+          // Map bewahrt Einfügereihenfolge von sich aus
+          for (const [k, v] of ctx) {
+            parts.push(
+              v && typeof v === "object" ? `${k}: ${JSON.stringify(v)}` : `${k}: ${v}`
+            );
+          }
+        } else if (ctx && typeof ctx === "object") {
+          // WICHTIG: getOwnPropertyNames statt entries/keys (keine Sortierung)
+          const keysInOrder = Object.getOwnPropertyNames(ctx);
+          for (let i = 0; i < keysInOrder.length; i++) {
+            const k = keysInOrder[i];
+            const v = ctx[k];
+            parts.push(
+              v && typeof v === "object" ? `${k}: ${JSON.stringify(v)}` : `${k}: ${v}`
+            );
+          }
         }
+
+        // "code" anhängen, wenn noch nicht enthalten
+        if (m.code) {
+          const hasCode = parts.some(line => /^\s*code\s*:/.test(line));
+          if (!hasCode) parts.push(`code: ${m.code}`);
+        }
+
+        if (parts.length) ctxText = parts.join("\n");
       } catch (e) {
-        ctxText = JSON.stringify(ctx);
+        ctxText = JSON.stringify(m?.context || {});
       }
-      if (m.code && !/(\b|_)code\s*:/.test(ctxText)) {
-        ctxText += (ctxText ? "\n" : "") + `code: ${m.code}`;
-      }
+
       if (ctxText) {
         li.setAttribute("data-ctx", ctxText);
       }
