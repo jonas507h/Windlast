@@ -51,9 +51,25 @@
     root.classList.toggle("is-visible", !!vis);
   }
 
-  function setRootClass(mod) {
-    root.classList.remove("tt-danger", "tt-warn", "tt-info");
-    if (mod) root.classList.add(mod);
+  function setRootClass(mod, el) {
+    // Alle möglichen Klassen entfernen (auch neue)
+    root.classList.remove("tt-error", "tt-warn", "tt-hint", "tt-info", "tt-danger");
+
+    if (!mod) return;
+
+    // Falls mod eine Funktion ist → auswerten
+    if (typeof mod === "function") {
+      mod = mod(el);
+    }
+
+    // Falls ein Array oder mehrere Klassen im String → aufsplitten
+    const classes = Array.isArray(mod)
+      ? mod
+      : String(mod).split(/\s+/).filter(Boolean);
+
+    if (classes.length) {
+      root.classList.add(...classes);
+    }
   }
 
   function setContent(nodeOrString, { loading = false } = {}) {

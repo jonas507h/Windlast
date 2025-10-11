@@ -29,6 +29,40 @@
 
 /* Modifier-Klassen, die du per Options setzen kannst */
 #tt-root.is-visible { display: block; }
-#tt-root.tt-danger  .tt-bubble { border-color: #ff6b6b; }
+#tt-root.tt-error  .tt-bubble { border-color: #ff6b6b; }
 #tt-root.tt-warn    .tt-bubble { border-color: #f0ad4e; }
+#tt-root.tt-hint    .tt-bubble { border-color: #2d6cdf; }
 #tt-root.tt-info    .tt-bubble { border-color: #2d6cdf; }
+
+/* ===== Meldungstypen innerhalb des Tooltips ===== */
+#tt-root .tt-line {
+  margin: 2px 0;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+/* Fehler (rot) */
+#tt-root .tt-line.error {
+  background-color: rgba(255, 107, 107, 0.15);
+  color: #ff4c4c;
+  font-weight: 600;
+}
+
+/* Warnung (gelb/orange) */
+#tt-root .tt-line.warn {
+  background-color: rgba(240, 173, 78, 0.15);
+  color: #d99000;
+  font-weight: 600;
+}
+
+/* Hinweis (blau) */
+#tt-root .tt-line.hint {
+  background-color: rgba(45, 108, 223, 0.12);
+  color: #2d6cdf;
+}
+
+/* Info (grau/blau) */
+#tt-root .tt-line.info {
+  background-color: rgba(100, 100, 100, 0.08);
+  color: var(--text, #555);
+}
