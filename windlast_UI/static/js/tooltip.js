@@ -142,7 +142,7 @@
     const delay = entry.delay ?? 100;
     active.showTimer = setTimeout(async () => {
       // Klasse setzen
-      setRootClass(entry.className);
+      setRootClass(entry.className, el);
 
       // Content laden
       const content = await resolveContent(entry, ev, el);
