@@ -2,6 +2,9 @@
 import sys
 from pathlib import Path
 
+import os, threading, time, logging
+from flask import request, jsonify
+
 # Bei .exe zeigt sys._MEIPASS auf das entpackte Temp-Verzeichnis
 BASE = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parents[1]))  # .../Windlast oder _MEIPASS
 ROOT = BASE
@@ -22,8 +25,35 @@ UI_ROOT      = (ROOT / "windlast_UI").resolve()
 STATIC_DIR   = (UI_ROOT / "static").resolve()
 PARTIALS_DIR = (UI_ROOT / "partials").resolve()
 
+_clients: dict[str, float] = {}           # {client_id: last_seen_ts}
+_lock = threading.Lock()
+_shutdown_timer: threading.Timer | None = None
+HB_TIMEOUT = 8.0   # s – wenn länger kein Heartbeat, gilt Client als weg
+
+def _schedule_shutdown(delay=0.6):
+    """App beenden (auch ohne Werkzeugs Shutdown-Hook)."""
+    def _do_exit():
+        logging.info("shutdown now")
+        time.sleep(delay)
+        os._exit(0)
+    t = threading.Timer(0.2, _do_exit)
+    t.daemon = True
+    t.start()
+    return t
+
+def _reap_and_maybe_shutdown():
+    """Inaktive Clients entfernen; wenn keiner mehr da, beenden."""
+    now = time.time()
+    with _lock:
+        stale = [cid for cid, ts in _clients.items() if now - ts > HB_TIMEOUT]
+        for cid in stale:
+            _clients.pop(cid, None)
+        if not _clients:
+            _schedule_shutdown()
+
 def create_app():
     app = Flask(__name__, static_folder=str(STATIC_DIR), static_url_path="/static")
+    # ... deine vorhandenen Routen ...
 
     @app.get("/")
     def index():
@@ -42,6 +72,28 @@ def create_app():
     @app.get("/healthz")
     def healthz():
         return {"status": "ok"}
+    
+    @app.post("/__client_event")
+    def __client_event():
+        if request.remote_addr not in ("127.0.0.1", "::1"):
+            return jsonify({"ok": False, "reason": "forbidden"}), 403
+
+        d = request.get_json(silent=True) or {}
+        ev = (d.get("event") or "").lower()
+        cid = d.get("id")
+        if not cid:
+            return {"ok": False, "reason": "missing id"}, 400
+
+        now = time.time()
+        with _lock:
+            if ev == "open" or ev == "beat":
+                _clients[cid] = now
+            elif ev == "close":
+                _clients.pop(cid, None)
+
+        # nach jedem Event kurz prüfen
+        _reap_and_maybe_shutdown()
+        return {"ok": True, "active": len(_clients)}
 
     return app
 

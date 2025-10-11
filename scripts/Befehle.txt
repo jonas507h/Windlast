@@ -8,10 +8,11 @@ App ausführen neu
 python .\windlast_API\app.py
 
 App bauen
-pyinstaller --onefile --name WindlastUI `
+pyinstaller --onefile --windowed --name WindlastUI `
   --paths . `
   --paths windlast_CORE `
   --add-data "windlast_UI;windlast_UI" `
+  --add-data "windlast_CORE/materialdaten/*.csv;windlast_CORE/materialdaten" `
   windlast_API\app.py
 
 In Struktur aufwärts cd..

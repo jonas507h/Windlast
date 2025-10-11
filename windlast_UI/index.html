@@ -56,5 +56,39 @@
       }
     });
   </script>
-</body>
+  <script>
+    (function(){
+      // stabile ID pro Tab/Fenster
+      const KEY = 'windlast_client_id';
+      let id = sessionStorage.getItem(KEY);
+      if (!id) { id = crypto.randomUUID(); sessionStorage.setItem(KEY, id); }
+
+      function send(event){
+        const payload = JSON.stringify({ event, id, t: Date.now() });
+        // robust: Beacon, sonst fetch(keepalive)
+        try {
+          const blob = new Blob([payload], { type: 'application/json' });
+          if (navigator.sendBeacon && navigator.sendBeacon('/__client_event', blob)) return;
+        } catch {}
+        fetch('/__client_event', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: payload,
+          keepalive: true
+        }).catch(()=>{});
+      }
+
+      // beim Laden anmelden
+      window.addEventListener('pageshow', () => send('open'), { once: true });
+
+      // alle 3s Heartbeat – falls "close" verschluckt wird
+      const hb = setInterval(() => send('beat'), 3000);
+
+      // beim Schließen abmelden (mehrere Events, je nach Browser)
+      const bye = () => { try { clearInterval(hb); } catch {} send('close'); };
+      window.addEventListener('pagehide', bye);
+      window.addEventListener('beforeunload', bye);
+    })();
+    </script>
+    </body>
 </html>
