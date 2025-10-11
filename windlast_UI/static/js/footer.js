@@ -330,10 +330,13 @@ function openMessagesModalFor(normKey, szenario = null) {
     ? (ResultsVM.listMessages ? ResultsVM.listMessages(normKey, szenario) : [])
     : (ResultsVM.listMessagesMainOnly ? ResultsVM.listMessagesMainOnly(normKey) : []);
 
+  // Normname hübsch machen
+  const niceNorm = normKey.replace(/^EN_/, "DIN EN ").replace(/_/g, " ");
   const niceScenario = szenario ? (displayAltName ? displayAltName(szenario) : szenario) : null;
+
   const title = szenario
-    ? `Meldungen – ${normKey} / ${niceScenario}`
-    : `Meldungen – ${normKey} (Hauptberechnung)`;
+    ? `Meldungen – ${niceNorm} (${niceScenario})`
+    : `Meldungen – ${niceNorm} (Hauptberechnung)`;
 
   // DOM für Modal
   const wrap = document.createElement("div");
