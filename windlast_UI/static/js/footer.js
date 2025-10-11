@@ -353,7 +353,7 @@ function openMessagesModalFor(normKey, szenario = null) {
       const li = document.createElement("li");
       li.textContent = m.text || "";
 
-            // → Kontext generisch zusammenbauen (alle Felder, dynamisch)
+      // → Kontext generisch zusammenbauen (alle Felder, dynamisch, 1 Eintrag pro Zeile)
       const ctx = m?.context || {};
       let ctxText = "";
 
@@ -362,26 +362,22 @@ function openMessagesModalFor(normKey, szenario = null) {
         if (entries.length > 0) {
           ctxText = entries
             .map(([k, v]) => {
-              // verschachtelte Objekte/Arrays sauber serialisieren
-              if (v && typeof v === "object") {
-                return `${k}: ${JSON.stringify(v)}`;
-              }
+              if (v && typeof v === "object") return `${k}: ${JSON.stringify(v)}`;
               return `${k}: ${v}`;
             })
-            .join(" · ");
+            .join("\n"); // <<< genau das sorgt für 1 Eintrag pro Zeile
         }
       } catch (e) {
-        // Fallback: einfaches JSON.stringify
         ctxText = JSON.stringify(ctx);
       }
 
-      // falls auch code außerhalb context steht, ergänzen
-      if (m.code && !ctxText.includes("code:")) {
-        ctxText += (ctxText ? " · " : "") + `code: ${m.code}`;
+      // falls "code" außerhalb context steht, ergänzen (eigene Zeile)
+      if (m.code && !/(\b|_)code\s*:/.test(ctxText)) {
+        ctxText += (ctxText ? "\n" : "") + `code: ${m.code}`;
       }
 
       if (ctxText) {
-        li.setAttribute("data-ctx", ctxText);
+        li.setAttribute("data-ctx", ctxText); // Tooltip liest dieses Attribut aus
       }
       ul.appendChild(li);
     }

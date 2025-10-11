@@ -188,9 +188,9 @@ def schlankheit(
 ) -> Zwischenergebnis:
     base_ctx = merge_kontext(kontext, {
         "funktion": "schlankheit",
-        "objekttyp": getattr(objekttyp, "name", str(objekttyp)),
+        "objekttyp": getattr(objekttyp, "value", str(objekttyp)),
         "objekt_name_intern": objekt_name_intern,
-        "norm": getattr(norm, "name", str(norm)),
+        "norm": getattr(norm, "value", str(norm)),
     })
 
     # Eingaben prüfen: fachliche Fehler -> Message + NaN statt harter Exception

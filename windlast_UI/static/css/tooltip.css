@@ -18,7 +18,7 @@
   line-height: 1.25;
   box-shadow: 0 8px 24px rgba(0,0,0,.18);
   max-width: 360px;
-  white-space: normal; /* bricht, wenn Text lang ist */
+  white-space: pre; /* respektiert \n und verhindert Auto-Wrap */
 }
 
 /* Optional: kleine Lade-Optik für async Inhalte */
