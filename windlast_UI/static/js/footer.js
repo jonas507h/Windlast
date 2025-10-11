@@ -353,18 +353,32 @@ function openMessagesModalFor(normKey, szenario = null) {
       const li = document.createElement("li");
       li.textContent = m.text || "";
 
-      // → Kontext kompakt zusammenbauen (menschenlesbar; ohne Styling)
+            // → Kontext generisch zusammenbauen (alle Felder, dynamisch)
       const ctx = m?.context || {};
-      const parts = [];
-      // typische Felder, falls vorhanden
-      if (ctx.szenario ?? ctx.scenario) parts.push(`Szenario: ${ctx.szenario ?? ctx.scenario}`);
-      if (ctx.nachweis)               parts.push(`Nachweis: ${ctx.nachweis}`);
-      if (ctx.abschnitt)              parts.push(`Abschnitt: ${ctx.abschnitt}`);
-      if (ctx.komponente)             parts.push(`Komponente: ${ctx.komponente}`);
-      if (m.code)                      parts.push(`Code: ${m.code}`);
+      let ctxText = "";
 
-      // Fallback: wenn nichts davon gesetzt ist, kurz JSONen
-      const ctxText = parts.length ? parts.join(" · ") : (ctx ? JSON.stringify(ctx) : "");
+      try {
+        const entries = Object.entries(ctx);
+        if (entries.length > 0) {
+          ctxText = entries
+            .map(([k, v]) => {
+              // verschachtelte Objekte/Arrays sauber serialisieren
+              if (v && typeof v === "object") {
+                return `${k}: ${JSON.stringify(v)}`;
+              }
+              return `${k}: ${v}`;
+            })
+            .join(" · ");
+        }
+      } catch (e) {
+        // Fallback: einfaches JSON.stringify
+        ctxText = JSON.stringify(ctx);
+      }
+
+      // falls auch code außerhalb context steht, ergänzen
+      if (m.code && !ctxText.includes("code:")) {
+        ctxText += (ctxText ? " · " : "") + `code: ${m.code}`;
+      }
 
       if (ctxText) {
         li.setAttribute("data-ctx", ctxText);
