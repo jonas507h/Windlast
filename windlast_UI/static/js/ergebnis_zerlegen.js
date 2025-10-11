@@ -82,7 +82,34 @@
           sum.error += c.error; sum.warn += c.warn; sum.hint += c.hint; sum.info += c.info;
         }
         return sum;
-      }
+      },
+
+      // Alle Meldungen je NormKey (optional: Szenario) als reine Texte
+      listMessageTexts(normKey, scenario = null) {
+        const all = Array.isArray(this.payload?.normen?.[normKey]?.messages)
+          ? this.payload.normen[normKey].messages
+          : [];
+        const wanted = (m) => {
+          if (!scenario) return true; // kein Filter -> alle
+          const sc = (m?.context?.szenario ?? m?.context?.scenario ?? "").toString().trim();
+          return sc === scenario;
+        };
+        return all.filter(wanted).map(m => m?.text).filter(Boolean);
+      },
+
+      // Nur Hauptberechnung (alle Meldungen ohne explizites Alternativ-Szenario)
+      listMessageTextsMainOnly(normKey) {
+        const all = Array.isArray(this.payload?.normen?.[normKey]?.messages)
+          ? this.payload.normen[normKey].messages
+          : [];
+        return all
+          .filter(m => {
+            const sc = (m?.context?.szenario ?? m?.context?.scenario);
+            return sc === undefined || sc === null || String(sc).trim() === "";
+          })
+          .map(m => m?.text)
+          .filter(Boolean);
+      },
     }
   };
 

@@ -321,26 +321,68 @@ Tooltip.register('.results-table .alt-title th[data-szenario]', {
   delay: 120
 });
 
+// ---- Messages im Modal rendern (nur Texte, ohne Kontext) ----
+function openMessagesModalFor(normKey, szenario = null) {
+  if (!ResultsVM) return;
+
+  // Texte holen (ergebnis_zerlegen.js erweitert)
+  const texts = szenario
+    ? ResultsVM.listMessageTexts(normKey, szenario)
+    : ResultsVM.listMessageTextsMainOnly(normKey);
+
+  // Titel bauen
+  const niceScenario = szenario ? (displayAltName ? displayAltName(szenario) : szenario) : null;
+  const title = szenario
+    ? `Meldungen – ${normKey} / ${niceScenario}`
+    : `Meldungen – ${normKey} (Hauptberechnung)`;
+
+  // DOM für Modal
+  const wrap = document.createElement("div");
+  const h = document.createElement("h3");
+  h.textContent = title;
+  h.className = "modal-title";
+  wrap.appendChild(h);
+
+  if (!texts || texts.length === 0) {
+    const p = document.createElement("p");
+    p.textContent = "Keine Meldungen vorhanden.";
+    wrap.appendChild(p);
+  } else {
+    const ul = document.createElement("ul");
+    ul.className = "messages-list";
+    for (const t of texts) {
+      const li = document.createElement("li");
+      li.textContent = t;
+      ul.appendChild(li);
+    }
+    wrap.appendChild(ul);
+  }
+
+  Modal.open(wrap);
+}
+
 // ---- Modal-Trigger: beim Klick auf die Tooltip-Zellen ein Modal öffnen ----
 (function setupMessageModalOnce(){
-  if (window.__messageModalSetup) return; // Guard gegen Doppel-Registrierung
+  if (window.__messageModalSetup) return;
   window.__messageModalSetup = true;
 
   document.addEventListener("click", (ev) => {
     const target = ev.target;
 
-    // 1) Kopfzellen je Norm (gleichen Selektor wie Tooltip-Logik verwenden)
+    // 1) Kopfzellen je Norm
     const thHead = target.closest(".results-table thead th");
     if (thHead && thHead.dataset && thHead.dataset.normKey) {
-      // Später dynamischer Inhalt; jetzt: "Testfenster"
-      Modal.open("Testfenster");
+      const normKey = thHead.dataset.normKey;
+      openMessagesModalFor(normKey, null); // Hauptberechnung
       return;
     }
 
-    // 2) Alternativ-Titelzellen (gleicher Selektor wie Tooltip-Alternative)
+    // 2) Alternativ-Titelzellen
     const thAlt = target.closest(".results-table .alt-title th[data-szenario]");
     if (thAlt) {
-      Modal.open("Testfenster");
+      const normKey  = thAlt.dataset.normKey;
+      const szenario = thAlt.dataset.szenario;
+      openMessagesModalFor(normKey, szenario); // spezifische Variante
       return;
     }
   }, { passive: true });
