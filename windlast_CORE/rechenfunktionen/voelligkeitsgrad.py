@@ -1,6 +1,6 @@
 from typing import Dict, Callable, Optional
 import math
-from datenstruktur.zwischenergebnis import (
+from windlast_CORE.datenstruktur.zwischenergebnis import (
     Zwischenergebnis,
     Protokoll,
     merge_kontext,
@@ -8,7 +8,7 @@ from datenstruktur.zwischenergebnis import (
     protokolliere_msg,
     protokolliere_doc,
 )
-from datenstruktur.enums import Norm, Severity
+from windlast_CORE.datenstruktur.enums import Norm, Severity
 
 _EPS = 1e-12  # numerische Toleranz gegen Division durch ~0
 

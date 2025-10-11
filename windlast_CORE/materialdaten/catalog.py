@@ -4,7 +4,7 @@ from pathlib import Path
 import csv
 import sys
 from typing import Dict, Optional, Tuple
-from datenstruktur.enums import MaterialTyp
+from windlast_CORE.datenstruktur.enums import MaterialTyp
 import warnings
 
 # --- Datamodels -----------------------------------------------------------

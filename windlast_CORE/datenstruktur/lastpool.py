@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple, Hashable
-from datenstruktur.kraefte import Kraefte
-from rechenfunktionen.geom3d import Vec3
+from windlast_CORE.datenstruktur.kraefte import Kraefte
+from windlast_CORE.rechenfunktionen.geom3d import Vec3
 
 @dataclass
 class LastSet:

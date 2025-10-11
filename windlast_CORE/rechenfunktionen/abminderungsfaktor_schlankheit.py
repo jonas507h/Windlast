@@ -1,7 +1,7 @@
 # rechenfunktionen/abminderungsfaktor_schlankheit.py
 from __future__ import annotations
 from typing import Tuple, Dict, Callable, Optional
-from datenstruktur.zwischenergebnis import (
+from windlast_CORE.datenstruktur.zwischenergebnis import (
     Zwischenergebnis,
     Protokoll,
     merge_kontext,
@@ -9,9 +9,9 @@ from datenstruktur.zwischenergebnis import (
     protokolliere_msg,
     protokolliere_doc,
 )
-from datenstruktur.enums import Norm, ObjektTyp, Severity
+from windlast_CORE.datenstruktur.enums import Norm, ObjektTyp, Severity
 
-from rechenfunktionen.interpolation import (
+from windlast_CORE.rechenfunktionen.interpolation import (
     clamp_range,
     bilinear_interpolate_grid,
 )

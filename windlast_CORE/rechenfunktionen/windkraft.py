@@ -3,8 +3,8 @@ from __future__ import annotations
 from typing import Dict, Callable, Optional
 import math
 
-from datenstruktur.enums import Norm, ObjektTyp, Severity
-from datenstruktur.zwischenergebnis import (
+from windlast_CORE.datenstruktur.enums import Norm, ObjektTyp, Severity
+from windlast_CORE.datenstruktur.zwischenergebnis import (
     Zwischenergebnis,
     Protokoll,
     merge_kontext,

@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from typing import Tuple, List, Sequence, Optional
-from datenstruktur.konstanten import PhysikKonstanten, aktuelle_konstanten
-from datenstruktur.zwischenergebnis import Protokoll, merge_kontext, protokolliere_msg
-from materialdaten.catalog import catalog
-from rechenfunktionen import (
+from windlast_CORE.datenstruktur.konstanten import PhysikKonstanten, aktuelle_konstanten
+from windlast_CORE.datenstruktur.zwischenergebnis import Protokoll, merge_kontext, protokolliere_msg
+from windlast_CORE.materialdaten.catalog import catalog
+from windlast_CORE.rechenfunktionen import (
     Vec3,
     flaechenschwerpunkt,
     abstand_punkte,
@@ -19,8 +19,8 @@ from rechenfunktionen import (
     windkraft_zu_vektor,
     segmentiere_strecke_nach_hoehenbereichen,
 )
-from datenstruktur.kraefte import Kraefte
-from datenstruktur.enums import Lasttyp, Variabilitaet, ObjektTyp, Norm, Severity
+from windlast_CORE.datenstruktur.kraefte import Kraefte
+from windlast_CORE.datenstruktur.enums import Lasttyp, Variabilitaet, ObjektTyp, Norm, Severity
 
 @dataclass
 class Traversenstrecke:

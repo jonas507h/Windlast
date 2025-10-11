@@ -3,8 +3,8 @@ from __future__ import annotations
 
 from typing import List, Optional, Sequence, Dict, Tuple
 
-from datenstruktur.enums import MaterialTyp, Norm, Severity
-from datenstruktur.zwischenergebnis import (
+from windlast_CORE.datenstruktur.enums import MaterialTyp, Norm, Severity
+from windlast_CORE.datenstruktur.zwischenergebnis import (
     Zwischenergebnis,
     Protokoll,
     merge_kontext,
@@ -12,7 +12,7 @@ from datenstruktur.zwischenergebnis import (
     protokolliere_msg,
     protokolliere_doc,
 )
-from materialdaten.catalog import catalog
+from windlast_CORE.materialdaten.catalog import catalog
 
 # Typ-Hinweis: Dict[Norm, Dict[Tuple[MaterialTyp, MaterialTyp], Tuple[float, str]]]
 DATA_REIBWERTE = {

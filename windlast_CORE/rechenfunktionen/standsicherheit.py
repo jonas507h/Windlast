@@ -7,17 +7,17 @@ from enum import Enum
 from dataclasses import asdict, is_dataclass
 import json
 
-from datenstruktur.enums import (
+from windlast_CORE.datenstruktur.enums import (
     Norm, Windzone, Betriebszustand, Schutzmassnahmen,
     RechenmethodeKippen, RechenmethodeGleiten, RechenmethodeAbheben,
     VereinfachungKonstruktion, Nachweis, Severity, ValueSource, NormStatus,
 )
-from datenstruktur.zeit import Dauer
-from datenstruktur.standsicherheit_ergebnis import (
+from windlast_CORE.datenstruktur.zeit import Dauer
+from windlast_CORE.datenstruktur.standsicherheit_ergebnis import (
     StandsicherheitErgebnis, NormErgebnis, SafetyValue, Message, Meta,
 )
-from rechenfunktionen.staudruecke import staudruecke  # type: ignore
-from datenstruktur.zwischenergebnis import make_protokoll, collect_messages, merge_kontext, Protokoll
+from windlast_CORE.rechenfunktionen.staudruecke import staudruecke  # type: ignore
+from windlast_CORE.datenstruktur.zwischenergebnis import make_protokoll, collect_messages, merge_kontext, Protokoll
 
 def dataclass_to_json(obj):
     """

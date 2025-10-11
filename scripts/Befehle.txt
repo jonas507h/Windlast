@@ -16,3 +16,7 @@ pyinstaller --onefile --name WindlastUI `
 
 In Struktur aufwärts cd..
 Abwärts: cd Ordnername
+
+Exe starten
+cd dist
+.\windlastUI.exe

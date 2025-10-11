@@ -1,13 +1,13 @@
 import math
 from typing import List, Tuple, Optional, Sequence, Iterable, Dict
-from rechenfunktionen.geom3d import Vec3, vektor_zwischen_punkten, vektor_normieren, einheitsvektor_aus_winkeln, konvexe_huelle_xy, moment_einzelkraft_um_achse, vektor_laenge
-from datenstruktur.objekte3d import Achse
-from datenstruktur.kraefte import Kraefte
-from datenstruktur.enums import Norm, Lasttyp, Variabilitaet, Severity
-from datenstruktur.zwischenergebnis import Protokoll, merge_kontext, protokolliere_msg, protokolliere_doc, make_docbundle
-from rechenfunktionen.sicherheitsbeiwert import sicherheitsbeiwert
-from datenstruktur.lastpool import LastPool, LastSet
-from datenstruktur.konstanten import _EPS
+from windlast_CORE.rechenfunktionen.geom3d import Vec3, vektor_zwischen_punkten, vektor_normieren, einheitsvektor_aus_winkeln, konvexe_huelle_xy, moment_einzelkraft_um_achse, vektor_laenge
+from windlast_CORE.datenstruktur.objekte3d import Achse
+from windlast_CORE.datenstruktur.kraefte import Kraefte
+from windlast_CORE.datenstruktur.enums import Norm, Lasttyp, Variabilitaet, Severity
+from windlast_CORE.datenstruktur.zwischenergebnis import Protokoll, merge_kontext, protokolliere_msg, protokolliere_doc, make_docbundle
+from windlast_CORE.rechenfunktionen.sicherheitsbeiwert import sicherheitsbeiwert
+from windlast_CORE.datenstruktur.lastpool import LastPool, LastSet
+from windlast_CORE.datenstruktur.konstanten import _EPS
 
 def generiere_windrichtungen(
     anzahl: int = 4,

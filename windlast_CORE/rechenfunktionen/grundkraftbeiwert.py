@@ -5,8 +5,8 @@ from enum import Enum
 import math
 import warnings
 
-from datenstruktur.enums import Norm, TraversenTyp, ObjektTyp, Severity
-from datenstruktur.zwischenergebnis import (                              # + Protokoll & Helpers
+from windlast_CORE.datenstruktur.enums import Norm, TraversenTyp, ObjektTyp, Severity
+from windlast_CORE.datenstruktur.zwischenergebnis import (                              # + Protokoll & Helpers
     Zwischenergebnis,
     Protokoll,
     merge_kontext,
@@ -14,8 +14,8 @@ from datenstruktur.zwischenergebnis import (                              # + Pr
     protokolliere_msg,
     protokolliere_doc,
 )
-from materialdaten.catalog import catalog
-from rechenfunktionen.geom3d import (
+from windlast_CORE.materialdaten.catalog import catalog
+from windlast_CORE.rechenfunktionen.geom3d import (
     Vec3,
     vektor_normieren,
     vektor_laenge,
@@ -25,8 +25,8 @@ from rechenfunktionen.geom3d import (
     vektor_invertieren,
     abstand_punkte,
 )
-from rechenfunktionen.interpolation import interpol_2D
-from datenstruktur.konstanten import _EPS
+from windlast_CORE.rechenfunktionen.interpolation import interpol_2D
+from windlast_CORE.datenstruktur.konstanten import _EPS
 
 
 class Anstroemrichtung(Enum):

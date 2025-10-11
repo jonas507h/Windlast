@@ -2,9 +2,9 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Optional, Tuple, List
-from datenstruktur.enums import Lasttyp, Variabilitaet
-from rechenfunktionen.geom3d import Vec3, vektoren_addieren, flaechenschwerpunkt
-from datenstruktur.konstanten import _EPS
+from windlast_CORE.datenstruktur.enums import Lasttyp, Variabilitaet
+from windlast_CORE.rechenfunktionen.geom3d import Vec3, vektoren_addieren, flaechenschwerpunkt
+from windlast_CORE.datenstruktur.konstanten import _EPS
 
 @dataclass
 class Kraefte:

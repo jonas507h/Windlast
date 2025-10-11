@@ -1,9 +1,9 @@
 from dataclasses import dataclass
-from materialdaten.catalog import catalog
-from datenstruktur.konstanten import PhysikKonstanten, aktuelle_konstanten
-from datenstruktur.zwischenergebnis import Protokoll, merge_kontext, protokolliere_msg
+from windlast_CORE.materialdaten.catalog import catalog
+from windlast_CORE.datenstruktur.konstanten import PhysikKonstanten, aktuelle_konstanten
+from windlast_CORE.datenstruktur.zwischenergebnis import Protokoll, merge_kontext, protokolliere_msg
 from typing import List, Optional
-from rechenfunktionen import (
+from windlast_CORE.rechenfunktionen import (
     Vec3,
     vektor_laenge,
     vektor_normieren,
@@ -17,9 +17,9 @@ from rechenfunktionen import (
     vektor_multiplizieren,
     reibwert as reibwert_fn,
 )
-from datenstruktur.enums import ObjektTyp, MaterialTyp, Lasttyp, Variabilitaet, FormTyp, Norm, Severity
-from datenstruktur.kraefte import Kraefte
-from datenstruktur.konstanten import _EPS
+from windlast_CORE.datenstruktur.enums import ObjektTyp, MaterialTyp, Lasttyp, Variabilitaet, FormTyp, Norm, Severity
+from windlast_CORE.datenstruktur.kraefte import Kraefte
+from windlast_CORE.datenstruktur.konstanten import _EPS
 
 @dataclass
 class Bodenplatte:

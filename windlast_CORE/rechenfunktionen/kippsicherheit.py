@@ -4,14 +4,14 @@ from math import inf
 from typing import Dict, Callable, Sequence, List, Optional, Tuple, Iterable
 from collections.abc import Sequence as _SeqABC
 
-from datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_kontext, protokolliere_msg, protokolliere_doc, make_docbundle
-from datenstruktur.enums import Norm, RechenmethodeKippen, VereinfachungKonstruktion, Lasttyp, Variabilitaet, Severity
-from datenstruktur.konstanten import _EPS, aktuelle_konstanten
-from datenstruktur.kraefte import Kraefte
-from rechenfunktionen.sicherheitsbeiwert import sicherheitsbeiwert
-from rechenfunktionen.geom3d import flaechenschwerpunkt, moment_einzelkraft_um_achse
+from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_kontext, protokolliere_msg, protokolliere_doc, make_docbundle
+from windlast_CORE.datenstruktur.enums import Norm, RechenmethodeKippen, VereinfachungKonstruktion, Lasttyp, Variabilitaet, Severity
+from windlast_CORE.datenstruktur.konstanten import _EPS, aktuelle_konstanten
+from windlast_CORE.datenstruktur.kraefte import Kraefte
+from windlast_CORE.rechenfunktionen.sicherheitsbeiwert import sicherheitsbeiwert
+from windlast_CORE.rechenfunktionen.geom3d import flaechenschwerpunkt, moment_einzelkraft_um_achse
 
-from rechenfunktionen.standsicherheit_utils import (
+from windlast_CORE.rechenfunktionen.standsicherheit_utils import (
     generiere_windrichtungen,
     sammle_kippachsen,
     obtain_pool,

@@ -2,9 +2,9 @@ from __future__ import annotations
 from typing import Dict, Callable, Optional, List, Sequence, Union, Any, Tuple
 import warnings
 
-from datenstruktur.enums import Betriebszustand, Windzone, Schutzmassnahmen, Zeitfaktor, Norm, Severity
-from datenstruktur.zeit import Dauer
-from datenstruktur.zwischenergebnis import (
+from windlast_CORE.datenstruktur.enums import Betriebszustand, Windzone, Schutzmassnahmen, Zeitfaktor, Norm, Severity
+from windlast_CORE.datenstruktur.zeit import Dauer
+from windlast_CORE.datenstruktur.zwischenergebnis import (
     Zwischenergebnis_Liste,
     Protokoll,
     merge_kontext,
@@ -12,8 +12,8 @@ from datenstruktur.zwischenergebnis import (
     protokolliere_msg,
     protokolliere_doc,
 )
-from datenstruktur.konstanten import _EPS
-from datenstruktur.zeit import convert_dauer
+from windlast_CORE.datenstruktur.konstanten import _EPS
+from windlast_CORE.datenstruktur.zeit import convert_dauer
 
 # DIN EN 13814:2005-06 — Staudruck q [N/m²], Schlüssel: Obergrenze der Bauhöhe [m]
 STAUDRUECKE_DIN_EN_13814_2005_06 = {

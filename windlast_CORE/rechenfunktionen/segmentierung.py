@@ -1,7 +1,7 @@
 # rechenfunktionen/segmentierung.py
 from __future__ import annotations
 from typing import Sequence, List, Dict, Tuple, Optional
-from rechenfunktionen.geom3d import Vec3, schnittpunkt_strecke_ebene, abstand_punkte
+from windlast_CORE.rechenfunktionen.geom3d import Vec3, schnittpunkt_strecke_ebene, abstand_punkte
 
 _EPS = 1e-9
 

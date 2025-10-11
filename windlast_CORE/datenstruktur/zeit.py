@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Dict, Tuple
-from datenstruktur.enums import Zeitfaktor
+from windlast_CORE.datenstruktur.enums import Zeitfaktor
 
 # === Speicherform für Dauer ===
 @dataclass(frozen=True)

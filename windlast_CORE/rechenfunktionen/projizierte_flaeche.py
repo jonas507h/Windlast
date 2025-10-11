@@ -1,6 +1,6 @@
 from typing import Dict, Callable, Optional, Sequence, Tuple
 import math
-from datenstruktur.zwischenergebnis import (
+from windlast_CORE.datenstruktur.zwischenergebnis import (
     Zwischenergebnis,
     Protokoll,
     merge_kontext,
@@ -8,9 +8,9 @@ from datenstruktur.zwischenergebnis import (
     protokolliere_msg,
     protokolliere_doc,
 )
-from datenstruktur.enums import Norm, TraversenTyp, ObjektTyp, Severity
-from materialdaten.catalog import catalog
-from rechenfunktionen.geom3d import Vec3, vektor_laenge, abstand_punkte
+from windlast_CORE.datenstruktur.enums import Norm, TraversenTyp, ObjektTyp, Severity
+from windlast_CORE.materialdaten.catalog import catalog
+from windlast_CORE.rechenfunktionen.geom3d import Vec3, vektor_laenge, abstand_punkte
 
 _EPS = 1e-9
 

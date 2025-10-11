@@ -1,15 +1,15 @@
 from dataclasses import dataclass, field
 from typing import List, Optional, Sequence
-from bauelemente import Bodenplatte, Traversenstrecke
-from materialdaten.catalog import catalog
-from rechenfunktionen import (
+from windlast_CORE.bauelemente import Bodenplatte, Traversenstrecke
+from windlast_CORE.materialdaten.catalog import catalog
+from windlast_CORE.rechenfunktionen import (
     gesamtgewicht as _gesamtgewicht,
 )
-from rechenfunktionen.kippsicherheit import kippsicherheit as _kippsicherheit
-from rechenfunktionen.gleitsicherheit import gleitsicherheit as _gleitsicherheit
-from rechenfunktionen.abhebesicherheit import abhebesicherheit as _abhebesicherheit
-from datenstruktur.enums import Norm, MaterialTyp, FormTyp, RechenmethodeKippen, RechenmethodeGleiten, RechenmethodeAbheben, VereinfachungKonstruktion
-from datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_kontext
+from windlast_CORE.rechenfunktionen.kippsicherheit import kippsicherheit as _kippsicherheit
+from windlast_CORE.rechenfunktionen.gleitsicherheit import gleitsicherheit as _gleitsicherheit
+from windlast_CORE.rechenfunktionen.abhebesicherheit import abhebesicherheit as _abhebesicherheit
+from windlast_CORE.datenstruktur.enums import Norm, MaterialTyp, FormTyp, RechenmethodeKippen, RechenmethodeGleiten, RechenmethodeAbheben, VereinfachungKonstruktion
+from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_kontext
 
 # TODO: ID-Vergabe
 @dataclass

@@ -4,20 +4,20 @@ from math import inf
 from typing import Dict, Callable, Sequence, List, Optional
 from collections.abc import Sequence as _SeqABC
 
-from datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_kontext, protokolliere_msg, protokolliere_doc, make_docbundle
-from datenstruktur.enums import Norm, RechenmethodeGleiten, VereinfachungKonstruktion, Lasttyp, Variabilitaet, Severity
-from datenstruktur.konstanten import _EPS, aktuelle_konstanten
-from rechenfunktionen.sicherheitsbeiwert import sicherheitsbeiwert
-from datenstruktur.kraefte import Kraefte
+from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_kontext, protokolliere_msg, protokolliere_doc, make_docbundle
+from windlast_CORE.datenstruktur.enums import Norm, RechenmethodeGleiten, VereinfachungKonstruktion, Lasttyp, Variabilitaet, Severity
+from windlast_CORE.datenstruktur.konstanten import _EPS, aktuelle_konstanten
+from windlast_CORE.rechenfunktionen.sicherheitsbeiwert import sicherheitsbeiwert
+from windlast_CORE.datenstruktur.kraefte import Kraefte
 
-from rechenfunktionen.standsicherheit_utils import (
+from windlast_CORE.rechenfunktionen.standsicherheit_utils import (
     generiere_windrichtungen,
     obtain_pool,
     get_or_create_lastset,
     ermittle_min_reibwert,
     gleit_envelope_pro_bauelement,
 )
-from rechenfunktionen.geom3d import Vec3, vektoren_addieren, vektor_laenge
+from windlast_CORE.rechenfunktionen.geom3d import Vec3, vektoren_addieren, vektor_laenge
 
 def _validate_inputs(
     konstruktion,

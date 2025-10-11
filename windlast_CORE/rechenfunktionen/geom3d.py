@@ -2,7 +2,7 @@
 from math import hypot
 from typing import Sequence, Tuple, Optional, List
 import math
-from datenstruktur.objekte3d import Achse
+from windlast_CORE.datenstruktur.objekte3d import Achse
 
 Vec3 = Tuple[float, float, float]
 _EPS = 1e-9

@@ -1,13 +1,13 @@
 # rechenfunktionen/schlankheit.py
 from __future__ import annotations
 from typing import Dict, Callable, Optional, Sequence, Mapping, Any, Callable
-from datenstruktur.zwischenergebnis import Zwischenergebnis
-from datenstruktur.enums import Norm, ObjektTyp, Severity
-from materialdaten.catalog import catalog
-from rechenfunktionen.geom3d import Vec3, abstand_punkte
-from rechenfunktionen.interpolation import interpol_2D
-from datenstruktur.konstanten import _EPS
-from datenstruktur.zwischenergebnis import (
+from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis
+from windlast_CORE.datenstruktur.enums import Norm, ObjektTyp, Severity
+from windlast_CORE.materialdaten.catalog import catalog
+from windlast_CORE.rechenfunktionen.geom3d import Vec3, abstand_punkte
+from windlast_CORE.rechenfunktionen.interpolation import interpol_2D
+from windlast_CORE.datenstruktur.konstanten import _EPS
+from windlast_CORE.datenstruktur.zwischenergebnis import (
     Protokoll,
     merge_kontext,
     make_docbundle,

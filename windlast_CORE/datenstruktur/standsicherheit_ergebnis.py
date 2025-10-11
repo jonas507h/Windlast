@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Mapping, Optional
 
 # Import der Enums aus deinem Projekt
-from datenstruktur.enums import (
+from windlast_CORE.datenstruktur.enums import (
     Norm, Nachweis, Severity, NormStatus, ValueSource
 )
 

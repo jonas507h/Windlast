@@ -2,7 +2,7 @@
 from __future__ import annotations
 from typing import Dict, Callable, Optional
 
-from datenstruktur.zwischenergebnis import (
+from windlast_CORE.datenstruktur.zwischenergebnis import (
     Zwischenergebnis,
     Protokoll,
     merge_kontext,
@@ -10,8 +10,8 @@ from datenstruktur.zwischenergebnis import (
     protokolliere_msg,
     protokolliere_doc,
 )
-from datenstruktur.enums import Norm, Lasttyp, Variabilitaet, Severity
-from datenstruktur.kraefte import Kraefte
+from windlast_CORE.datenstruktur.enums import Norm, Lasttyp, Variabilitaet, Severity
+from windlast_CORE.datenstruktur.kraefte import Kraefte
 
 # TODO: Umgang mit Reibung (Reibung auf Boden -> Gewicht / Reibung durch Wind -> Wind)
 

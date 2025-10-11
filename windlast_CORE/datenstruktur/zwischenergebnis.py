@@ -1,12 +1,12 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional, Sequence, Mapping, Any, Protocol, runtime_checkable, Dict, List, Tuple, Union, TYPE_CHECKING
-from datenstruktur.enums import Severity
-from datenstruktur.standsicherheit_ergebnis import Message
+from windlast_CORE.datenstruktur.enums import Severity
+from windlast_CORE.datenstruktur.standsicherheit_ergebnis import Message
 
 if TYPE_CHECKING:
     # nur für Typprüfung, NICHT zur Laufzeit:
-    from rechenfunktionen.geom3d import Vec3
+    from windlast_CORE.rechenfunktionen.geom3d import Vec3
 else:
     # Laufzeit-Placeholder – reicht für Typannotationen und Dataklassen
     Vec3 = Tuple[float, float, float]

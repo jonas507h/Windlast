@@ -3,8 +3,8 @@ from __future__ import annotations
 from typing import Dict, Callable, Sequence, Optional
 import math
 
-from datenstruktur.enums import Norm, ObjektTyp, Severity
-from datenstruktur.zwischenergebnis import (
+from windlast_CORE.datenstruktur.enums import Norm, ObjektTyp, Severity
+from windlast_CORE.datenstruktur.zwischenergebnis import (
     Zwischenergebnis_Vektor,
     Protokoll,
     merge_kontext,
@@ -12,7 +12,7 @@ from datenstruktur.zwischenergebnis import (
     protokolliere_msg,
     protokolliere_doc,
 )
-from rechenfunktionen.geom3d import Vec3, vektor_laenge
+from windlast_CORE.rechenfunktionen.geom3d import Vec3, vektor_laenge
 
 def _validate_inputs(
     objekttyp: ObjektTyp,

@@ -1,6 +1,6 @@
 from math import inf
 from typing import List, Tuple, Dict, Sequence
-from rechenfunktionen.standsicherheit_utils import (
+from windlast_CORE.rechenfunktionen.standsicherheit_utils import (
     generiere_windrichtungen,
     kipp_envelope_pro_bauelement,
     sammle_kippachsen,
@@ -10,11 +10,11 @@ from rechenfunktionen.standsicherheit_utils import (
     gleit_envelope_pro_bauelement,
     abhebe_envelope_pro_bauelement,
 )
-from rechenfunktionen.geom3d import Vec3, vektoren_addieren, vektor_laenge
-from datenstruktur.kraefte import Kraefte
-from datenstruktur.enums import Norm, RechenmethodeKippen, RechenmethodeGleiten, RechenmethodeAbheben, VereinfachungKonstruktion
-from datenstruktur.lastpool import LastPool
-from datenstruktur.konstanten import _EPS
+from windlast_CORE.rechenfunktionen.geom3d import Vec3, vektoren_addieren, vektor_laenge
+from windlast_CORE.datenstruktur.kraefte import Kraefte
+from windlast_CORE.datenstruktur.enums import Norm, RechenmethodeKippen, RechenmethodeGleiten, RechenmethodeAbheben, VereinfachungKonstruktion
+from windlast_CORE.datenstruktur.lastpool import LastPool
+from windlast_CORE.datenstruktur.konstanten import _EPS
 
 _anzahl_windrichtungen_standard = 4
 
