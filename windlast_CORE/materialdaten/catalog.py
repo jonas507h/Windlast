@@ -143,7 +143,12 @@ def _load_rohre_csv(csv_path: Path) -> Dict[str, RohrSpec]:
 
 class Catalog:
     def __init__(self, daten_root: Optional[Path] = None) -> None:
-        base = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent))
+        if hasattr(sys, "_MEIPASS"):
+            # in der EXE: Daten liegen im Bundle unter windlast_CORE/materialdaten
+            base = Path(sys._MEIPASS) / "windlast_CORE" / "materialdaten"
+        else:
+            # Dev: Ordner der aktuellen Datei
+            base = Path(__file__).resolve().parent
         self._root = daten_root or base
         self._bodenplatten = _load_bodenplatten_csv(self._root / "bodenplatten.csv")
         self._traversen = _load_traversen_csv(self._root / "traversen.csv")

@@ -6,3 +6,13 @@ python app.py
 
 App ausführen neu
 python .\windlast_API\app.py
+
+App bauen
+pyinstaller --onefile --name WindlastUI `
+  --paths . `
+  --paths windlast_CORE `
+  --add-data "windlast_UI;windlast_UI" `
+  windlast_API\app.py
+
+In Struktur aufwärts cd..
+Abwärts: cd Ordnername
