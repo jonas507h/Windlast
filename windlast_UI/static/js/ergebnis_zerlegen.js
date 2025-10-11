@@ -114,6 +114,44 @@
           .map(m => m?.text)
           .filter(Boolean);
       },
+
+      // Alle Meldungen je Norm (optional: Szenario) als Objekte { text, severity, code, context }
+      listMessages(normKey, scenario = null) {
+        const all = Array.isArray(this.payload?.normen?.[normKey]?.messages)
+          ? this.payload.normen[normKey].messages
+          : [];
+        return all.filter(m => {
+            if (!scenario) return true;
+            const sc = (m?.context?.szenario ?? m?.context?.scenario ?? "").toString().trim();
+            return sc === scenario;
+          })
+          .map(m => ({
+            text: m?.text ?? "",
+            severity: m?.severity ?? null,
+            code: m?.code ?? null,
+            context: m?.context ?? null,
+          }));
+      },
+
+      // Nur Hauptberechnung: alle Meldungen, deren Szenario NICHT eine Alternative ist
+      listMessagesMainOnly(normKey) {
+        const norm = this.payload?.normen?.[normKey] || {};
+        const all = Array.isArray(norm.messages) ? norm.messages : [];
+        const altNames = Object.keys(norm.alternativen || {});
+        const altSet = new Set(altNames.map(String));
+        return all
+          .filter(m => {
+            const raw = (m?.context?.szenario ?? m?.context?.scenario);
+            const sc = (raw == null) ? "" : String(raw).trim();
+            return !altSet.has(sc);
+          })
+          .map(m => ({
+            text: m?.text ?? "",
+            severity: m?.severity ?? null,
+            code: m?.code ?? null,
+            context: m?.context ?? null,
+          }));
+      },
     }
   };
 

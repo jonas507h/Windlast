@@ -321,16 +321,15 @@ Tooltip.register('.results-table .alt-title th[data-szenario]', {
   delay: 120
 });
 
-// ---- Messages im Modal rendern (nur Texte, ohne Kontext) ----
+// ---- Messages im Modal rendern (Texte; Kontext wird als Tooltip gezeigt) ----
 function openMessagesModalFor(normKey, szenario = null) {
   if (!ResultsVM) return;
 
-  // Texte holen (ergebnis_zerlegen.js erweitert)
-  const texts = szenario
-    ? ResultsVM.listMessageTexts(normKey, szenario)
-    : ResultsVM.listMessageTextsMainOnly(normKey);
+  // Meldungen holen (Objekte; s.o.)
+  const msgs = szenario
+    ? (ResultsVM.listMessages ? ResultsVM.listMessages(normKey, szenario) : [])
+    : (ResultsVM.listMessagesMainOnly ? ResultsVM.listMessagesMainOnly(normKey) : []);
 
-  // Titel bauen
   const niceScenario = szenario ? (displayAltName ? displayAltName(szenario) : szenario) : null;
   const title = szenario
     ? `Meldungen – ${normKey} / ${niceScenario}`
@@ -343,16 +342,33 @@ function openMessagesModalFor(normKey, szenario = null) {
   h.className = "modal-title";
   wrap.appendChild(h);
 
-  if (!texts || texts.length === 0) {
+  if (!msgs || msgs.length === 0) {
     const p = document.createElement("p");
     p.textContent = "Keine Meldungen vorhanden.";
     wrap.appendChild(p);
   } else {
     const ul = document.createElement("ul");
     ul.className = "messages-list";
-    for (const t of texts) {
+    for (const m of msgs) {
       const li = document.createElement("li");
-      li.textContent = t;
+      li.textContent = m.text || "";
+
+      // → Kontext kompakt zusammenbauen (menschenlesbar; ohne Styling)
+      const ctx = m?.context || {};
+      const parts = [];
+      // typische Felder, falls vorhanden
+      if (ctx.szenario ?? ctx.scenario) parts.push(`Szenario: ${ctx.szenario ?? ctx.scenario}`);
+      if (ctx.nachweis)               parts.push(`Nachweis: ${ctx.nachweis}`);
+      if (ctx.abschnitt)              parts.push(`Abschnitt: ${ctx.abschnitt}`);
+      if (ctx.komponente)             parts.push(`Komponente: ${ctx.komponente}`);
+      if (m.code)                      parts.push(`Code: ${m.code}`);
+
+      // Fallback: wenn nichts davon gesetzt ist, kurz JSONen
+      const ctxText = parts.length ? parts.join(" · ") : (ctx ? JSON.stringify(ctx) : "");
+
+      if (ctxText) {
+        li.setAttribute("data-ctx", ctxText);
+      }
       ul.appendChild(li);
     }
     wrap.appendChild(ul);
@@ -387,3 +403,10 @@ function openMessagesModalFor(normKey, szenario = null) {
     }
   }, { passive: true });
 })();
+
+// Tooltip für Meldungseinträge im Modal: zeigt den Kontext
+Tooltip.register('#modal-root .messages-list li[data-ctx]', {
+  content: (_ev, el) => el.getAttribute('data-ctx') || "",
+  // optional: sehr kurzer Delay im Modal
+  delay: 80
+});
