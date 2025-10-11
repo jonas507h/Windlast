@@ -36,3 +36,36 @@
   font-size: 14px; 
   line-height: 1.5; 
 }
+
+/* ===== Meldungszeilen im MODAL (gleiche Optik wie Tooltip) ===== */
+#modal-root .tt-line {
+  margin: 2px 0;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+/* Fehler (rot) */
+#modal-root .tt-line.error {
+  background-color: rgba(255, 107, 107, 0.15);
+  color: #ff4c4c;
+  font-weight: 600;
+}
+
+/* Warnung (gelb/orange) */
+#modal-root .tt-line.warn {
+  background-color: rgba(240, 173, 78, 0.15);
+  color: #d99000;
+  font-weight: 600;
+}
+
+/* Hinweis (blau) */
+#modal-root .tt-line.hint {
+  background-color: rgba(45, 108, 223, 0.12);
+  color: #2d6cdf;
+}
+
+/* Info (grau/blau) */
+#modal-root .tt-line.info {
+  background-color: rgba(100, 100, 100, 0.08);
+  color: var(--text, #555);
+}

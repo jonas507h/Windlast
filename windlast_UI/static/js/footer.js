@@ -351,34 +351,36 @@ function openMessagesModalFor(normKey, szenario = null) {
     ul.className = "messages-list";
     for (const m of msgs) {
       const li = document.createElement("li");
-      li.textContent = m.text || "";
 
-      // → Kontext generisch zusammenbauen (alle Felder, dynamisch, 1 Eintrag pro Zeile)
+      const line = document.createElement("div");
+      const sev = (m.severity || "").toLowerCase();
+      const sevClass = (sev === "error" || sev === "warn" || sev === "hint" || sev === "info")
+        ? sev
+        : "info"; // Fallback
+      line.className = `tt-line ${sevClass}`;
+      line.textContent = m.text || "";
+      li.appendChild(line);
+
+      // Kontext generisch sammeln -> Tooltip-Attribut
       const ctx = m?.context || {};
       let ctxText = "";
-
       try {
         const entries = Object.entries(ctx);
         if (entries.length > 0) {
           ctxText = entries
-            .map(([k, v]) => {
-              if (v && typeof v === "object") return `${k}: ${JSON.stringify(v)}`;
-              return `${k}: ${v}`;
-            })
-            .join("\n"); // <<< genau das sorgt für 1 Eintrag pro Zeile
+            .map(([k, v]) => (v && typeof v === "object") ? `${k}: ${JSON.stringify(v)}` : `${k}: ${v}`)
+            .join("\n"); // 1 Eintrag pro Zeile
         }
       } catch (e) {
         ctxText = JSON.stringify(ctx);
       }
-
-      // falls "code" außerhalb context steht, ergänzen (eigene Zeile)
       if (m.code && !/(\b|_)code\s*:/.test(ctxText)) {
         ctxText += (ctxText ? "\n" : "") + `code: ${m.code}`;
       }
-
       if (ctxText) {
-        li.setAttribute("data-ctx", ctxText); // Tooltip liest dieses Attribut aus
+        li.setAttribute("data-ctx", ctxText);
       }
+
       ul.appendChild(li);
     }
     wrap.appendChild(ul);
@@ -416,7 +418,11 @@ function openMessagesModalFor(normKey, szenario = null) {
 
 // Tooltip für Meldungseinträge im Modal: zeigt den Kontext
 Tooltip.register('#modal-root .messages-list li[data-ctx]', {
-  content: (_ev, el) => el.getAttribute('data-ctx') || "",
-  // optional: sehr kurzer Delay im Modal
+  // wichtig: auch Treffer auf Kindelementen zulassen
+  predicate: (el) => !!el.closest('li[data-ctx]'),
+  content: (_ev, el) => {
+    const li = el.closest('li[data-ctx]');
+    return li ? (li.getAttribute('data-ctx') || "") : "";
+  },
   delay: 80
 });
