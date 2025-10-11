@@ -97,15 +97,19 @@
         return all.filter(wanted).map(m => m?.text).filter(Boolean);
       },
 
-      // Nur Hauptberechnung (alle Meldungen ohne explizites Alternativ-Szenario)
+      // Nur Hauptberechnung: alle Meldungen, deren Szenario NICHT eine Alternative ist
       listMessageTextsMainOnly(normKey) {
-        const all = Array.isArray(this.payload?.normen?.[normKey]?.messages)
-          ? this.payload.normen[normKey].messages
-          : [];
+        const norm = this.payload?.normen?.[normKey] || {};
+        const all = Array.isArray(norm.messages) ? norm.messages : [];
+        const altNames = Object.keys(norm.alternativen || {});
+        const altSet = new Set(altNames.map(String));
+
         return all
           .filter(m => {
-            const sc = (m?.context?.szenario ?? m?.context?.scenario);
-            return sc === undefined || sc === null || String(sc).trim() === "";
+            const raw = (m?.context?.szenario ?? m?.context?.scenario);
+            const sc = (raw === undefined || raw === null) ? "" : String(raw).trim();
+            // analog zu getCountsMainOnly: Primär = alles, was NICHT in "alternativen" steckt
+            return !altSet.has(sc);
           })
           .map(m => m?.text)
           .filter(Boolean);
