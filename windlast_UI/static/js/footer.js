@@ -27,6 +27,38 @@ function getNormDisplayName(normKey) {
   return NORM_DISPLAY_NAMES[normKey] || normKey.replace(/_/g, " ");
 }
 
+// Wunschreihenfolge für Kontext-Felder (anpassbar)
+const CONTEXT_ORDER = [
+  "szenario", "scenario",
+  "nachweis", "abschnitt",
+  "komponente", "element", "bauteil",
+  "einwirkungsart", "stelle",
+  "id"
+];
+
+// Sortiert Kontext-Einträge: erst laut CONTEXT_ORDER, dann Rest in Quell-Reihenfolge
+function orderContextEntries(ctx, pref = CONTEXT_ORDER) {
+  if (!ctx || typeof ctx !== "object") return [];
+
+  // Quell-Reihenfolge sichern (stabil, kein Object.entries mit Sort)
+  const withIndex = [];
+  let i = 0;
+  for (const k in ctx) {
+    if (!Object.hasOwn(ctx, k)) continue;
+    withIndex.push([k, ctx[k], i++]); // [key, value, originalIndex]
+  }
+
+  const rank = new Map(pref.map((k, idx) => [k, idx]));
+  withIndex.sort((a, b) => {
+    const ra = rank.has(a[0]) ? rank.get(a[0]) : Infinity;
+    const rb = rank.has(b[0]) ? rank.get(b[0]) : Infinity;
+    if (ra !== rb) return ra - rb;     // bevorzugte zuerst
+    return a[2] - b[2];                // Originalreihenfolge unter gleicher Priorität
+  });
+
+  return withIndex.map(([k, v]) => [k, v]);
+}
+
 let ResultsVM = null; // hält das von ResultsIndex.build(...) erzeugte ViewModel
 
 function attachNormKeysToHeader() {
@@ -377,39 +409,22 @@ function openMessagesModalFor(normKey, szenario = null) {
       li.appendChild(line);
 
       // Kontext generisch sammeln -> Tooltip-Attribut
-      // Kontext generisch (Original-Reihenfolge, keine Sortierung)
+      // Kontext generisch, nach CONTEXT_ORDER, Rest in Quell-Reihenfolge
       let ctxText = "";
       try {
         const ctx = m?.context || {};
-        const parts = [];
-
-        if (ctx instanceof Map) {
-          // Map bewahrt Einfügereihenfolge von sich aus
-          for (const [k, v] of ctx) {
-            parts.push(
-              v && typeof v === "object" ? `${k}: ${JSON.stringify(v)}` : `${k}: ${v}`
-            );
-          }
-        } else if (ctx && typeof ctx === "object") {
-          // WICHTIG: getOwnPropertyNames statt entries/keys (keine Sortierung)
-          const keysInOrder = Object.getOwnPropertyNames(ctx);
-          for (let i = 0; i < keysInOrder.length; i++) {
-            const k = keysInOrder[i];
-            const v = ctx[k];
-            parts.push(
-              v && typeof v === "object" ? `${k}: ${JSON.stringify(v)}` : `${k}: ${v}`
-            );
-          }
-        }
+        const ordered = orderContextEntries(ctx);
+        const parts = ordered.map(([k, v]) =>
+          (v && typeof v === "object") ? `${k}: ${JSON.stringify(v)}` : `${k}: ${v}`
+        );
 
         // "code" anhängen, wenn noch nicht enthalten
-        if (m.code) {
-          const hasCode = parts.some(line => /^\s*code\s*:/.test(line));
-          if (!hasCode) parts.push(`code: ${m.code}`);
+        if (m.code && !parts.some(line => /^\s*code\s*:/.test(line))) {
+          parts.push(`code: ${m.code}`);
         }
 
         if (parts.length) ctxText = parts.join("\n");
-      } catch (e) {
+      } catch {
         ctxText = JSON.stringify(m?.context || {});
       }
 
