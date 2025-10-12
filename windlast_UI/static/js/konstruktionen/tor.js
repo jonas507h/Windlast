@@ -40,6 +40,15 @@ async function initTorDropdowns() {
     fillSelect(document.getElementById("traverse_name_intern"), traversen);
     fillSelect(document.getElementById("bodenplatte_name_intern"), bps);
     fillSelect(document.getElementById("untergrund_typ"), untergruende, { defaultValue: "beton" });
+
+    // Statisches Dropdown: Gummimatte (Ja/Nein), Default = Ja
+    const gm = document.getElementById("gummimatte");
+    if (gm) {
+      fillSelect(gm, [
+        { value: "ja",   label: "Ja" },
+        { value: "nein", label: "Nein" },
+      ], { defaultValue: "ja" });
+    }
   } catch (e) {
     console.error("Tor-Dropdowns konnten nicht geladen werden:", e);
   }
@@ -83,6 +92,10 @@ function readHeaderValues() {
 async function submitTor() {
   // Formulardaten sammeln und an API senden
   try {
+    // Gummimatte-Wert holen (ja/nein); wir reichen ihn als Boolean weiter
+    const gmVal = document.getElementById("gummimatte")?.value ?? "ja";
+    const gummimatte_bool = (gmVal === "ja");
+
     // Sammeln der Eingabewerte und verpacken
     const payload = {
       breite_m: parseFloat(document.getElementById("breite_m").value),
@@ -90,6 +103,7 @@ async function submitTor() {
       traverse_name_intern: document.getElementById("traverse_name_intern").value,
       bodenplatte_name_intern: document.getElementById("bodenplatte_name_intern").value,
       untergrund_typ: document.getElementById("untergrund_typ").value, // z.B. "beton"
+      gummimatte: gummimatte_bool,
       ...readHeaderValues(),
     };
 
