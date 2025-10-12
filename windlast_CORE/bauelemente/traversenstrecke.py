@@ -30,6 +30,7 @@ class Traversenstrecke:
     orientierung: Vec3
     objekttyp: ObjektTyp = ObjektTyp.TRAVERSE
     element_id_intern: Optional[str] = None
+    traverse_anzeigename: Optional[str] = None
 
     def gesamthoehe(self) -> float:
         return max(self.start[2], self.ende[2])
@@ -78,11 +79,11 @@ class Traversenstrecke:
         _luftdichte = k.luftdichte
 
         base_ctx = merge_kontext(kontext, {
-            "funktion": "windkraefte",
-            "norm": norm.name,
+            "funktion": "Windkraefte",
+            "norm": norm.value,
             "element_id": self.element_id_intern,
-            "objekttyp": self.objekttyp.name,
-            "traverse_name_intern": self.traverse_name_intern,
+            "objekttyp": self.objekttyp.value,
+            "traverse_anzeigename": self.traverse_anzeigename,
             "windrichtung": windrichtung,
         })
 

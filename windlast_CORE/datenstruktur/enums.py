@@ -16,13 +16,13 @@ class TraversenTyp(str, Enum):
             raise ValueError(f"Ungültige Anzahl Punkte: {n}. Erlaubt: 2, 3, 4.")
         
 class Lasttyp(str, Enum):
-    WIND = "wind"
-    GEWICHT = "gewicht"
-    REIBUNG = "reibung"
+    WIND = "Wind"
+    GEWICHT = "Gewicht"
+    REIBUNG = "Reibung"
 
 class Variabilitaet(str, Enum):
-    STAENDIG = "staendig"
-    VERAENDERLICH = "veraenderlich"
+    STAENDIG = "ständig"
+    VERAENDERLICH = "veränderlich"
 
 class Norm(str, Enum):
     DIN_EN_1991_1_4_2010_12 = "EN 1991-1-4:2010-12" #Eurocode
@@ -31,9 +31,9 @@ class Norm(str, Enum):
     DEFAULT = "Default"
 
 class ObjektTyp(str, Enum):
-    TRAVERSE = "traverse"
-    ROHR = "rohr"
-    BODENPLATTE = "bodenplatte"
+    TRAVERSE = "Traverse"
+    ROHR = "Rohr"
+    BODENPLATTE = "Bodenplatte"
 
 class MaterialTyp(str, Enum):
     HOLZ = "Holz"

@@ -51,17 +51,17 @@ def _schlankheit_DinEn1991_1_4_2010_12(
         hoehe = traverse.hoehe
         if hoehe is None or hoehe <= 0:
             local_ctx = merge_kontext(kontext, {
-                "phase": "ZWISCHENWERTE",
-                "metrik": "lambda",
-                "input_source": "catalog",
-                "laenge": laenge,
-                "hoehe": hoehe,
+                "phase": "Zwischenwerte",
+                "metrik": "λ",
+                "input_source": "Katalog",
+                "laenge": f"{laenge}m",
+                "hoehe": f"{hoehe}m",
             })
             protokolliere_msg(
                 protokoll,
                 severity=Severity.ERROR,
                 code="SCHLANKHEIT/CATALOG_MISSING",
-                text=f"Traverse '{objekt_name_intern}': ungültige Höhe ({hoehe}).",
+                text=f"Traverse '{objekt_name_intern}': ungültige Höhe ({hoehe}m).",
                 kontext=local_ctx,
             )
             protokolliere_doc(
@@ -91,7 +91,7 @@ def _schlankheit_DinEn1991_1_4_2010_12(
                 severity=Severity.INFO,
                 code="SCHLANKHEIT/CLAMP_70",
                 text=f"Schlankheit auf 70 gekappt (Rechenwert {rechenwert:.3f}).",
-                kontext=merge_kontext(kontext, {"phase": "ZWISCHENWERTE", "rechenwert": rechenwert}),
+                kontext=merge_kontext(kontext, {"phase": "Zwischenwerte", "rechenwert": rechenwert}),
             )
 
         protokolliere_doc(
@@ -103,7 +103,7 @@ def _schlankheit_DinEn1991_1_4_2010_12(
                 # Optional: Wenn du Formeln/Quellen an dieser Stelle schon kennst:
                 # formel="λ = f(L) * L / h", quelle_formel="DIN EN 1991-1-4:2010-12, Tab ..."
             ),
-            kontext=merge_kontext(kontext, {"phase": "ZWISCHENWERTE"}),
+            kontext=merge_kontext(kontext, {"phase": "Zwischenwerte"}),
         )
         return Zwischenergebnis(wert=wert)
     
@@ -115,11 +115,11 @@ def _schlankheit_DinEn1991_1_4_2010_12(
         d_aussen = rohr.d_aussen
         if d_aussen is None or d_aussen <= 0:
             local_ctx = merge_kontext(kontext, {
-                "phase": "ZWISCHENWERTE",
-                "metrik": "lambda",
-                "input_source": "catalog",
-                "laenge": laenge,
-                "d_aussen": d_aussen,
+                "phase": "Zwischenwerte",
+                "metrik": "λ",
+                "input_source": "Katalog",
+                "laenge": f"{laenge}m",
+                "d_aussen": f"{d_aussen}m",
             })
             protokolliere_msg(
                 protokoll,
@@ -137,14 +137,6 @@ def _schlankheit_DinEn1991_1_4_2010_12(
             return Zwischenergebnis(wert=float("nan"))
 
         faktor = interpol_2D([15.0, 50.0], [2.0, 1.4], laenge)
-        if laenge < 15.0 or laenge > 50.0:
-            protokolliere_msg(
-                protokoll,
-                severity=Severity.WARN,
-                code="SCHLANKHEIT/EXTRAPOLATION",
-                text=f"Faktor via Extrapolation für L={laenge:.3f} außerhalb [15, 50].",
-                kontext=merge_kontext(kontext, {"phase": "ZWISCHENWERTE", "bounds": [15.0, 50.0], "laenge": laenge}),
-            )
 
         rechenwert = faktor * (laenge / d_aussen)
         wert = min(rechenwert, 70.0)
@@ -155,7 +147,7 @@ def _schlankheit_DinEn1991_1_4_2010_12(
                 severity=Severity.INFO,
                 code="SCHLANKHEIT/CLAMP_70",
                 text=f"Schlankheit auf 70 gekappt (Rechenwert {rechenwert:.3f}).",
-                kontext=merge_kontext(kontext, {"phase": "ZWISCHENWERTE", "rechenwert": rechenwert}),
+                kontext=merge_kontext(kontext, {"phase": "Zwischenwerte", "rechenwert": rechenwert}),
             )
 
         protokolliere_doc(
@@ -165,7 +157,7 @@ def _schlankheit_DinEn1991_1_4_2010_12(
                 wert=wert,
                 einzelwerte=[laenge, d_aussen],
             ),
-            kontext=merge_kontext(kontext, {"phase": "ZWISCHENWERTE"}),
+            kontext=merge_kontext(kontext, {"phase": "Zwischenwerte"}),
         )
         return Zwischenergebnis(wert=wert)
 
@@ -187,7 +179,7 @@ def schlankheit(
     kontext: Optional[dict] = None,
 ) -> Zwischenergebnis:
     base_ctx = merge_kontext(kontext, {
-        "funktion": "schlankheit",
+        "funktion": "Schlankheit",
         "objekttyp": getattr(objekttyp, "value", str(objekttyp)),
         "objekt_name_intern": objekt_name_intern,
         "norm": getattr(norm, "value", str(norm)),

@@ -32,12 +32,88 @@ function getNormDisplayName(normKey) {
 
 // Wunschreihenfolge für Kontext-Felder (anpassbar)
 const CONTEXT_ORDER = [
+  "anzahl_windrichtungen",
+  "windrichtung", "winkel_deg",
   "szenario", "scenario",
-  "nachweis", "abschnitt",
+  "nachweis",
+  "abschnitt",
+  "phase",
   "komponente", "element", "bauteil",
   "einwirkungsart", "stelle",
-  "id"
+  "element_index",
+  "id", "element_id", "element_id_intern",
+  "objekttyp",
+  "traverse_anzeigename",
+  "objekt_name_intern",
+  "funktion",
+  "norm", "norm_label",
+  "methode",
 ];
+
+// Anzeigenamen/Aliase für Kontext-Keys
+const CONTEXT_ALIASES = {
+  funktion: "Funktion",
+  norm: "Norm",
+  nachweis: "Nachweis",
+  abschnitt: "Abschnitt",
+  komponente: "Komponente",
+  element: "Element",
+  bauteil: "Bauteil",
+  element_id: "Element-ID",
+  element_id_intern: "Element-ID (intern)",
+  bodenplatte_name_intern: "Bodenplatte",
+  szenario: "Szenario",
+  scenario: "Szenario",
+  einwirkungsart: "Einwirkungsart",
+  stelle: "Stelle",
+  id: "ID",
+  gesamt_hoehe: "Gesamthöhe",
+  gesamthoehe: "Gesamthöhe",
+  h_bau: "Gesamthöhe",
+  h_max: "Max. gültige Höhe",
+  windzone: "Windzone",
+  winkel_deg: "Windrichtung (°)",
+  paarung: "Materialpaarung",
+  norm_used: "Verwendete Norm",
+};
+
+// Key → hübscher Labeltext
+function prettyKey(k) {
+  if (!k || typeof k !== "string") return String(k);
+  if (CONTEXT_ALIASES[k]) return CONTEXT_ALIASES[k];
+  // snake_case → "Snake Case" (erstes Zeichen jedes Wortes groß)
+  return k.replace(/_/g, " ").replace(/\b\p{L}/gu, (c) => c.toUpperCase());
+}
+
+// Werte ggf. hübscher darstellen
+function prettyVal(k, v) {
+  if (v === null || v === undefined) return "—";
+
+  // Norm-Schlüssel hübsch machen, falls im Kontext als Key "norm" steckt
+  /*if ((k === "norm" || k === "norm_used") && typeof v === "string") {
+    return getNormDisplayName(v);
+  }*/
+
+  // Szenario-Namen ggf. durch ALT_LABELS mappen
+  if ((k === "szenario" || k === "scenario") && typeof v === "string") {
+    return displayAltName(v) || v;
+  }
+
+  // Booleans auf Deutsch
+  if (typeof v === "boolean") return v ? "Ja" : "Nein";
+
+  // Arrays als kommagetrennte Liste
+  if (Array.isArray(v)) return v.map((x) => prettyVal(k, x)).join(", ");
+
+  // Objekte kompakt serialisieren
+  if (v && typeof v === "object") {
+    try { return JSON.stringify(v); } catch { return String(v); }
+  }
+
+  // Standard: Wert direkt
+  return String(v);
+}
+
 
 // Sortiert Kontext-Einträge: erst laut CONTEXT_ORDER, dann Rest in Quell-Reihenfolge
 function orderContextEntries(ctx, pref = CONTEXT_ORDER) {
@@ -432,9 +508,11 @@ function openMessagesModalFor(normKey, szenario = null) {
       try {
         const ctx = m?.context || {};
         const ordered = orderContextEntries(ctx);
-        const parts = ordered.map(([k, v]) =>
-          (v && typeof v === "object") ? `${k}: ${JSON.stringify(v)}` : `${k}: ${v}`
-        );
+        const parts = ordered.map(([k, v]) => {
+          const label = prettyKey(k);
+          const val   = prettyVal(k, v);
+          return `${label}: ${val}`;
+        });
 
         // "code" anhängen, wenn noch nicht enthalten
         if (m.code && !parts.some(line => /^\s*code\s*:/.test(line))) {

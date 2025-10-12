@@ -55,8 +55,8 @@ def _windkraft_default(
                 quelle_formelzeichen=["Projektinterne Bezeichnungen"],
             ),
             kontext=merge_kontext(kontext, {
-                "funktion": "windkraft",
-                "objekttyp": getattr(objekttyp, "name", str(objekttyp)),
+                "funktion": "Windkraft",
+                "objekttyp": getattr(objekttyp, "value", str(objekttyp)),
             }),
         )
         return Zwischenergebnis(wert=wert)
@@ -79,9 +79,9 @@ def windkraft(
     kontext: Optional[dict] = None,
 ) -> Zwischenergebnis:
     base_ctx = merge_kontext(kontext, {
-        "funktion": "windkraft",
-        "objekttyp": getattr(objekttyp, "name", str(objekttyp)),
-        "norm": getattr(norm, "name", str(norm)),
+        "funktion": "Windkraft",
+        "objekttyp": getattr(objekttyp, "value", str(objekttyp)),
+        "norm": getattr(norm, "value", str(norm)),
     })
 
     try:

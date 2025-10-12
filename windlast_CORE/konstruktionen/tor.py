@@ -58,6 +58,7 @@ class Tor:
                 ende=(t/2, 0.0, H),
                 orientierung=vecs["links"],
                 element_id_intern="Strecke_Links",
+                traverse_anzeigename=spec.anzeige_name,
             )
             top = Traversenstrecke(
                 traverse_name_intern=self.traverse_name_intern,
@@ -65,6 +66,7 @@ class Tor:
                 ende=(B,   0.0, H - t/2),
                 orientierung=vecs["oben"],
                 element_id_intern="Strecke_Oben",
+                traverse_anzeigename=spec.anzeige_name,
             )
             right = Traversenstrecke(
                 traverse_name_intern=self.traverse_name_intern,
@@ -72,6 +74,7 @@ class Tor:
                 ende=(B - t/2, 0.0, H),
                 orientierung=vecs["rechts"],
                 element_id_intern="Strecke_Rechts",
+                traverse_anzeigename=spec.anzeige_name,
             )
             self.bauelemente.extend([left, top, right])
 
@@ -108,8 +111,7 @@ class Tor:
     ) -> float:
         """Maximale Gesamthöhe über alle Bauelemente mit .gesamthoehe()."""
         base_ctx = merge_kontext(kontext, {
-            "funktion": "tor.gesamthoehe",
-            "tor_name": self.name,
+            "funktion": "Tor.Gesamthöhe",
         })
         max_h = 0.0
         found = False
@@ -150,8 +152,7 @@ class Tor:
         kontext: Optional[dict] = None,
     ) -> List[Zwischenergebnis]:
         base_ctx = merge_kontext(kontext, {
-            "funktion": "tor.berechne_kippsicherheit",
-            "tor_name": self.name,
+            "funktion": "Tor.BerechneKippsicherheit",
         })
         
         return _kippsicherheit(
@@ -183,8 +184,7 @@ class Tor:
         kontext: Optional[dict] = None,
     ) -> List[Zwischenergebnis]:
         base_ctx = merge_kontext(kontext, {
-            "funktion": "tor.berechne_gleitsicherheit",
-            "tor_name": self.name,
+            "funktion": "Tor.BerechneGleitsicherheit",
         })
         
         return _gleitsicherheit(
@@ -216,8 +216,7 @@ class Tor:
         kontext: Optional[dict] = None,
     ) -> List[Zwischenergebnis]:
         base_ctx = merge_kontext(kontext, {
-            "funktion": "tor.berechne_abhebesicherheit",
-            "tor_name": self.name,
+            "funktion": "Tor.BerechneAbhebesicherheit",
         })
 
         return _abhebesicherheit(
