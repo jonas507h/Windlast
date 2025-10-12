@@ -36,19 +36,19 @@ class ObjektTyp(str, Enum):
     BODENPLATTE = "bodenplatte"
 
 class MaterialTyp(str, Enum):
-    HOLZ = "holz"
-    STAHL = "stahl"
-    BETON = "beton"
-    TON = "ton"
-    LEHM = "lehm"
-    SAND = "sand"
-    KIES = "kies"
-    GUMMI = "gummi"
+    HOLZ = "Holz"
+    STAHL = "Stahl"
+    BETON = "Beton"
+    TON = "Ton"
+    LEHM = "Lehm"
+    SAND = "Sand"
+    KIES = "Kies"
+    GUMMI = "Gummi"
 
 class FormTyp(str, Enum):
-    RECHTECK = "rechteck"
-    KREIS = "kreis"
-    DREIECK = "dreieck"
+    RECHTECK = "Rechteck"
+    KREIS = "Kreis"
+    DREIECK = "Dreieck"
 
 class RechenmethodeKippen(str, Enum):
     STANDARD = "Standard"

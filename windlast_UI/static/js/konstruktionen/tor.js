@@ -39,7 +39,7 @@ async function initTorDropdowns() {
     // Dropdowns füllen
     fillSelect(document.getElementById("traverse_name_intern"), traversen);
     fillSelect(document.getElementById("bodenplatte_name_intern"), bps);
-    fillSelect(document.getElementById("untergrund_typ"), untergruende, { defaultValue: "beton" });
+    fillSelect(document.getElementById("untergrund_typ"), untergruende, { defaultValue: "Beton" });
 
     // Statisches Dropdown: Traversen-Orientierung (Default: Spitze nach oben)
     const trOri = document.getElementById("traversen_orientierung");

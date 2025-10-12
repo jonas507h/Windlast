@@ -83,7 +83,7 @@ def get_reibwert(a: MaterialTyp, b: MaterialTyp, norm: Norm,
         if key in pool:
             mu, quelle = pool[key]
             return mu, quelle, n
-    raise KeyError(f"Kein Reibwert für Paarung {a}–{b} in den bekannten Normen vorhanden.")
+    raise KeyError(f"Kein Reibwert für Paarung {a.value}–{b.value} in den bekannten Normen vorhanden.")
 
 def reibwert(
     norm: Norm,
@@ -110,10 +110,10 @@ def reibwert(
         )
         protokolliere_doc(
             protokoll,
-            bundle=make_docbundle(titel="Effektiver Reibwert μ_eff", wert=float("nan")),
-            kontext=merge_kontext(base_ctx, {"nan": True}),
+            bundle=make_docbundle(titel="Effektiver Reibwert μ_eff", wert=None),
+            kontext=merge_kontext(base_ctx, {"None": True}),
         )
-        return Zwischenergebnis(wert=float("nan"))
+        return Zwischenergebnis(wert=None)
 
     # 2) Reibwerte Quellen ermitteln
     einzelwerte: List[float] = []
@@ -134,8 +134,8 @@ def reibwert(
                         protokoll,
                         severity=Severity.HINT,
                         code="REIB/FALLBACK_NORM",
-                        text=f"Für Paarung {a.name}–{b.name} wurde auf {used_norm.name} zurückgegriffen.",
-                        kontext=merge_kontext(base_ctx, {"paarung": (a.name, b.name), "norm_used": used_norm.name}),
+                        text=f"Für Paarung {a.value}–{b.value} wurde auf {used_norm.name} zurückgegriffen.",
+                        kontext=merge_kontext(base_ctx, {"paarung": (a.value, b.value), "norm_used": used_norm.name}),
                     )
     except KeyError as e:
         protokolliere_msg(
@@ -147,10 +147,10 @@ def reibwert(
         )
         protokolliere_doc(
             protokoll,
-            bundle=make_docbundle(titel="Effektiver Reibwert μ_eff", wert=float("nan")),
-            kontext=merge_kontext(base_ctx, {"nan": True}),
+            bundle=make_docbundle(titel="Effektiver Reibwert μ_eff", wert=None),
+            kontext=merge_kontext(base_ctx, {"None": True}),
         )
-        return Zwischenergebnis(wert=float("nan"))
+        return Zwischenergebnis(wert=None)
 
     # 3) effektiver Reibwert ist das Minimum
     reibwert_eff = min(einzelwerte)
@@ -162,8 +162,8 @@ def reibwert(
         protokoll,
         severity=Severity.HINT,
         code="REIB/PAIR_GOVERNING",
-        text=f"Maßgebend ist die Paarung {a_gov.name}–{b_gov.name} mit μ={reibwert_eff:.3f}.",
-        kontext=merge_kontext(base_ctx, {"paarung": (a_gov.name, b_gov.name)}),
+        text=f"Maßgebend ist die Paarung {a_gov.value}–{b_gov.value} mit μ={reibwert_eff:.3f}.",
+        kontext=merge_kontext(base_ctx, {"paarung": (a_gov.value, b_gov.value)}),
     )
 
     # 4) in Zwischenergebnis schreiben
