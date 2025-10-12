@@ -49,6 +49,7 @@ def save_ergebnis_to_file(ergebnis, pfad="ergebnis_dump.json"):
 @dataclass(frozen=True)
 class StaudruckSzenario:
     label: str                   # z.B. "AUSSER_BETRIEB", "IN_BETRIEB", "1991_ALTVERFAHREN"
+    anzeigename: str
     norm: Norm
     modus: Literal["betrieb", "schutz"]  # Auswahl der Parametrisierung
     betriebszustand: Optional[Betriebszustand] = None
@@ -68,7 +69,7 @@ def _ermittle_staudruecke(
     z = Obergrenzen, q = Staudrücke, beide als List[float].
     """
     reasons: List[Message] = []
-    base_ctx = merge_kontext(kontext, {"szenario": s.label, "norm": s.norm.name})
+    base_ctx = merge_kontext(kontext, {"szenario": s.anzeigename, "norm": s.norm.value})
     try:
         if s.modus == "betrieb":
             zl1, zl2 = staudruecke(s.norm, konstruktion, s.betriebszustand, aufstelldauer=aufstelldauer, windzone=None, protokoll=protokoll, kontext=base_ctx)
@@ -269,7 +270,7 @@ def standsicherheit(
             konst=konst, meth_kipp=meth_kipp, meth_gleit=meth_gleit, meth_abhebe=meth_abhebe,
             vereinfachung_konstruktion=vereinfachung_konstruktion, anzahl_windrichtungen=anzahl_windrichtungen,
             reasons=reasons_all, norm_label=normtitel,
-            protokoll=prot, kontext={"szenario": s_primary.label},
+            protokoll=prot, kontext={"szenario": s_primary.anzeigename},
         )
 
         alternativen: Dict[str, Dict[Nachweis, SafetyValue]] = {}
@@ -288,7 +289,7 @@ def standsicherheit(
                     konst=konst, meth_kipp=meth_kipp, meth_gleit=meth_gleit, meth_abhebe=meth_abhebe,
                     vereinfachung_konstruktion=vereinfachung_konstruktion, anzahl_windrichtungen=anzahl_windrichtungen,
                     reasons=reasons_all, norm_label=f"{s.norm.name} ({s.label})",
-                    protokoll=prot, kontext={"szenario": s.label},
+                    protokoll=prot, kontext={"szenario": s.anzeigename},
                 )
                 alternativen[s.label] = vals_b
 
@@ -305,9 +306,9 @@ def standsicherheit(
     # --------------------------
     normen[Norm.DIN_EN_13814_2005_06] = _rechne_norm(
         [
-            StaudruckSzenario("AUSSER_BETRIEB", Norm.DIN_EN_13814_2005_06, modus="betrieb",
+            StaudruckSzenario("AUSSER_BETRIEB", "Außer Betrieb", Norm.DIN_EN_13814_2005_06, modus="betrieb",
                             betriebszustand=Betriebszustand.AUSSER_BETRIEB),
-            StaudruckSzenario("IN_BETRIEB",     Norm.DIN_EN_13814_2005_06, modus="betrieb",
+            StaudruckSzenario("IN_BETRIEB",     "In Betrieb", Norm.DIN_EN_13814_2005_06, modus="betrieb",
                             betriebszustand=Betriebszustand.IN_BETRIEB),
         ],
         normtitel="DIN EN 13814:2005-06",
@@ -318,9 +319,9 @@ def standsicherheit(
     # --------------------------
     normen[Norm.DIN_EN_17879_2024_08] = _rechne_norm(
         [
-            StaudruckSzenario("AUSSER_BETRIEB", Norm.DIN_EN_17879_2024_08, modus="betrieb",
+            StaudruckSzenario("AUSSER_BETRIEB", "Außer Betrieb", Norm.DIN_EN_17879_2024_08, modus="betrieb",
                             betriebszustand=Betriebszustand.AUSSER_BETRIEB),
-            StaudruckSzenario("IN_BETRIEB",     Norm.DIN_EN_17879_2024_08, modus="betrieb",
+            StaudruckSzenario("IN_BETRIEB",     "In Betrieb", Norm.DIN_EN_17879_2024_08, modus="betrieb",
                             betriebszustand=Betriebszustand.IN_BETRIEB),
         ],
         normtitel="DIN EN 17879:2024-08",
@@ -331,7 +332,7 @@ def standsicherheit(
     # --------------------------
     normen[Norm.DIN_EN_1991_1_4_2010_12] = _rechne_norm(
         [
-            StaudruckSzenario("STANDARD", Norm.DIN_EN_1991_1_4_2010_12, modus="schutz",
+            StaudruckSzenario("STANDARD", "Standard", Norm.DIN_EN_1991_1_4_2010_12, modus="schutz",
                             schutz=Schutzmassnahmen.KEINE, windzone=windzone),
             # weitere Fallback-Verfahren hier einfach anhängen:
             # StaudruckSzenario("ALTVERFAHREN_XYZ", Norm.DIN_EN_1991_1_4_2010_12, modus="schutz",
