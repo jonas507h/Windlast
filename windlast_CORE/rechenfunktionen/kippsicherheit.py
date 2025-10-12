@@ -4,7 +4,7 @@ from math import inf
 from typing import Dict, Callable, Sequence, List, Optional, Tuple, Iterable
 from collections.abc import Sequence as _SeqABC
 
-from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_kontext, protokolliere_msg, protokolliere_doc, make_docbundle
+from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_kontext, protokolliere_msg, protokolliere_doc, make_docbundle, merge_protokoll, make_protokoll
 from windlast_CORE.datenstruktur.enums import Norm, RechenmethodeKippen, VereinfachungKonstruktion, Lasttyp, Variabilitaet, Severity
 from windlast_CORE.datenstruktur.konstanten import _EPS, aktuelle_konstanten
 from windlast_CORE.datenstruktur.kraefte import Kraefte
@@ -118,6 +118,7 @@ def _kippsicherheit_DinEn13814_2005_06(
         pool = obtain_pool(konstruktion, reset_berechnungen)
 
         for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen, protokoll=protokoll, kontext=base_ctx):
+            sub_prot = make_protokoll()
             lastset = get_or_create_lastset(
                 pool,
                 konstruktion,
@@ -127,10 +128,14 @@ def _kippsicherheit_DinEn13814_2005_06(
                 staudruecke=staudruecke,
                 obergrenzen=obergrenzen,
                 konst=konst,
-                protokoll=protokoll,
+                protokoll=sub_prot,
                 kontext=base_ctx,
             )
             kraefte_nach_element = lastset.kraefte_nach_element
+
+            # Richtungs-lokale Aggregation
+            dir_min_sicherheit = inf
+            dir_ballast_max = 0.0 
 
             # 2c) Für jede Achse: Envelope je Bauelement → summieren → η bilden
             for achse in achsen:
@@ -138,7 +143,7 @@ def _kippsicherheit_DinEn13814_2005_06(
                 total_stand = 0.0
 
                 for _, lastfaelle_elem in kraefte_nach_element.items():
-                    kipp_b, stand_b = kipp_envelope_pro_bauelement(norm, achse, lastfaelle_elem, protokoll=protokoll, kontext=base_ctx)
+                    kipp_b, stand_b = kipp_envelope_pro_bauelement(norm, achse, lastfaelle_elem, protokoll=sub_prot, kontext=base_ctx)
                     total_kipp += kipp_b
                     total_stand += stand_b
 
@@ -148,8 +153,8 @@ def _kippsicherheit_DinEn13814_2005_06(
                 else:
                     sicherheit = total_stand / total_kipp
 
-                if sicherheit < sicherheit_min_global:
-                    sicherheit_min_global = sicherheit
+                if sicherheit < dir_min_sicherheit:
+                    dir_min_sicherheit = sicherheit
 
                 moment_defizit = max(0.0, total_kipp - total_stand)
 
@@ -169,8 +174,19 @@ def _kippsicherheit_DinEn13814_2005_06(
                 else:
                     ballastkraft = 0.0
 
-                if ballastkraft > ballast_erforderlich_max:
-                    ballast_erforderlich_max = ballastkraft
+                if ballastkraft > dir_ballast_max:
+                    dir_ballast_max = ballastkraft
+
+        # >>> Nach Abschluss der Achsen: Entscheidung & Merge
+        if dir_min_sicherheit < sicherheit_min_global:
+            # Gewinner-Richtung: komplettes Sub-Protokoll übernehmen
+            merge_protokoll(sub_prot, protokoll, only_errors=False)
+            sicherheit_min_global = dir_min_sicherheit
+            if dir_ballast_max > ballast_erforderlich_max:
+                ballast_erforderlich_max = dir_ballast_max
+        else:
+            # Verworfen: nur Fehler übernehmen
+            merge_protokoll(sub_prot, protokoll, only_errors=True)
 
         erdbeschleunigung = aktuelle_konstanten().erdbeschleunigung
         ballast_kg = ballast_erforderlich_max / erdbeschleunigung
@@ -262,6 +278,7 @@ def _kippsicherheit_DinEn17879_2024_08(
         pool = obtain_pool(konstruktion, reset_berechnungen)
 
         for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen, protokoll=protokoll, kontext=base_ctx):
+            sub_prot = make_protokoll()
             lastset = get_or_create_lastset(
                 pool,
                 konstruktion,
@@ -271,10 +288,14 @@ def _kippsicherheit_DinEn17879_2024_08(
                 staudruecke=staudruecke,
                 obergrenzen=obergrenzen,
                 konst=konst,
-                protokoll=protokoll,
+                protokoll=sub_prot,
                 kontext=base_ctx,
             )
             kraefte_nach_element = lastset.kraefte_nach_element
+
+            # Richtungs-lokale Aggregation
+            dir_min_sicherheit = inf           # <<< NEU: kleinstes S dieser Richtung
+            dir_ballast_max = 0.0              # <<< NEU: größter Ballast dieser Richtung
 
             # 2c) Für jede Achse: Envelope je Bauelement → summieren → η bilden
             for achse in achsen:
@@ -282,7 +303,7 @@ def _kippsicherheit_DinEn17879_2024_08(
                 total_stand = 0.0
 
                 for _, lastfaelle_elem in kraefte_nach_element.items():
-                    kipp_b, stand_b = kipp_envelope_pro_bauelement(norm, achse, lastfaelle_elem, protokoll=protokoll, kontext=base_ctx)
+                    kipp_b, stand_b = kipp_envelope_pro_bauelement(norm, achse, lastfaelle_elem, protokoll=sub_prot, kontext=base_ctx)
                     total_kipp += kipp_b
                     total_stand += stand_b
 
@@ -292,8 +313,9 @@ def _kippsicherheit_DinEn17879_2024_08(
                 else:
                     sicherheit = total_stand / total_kipp
 
-                if sicherheit < sicherheit_min_global:
-                    sicherheit_min_global = sicherheit
+                # Richtungs-Minimum aktualisieren
+                if sicherheit < dir_min_sicherheit:
+                    dir_min_sicherheit = sicherheit
 
                 moment_defizit = max(0.0, total_kipp - total_stand)
 
@@ -313,8 +335,19 @@ def _kippsicherheit_DinEn17879_2024_08(
                 else:
                     ballastkraft = 0.0
 
-                if ballastkraft > ballast_erforderlich_max:
-                    ballast_erforderlich_max = ballastkraft
+                if ballastkraft > dir_ballast_max:
+                    dir_ballast_max = ballastkraft
+
+        # >>> Nach Abschluss der Achsen: Entscheidung & Merge
+        if dir_min_sicherheit < sicherheit_min_global:
+            # Gewinner-Richtung: komplettes Sub-Protokoll übernehmen
+            merge_protokoll(sub_prot, protokoll, only_errors=False)
+            sicherheit_min_global = dir_min_sicherheit
+            if dir_ballast_max > ballast_erforderlich_max:
+                ballast_erforderlich_max = dir_ballast_max
+        else:
+            # Verworfen: nur Fehler übernehmen
+            merge_protokoll(sub_prot, protokoll, only_errors=True)
 
         erdbeschleunigung = aktuelle_konstanten().erdbeschleunigung
         ballast_kg = ballast_erforderlich_max / erdbeschleunigung

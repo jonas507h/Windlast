@@ -139,6 +139,21 @@ def protokolliere_doc(
     if protokoll is not None:
         protokoll.add_doc(bundle=bundle, kontext=kontext)
 
+def merge_protokoll(src, dst, *, only_errors: bool = False):
+    """
+    Überträgt Messages aus 'src' nach 'dst'.
+    - only_errors=True  → nur Severity.ERROR
+    - only_errors=False → alle Messages
+    (Docs/Bundles werden hier bewusst nicht kopiert.)
+    """
+    try:
+        msgs = collect_messages(src) or []
+    except Exception:
+        msgs = []
+    for m in msgs:
+        if only_errors and getattr(m, "severity", None) != Severity.ERROR:
+            continue
+        protokolliere_msg(dst, severity=m.severity, code=m.code, text=m.text, kontext=m.context)
 
 # ========= Verschlankte Ergebnis-Typen =========
 # Ab jetzt tragen die Hilfsfunktionen die Dokumentationsinfos (Formeln/Quellen/Einzelwerte)
