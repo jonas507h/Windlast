@@ -41,6 +41,19 @@ async function initTorDropdowns() {
     fillSelect(document.getElementById("bodenplatte_name_intern"), bps);
     fillSelect(document.getElementById("untergrund_typ"), untergruende, { defaultValue: "beton" });
 
+    // Statisches Dropdown: Traversen-Orientierung (Default: Spitze nach oben)
+    const trOri = document.getElementById("traversen_orientierung");
+    if (trOri) {
+      fillSelect(trOri, [
+        { value: "up",   label: "Spitze nach oben"   },
+        { value: "side", label: "Spitze seitlich"    },
+        { value: "down", label: "Spitze nach unten"  },
+      ], { defaultValue: "up" });
+      trOri.addEventListener("change", () => {
+        console.debug("[UI] Traversen-Orientierung geändert:", trOri.value);
+      });
+    }
+
     // Statisches Dropdown: Gummimatte (Ja/Nein), Default = Ja
     const gm = document.getElementById("gummimatte");
     if (gm) {
@@ -52,6 +65,13 @@ async function initTorDropdowns() {
   } catch (e) {
     console.error("Tor-Dropdowns konnten nicht geladen werden:", e);
   }
+}
+
+function readTraversenOrientierung() {
+  const el = document.getElementById("traversen_orientierung");
+  const v = String(el?.value ?? "up").trim().toLowerCase();
+  // Nur erlaubte Tokens durchlassen; ansonsten Default "up"
+  return (v === "up" || v === "side" || v === "down") ? v : "up";
 }
 
 async function fetchJSON(url, opts) {
@@ -104,6 +124,7 @@ async function submitTor() {
       bodenplatte_name_intern: document.getElementById("bodenplatte_name_intern").value,
       untergrund_typ: document.getElementById("untergrund_typ").value, // z.B. "beton"
       gummimatte: gummimatte_bool,
+      orientierung: readTraversenOrientierung(), // z.B. "up"
       ...readHeaderValues(),
     };
 
