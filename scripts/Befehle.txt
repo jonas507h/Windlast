@@ -8,7 +8,7 @@ App ausführen neu
 python .\windlast_API\app.py
 
 App bauen
-pyinstaller --onefile --windowed --name WindlastUI `
+pyinstaller --onefile --windowed --name "Windlastrechner 2.0" --icon Logo\windlast.ico `
   --paths . `
   --paths windlast_CORE `
   --add-data "windlast_UI;windlast_UI" `
