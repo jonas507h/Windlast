@@ -15,6 +15,9 @@ const ALT_LABELS = {
   IN_BETRIEB: "mit Schutzmaßnahmen",
 };
 
+// === Reihenfolge für Severity-Sortierung ===
+const SEVERITY_ORDER = ["error", "warn", "hint", "info"];
+
 // ===== Offizielle Anzeigenamen für Normen =====
 const NORM_DISPLAY_NAMES = {
   EN_13814_2005: "DIN EN 13814:2005-06",
@@ -366,6 +369,19 @@ Tooltip.register('.results-table .alt-title th[data-szenario]', {
   delay: 120
 });
 
+function sortMessagesBySeverity(msgs) {
+  return [...msgs].sort((a, b) => {
+    const sa = (a.severity || "").toLowerCase();
+    const sb = (b.severity || "").toLowerCase();
+    const ia = SEVERITY_ORDER.indexOf(sa);
+    const ib = SEVERITY_ORDER.indexOf(sb);
+    // unbekannte Severities hängen wir ans Ende
+    const ra = ia >= 0 ? ia : SEVERITY_ORDER.length;
+    const rb = ib >= 0 ? ib : SEVERITY_ORDER.length;
+    return ra - rb;
+  });
+}
+
 // ---- Messages im Modal rendern (Texte; Kontext wird als Tooltip gezeigt) ----
 function openMessagesModalFor(normKey, szenario = null) {
   if (!ResultsVM) return;
@@ -374,6 +390,7 @@ function openMessagesModalFor(normKey, szenario = null) {
   const msgs = szenario
     ? (ResultsVM.listMessages ? ResultsVM.listMessages(normKey, szenario) : [])
     : (ResultsVM.listMessagesMainOnly ? ResultsVM.listMessagesMainOnly(normKey) : []);
+  const sortedMsgs = sortMessagesBySeverity(msgs);
 
   // Normname hübsch machen
   const normName = getNormDisplayName(normKey);
@@ -397,7 +414,7 @@ function openMessagesModalFor(normKey, szenario = null) {
   } else {
     const ul = document.createElement("ul");
     ul.className = "messages-list";
-    for (const m of msgs) {
+    for (const m of sortedMsgs) {
       const li = document.createElement("li");
 
       const line = document.createElement("div");
