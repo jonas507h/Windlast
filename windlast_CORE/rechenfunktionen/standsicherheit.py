@@ -76,6 +76,18 @@ def _ermittle_staudruecke(
             zl1, zl2 = staudruecke(s.norm, konstruktion, s.schutz,           aufstelldauer=aufstelldauer, windzone=s.windzone, protokoll=protokoll, kontext=base_ctx)
         z = list(zl1.wert)  # Obergrenzen
         q = list(zl2.wert)  # Staudrücke
+
+        def _has_nan(xs): 
+            return any((isinstance(v, float) and v != v) for v in xs)  # NaN-Test
+
+        if _has_nan(z) or _has_nan(q):
+            reasons.append(Message(
+                code="STAUD/NAN_IN_DATA", severity=Severity.ERROR,
+                text=f"Staudrücke/Obergrenzen enthalten ungültige Werte (NaN) für {s.norm.value}, {s.label}.",
+                context={}
+            ))
+            return None, None, reasons
+
         return z, q, reasons
     except Exception as e:
         # Einheitliche Fehlercodes/Texte pro Normfamilie
@@ -235,6 +247,10 @@ def standsicherheit(
         s_primary = szenarien[0]
         z, q, reasons = _ermittle_staudruecke(konstruktion, s_primary, aufstelldauer=aufstelldauer, protokoll=prot, kontext={})
         reasons_all.extend(reasons)
+        try:
+            reasons_all.extend(collect_messages(prot))
+        except Exception:
+            pass
         if z is None or q is None:
             # Ohne q/z: ERROR + Platzhalterwerte wie bisher
             return NormErgebnis(

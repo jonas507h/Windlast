@@ -164,9 +164,9 @@ def _winddruck_DinEn13814_2005_06(
     kontext: Optional[dict] = None,
 ) -> Tuple[Zwischenergebnis_Liste, Zwischenergebnis_Liste]:
     base_ctx = merge_kontext(kontext, {
-        "funktion": "staudruecke",
-        "norm": "DIN_EN_13814_2005_06",
-        "zustand": getattr(zustand, "name", str(zustand)),
+        "funktion": "Staudruecke",
+        "norm": "DIN EN 13814:2005-06",
+        "betriebszustand": getattr(zustand, "value", str(zustand)),
     })
 
     # 1) Obergrenzen & Staudrücke für den gesetzten Betriebszustand
@@ -191,7 +191,7 @@ def _winddruck_DinEn13814_2005_06(
     if h > max_obergrenze + _EPS:
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="STAUD/HEIGHT_EXCEEDS_MAX",
-            text=f"Gesamthöhe {h:.3f} m überschreitet die höchste Obergrenze {max_obergrenze:.3f} m (13814:{zustand.value}).",
+            text=f"Gesamthöhe {h:.3f} m überschreitet die höchste Obergrenze {max_obergrenze:.3f} m (DIN EN 13814:2005-06: {zustand.value}).",
             kontext=merge_kontext(base_ctx, {"gesamthoehe": h, "z_max": max_obergrenze}),
         )
         nan = Zwischenergebnis_Liste(wert=[float("nan")])
@@ -203,7 +203,7 @@ def _winddruck_DinEn13814_2005_06(
         if dauer_monate > 3.0 + _EPS:
             protokolliere_msg(
                 protokoll, severity=Severity.WARN, code="STAUD/DAUER_GT_3M",
-                text=f"Aufstelldauer {dauer_monate:.3f} Monate > 3 Monate; Berechnung nach 13814 wird dennoch fortgesetzt.",
+                text=f"Aufstelldauer {dauer_monate:.3f} Monate > 3 Monate; Berechnung nach DIN EN 13814:2005-06 wird dennoch fortgesetzt.",
                 kontext=merge_kontext(base_ctx, {"aufstelldauer_monate": dauer_monate}),
             )
 
@@ -245,9 +245,9 @@ def _winddruck_DinEn17879_2024_08(
     kontext: Optional[dict] = None,
 ) -> Tuple[Zwischenergebnis_Liste, Zwischenergebnis_Liste]:
     base_ctx = merge_kontext(kontext, {
-        "funktion": "staudruecke",
-        "norm": "DIN_EN_17879_2024_08",
-        "zustand": getattr(zustand, "name", str(zustand)),
+        "funktion": "Staudruecke",
+        "norm": "DIN EN 17879:2024-08",
+        "zustand": getattr(zustand, "value", str(zustand)),
     })
 
     # 1) Obergrenzen & Staudrücke für den gesetzten Betriebszustand
@@ -256,7 +256,7 @@ def _winddruck_DinEn17879_2024_08(
     except KeyError as e:
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="STAUD/STATE_UNKNOWN",
-            text=f"Keine Staudruckdaten für Betriebszustand '{zustand.value}' (17879).",
+            text=f"Keine Staudruckdaten für Betriebszustand '{zustand.value}' (DIN EN 17879:2024-08).",
             kontext=base_ctx,
         )
         nan = Zwischenergebnis_Liste(wert=[float("nan")])
@@ -272,7 +272,7 @@ def _winddruck_DinEn17879_2024_08(
     if h > max_obergrenze + _EPS:
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="STAUD/HEIGHT_EXCEEDS_MAX",
-            text=f"Gesamthöhe {h:.3f} m überschreitet die höchste Obergrenze {max_obergrenze:.3f} m (17879:{zustand.value}).",
+            text=f"Gesamthöhe {h:.3f} m überschreitet die höchste Obergrenze {max_obergrenze:.3f} m (DIN EN 17879:2024-08: {zustand.value}).",
             kontext=merge_kontext(base_ctx, {"gesamthoehe": h, "z_max": max_obergrenze}),
         )
         nan = Zwischenergebnis_Liste(wert=[float("nan")])
@@ -318,10 +318,10 @@ def _geschwindigkeitsdruck_DinEn1991_1_4_2010_12(
     kontext: Optional[dict] = None,
 ) -> Tuple[Zwischenergebnis_Liste, Zwischenergebnis_Liste]:
     base_ctx = merge_kontext(kontext, {
-        "funktion": "staudruecke",
-        "norm": "DIN_EN_1991_1_4_2010_12",
-        "zustand": getattr(zustand, "name", str(zustand)),
-        "windzone": getattr(windzone, "name", str(windzone)),
+        "funktion": "Staudruecke",
+        "norm": "DIN EN 1991-1-4:2010-12",
+        "zustand": getattr(zustand, "value", str(zustand)),
+        "windzone": getattr(windzone, "value", str(windzone)),
     })
 
     if windzone is None:
@@ -354,7 +354,7 @@ def _geschwindigkeitsdruck_DinEn1991_1_4_2010_12(
         max_og = obergrenzen_sorted[-1]
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="STAUD/HEIGHT_EXCEEDS_MAX",
-            text=f"Gesamthöhe {h:.3f} m überschreitet die höchste definierte Obergrenze {max_og:.3f} m (1991-1-4, Zone: {windzone.value}).",
+            text=f"Gesamthöhe {h:.3f} m überschreitet die höchste definierte Obergrenze {max_og:.3f} m (DIN EN 1991-1-4:2010-12, Zone: {windzone.value}).",
             kontext=merge_kontext(base_ctx, {"gesamthoehe": h, "z_max": max_og}),
         )
         nan = Zwischenergebnis_Liste(wert=[float("nan")])
@@ -445,10 +445,10 @@ def staudruecke(
     kontext: Optional[dict] = None,
 ) -> Tuple[Zwischenergebnis_Liste, Zwischenergebnis_Liste]:
     base_ctx = merge_kontext(kontext, {
-        "funktion": "staudruecke",
-        "norm": getattr(norm, "name", str(norm)),
-        "zustand": getattr(zustand, "name", str(zustand)),
-        "windzone": getattr(windzone, "name", str(windzone)) if windzone is not None else None,
+        "funktion": "Staudruecke",
+        "norm": getattr(norm, "value", str(norm)),
+        "zustand": getattr(zustand, "value", str(zustand)),
+        "windzone": getattr(windzone, "value", str(windzone)) if windzone is not None else None,
     })
 
     try:

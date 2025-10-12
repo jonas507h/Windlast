@@ -1,6 +1,6 @@
 # api_mapper.py
 from typing import Dict, Any, Mapping, Iterable
-from math import isfinite
+from math import isfinite, isinf, isnan
 from dataclasses import is_dataclass, asdict
 from windlast_CORE.datenstruktur.enums import Norm, Nachweis
 
@@ -23,6 +23,11 @@ def _to_primitive(obj):
     """
     if obj is None:
         return None
+    # --- Zahlen: hier ebenfalls absichern ---
+    if isinstance(obj, float):
+        return _jsonify_number(obj)
+    if isinstance(obj, int):
+        return obj
     # enums
     if hasattr(obj, "__class__") and hasattr(obj.__class__, "__members__"):
         return _enum_to_str(obj)
@@ -43,14 +48,16 @@ def _to_primitive(obj):
     return obj
 
 def _jsonify_number(x):
-    """float -> JSON-safe (keep +/-INF info as strings)."""
+    """float -> JSON-safe (NaN -> None, keep +/-INF as strings)."""
     try:
         v = float(x)
     except Exception:
         return None
-    if isfinite(v):
-        return v
-    return "INF" if v > 0 else "-INF"
+    if isnan(v):
+        return None
+    if isinf(v):
+        return "INF" if v > 0 else "-INF"
+    return v
 
 def _collect_messages_from_list(items: Iterable[Any], fallback_szenario: str | None = None):
     """
