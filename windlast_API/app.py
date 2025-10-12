@@ -164,4 +164,4 @@ if __name__ == "__main__":
     url = f"http://127.0.0.1:{port}"
     Thread(target=open_browser_when_ready, args=(url, "127.0.0.1", port), daemon=True).start()
     debug = not hasattr(sys, "_MEIPASS")  # Dev: True, EXE: False
-    app.run(host="127.0.0.1", port=port, debug=debug)
+    app.run(host="127.0.0.1", port=port, debug=debug, use_reloader=False)
