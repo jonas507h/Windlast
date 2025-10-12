@@ -4,7 +4,7 @@ from math import inf
 from typing import Dict, Callable, Sequence, List, Optional
 from collections.abc import Sequence as _SeqABC
 
-from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_kontext, protokolliere_msg, protokolliere_doc, make_docbundle
+from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_kontext, protokolliere_msg, protokolliere_doc, make_docbundle, make_protokoll, merge_protokoll
 from windlast_CORE.datenstruktur.enums import Norm, RechenmethodeGleiten, VereinfachungKonstruktion, Lasttyp, Variabilitaet, Severity
 from windlast_CORE.datenstruktur.konstanten import _EPS, aktuelle_konstanten
 from windlast_CORE.rechenfunktionen.sicherheitsbeiwert import sicherheitsbeiwert
@@ -82,9 +82,9 @@ def _gleitsicherheit_DinEn13814_2005_06(
     kontext: Optional[dict] = None,
 ) -> List[Zwischenergebnis]:
     base_ctx = merge_kontext(kontext, {
-        "funktion": "_gleitsicherheit",
-        "norm": "DIN_EN_13814_2005_06",
-        "methode": methode.name,
+        "funktion": "Gleitsicherheit",
+        "norm": "DIN EN 13814:2005-06",
+        "methode": methode.value,
     })
 
     if vereinfachung_konstruktion is not VereinfachungKonstruktion.KEINE:
@@ -109,6 +109,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
         pool = obtain_pool(konstruktion, reset_berechnungen)
 
         for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen, protokoll=protokoll, kontext=base_ctx):
+            sub_prot = make_protokoll()
             lastset = get_or_create_lastset(
                 pool,
                 konstruktion,
@@ -118,17 +119,21 @@ def _gleitsicherheit_DinEn13814_2005_06(
                 staudruecke=staudruecke,
                 obergrenzen=obergrenzen,
                 konst=konst,
-                protokoll=protokoll,
+                protokoll=sub_prot,
                 kontext=base_ctx,
             )
             kraefte_nach_element = lastset.kraefte_nach_element
+
+            # Richtungs-lokale Aggregation
+            dir_min_sicherheit = inf
+            dir_ballast_max = 0.0
 
             total_horizontal: Vec3 = (0.0, 0.0, 0.0)
             total_normal_up = 0.0
             total_normal_down = 0.0
 
             for _, lastfaelle_elem in kraefte_nach_element.items():
-                H_vec, N_down, N_up = gleit_envelope_pro_bauelement(norm, lastfaelle_elem)
+                H_vec, N_down, N_up = gleit_envelope_pro_bauelement(norm, lastfaelle_elem, protokoll=sub_prot, kontext=base_ctx)
                 total_horizontal = vektoren_addieren([total_horizontal, H_vec])
                 total_normal_up += N_up
                 total_normal_down += N_down
@@ -139,7 +144,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
 
             if horizontal_betrag > _EPS:
                 sicherheit = reibkraft / horizontal_betrag
-                sicherheit_min_global = min(sicherheit_min_global, sicherheit)
+                sicherheit_min_global = min(dir_min_sicherheit, sicherheit)
 
             if reibwert_min <= _EPS:
                 if horizontal_betrag > _EPS:
@@ -149,8 +154,16 @@ def _gleitsicherheit_DinEn13814_2005_06(
             else:
                 ballastkraft = max(0.0, horizontal_betrag / reibwert_min + total_normal_up - total_normal_down) / sicherheitsbeiwert_ballast.wert
 
-            if ballastkraft > ballast_erforderlich_max:
-                ballast_erforderlich_max = ballastkraft
+            if ballastkraft > dir_ballast_max:
+                dir_ballast_max = ballastkraft
+
+        # Entscheidung & Merge nach Abschluss der Richtung
+        if dir_min_sicherheit < sicherheit_min_global:
+            merge_protokoll(sub_prot, protokoll, only_errors=False)  # Gewinner: alles
+            sicherheit_min_global = dir_min_sicherheit
+            ballast_erforderlich_max = dir_ballast_max
+        else:
+            merge_protokoll(sub_prot, protokoll, only_errors=True)   # Verlierer: nur ERROR
 
         erdbeschleunigung = aktuelle_konstanten().erdbeschleunigung
         ballast_kg = ballast_erforderlich_max / erdbeschleunigung  # in N -> in kg
@@ -203,9 +216,9 @@ def _gleitsicherheit_DinEn17879_2024_08(
     kontext: Optional[dict] = None
 ) -> List[Zwischenergebnis]:
     base_ctx = merge_kontext(kontext, {
-        "funktion": "_gleitsicherheit",
-        "norm": "DIN_EN_13814_2005_06",
-        "methode": methode.name,
+        "funktion": "Gleitsicherheit",
+        "norm": "DIN EN 17879:2024-08",
+        "methode": methode.value,
     })
 
     if vereinfachung_konstruktion is not VereinfachungKonstruktion.KEINE:
@@ -230,6 +243,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
         pool = obtain_pool(konstruktion, reset_berechnungen)
 
         for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen, protokoll=protokoll, kontext=base_ctx):
+            sub_prot = make_protokoll()
             lastset = get_or_create_lastset(
                 pool,
                 konstruktion,
@@ -239,17 +253,21 @@ def _gleitsicherheit_DinEn17879_2024_08(
                 staudruecke=staudruecke,
                 obergrenzen=obergrenzen,
                 konst=konst,
-                protokoll=protokoll,
+                protokoll=sub_prot,
                 kontext=base_ctx,
             )
             kraefte_nach_element = lastset.kraefte_nach_element
+
+            # Richtungs-lokale Aggregation
+            dir_min_sicherheit = inf
+            dir_ballast_max = 0.0
 
             total_horizontal: Vec3 = (0.0, 0.0, 0.0)
             total_normal_up = 0.0
             total_normal_down = 0.0
 
             for _, lastfaelle_elem in kraefte_nach_element.items():
-                H_vec, N_down, N_up = gleit_envelope_pro_bauelement(norm, lastfaelle_elem, protokoll=protokoll, kontext=base_ctx)
+                H_vec, N_down, N_up = gleit_envelope_pro_bauelement(norm, lastfaelle_elem, protokoll=sub_prot, kontext=base_ctx)
                 total_horizontal = vektoren_addieren([total_horizontal, H_vec])
                 total_normal_up += N_up
                 total_normal_down += N_down
@@ -260,7 +278,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
 
             if horizontal_betrag > _EPS:
                 sicherheit = reibkraft / horizontal_betrag
-                sicherheit_min_global = min(sicherheit_min_global, sicherheit)
+                sicherheit_min_global = min(dir_min_sicherheit, sicherheit)
 
             if reibwert_min <= _EPS:
                 if horizontal_betrag > _EPS:
@@ -270,8 +288,16 @@ def _gleitsicherheit_DinEn17879_2024_08(
             else:
                 ballastkraft = max(0.0, horizontal_betrag / reibwert_min + total_normal_up - total_normal_down) / sicherheitsbeiwert_ballast.wert
 
-            if ballastkraft > ballast_erforderlich_max:
-                ballast_erforderlich_max = ballastkraft
+            if ballastkraft > dir_ballast_max:
+                dir_ballast_max = ballastkraft
+
+        # Entscheidung & Merge nach Abschluss der Richtung
+        if dir_min_sicherheit < sicherheit_min_global:
+            merge_protokoll(sub_prot, protokoll, only_errors=False)  # Gewinner: alles
+            sicherheit_min_global = dir_min_sicherheit
+            ballast_erforderlich_max = dir_ballast_max
+        else:
+            merge_protokoll(sub_prot, protokoll, only_errors=True)   # Verlierer: nur ERROR
 
         erdbeschleunigung = aktuelle_konstanten().erdbeschleunigung
         ballast_kg = ballast_erforderlich_max / erdbeschleunigung  # in N -> in kg
@@ -330,8 +356,8 @@ def gleitsicherheit(
     kontext: Optional[dict] = None,
 ) -> List[Zwischenergebnis]:
     base_ctx = merge_kontext(kontext, {
-        "funktion": "gleitsicherheit",
-        "norm": getattr(norm, "name", str(norm)),
+        "funktion": "Gleitsicherheit",
+        "norm": getattr(norm, "value", str(norm)),
         "anzahl_windrichtungen": anzahl_windrichtungen,
     })
 

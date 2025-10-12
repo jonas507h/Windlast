@@ -4,7 +4,7 @@ from math import inf
 from typing import Dict, Callable, Sequence, List, Optional
 from collections.abc import Sequence as _SeqABC
 
-from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_kontext, protokolliere_msg, protokolliere_doc, make_docbundle
+from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_kontext, protokolliere_msg, protokolliere_doc, make_docbundle, merge_protokoll, make_protokoll
 from windlast_CORE.datenstruktur.enums import Norm, RechenmethodeAbheben, VereinfachungKonstruktion, Lasttyp, Variabilitaet, Severity
 from windlast_CORE.datenstruktur.konstanten import _EPS, aktuelle_konstanten
 from windlast_CORE.datenstruktur.kraefte import Kraefte
@@ -80,9 +80,9 @@ def _abhebesicherheit_DinEn13814_2005_06(
     kontext: Optional[dict] = None,
 ) -> List[Zwischenergebnis]:
     base_ctx = merge_kontext(kontext, {
-        "funktion": "_abhebesicherheit",
-        "norm": "DIN_EN_13814_2005_06",
-        "methode": methode.name,
+        "funktion": "Abhebesicherheit",
+        "norm": "DIN EN 13814:2005-06",
+        "methode": methode.value,
     })
 
     if vereinfachung_konstruktion is not VereinfachungKonstruktion.KEINE:
@@ -106,6 +106,7 @@ def _abhebesicherheit_DinEn13814_2005_06(
         sicherheitsbeiwert_ballast = sicherheitsbeiwert(norm, ballastkraft_dummy, ist_guenstig=True, protokoll=protokoll, kontext=base_ctx)
 
         for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen, protokoll=protokoll, kontext=base_ctx):
+            sub_prot = make_protokoll()
             lastset = get_or_create_lastset(
                 pool,
                 konstruktion,
@@ -115,7 +116,7 @@ def _abhebesicherheit_DinEn13814_2005_06(
                 staudruecke=staudruecke,
                 obergrenzen=obergrenzen,
                 konst=konst,
-                protokoll=protokoll,
+                protokoll=sub_prot,
                 kontext=base_ctx,
             )
             kraefte_nach_element = lastset.kraefte_nach_element
@@ -124,13 +125,17 @@ def _abhebesicherheit_DinEn13814_2005_06(
             total_normal_up = 0.0
 
             for _, lastfaelle_elem in kraefte_nach_element.items():
-                N_down_b, N_up_b = abhebe_envelope_pro_bauelement(norm, lastfaelle_elem, protokoll=protokoll, kontext=base_ctx)
+                N_down_b, N_up_b = abhebe_envelope_pro_bauelement(norm, lastfaelle_elem, protokoll=sub_prot, kontext=base_ctx)
                 total_normal_down += N_down_b
                 total_normal_up += N_up_b
 
             sicherheit = inf if total_normal_up <= _EPS else (total_normal_down / total_normal_up)
+            # Auswahl & Merge
             if sicherheit < sicherheit_min_global:
                 sicherheit_min_global = sicherheit
+                merge_protokoll(sub_prot, protokoll, only_errors=False)  # Gewinner: alles
+            else:
+                merge_protokoll(sub_prot, protokoll, only_errors=True)   # Verlierer: nur ERROR
 
             if total_normal_up <= _EPS:
                 ballastkraft = 0.0
@@ -194,9 +199,9 @@ def _abhebesicherheit_DinEn17879_2024_08(
     kontext: Optional[dict] = None,
 ) -> List[Zwischenergebnis]:
     base_ctx = merge_kontext(kontext, {
-        "funktion": "_abhebesicherheit",
-        "norm": "DIN_EN_13814_2005_06",
-        "methode": methode.name,
+        "funktion": "Abhebesicherheit",
+        "norm": "DIN EN 17879:2024-08",
+        "methode": methode.value,
     })
 
     if vereinfachung_konstruktion is not VereinfachungKonstruktion.KEINE:
@@ -220,6 +225,7 @@ def _abhebesicherheit_DinEn17879_2024_08(
         sicherheitsbeiwert_ballast = sicherheitsbeiwert(norm, ballastkraft_dummy, ist_guenstig=True, protokoll=protokoll, kontext=base_ctx)
 
         for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen, protokoll=protokoll, kontext=base_ctx):
+            sub_prot = make_protokoll()
             lastset = get_or_create_lastset(
                 pool,
                 konstruktion,
@@ -229,7 +235,7 @@ def _abhebesicherheit_DinEn17879_2024_08(
                 staudruecke=staudruecke,
                 obergrenzen=obergrenzen,
                 konst=konst,
-                protokoll=protokoll,
+                protokoll=sub_prot,
                 kontext=base_ctx,
             )
             kraefte_nach_element = lastset.kraefte_nach_element
@@ -238,13 +244,17 @@ def _abhebesicherheit_DinEn17879_2024_08(
             total_normal_up = 0.0
 
             for _, lastfaelle_elem in kraefte_nach_element.items():
-                N_down_b, N_up_b = abhebe_envelope_pro_bauelement(norm, lastfaelle_elem, protokoll=protokoll, kontext=base_ctx)
+                N_down_b, N_up_b = abhebe_envelope_pro_bauelement(norm, lastfaelle_elem, protokoll=sub_prot, kontext=base_ctx)
                 total_normal_down += N_down_b
                 total_normal_up += N_up_b
 
             sicherheit = inf if total_normal_up <= _EPS else (total_normal_down / total_normal_up)
+            # Auswahl & Merge
             if sicherheit < sicherheit_min_global:
                 sicherheit_min_global = sicherheit
+                merge_protokoll(sub_prot, protokoll, only_errors=False)  # Gewinner: alles
+            else:
+                merge_protokoll(sub_prot, protokoll, only_errors=True)   # Verlierer: nur ERROR
 
             if total_normal_up <= _EPS:
                 ballastkraft = 0.0
@@ -318,8 +328,8 @@ def abhebesicherheit(
     kontext: Optional[dict] = None,
 ) -> List[Zwischenergebnis]:
     base_ctx = merge_kontext(kontext, {
-        "funktion": "abhebesicherheit",
-        "norm": getattr(norm, "name", str(norm)),
+        "funktion": "Abhebesicherheit",
+        "norm": getattr(norm, "value", str(norm)),
         "anzahl_windrichtungen": anzahl_windrichtungen,
     })
     """
