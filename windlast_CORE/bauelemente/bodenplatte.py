@@ -107,7 +107,9 @@ class Bodenplatte:
         })
         # Reibwert ermitteln
         _materialfolge = [self.material, self.gummimatte, self.untergrund]
-        _reibwert = reibwert_fn(_materialfolge).wert
+        _reibwert = reibwert_fn(
+            norm, _materialfolge, protokoll=protokoll, kontext=base_ctx
+        ).wert
 
         # Belastungsrichtung prüfen
         _belastungsrichtung = vektor_skalarprodukt(belastung, self.orientierung)

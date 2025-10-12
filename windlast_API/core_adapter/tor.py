@@ -22,6 +22,7 @@ def berechne_tor(payload: Dict[str, Any]) -> Dict[str, Any]:
         hoehe=payload["hoehe_m"],
         traverse_name_intern=payload["traverse_name_intern"],
         bodenplatte_name_intern=payload["bodenplatte_name_intern"],
+        gummimatte_vorhanden=payload.get("gummimatte", True),
     )
 
     # 2) Untergrund setzen

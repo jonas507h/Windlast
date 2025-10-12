@@ -25,6 +25,8 @@ class Tor:
     anzahl_bodenplatten: int = 2
     traverse_name_intern: Optional[str] = None
 
+    gummimatte_vorhanden: bool = True
+
     def __post_init__(self):
         B = float(self.breite)
         H = float(self.hoehe)
@@ -66,6 +68,7 @@ class Tor:
 
         # Bodenplatten ggf. anlegen
         hat_bodenplatten = any(isinstance(k, Bodenplatte) for k in self.bauelemente)
+        gummi = MaterialTyp.GUMMI if self.gummimatte_vorhanden else None
         if (not hat_bodenplatten) and self.bodenplatte_name_intern:
             left = Bodenplatte(
                 name_intern=self.bodenplatte_name_intern,
@@ -75,7 +78,7 @@ class Tor:
                 form=FormTyp.RECHTECK,
                 material=MaterialTyp.STAHL,
                 untergrund=MaterialTyp.BETON,
-                gummimatte=MaterialTyp.GUMMI,
+                gummimatte=gummi,
                 element_id_intern="Bodenplatte_Links",
             )
             right = Bodenplatte(
@@ -86,7 +89,7 @@ class Tor:
                 form=FormTyp.RECHTECK,
                 material=MaterialTyp.STAHL,
                 untergrund=MaterialTyp.BETON,
-                gummimatte=MaterialTyp.GUMMI,
+                gummimatte=gummi,
                 element_id_intern="Bodenplatte_Rechts",
             )
             self.bauelemente.extend([left, right])

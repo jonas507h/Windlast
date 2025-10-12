@@ -12,6 +12,7 @@ class TorInput(BaseModel):
     traverse_name_intern: str
     bodenplatte_name_intern: str
     untergrund_typ: str  # MaterialTyp.value (z.B. "beton")
+    gummimatte: bool = True
     aufstelldauer: DauerInput | None = None
     windzone: str  # Windzone Enum-Name (z.B. "III_Binnenland")
 
