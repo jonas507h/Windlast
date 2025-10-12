@@ -122,7 +122,7 @@ def _rechne_drei_nachweise(
     protokoll: Optional[Protokoll] = None,
     kontext: Optional[dict] = None,
 ) -> Tuple[Dict[Nachweis, SafetyValue], Tuple[Optional[float], Optional[float], Optional[float]]]:
-    base_ctx = merge_kontext(kontext, {"funktion": "_rechne_drei_nachweise", "norm": norm.name, "norm_label": norm_label})
+    base_ctx = merge_kontext(kontext, {"funktion": "_rechne_drei_nachweise", "norm": norm.value})
 
     """
     Führt Kipp/Gleit/Abhebe durch (inkl. Fehlermeldungen im gleichen Stil wie bisher)

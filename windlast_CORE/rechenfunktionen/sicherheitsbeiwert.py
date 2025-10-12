@@ -31,9 +31,9 @@ def _beiwert_default(
     kontext: Optional[dict] = None,
 ) -> Zwischenergebnis:
     base_ctx = merge_kontext(kontext, {
-        "funktion": "sicherheitsbeiwert",
-        "lasttyp": getattr(kraft.typ, "name", str(getattr(kraft, "typ", None))),
-        "variabilitaet": getattr(kraft.variabilitaet, "name", str(getattr(kraft, "variabilitaet", None))),
+        "funktion": "Sicherheitsbeiwert",
+        "lasttyp": getattr(kraft.typ, "value", str(getattr(kraft, "typ", None))),
+        "variabilitaet": getattr(kraft.variabilitaet, "value", str(getattr(kraft, "variabilitaet", None))),
         "ist_guenstig": ist_guenstig,
     })
 
@@ -45,14 +45,11 @@ def _beiwert_default(
             # Eigenlast günstig & ständig
             gamma = 1.0
             formel = "γ_G = 1.0 (günstig, ständig)"
-            protokolliere_msg(protokoll, severity=Severity.HINT, code="SICHB/CASE",
-                              text="Günstig: ständige Eigenlast wird mit γ=1.0 angesetzt.",
-                              kontext=base_ctx)
         else:
             # alle anderen günstigen Lasten
             gamma = 0.0
             formel = "γ = 0.0 (günstige variable oder nicht zulässige Gutschrift)"
-            protokolliere_msg(protokoll, severity=Severity.HINT, code="SICHB/CASE",
+            protokolliere_msg(protokoll, severity=Severity.INFO, code="SICHB/CASE",
                               text="Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
                               kontext=base_ctx)
     else:
@@ -109,10 +106,10 @@ def sicherheitsbeiwert(
     kontext: Optional[dict] = None,
 ) -> Zwischenergebnis:
     base_ctx = merge_kontext(kontext, {
-        "funktion": "sicherheitsbeiwert",
-        "norm": getattr(norm, "name", str(norm)),
-        "lasttyp": getattr(kraft.typ, "name", str(getattr(kraft, "typ", None))),
-        "variabilitaet": getattr(kraft.variabilitaet, "name", str(getattr(kraft, "variabilitaet", None))),
+        "funktion": "Sicherheitsbeiwert",
+        "norm": getattr(norm, "value", str(norm)),
+        "lasttyp": getattr(kraft.typ, "value", str(getattr(kraft, "typ", None))),
+        "variabilitaet": getattr(kraft.variabilitaet, "value", str(getattr(kraft, "variabilitaet", None))),
         "ist_guenstig": ist_guenstig,
     })
 

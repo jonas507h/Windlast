@@ -73,14 +73,6 @@ def _schlankheit_DinEn1991_1_4_2010_12(
             return Zwischenergebnis(wert=float("nan"))
 
         faktor = interpol_2D([15.0, 50.0], [2.0, 1.4], laenge)
-        if laenge < 15.0 or laenge > 50.0:
-            protokolliere_msg(
-                protokoll,
-                severity=Severity.WARN,
-                code="SCHLANKHEIT/EXTRAPOLATION",
-                text=f"Faktor via Extrapolation für L={laenge:.3f} außerhalb [15, 50].",
-                kontext=merge_kontext(kontext, {"phase": "ZWISCHENWERTE", "bounds": [15.0, 50.0], "laenge": laenge}),
-            )
 
         rechenwert = faktor * (laenge / hoehe)
         wert = min(rechenwert, 70.0)

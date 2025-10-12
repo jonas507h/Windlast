@@ -51,7 +51,7 @@ def ermittle_kraefte_pro_windrichtung(
 ) -> Dict[str, List[Kraefte]]:
     base_ctx = merge_kontext(kontext, {
         "funktion": "ermittle_kraefte_pro_windrichtung",
-        "norm": getattr(norm, "name", str(norm)),
+        "norm": getattr(norm, "value", str(norm)),
         "windrichtung": windrichtung,
     })
 
@@ -62,7 +62,7 @@ def ermittle_kraefte_pro_windrichtung(
         elem_ctx = merge_kontext(base_ctx, {
             "element_index": idx,
             "element_id": getattr(elem, "element_id_intern", None),
-            "objekttyp": getattr(getattr(elem, "objekttyp", None), "name", None),
+            "objekttyp": getattr(getattr(elem, "objekttyp", None), "value", None),
         })
         # Gewicht
         fn_gewicht = getattr(elem, "gewichtskraefte", None)
@@ -139,7 +139,7 @@ def get_or_create_lastset(
 ) -> LastSet:
     base_ctx = merge_kontext(kontext, {
         "funktion": "get_or_create_lastset",
-        "winkel_deg": winkel_deg,
+        "winkel_deg": f"{winkel_deg}°",
         "windrichtung": windrichtung,
     })
 

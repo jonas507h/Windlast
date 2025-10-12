@@ -33,6 +33,15 @@ class Bodenplatte:
     gummimatte: Optional[MaterialTyp] = None
     objekttyp: ObjektTyp = ObjektTyp.BODENPLATTE
     element_id_intern: Optional[str] = None
+    anzeigename: Optional[str] = None
+
+    def __post_init__(self):
+        if not self.anzeigename:
+            try:
+                specs = catalog.get_bodenplatte(self.name_intern)
+                self.anzeigename = specs.anzeige_name or self.name_intern
+            except Exception:
+                self.anzeigename = self.name_intern
 
     def gesamthoehe(self) -> float:
         return self.mittelpunkt[2]
@@ -41,10 +50,10 @@ class Bodenplatte:
         self, *, protokoll: Optional[Protokoll] = None, kontext: Optional[dict] = None
     ) -> List[Kraefte]:
         base_ctx = merge_kontext(kontext, {
-            "funktion": "gewichtskraefte",
+            "funktion": "Gewichtskräfte",
             "element_id": self.element_id_intern,
-            "objekttyp": self.objekttyp.name,
-            "bodenplatte_name_intern": self.name_intern,
+            "objekttyp": self.objekttyp.value,
+            "objekt_name": self.anzeigename,
         })
         try:
             specs = catalog.get_bodenplatte(self.name_intern)
@@ -85,9 +94,9 @@ class Bodenplatte:
         self, norm: Norm, *, protokoll: Optional[Protokoll] = None, kontext: Optional[dict] = None
     ) -> float:
         base_ctx = merge_kontext(kontext, {
-            "funktion": "reibwert",
+            "funktion": "Reibwert",
             "element_id": self.element_id_intern,
-            "bodenplatte_name_intern": self.name_intern,
+            "objekt_name": self.anzeigename,
         })
         materialfolge = [self.material, self.gummimatte, self.untergrund]
         return reibwert_fn(
@@ -99,10 +108,10 @@ class Bodenplatte:
         protokoll: Optional[Protokoll] = None, kontext: Optional[dict] = None
     ) -> List[Kraefte]:
         base_ctx = merge_kontext(kontext, {
-            "funktion": "reibkraefte",
+            "funktion": "Reibkräfte",
             "element_id": self.element_id_intern,
-            "objekttyp": self.objekttyp.name,
-            "bodenplatte_name_intern": self.name_intern,
+            "objekttyp": self.objekttyp.value,
+            "objekt_name": self.anzeigename,
             "belastung": belastung,
         })
         # Reibwert ermitteln
@@ -156,11 +165,11 @@ class Bodenplatte:
         self, *, protokoll: Optional[Protokoll] = None, kontext: Optional[dict] = None
     ) -> List[Vec3]:
         base_ctx = merge_kontext(kontext, {
-            "funktion": "eckpunkte",
+            "funktion": "Eckpunkte",
             "element_id": self.element_id_intern,
-            "objekttyp": self.objekttyp.name,
-            "bodenplatte_name_intern": self.name_intern,
-            "form": self.form.name,
+            "objekttyp": self.objekttyp.value,
+            "objekt_name": self.anzeigename,
+            "form": self.form.value,
         })
 
         if self.form == FormTyp.RECHTECK:

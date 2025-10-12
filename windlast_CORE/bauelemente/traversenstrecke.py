@@ -30,17 +30,17 @@ class Traversenstrecke:
     orientierung: Vec3
     objekttyp: ObjektTyp = ObjektTyp.TRAVERSE
     element_id_intern: Optional[str] = None
-    traverse_anzeigename: Optional[str] = None
+    anzeigename: Optional[str] = None
 
     def gesamthoehe(self) -> float:
         return max(self.start[2], self.ende[2])
 
     def gewichtskraefte(self, *, protokoll: Optional[Protokoll] = None, kontext: Optional[dict] = None) -> List[Kraefte]:
         base_ctx = merge_kontext(kontext, {
-            "funktion": "gewichtskraefte",
+            "funktion": "Gewichtskraefte",
             "element_id": self.element_id_intern,
             "objekttyp": self.objekttyp.name,
-            "traverse_name_intern": self.traverse_name_intern,
+            "objekt_name": self.anzeigename,
         })
         laenge = abstand_punkte(self.start, self.ende)
 
@@ -83,7 +83,7 @@ class Traversenstrecke:
             "norm": norm.value,
             "element_id": self.element_id_intern,
             "objekttyp": self.objekttyp.value,
-            "traverse_anzeigename": self.traverse_anzeigename,
+            "objekt_name": self.anzeigename,
             "windrichtung": windrichtung,
         })
 

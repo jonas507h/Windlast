@@ -43,7 +43,7 @@ const CONTEXT_ORDER = [
   "element_index",
   "id", "element_id", "element_id_intern",
   "objekttyp",
-  "traverse_anzeigename",
+  "objekt_name",
   "objekt_name_intern",
   "funktion",
   "norm", "norm_label",

@@ -58,7 +58,7 @@ class Tor:
                 ende=(t/2, 0.0, H),
                 orientierung=vecs["links"],
                 element_id_intern="Strecke_Links",
-                traverse_anzeigename=spec.anzeige_name,
+                anzeigename=spec.anzeige_name,
             )
             top = Traversenstrecke(
                 traverse_name_intern=self.traverse_name_intern,
@@ -66,7 +66,7 @@ class Tor:
                 ende=(B,   0.0, H - t/2),
                 orientierung=vecs["oben"],
                 element_id_intern="Strecke_Oben",
-                traverse_anzeigename=spec.anzeige_name,
+                anzeigename=spec.anzeige_name,
             )
             right = Traversenstrecke(
                 traverse_name_intern=self.traverse_name_intern,
@@ -74,7 +74,7 @@ class Tor:
                 ende=(B - t/2, 0.0, H),
                 orientierung=vecs["rechts"],
                 element_id_intern="Strecke_Rechts",
-                traverse_anzeigename=spec.anzeige_name,
+                anzeigename=spec.anzeige_name,
             )
             self.bauelemente.extend([left, top, right])
 

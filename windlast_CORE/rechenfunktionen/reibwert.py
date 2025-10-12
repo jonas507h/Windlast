@@ -94,8 +94,8 @@ def reibwert(
 ) -> Zwischenergebnis:
     
     base_ctx = merge_kontext(kontext, {
-        "funktion": "reibwert",
-        "norm": getattr(norm, "name", str(norm)),
+        "funktion": "Reibwert",
+        "norm": getattr(norm, "value", str(norm)),
     })
 
     # 1) None rausfiltern
@@ -135,7 +135,7 @@ def reibwert(
                         severity=Severity.HINT,
                         code="REIB/FALLBACK_NORM",
                         text=f"Für Paarung {a.value}–{b.value} wurde auf {used_norm.name} zurückgegriffen.",
-                        kontext=merge_kontext(base_ctx, {"paarung": (a.value, b.value), "norm_used": used_norm.name}),
+                        kontext=merge_kontext(base_ctx, {"paarung": (a.value, b.value), "norm_used": used_norm.value}),
                     )
     except KeyError as e:
         protokolliere_msg(
@@ -160,7 +160,7 @@ def reibwert(
     b_gov = cleaned[idx_min + 1]
     protokolliere_msg(
         protokoll,
-        severity=Severity.HINT,
+        severity=Severity.INFO,
         code="REIB/PAIR_GOVERNING",
         text=f"Maßgebend ist die Paarung {a_gov.value}–{b_gov.value} mit μ={reibwert_eff:.3f}.",
         kontext=merge_kontext(base_ctx, {"paarung": (a_gov.value, b_gov.value)}),

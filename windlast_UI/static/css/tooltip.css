@@ -32,7 +32,7 @@
 #tt-root.tt-error  .tt-bubble { border-color: #ff6b6b; }
 #tt-root.tt-warn    .tt-bubble { border-color: #f0ad4e; }
 #tt-root.tt-hint    .tt-bubble { border-color: #2d6cdf; }
-#tt-root.tt-info    .tt-bubble { border-color: #2d6cdf; }
+#tt-root.tt-info    .tt-bubble { border-color: #555; }
 
 /* ===== Meldungstypen innerhalb des Tooltips ===== */
 #tt-root .tt-line {
