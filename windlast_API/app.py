@@ -25,31 +25,58 @@ UI_ROOT      = (ROOT / "windlast_UI").resolve()
 STATIC_DIR   = (UI_ROOT / "static").resolve()
 PARTIALS_DIR = (UI_ROOT / "partials").resolve()
 
-_clients: dict[str, float] = {}           # {client_id: last_seen_ts}
+_clients: dict[str, float] = {}   # {client_id: last_seen_ts}
 _lock = threading.Lock()
-_shutdown_timer: threading.Timer | None = None
-HB_TIMEOUT = 8.0   # s – wenn länger kein Heartbeat, gilt Client als weg
 
-def _schedule_shutdown(delay=0.6):
-    """App beenden (auch ohne Werkzeugs Shutdown-Hook)."""
+HB_TIMEOUT = 8.0        # s ohne Heartbeat => Client gilt als weg
+HK_PERIOD  = 2.0        # s Housekeeper-Intervall
+GRACE      = 3.0        # s Gnadenfrist bevor wir wirklich beenden
+
+_shutdown_timer: threading.Timer | None = None
+_housekeeper_started = False
+
+def _cancel_shutdown():
+    global _shutdown_timer
+    if _shutdown_timer is not None:
+        _shutdown_timer.cancel()
+        _shutdown_timer = None
+
+def _schedule_shutdown():
+    """Plane Shutdown nach GRACE Sekunden; wird durch _cancel_shutdown aufgehoben."""
+    global _shutdown_timer
+    _cancel_shutdown()
     def _do_exit():
         logging.info("shutdown now")
-        time.sleep(delay)
         os._exit(0)
-    t = threading.Timer(0.2, _do_exit)
+    t = threading.Timer(GRACE, _do_exit)
     t.daemon = True
     t.start()
-    return t
+    _shutdown_timer = t
 
-def _reap_and_maybe_shutdown():
-    """Inaktive Clients entfernen; wenn keiner mehr da, beenden."""
-    now = time.time()
-    with _lock:
-        stale = [cid for cid, ts in _clients.items() if now - ts > HB_TIMEOUT]
-        for cid in stale:
-            _clients.pop(cid, None)
-        if not _clients:
-            _schedule_shutdown()
+def _reap_stale(now: float | None = None):
+    """Entfernt Clients ohne Heartbeat > HB_TIMEOUT."""
+    if now is None: now = time.time()
+    stale = [cid for cid, ts in _clients.items() if now - ts > HB_TIMEOUT]
+    for cid in stale:
+        _clients.pop(cid, None)
+
+def _ensure_housekeeper():
+    """Startet einen leichten Background-Thread, der verwaiste Clients entfernt und ggf. Shutdown plant."""
+    global _housekeeper_started
+    if _housekeeper_started:
+        return
+    def _loop():
+        while True:
+            time.sleep(HK_PERIOD)
+            with _lock:
+                _reap_stale()
+                if not _clients:
+                    # kein Client mehr aktiv -> Shutdown planen (falls nicht schon geplant)
+                    if _shutdown_timer is None:
+                        _schedule_shutdown()
+    th = threading.Thread(target=_loop, daemon=True)
+    th.start()
+    _housekeeper_started = True
 
 def create_app():
     app = Flask(__name__, static_folder=str(STATIC_DIR), static_url_path="/static")
@@ -73,6 +100,8 @@ def create_app():
     def healthz():
         return {"status": "ok"}
     
+    _ensure_housekeeper()  # beim App-Start einmal starten
+
     @app.post("/__client_event")
     def __client_event():
         if request.remote_addr not in ("127.0.0.1", "::1"):
@@ -86,13 +115,16 @@ def create_app():
 
         now = time.time()
         with _lock:
-            if ev == "open" or ev == "beat":
+            if ev in ("open", "beat"):
                 _clients[cid] = now
+                _reap_stale(now)
+                _cancel_shutdown()             # Aktivität -> geplanten Exit abbrechen
             elif ev == "close":
                 _clients.pop(cid, None)
+                _reap_stale(now)
+                if not _clients:
+                    _schedule_shutdown()        # leer -> Exit planen (debounced)
 
-        # nach jedem Event kurz prüfen
-        _reap_and_maybe_shutdown()
         return {"ok": True, "active": len(_clients)}
 
     return app
