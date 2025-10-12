@@ -84,8 +84,9 @@ function klassifizierung_anwenden(el, good) {
 function sicherheit_klassifizieren(val) {
   if (val === "INF") return true;
   if (val === "-INF") return false;
-  const num = typeof val === "string" ? Number(val) : val;
+  let num = typeof val === "string" ? Number(val) : val;
   if (num === null || num === undefined || Number.isNaN(num)) return false;
+  num = Math.floor(num * 100) / 100;
   return num >= 1.0;
 }
 
@@ -136,7 +137,7 @@ function setCell(id, val) {
       el.textContent = "—";
       el.title = "";
     } else {
-      el.textContent = (Math.round(num * 100) / 100).toFixed(2);
+      el.textContent = (Math.floor(num * 100) / 100).toFixed(2);
       el.title = "";
     }
   }
@@ -165,7 +166,7 @@ function _setSafetyOnTdAlt(td, val) {
     td.title = "";
     td.classList.remove("val-ok", "val-bad");
   } else {
-    td.textContent = (Math.round(num * 100) / 100).toFixed(2);
+    td.textContent = (Math.floor(num * 100) / 100).toFixed(2);
     td.title = "";
     klassifizierung_anwenden(td, sicherheit_klassifizieren(num));
   }

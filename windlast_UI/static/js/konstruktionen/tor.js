@@ -49,9 +49,6 @@ async function initTorDropdowns() {
         { value: "side", label: "Spitze seitlich"    },
         { value: "down", label: "Spitze nach unten"  },
       ], { defaultValue: "up" });
-      trOri.addEventListener("change", () => {
-        console.debug("[UI] Traversen-Orientierung geändert:", trOri.value);
-      });
     }
 
     // Statisches Dropdown: Gummimatte (Ja/Nein), Default = Ja
