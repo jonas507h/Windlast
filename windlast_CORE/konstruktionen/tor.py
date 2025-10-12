@@ -8,7 +8,7 @@ from windlast_CORE.rechenfunktionen import (
 from windlast_CORE.rechenfunktionen.kippsicherheit import kippsicherheit as _kippsicherheit
 from windlast_CORE.rechenfunktionen.gleitsicherheit import gleitsicherheit as _gleitsicherheit
 from windlast_CORE.rechenfunktionen.abhebesicherheit import abhebesicherheit as _abhebesicherheit
-from windlast_CORE.datenstruktur.enums import Norm, MaterialTyp, FormTyp, RechenmethodeKippen, RechenmethodeGleiten, RechenmethodeAbheben, VereinfachungKonstruktion
+from windlast_CORE.datenstruktur.enums import Norm, MaterialTyp, FormTyp, RechenmethodeKippen, RechenmethodeGleiten, RechenmethodeAbheben, VereinfachungKonstruktion, TraversenOrientierung
 from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_kontext
 
 # TODO: ID-Vergabe
@@ -24,12 +24,21 @@ class Tor:
     bodenplatte_name_intern: Optional[str] = None
     anzahl_bodenplatten: int = 2
     traverse_name_intern: Optional[str] = None
+    traversen_orientierung: TraversenOrientierung = TraversenOrientierung.UP
 
     gummimatte_vorhanden: bool = True
 
     def __post_init__(self):
         B = float(self.breite)
         H = float(self.hoehe)
+
+        orient_map = {
+            TraversenOrientierung.UP:   { "links": (-1.0, 0.0,  0.0), "oben": ( 0.0, 0.0,  1.0), "rechts": ( 1.0, 0.0,  0.0) },
+            TraversenOrientierung.SIDE: { "links": ( 0.0, 1.0,  0.0), "oben": ( 0.0, 1.0,  0.0), "rechts": ( 0.0, 1.0,  0.0) },
+            TraversenOrientierung.DOWN: { "links": ( 1.0, 0.0,  0.0), "oben": ( 0.0, 0.0, -1.0), "rechts": (-1.0, 0.0,  0.0) },
+        }
+        vecs = orient_map.get(self.traversen_orientierung, orient_map[TraversenOrientierung.UP])
+
         # Traversenstrecken aus Breite/Höhe + Profilhöhe t
         hat_traversen = any(isinstance(k, Traversenstrecke) for k in self.bauelemente)
         if (not hat_traversen) and self.breite and self.hoehe and self.traverse_name_intern:
@@ -47,21 +56,21 @@ class Tor:
                 traverse_name_intern=self.traverse_name_intern,
                 start=(t/2, 0.0, 0.0),
                 ende=(t/2, 0.0, H),
-                orientierung=(0.0, 1.0, 0.0),
+                orientierung=vecs["links"],
                 element_id_intern="Strecke_Links",
             )
             top = Traversenstrecke(
                 traverse_name_intern=self.traverse_name_intern,
                 start=(0.0, 0.0, H - t/2),
                 ende=(B,   0.0, H - t/2),
-                orientierung=(0.0, 1.0, 0.0),
+                orientierung=vecs["oben"],
                 element_id_intern="Strecke_Oben",
             )
             right = Traversenstrecke(
                 traverse_name_intern=self.traverse_name_intern,
                 start=(B - t/2, 0.0, 0.0),
                 ende=(B - t/2, 0.0, H),
-                orientierung=(0.0, 1.0, 0.0),
+                orientierung=vecs["rechts"],
                 element_id_intern="Strecke_Rechts",
             )
             self.bauelemente.extend([left, top, right])
@@ -74,7 +83,7 @@ class Tor:
                 name_intern=self.bodenplatte_name_intern,
                 mittelpunkt=(0.0, 0.0, 0.0),
                 orientierung=(0.0, 0.0, 1.0),
-                drehung=(0.0, 1.0, 0.0),
+                drehung=vecs["links"],
                 form=FormTyp.RECHTECK,
                 material=MaterialTyp.STAHL,
                 untergrund=MaterialTyp.BETON,
@@ -85,7 +94,7 @@ class Tor:
                 name_intern=self.bodenplatte_name_intern,
                 mittelpunkt=(B, 0.0, 0.0),
                 orientierung=(0.0, 0.0, 1.0),
-                drehung=(0.0, 1.0, 0.0),
+                drehung=vecs["rechts"],
                 form=FormTyp.RECHTECK,
                 material=MaterialTyp.STAHL,
                 untergrund=MaterialTyp.BETON,

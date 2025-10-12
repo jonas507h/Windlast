@@ -2,7 +2,7 @@ from typing import Dict, Any
 from math import isfinite
 from windlast_CORE.konstruktionen.tor import Tor
 from windlast_CORE.datenstruktur.enums import (
-    MaterialTyp, Zeitfaktor, Windzone as WindzoneEnum, Norm, Nachweis
+    MaterialTyp, Zeitfaktor, Windzone as WindzoneEnum, Norm, Nachweis, TraversenOrientierung
 )
 from windlast_CORE.datenstruktur.zeit import Dauer
 from windlast_CORE.rechenfunktionen.standsicherheit import standsicherheit
@@ -23,6 +23,11 @@ def berechne_tor(payload: Dict[str, Any]) -> Dict[str, Any]:
         traverse_name_intern=payload["traverse_name_intern"],
         bodenplatte_name_intern=payload["bodenplatte_name_intern"],
         gummimatte_vorhanden=payload.get("gummimatte", True),
+        traversen_orientierung={
+            "up":   TraversenOrientierung.UP,
+            "side": TraversenOrientierung.SIDE,
+            "down": TraversenOrientierung.DOWN,
+        }[payload.get("orientierung", "up")],
     )
 
     # 2) Untergrund setzen

@@ -119,3 +119,8 @@ class NormStatus(str, Enum):
     CALCULATED = "calculated"
     NOT_APPLICABLE = "not_applicable"
     ERROR = "error"
+
+class TraversenOrientierung(str, Enum):
+    UP = "up"
+    SIDE = "side"
+    DOWN = "down"

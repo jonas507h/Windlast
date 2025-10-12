@@ -11,6 +11,7 @@ class TorInput(BaseModel):
     hoehe_m: PositiveFloat
     traverse_name_intern: str
     bodenplatte_name_intern: str
+    orientierung: str
     untergrund_typ: str  # MaterialTyp.value (z.B. "beton")
     gummimatte: bool = True
     aufstelldauer: DauerInput | None = None
