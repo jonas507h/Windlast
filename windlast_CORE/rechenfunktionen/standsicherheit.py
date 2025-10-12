@@ -60,17 +60,20 @@ def _ermittle_staudruecke(
     s: StaudruckSzenario,
     *,
     aufstelldauer: Optional[Dauer],
+    protokoll: Optional[Protokoll] = None,
+    kontext: Optional[dict] = None,
 ) -> Tuple[Optional[List[float]], Optional[List[float]], List[Message]]:
     """
     Liefert (z, q, reasons). Kapselt staudruecke(...) inkl. robustem Fehlermanagement.
     z = Obergrenzen, q = Staudrücke, beide als List[float].
     """
     reasons: List[Message] = []
+    base_ctx = merge_kontext(kontext, {"szenario": s.label, "norm": s.norm.name})
     try:
         if s.modus == "betrieb":
-            zl1, zl2 = staudruecke(s.norm, konstruktion, s.betriebszustand, aufstelldauer=aufstelldauer, windzone=None)
+            zl1, zl2 = staudruecke(s.norm, konstruktion, s.betriebszustand, aufstelldauer=aufstelldauer, windzone=None, protokoll=protokoll, kontext=base_ctx)
         else:  # "schutz"
-            zl1, zl2 = staudruecke(s.norm, konstruktion, s.schutz,           aufstelldauer=aufstelldauer, windzone=s.windzone)
+            zl1, zl2 = staudruecke(s.norm, konstruktion, s.schutz,           aufstelldauer=aufstelldauer, windzone=s.windzone, protokoll=protokoll, kontext=base_ctx)
         z = list(zl1.wert)  # Obergrenzen
         q = list(zl2.wert)  # Staudrücke
         return z, q, reasons
@@ -230,7 +233,7 @@ def standsicherheit(
 
         # Primär
         s_primary = szenarien[0]
-        z, q, reasons = _ermittle_staudruecke(konstruktion, s_primary, aufstelldauer=aufstelldauer)
+        z, q, reasons = _ermittle_staudruecke(konstruktion, s_primary, aufstelldauer=aufstelldauer, protokoll=prot, kontext={})
         reasons_all.extend(reasons)
         if z is None or q is None:
             # Ohne q/z: ERROR + Platzhalterwerte wie bisher
@@ -259,7 +262,7 @@ def standsicherheit(
 
         if need_fallback and len(szenarien) > 1:
             for s in szenarien[1:]:
-                z_b, q_b, reasons_b = _ermittle_staudruecke(konstruktion, s, aufstelldauer=aufstelldauer)
+                z_b, q_b, reasons_b = _ermittle_staudruecke(konstruktion, s, aufstelldauer=aufstelldauer, protokoll=prot, kontext={})
                 reasons_all.extend(reasons_b)
                 if z_b is None or q_b is None:
                     # Wenn Staudrücke fürs Fallback nicht verfügbar, einfach überspringen (Reasons sind geloggt)
