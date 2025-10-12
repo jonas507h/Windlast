@@ -34,7 +34,8 @@ function getNormDisplayName(normKey) {
 const CONTEXT_ORDER = [
   "anzahl_windrichtungen",
   "windrichtung", "winkel_deg",
-  "szenario", "scenario",
+  "szenario", "scenario", "szenario_anzeigename",
+  "windzone",
   "nachweis",
   "abschnitt",
   "phase",
@@ -64,6 +65,7 @@ const CONTEXT_ALIASES = {
   bodenplatte_name_intern: "Bodenplatte",
   szenario: "Szenario",
   scenario: "Szenario",
+  szenario_anzeigename: "Szenario",
   einwirkungsart: "Einwirkungsart",
   stelle: "Stelle",
   id: "ID",
@@ -71,11 +73,32 @@ const CONTEXT_ALIASES = {
   gesamthoehe: "Gesamthöhe",
   h_bau: "Gesamthöhe",
   h_max: "Max. gültige Höhe",
+  z_max: "Max. erlaubte Höhe",
   windzone: "Windzone",
   winkel_deg: "Windrichtung (°)",
   paarung: "Materialpaarung",
   norm_used: "Verwendete Norm",
 };
+
+// Kontext-Blacklist: diese Keys werden im Tooltip NICHT angezeigt
+const CONTEXT_BLACKLIST = new Set([
+  "szenario",
+  "element_index",
+  "element_id_intern",
+]);
+
+// Optional: per Präfix ausblenden (z.B. alles was mit "debug_" beginnt)
+const CONTEXT_BLACKLIST_PREFIXES = [
+  /^debug_/,
+  /^internal_/,
+];
+
+// Helper
+function isBlacklistedKey(k) {
+  if (!k) return false;
+  if (CONTEXT_BLACKLIST.has(k)) return true;
+  return CONTEXT_BLACKLIST_PREFIXES.some(rx => rx.test(k));
+}
 
 // Key → hübscher Labeltext
 function prettyKey(k) {
@@ -119,20 +142,22 @@ function prettyVal(k, v) {
 function orderContextEntries(ctx, pref = CONTEXT_ORDER) {
   if (!ctx || typeof ctx !== "object") return [];
 
-  // Quell-Reihenfolge sichern (stabil, kein Object.entries mit Sort)
   const withIndex = [];
   let i = 0;
   for (const k in ctx) {
     if (!Object.hasOwn(ctx, k)) continue;
-    withIndex.push([k, ctx[k], i++]); // [key, value, originalIndex]
+    if (isBlacklistedKey(k)) continue;                    
+    const v = ctx[k];
+    if (v === undefined || v === null || v === "") continue;
+    withIndex.push([k, v, i++]); // [key, value, originalIndex]
   }
 
   const rank = new Map(pref.map((k, idx) => [k, idx]));
   withIndex.sort((a, b) => {
     const ra = rank.has(a[0]) ? rank.get(a[0]) : Infinity;
     const rb = rank.has(b[0]) ? rank.get(b[0]) : Infinity;
-    if (ra !== rb) return ra - rb;     // bevorzugte zuerst
-    return a[2] - b[2];                // Originalreihenfolge unter gleicher Priorität
+    if (ra !== rb) return ra - rb;
+    return a[2] - b[2];
   });
 
   return withIndex.map(([k, v]) => [k, v]);

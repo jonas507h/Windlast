@@ -69,7 +69,7 @@ def _ermittle_staudruecke(
     z = Obergrenzen, q = Staudrücke, beide als List[float].
     """
     reasons: List[Message] = []
-    base_ctx = merge_kontext(kontext, {"szenario": s.anzeigename, "norm": s.norm.value})
+    base_ctx = merge_kontext(kontext, {"szenario_anzeigename": s.anzeigename, "szenario": s.label, "norm": s.norm.value})
     try:
         if s.modus == "betrieb":
             zl1, zl2 = staudruecke(s.norm, konstruktion, s.betriebszustand, aufstelldauer=aufstelldauer, windzone=None, protokoll=protokoll, kontext=base_ctx)
@@ -270,7 +270,7 @@ def standsicherheit(
             konst=konst, meth_kipp=meth_kipp, meth_gleit=meth_gleit, meth_abhebe=meth_abhebe,
             vereinfachung_konstruktion=vereinfachung_konstruktion, anzahl_windrichtungen=anzahl_windrichtungen,
             reasons=reasons_all, norm_label=normtitel,
-            protokoll=prot, kontext={"szenario": s_primary.anzeigename},
+            protokoll=prot, kontext={"szenario_anzeigename": s_primary.anzeigename, "szenario": s_primary.label,},
         )
 
         alternativen: Dict[str, Dict[Nachweis, SafetyValue]] = {}
@@ -289,7 +289,7 @@ def standsicherheit(
                     konst=konst, meth_kipp=meth_kipp, meth_gleit=meth_gleit, meth_abhebe=meth_abhebe,
                     vereinfachung_konstruktion=vereinfachung_konstruktion, anzahl_windrichtungen=anzahl_windrichtungen,
                     reasons=reasons_all, norm_label=f"{s.norm.name} ({s.label})",
-                    protokoll=prot, kontext={"szenario": s.anzeigename},
+                    protokoll=prot, kontext={"szenario_anzeigename": s.anzeigename, "szenario": s.label,},
                 )
                 alternativen[s.label] = vals_b
 

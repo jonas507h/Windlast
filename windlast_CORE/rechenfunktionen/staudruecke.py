@@ -192,7 +192,7 @@ def _winddruck_DinEn13814_2005_06(
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="STAUD/HEIGHT_EXCEEDS_MAX",
             text=f"Gesamthöhe {h:.3f} m überschreitet die höchste Obergrenze {max_obergrenze:.3f} m (DIN EN 13814:2005-06: {zustand.value}).",
-            kontext=merge_kontext(base_ctx, {"gesamthoehe": h, "z_max": max_obergrenze}),
+            kontext=merge_kontext(base_ctx, {"gesamthoehe": f"{h}m", "z_max": f"{max_obergrenze}m"}),
         )
         nan = Zwischenergebnis_Liste(wert=[float("nan")])
         return nan, nan
@@ -273,7 +273,7 @@ def _winddruck_DinEn17879_2024_08(
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="STAUD/HEIGHT_EXCEEDS_MAX",
             text=f"Gesamthöhe {h:.3f} m überschreitet die höchste Obergrenze {max_obergrenze:.3f} m (DIN EN 17879:2024-08: {zustand.value}).",
-            kontext=merge_kontext(base_ctx, {"gesamthoehe": h, "z_max": max_obergrenze}),
+            kontext=merge_kontext(base_ctx, {"gesamthoehe": f"{h}m", "z_max": f"{max_obergrenze}m"}),
         )
         nan = Zwischenergebnis_Liste(wert=[float("nan")])
         return nan, nan
@@ -355,7 +355,7 @@ def _geschwindigkeitsdruck_DinEn1991_1_4_2010_12(
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="STAUD/HEIGHT_EXCEEDS_MAX",
             text=f"Gesamthöhe {h:.3f} m überschreitet die höchste definierte Obergrenze {max_og:.3f} m (DIN EN 1991-1-4:2010-12, Zone: {windzone.value}).",
-            kontext=merge_kontext(base_ctx, {"gesamthoehe": h, "z_max": max_og}),
+            kontext=merge_kontext(base_ctx, {"gesamthoehe": f"{h}m", "z_max": f"{max_og}m"}),
         )
         nan = Zwischenergebnis_Liste(wert=[float("nan")])
         return nan, nan
