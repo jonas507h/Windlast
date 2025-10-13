@@ -360,6 +360,16 @@ function renderAlternativenBlocksVM(vm) {
   }
 }
 
+// --- NEU: Direktfunktion anbieten (für tor.js Variante 1)
+window.updateFooterResults = function(payload){
+  updateFooter(payload);
+};
+
+// --- NEU: CustomEvent-Listener (für tor.js Variante 2)
+document.addEventListener("results:update", (ev) => {
+  updateFooter(ev.detail);
+});
+
 function updateFooter(payload) {
   // ViewModel bauen
   ResultsVM = ResultsIndex.build(payload);

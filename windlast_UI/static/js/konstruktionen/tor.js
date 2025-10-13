@@ -86,10 +86,7 @@ async function fetchJSON(url, opts) {
 }
 
 function getHeaderDoc() {
-  // Sucht header.html im Parent (index.html) und gibt das Document zurück
-  const topDoc = window.top?.document;
-  const hdr = topDoc?.querySelector('iframe[src*="partials/header.html"]');
-  return hdr?.contentDocument || hdr?.contentWindow?.document || null;
+  return document;
 }
 
 function readHeaderValues() {
@@ -125,20 +122,19 @@ async function submitTor() {
       ...readHeaderValues(),
     };
 
-    // Senden an API und Empfangen der Rechenergebnisse
-    const data = await fetchJSON("/api/v1/tor/berechnen", {
-      method: "POST",
-      body: JSON.stringify(payload),
-    });
-
-    // Rechenergebnisse an Parent senden (sendet sie weiter an Footer zur Anzeige)
-    window.top?.postMessage({ type: "results", source: "tor", payload: data }, "*");
+    // 1) bevorzugt: direkte Funktion (falls Footer sie anbietet)
+    if (typeof window.updateFooterResults === "function") {
+      window.updateFooterResults(data);
+    } else {
+      // 2) Fallback: CustomEvent im selben Dokument
+      document.dispatchEvent(new CustomEvent("results:update", { detail: data }));
+    }
   } catch (e) {
     console.error("Tor-Berechnung fehlgeschlagen:", e);
-    window.top?.postMessage({
-      type: "toast",
-      payload: { level: "error", text: String(e.message || e) },
-    }, "*");
+    // optional: ein schlichtes Toast-Event, falls du es nutzen willst
+    document.dispatchEvent(new CustomEvent("toast", {
+      detail: { level: "error", text: String(e?.message || e) }
+    }));
   }
 }
 

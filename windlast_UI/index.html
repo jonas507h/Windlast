@@ -5,68 +5,154 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Windlastrechner 2.0</title>
   <link rel="icon" href="static/windlast.ico">
+
+  <!-- Globales Styling -->
+  <link rel="stylesheet" href="static/css/style.css">
+  <link rel="stylesheet" href="static/css/tooltip.css">
+  <link rel="stylesheet" href="static/css/modal.css">
+
   <style>
     html, body { height: 100%; }
     body {
       margin: 0;
-      display: grid;
-      grid-template-rows: 80px 1fr 1fr;
+      display: flex;
+      flex-direction: column;
       min-height: 100vh;
       background: var(--bg);
       color: var(--text);
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     }
-    .slot { min-height: 0; }
-    .slot > iframe { width:100%; height:100%; border:0; display:block; }
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      padding: 0 1rem;
+    }
   </style>
-  <link rel="stylesheet" href="static/css/style.css">
+
   <script src="static/js/theme.js"></script>
 </head>
-<body>
-  <div class="slot">
-    <iframe src="partials/header.html" title="Header" data-theme-sync></iframe>
-  </div>
-  <div class="slot">
-    <iframe src="partials/konstruktionen/wrapper.html" title="Konstruktionen" data-theme-sync></iframe>
-  </div>
-  <div class="slot">
-    <iframe src="partials/footer.html" title="Ergebnisse" data-theme-sync></iframe>
-  </div>
-  <script>
-    // Map API-Normkeys -> Footer-ID-Suffix
-    const NORM_ID = {
-      "EN_13814_2005": "en13814_2005",
-      "EN_17879_2024": "en17879_2024",
-      "EN_1991_1_4_2010": "en1991_2010",
-    };
+<body class="wrap">
 
-    function forwardResultsToFooter(payload) {
-      const footer = document.querySelector('iframe[src*="partials/footer.html"]');
-      footer?.contentWindow?.postMessage({ type: "results/update", payload }, "*");
+  <!-- ========== HEADER ========== -->
+  <header class="panel header-bar">
+    <h1 style="margin:0;">Windlastrechner 2.0</h1>
+
+    <form id="header-form" class="header-controls" onsubmit="return false;">
+      <label for="aufstelldauer_wert">Aufstelldauer</label>
+      <input id="aufstelldauer_wert" name="aufstelldauer_wert"
+             type="number" min="0" step="1" placeholder="z. B. 30" />
+      <select id="aufstelldauer_einheit"></select>
+
+      <label for="windzone">Windzone</label>
+      <select id="windzone"></select>
+    </form>
+
+    <div class="actions" style="margin:0;">
+      <button type="button" class="btn" onclick="toggleTheme()">Dark / Light</button>
+    </div>
+  </header>
+
+  <!-- ========== MAIN (Konstruktionen) ========== -->
+  <main class="wrap">
+    <h2 style="margin:0 0 8px;">Konstruktionen</h2>
+
+    <nav class="tabs">
+      <button type="button" class="tab" data-view="tor" aria-current="page"
+              onclick="switch_konstruktion('tor')">Tor</button>
+      <button type="button" class="tab" data-view="steher"
+              onclick="switch_konstruktion('steher')">Steher</button>
+    </nav>
+
+    <!-- Hier wird dynamisch der Inhalt von tor.html / steher.html eingefügt -->
+    <div id="konstruktions_container"></div>
+  </main>
+
+  <!-- ========== FOOTER ========== -->
+  <section class="panel wrap" id="results-section">
+    <h2 style="margin:0 0 10px;">Ergebnisse</h2>
+
+    <table class="results-table" aria-describedby="results-caption">
+      <caption id="results-caption" style="text-align:left; margin-bottom:6px;">
+        Sicherheiten & erforderlicher Ballast
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col" class="rowhead-stub">Nachweis</th>
+          <th>DIN EN 13814:2005-06</th>
+          <th>DIN EN 17879:2024-08</th>
+          <th>DIN EN 1991-1-4:2010-12</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row" class="rowhead">Kippsicherheit</th>
+          <td class="value" id="kipp_en13814_2005">–</td>
+          <td class="value" id="kipp_en17879_2024">–</td>
+          <td class="value" id="kipp_en1991_2010">–</td>
+        </tr>
+        <tr>
+          <th scope="row" class="rowhead">Gleitsicherheit</th>
+          <td class="value" id="gleit_en13814_2005">–</td>
+          <td class="value" id="gleit_en17879_2024">–</td>
+          <td class="value" id="gleit_en1991_2010">–</td>
+        </tr>
+        <tr>
+          <th scope="row" class="rowhead">Abhebesicherheit</th>
+          <td class="value" id="abhebe_en13814_2005">–</td>
+          <td class="value" id="abhebe_en17879_2024">–</td>
+          <td class="value" id="abhebe_en1991_2010">–</td>
+        </tr>
+        <tr>
+          <th scope="row" class="rowhead">erforderlicher Ballast</th>
+          <td class="value" id="ballast_en13814_2005">–</td>
+          <td class="value" id="ballast_en17879_2024">–</td>
+          <td class="value" id="ballast_en1991_2010">–</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ========== Skripte ========== -->
+  <script src="/static/js/header.js"></script>
+  <script src="/static/js/konstruktionen/wrapper.js"></script>
+  <script src="/static/js/konstruktionen/tor.js"></script>
+  <script src="/static/js/konstruktionen/steher.js"></script>
+  <script src="/static/js/tooltip.js"></script>
+  <script src="/static/js/ergebnis_zerlegen.js"></script>
+  <script src="/static/js/footer.js"></script>
+  <script src="/static/js/modal.js"></script>
+
+  <!-- Dynamisches Laden der Konstruktionen -->
+  <script>
+    async function loadKonstruktion(name) {
+      const html = await fetch(`partials/konstruktionen/${name}.html`).then(r => r.text());
+      const doc = new DOMParser().parseFromString(html, "text/html");
+      const body = doc.body;
+      document.getElementById("konstruktions_container").innerHTML = body.innerHTML;
     }
 
-    window.addEventListener("message", (ev) => {
-      const msg = ev.data;
-      if (!msg || typeof msg !== "object") return;
+    async function switch_konstruktion(view) {
+      await loadKonstruktion(view);
+      document.querySelectorAll(".tab").forEach(btn =>
+        btn.setAttribute("aria-current", btn.dataset.view === view ? "page" : "")
+      );
+    }
 
-      if (msg.type === "results" && msg.source === "tor") {
-        forwardResultsToFooter(msg.payload);
-      }
-      if (msg.type === "toast") {
-        console[msg.payload?.level === "error" ? "error" : "log"](msg.payload?.text);
-      }
-    });
+    // beim Start Tor laden
+    document.addEventListener("DOMContentLoaded", () => switch_konstruktion("tor"));
   </script>
+
+  <!-- Client heartbeat (wie bisher) -->
   <script>
     (function(){
-      // stabile ID pro Tab/Fenster
       const KEY = 'windlast_client_id';
       let id = sessionStorage.getItem(KEY);
       if (!id) { id = crypto.randomUUID(); sessionStorage.setItem(KEY, id); }
 
       function send(event){
         const payload = JSON.stringify({ event, id, t: Date.now() });
-        // robust: Beacon, sonst fetch(keepalive)
         try {
           const blob = new Blob([payload], { type: 'application/json' });
           if (navigator.sendBeacon && navigator.sendBeacon('/__client_event', blob)) return;
@@ -79,17 +165,12 @@
         }).catch(()=>{});
       }
 
-      // beim Laden anmelden
       window.addEventListener('pageshow', () => send('open'), { once: true });
-
-      // alle 3s Heartbeat – falls "close" verschluckt wird
       const hb = setInterval(() => send('beat'), 3000);
-
-      // beim Schließen abmelden (mehrere Events, je nach Browser)
       const bye = () => { try { clearInterval(hb); } catch {} send('close'); };
       window.addEventListener('pagehide', bye);
       window.addEventListener('beforeunload', bye);
     })();
-    </script>
-    </body>
+  </script>
+</body>
 </html>
