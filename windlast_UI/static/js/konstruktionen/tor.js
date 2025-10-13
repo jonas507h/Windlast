@@ -122,6 +122,11 @@ async function submitTor() {
       ...readHeaderValues(),
     };
 
+    const data = await fetchJSON("/api/v1/tor/berechnen", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+
     // 1) bevorzugt: direkte Funktion (falls Footer sie anbietet)
     if (typeof window.updateFooterResults === "function") {
       window.updateFooterResults(data);
@@ -143,6 +148,3 @@ document.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById("btn-berechnen");
   if (btn) btn.addEventListener("click", submitTor);
 });
-
-// Dropdowns initialisieren, wenn das Dokument geladen ist
-document.addEventListener("DOMContentLoaded", initTorDropdowns);

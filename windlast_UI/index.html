@@ -131,6 +131,19 @@
       const doc = new DOMParser().parseFromString(html, "text/html");
       const body = doc.body;
       document.getElementById("konstruktions_container").innerHTML = body.innerHTML;
+
+      // >>> NEU: View-spezifische Init aufrufen
+      if (name === "tor") {
+        // Dropdowns füllen
+        if (typeof window.initTorDropdowns === "function") {
+          await window.initTorDropdowns();
+        }
+        // Button-Handler anbinden (weil DOM jetzt da ist)
+        const btn = document.getElementById("btn-berechnen");
+        if (btn && typeof window.submitTor === "function") {
+          btn.addEventListener("click", window.submitTor);
+        }
+      }
     }
 
     async function switch_konstruktion(view) {
