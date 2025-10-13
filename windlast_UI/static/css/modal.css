@@ -2,8 +2,9 @@
 .modal-root { 
   position: fixed; inset: 0; z-index: 1000; 
   display: none;
+  place-items: center;
 }
-.modal-root.is-open { display: block; }
+.modal-root.is-open { display: grid; }
 .modal-open { overflow: hidden; }
 
 .modal-backdrop {
@@ -12,11 +13,10 @@
 }
 
 .modal-dialog {
-  position: absolute;
+  position: relative;
   max-width: min(720px, 90vw);
   max-height: min(80vh, 1000px);
-  overflow: auto;
-  top: 10vh; left: 50%; transform: translateX(-50%);
+  overflow: hidden;
   background: var(--panel, #fff);
   color: var(--text, #111);
   border-radius: 16px;
