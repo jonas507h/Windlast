@@ -200,7 +200,7 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
                 protokoll,
                 severity=Severity.ERROR,
                 code="GRUNDKRAFT/NICHT_ZUGEORDNET",
-                text=f"Keine Zuordnung für {traversentyp.name} bei Anströmung {anstroemrichtung.name}.",
+                text=f"Keine Zuordnung für {traversentyp.value} bei Anströmung {anstroemrichtung.value}.",
                 kontext=base_ctx,
             )
             protokolliere_doc(

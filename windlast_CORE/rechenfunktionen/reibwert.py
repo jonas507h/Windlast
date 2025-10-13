@@ -134,7 +134,7 @@ def reibwert(
                         protokoll,
                         severity=Severity.HINT,
                         code="REIB/FALLBACK_NORM",
-                        text=f"Für Paarung {a.value}–{b.value} wurde auf {used_norm.name} zurückgegriffen.",
+                        text=f"Für Paarung {a.value}–{b.value} wurde auf {used_norm.value} zurückgegriffen.",
                         kontext=merge_kontext(base_ctx, {"paarung": (a.value, b.value), "norm_used": used_norm.value}),
                     )
     except KeyError as e:

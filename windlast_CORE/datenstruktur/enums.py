@@ -25,7 +25,7 @@ class Variabilitaet(str, Enum):
     VERAENDERLICH = "veränderlich"
 
 class Norm(str, Enum):
-    DIN_EN_1991_1_4_2010_12 = "EN 1991-1-4:2010-12" #Eurocode
+    DIN_EN_1991_1_4_2010_12 = "DIN EN 1991-1-4:2010-12" #Eurocode
     DIN_EN_13814_2005_06 = "DIN EN 13814:2005-06" #Fliegende Bauten
     DIN_EN_17879_2024_08 = "DIN EN 17879:2024-08" #Event-Strukturen
     DEFAULT = "Default"
