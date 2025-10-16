@@ -153,19 +153,26 @@ function getDocsForModal({ normKey, nachweis, altName=null }) {
 }
 
 function openZwischenergebnisseModal({ normKey, nachweis, altName }, docs) {
-  const header = `
-    <div class="modal-hdr">
-      <div class="modal-title">Zwischenergebnisse</div>
-      <div class="modal-subtitle">
-        ${escapeHtml(normKey)} · ${escapeHtml(nachweis)}${altName ? ` · ${escapeHtml(altName)}` : ""}
-      </div>
-    </div>
-  `;
+  // Titel exakt wie bei Meldungen bauen
+  const normName = getNormDisplayName(normKey);
+  const niceScenario = altName ? (displayAltName ? displayAltName(altName) : altName) : null;
 
-  const listHtml = renderDocsSimpleList(docs);
+  const title = altName
+    ? `Zwischenergebnisse – ${normName} (${niceScenario})`
+    : `Zwischenergebnisse – ${normName} (Hauptberechnung)`;
 
+  // Gleiches Markup: <h3 class="modal-title">…</h3>
   const wrap = document.createElement("div");
-  wrap.innerHTML = header + listHtml;
+  const h = document.createElement("h3");
+  h.textContent = title;
+  h.className = "modal-title";
+  wrap.appendChild(h);
+
+  // Liste anhängen (weiterhin mit .doc-list, damit der Tooltip greift)
+  const list = document.createElement("div");
+  list.innerHTML = renderDocsSimpleList(docs);
+  wrap.appendChild(list);
+
   Modal.open(wrap);
 }
 
@@ -174,28 +181,20 @@ function renderDocsSimpleList(docs) {
     return `<div class="muted" style="padding:0.75rem 0;">Keine Zwischenergebnisse vorhanden.</div>`;
   }
   const lis = docs.map(d => {
-    const title = escapeHtml(d?.title ?? "—");
-    const val   = formatNumber(d?.value);
-    const unit  = d?.unit ? ` ${escapeHtml(String(d.unit))}` : "";
-    // Kontext aufbereiten wie bei Fehlermeldungen:
-    let ctxText = "";
-    try {
-      const ctx = d?.context || {};
-      const ordered = orderContextEntries(ctx);
-      const parts = ordered.map(([k, v]) => {
-        const label = prettyKey(k);
-        const pretty = prettyVal(k, v);
-        return `${label}: ${pretty}`;
-      });
-      if (parts.length) ctxText = parts.join("\n");
-    } catch {
-      ctxText = JSON.stringify(d?.context || {});
-    }
+    const titleHtml = escapeHtml(d?.title ?? "—");
+    const val   = formatSig4(d?.value);
+    const unit  = d?.unit ? ` ${String(d.unit)}` : "";
+
+    // Für den Tooltip nur Rohdaten speichern: Formel + Kontext (JSON)
+    const formula = d?.formula ? String(d.formula) : "";
+    const ctxJson = escapeHtml(JSON.stringify(d?.context || {}));
+    const dataAttr = `data-formula="${escapeHtml(formula)}" data-ctx-json="${ctxJson}"`;
+
     return `
-      <li class="doc-li" ${ctxText ? `data-ctx="${escapeHtml(ctxText)}"` : ""}>
-        <span class="doc-title">${title}</span>
-        <span class="doc-sep"> — </span>
-        <span class="doc-val">${val}${unit}</span>
+      <li class="doc-li" ${dataAttr}>
+        <span class="doc-title">${titleHtml}</span>
+        <span class="doc-eq"> = </span>
+        <span class="doc-val">${escapeHtml(withUnit(val, unit))}</span>
       </li>
     `;
   }).join("");
@@ -209,6 +208,81 @@ function formatNumber(v) {
   if (!Number.isFinite(n)) return String(v);
   return n.toLocaleString(undefined, { maximumFractionDigits: 3 });
 }
+
+function formatSig4(v) {
+  // Strings wie "INF"/"-INF"/null sauber durchreichen
+  if (v === "INF" || v === "-INF" || v == null) return String(v);
+  const n = Number(v);
+  if (!Number.isFinite(n)) return String(v);
+
+  // 4 signifikante Stellen
+  // z.B. 12345 -> "1.235e+4", 0.00123456 -> "0.001235", 12.3456 -> "12.35"
+  const s = n.toPrecision(4);
+  // toPrecision kann unnötige trailing zeros geben -> minimal hübschen
+  // und "e" Schreibweise lassen wir so (ist für große/kleine Zahlen ok)
+  return s;
+}
+
+// Einheit hübsch anhängen (schmales Leerzeichen)
+function withUnit(valStr, unit) {
+  return unit ? `${valStr}\u2009${String(unit)}` : valStr;
+}
+
+function formatLabelWithSubscripts(input) {
+  if (input == null) return "";
+  const raw = String(input);
+
+  // Ersetze Muster:  X_y  oder  X_{y,z}  →  X<sub>y[,z]</sub>
+  // - X = einzelner Buchstabe (auch griechisch), bleibt wie ist
+  // - y[,z] werden kleingeschrieben (F_W → F<sub>w</sub>)
+  // - alles sauber geescaped
+  return raw.replace(
+    /([A-Za-z\u0370-\u03FF])_(\{[^}]+\}|[A-Za-z0-9,]+)(?![^<]*>)/g,
+    (_, base, sub) => {
+      const inner = sub.startsWith("{") ? sub.slice(1, -1) : sub;
+      const lowered = inner.toLowerCase();
+      return `${escapeHtml(base)}<sub>${escapeHtml(lowered)}</sub>`;
+    }
+  ).replace(/(^|[^>])_([^>]|$)/g, (m) => {
+    // übrige Unterstriche (keine Subscript-Pattern) entschärfen
+    return m.replace("_", "&#95;");
+  });
+}
+
+function formatMathWithSubSup(input) {
+  const s = String(input ?? "");
+  // Wir bauen output sicher auf: zwischen Matches wird ge-escaped,
+  // in den Matches escapen wir Base und Innenleben separat.
+  const pattern = /([A-Za-z\u0370-\u03FF0-9])_(\{[^}]+\}|[A-Za-z0-9]+)|([A-Za-z\u0370-\u03FF0-9])\^(\{[^}]+\}|[A-Za-z0-9]+)/g;
+  let out = "";
+  let last = 0;
+
+  const esc = (t) => t.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+
+  for (let m; (m = pattern.exec(s)); ) {
+    // Text vor dem Match escapen
+    out += esc(s.slice(last, m.index));
+    last = pattern.lastIndex;
+
+    if (m[1] != null) {
+      // Subscript: base _ sub
+      const base = m[1];
+      const rawSub = m[2];
+      const inner = rawSub.startsWith("{") ? rawSub.slice(1, -1) : rawSub;
+      out += esc(base) + "<sub>" + esc(inner) + "</sub>";
+    } else {
+      // Superscript: base ^ sup
+      const base = m[3];
+      const rawSup = m[4];
+      const inner = rawSup.startsWith("{") ? rawSup.slice(1, -1) : rawSup;
+      out += esc(base) + "<sup>" + esc(inner) + "</sup>";
+    }
+  }
+  // Rest anhängen
+  out += esc(s.slice(last));
+  return out;
+}
+
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));   }
 
 function buildContextTitle(ctx) {
@@ -781,12 +855,51 @@ Tooltip.register('#modal-root .messages-list li[data-ctx]', {
   delay: 80
 });
 
-// Tooltip für Zwischenergebnis-Einträge im Modal: nutzt exakt dieselbe Logik
-Tooltip.register('#modal-root .doc-list li[data-ctx]', {
-  predicate: (el) => !!el.closest('li[data-ctx]'),
+// Tooltip für Zwischenergebnis-Einträge im Modal (Node-basiert => HTML möglich)
+Tooltip.register('#modal-root .doc-list li', {
+  predicate: (el) => !!el.closest('li.doc-li'),
   content: (_ev, el) => {
-    const li = el.closest('li[data-ctx]');
-    return li ? (li.getAttribute('data-ctx') || "") : "";
+    const li = el.closest('li.doc-li');
+    if (!li) return "";
+    const formula = li.getAttribute('data-formula') || "";
+    let ctx = {};
+    try { ctx = JSON.parse(li.getAttribute('data-ctx-json') || "{}"); } catch {}
+
+    // Node zusammenbauen
+    const root = document.createElement('div');
+    root.className = 'ctx-tooltip';
+
+    // 1) Formel (falls vorhanden) – mit Tief-/Hochstellung
+    if (formula) {
+      const f = document.createElement('div');
+      f.className = 'ctx-formula';
+      f.innerHTML = formatMathWithSubSup(formula);
+      root.appendChild(f);
+    }
+
+    // 2) Kontext wie bei Fehlermeldungen
+    const ordered = orderContextEntries(ctx);
+    if (ordered.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'ctx-empty muted';
+      empty.textContent = 'Kein Kontext';
+      root.appendChild(empty);
+    } else {
+      for (const [k, v] of ordered) {
+        const row = document.createElement('div');
+        row.className = 'ctx-row';
+        const kEl = document.createElement('span');
+        kEl.className = 'ctx-k';
+        kEl.textContent = prettyKey(k) + ": ";
+        const vEl = document.createElement('span');
+        vEl.className = 'ctx-v';
+        vEl.textContent = prettyVal(k, v);
+        row.appendChild(kEl);
+        row.appendChild(vEl);
+        root.appendChild(row);
+      }
+    }
+    return root; // <- Node, Tooltip kann HTML rendern
   },
   delay: 80
 });
