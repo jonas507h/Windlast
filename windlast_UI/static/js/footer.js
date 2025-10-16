@@ -350,16 +350,72 @@ function renderDocsByWindrichtung(docs) {
     const list = groups.get(k) || [];
     const title = (k === "__none__") ? "ohne Richtung" : `Windrichtung ${k}°`;
     const countBadge = `<span class="muted" style="font-weight:400; margin-left:.5rem;">(${list.length})</span>`;
-    const lis = renderDocsListItems(list);
+    // NEU: innerhalb jeder Windrichtung nach Element-ID gruppieren
+    const elemGroupsHtml = renderDocsByElement(list);
+
     return `
       <details class="dir-group"${idx === 0 ? " open" : ""}>
         <summary class="dir-summary">${escapeHtml(title)} ${countBadge}</summary>
-        <ul class="doc-list">${lis}</ul>
+        <div class="elem-groups">
+          ${elemGroupsHtml}
+        </div>
       </details>
     `;
   }).join("");
 
   return `<div class="doc-groups">${blocks}</div>`;
+}
+
+// --- Sub-Gruppierung nach Element-ID (oder ähnliche Felder) -----------------
+// Bevorzugte Keys im Kontext: element_id > element > bauteil > komponente
+function _pickElementKey(ctx) {
+  if (!ctx) return null;
+  return (
+    ctx.element_id ??
+    ctx.element ??
+    ctx.bauteil ??
+    ctx.komponente ??
+    null
+  );
+}
+
+function groupDocsByElement(docs) {
+  const groups = new Map(); // key -> array
+  for (const d of (docs || [])) {
+    const k = _pickElementKey(d?.context);
+    const key = (k === undefined || k === null || k === "") ? "__allgemein__" : String(k);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(d);
+  }
+  // Sortierung: alphanumerisch, "__allgemein__" am Ende
+  const keys = [...groups.keys()].sort((a, b) => {
+    if (a === "__allgemein__" && b === "__allgemein__") return 0;
+    if (a === "__allgemein__") return 1;
+    if (b === "__allgemein__") return -1;
+    // try numeric if both look like numbers, else localeCompare
+    const na = Number(a), nb = Number(b);
+    const an = Number.isFinite(na), bn = Number.isFinite(nb);
+    if (an && bn) return na - nb;
+    return String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: "base" });
+  });
+  return { groups, keys };
+}
+
+function renderDocsByElement(docsInDir) {
+  const { groups, keys } = groupDocsByElement(docsInDir);
+  const blocks = keys.map((k, idx) => {
+    const list = groups.get(k) || [];
+    const title = (k === "__allgemein__") ? "allgemein" : `Element ${k}`;
+    const countBadge = `<span class="muted" style="font-weight:400; margin-left:.5rem;">(${list.length})</span>`;
+    const lis = renderDocsListItems(list);
+    return `
+      <details class="elem-group"${idx === 0 ? " open" : ""}>
+        <summary class="elem-summary">${escapeHtml(title)} ${countBadge}</summary>
+        <ul class="doc-list">${lis}</ul>
+      </details>
+    `;
+  }).join("");
+  return blocks || "";
 }
 
 // Helper
