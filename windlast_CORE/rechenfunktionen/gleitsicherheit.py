@@ -4,7 +4,7 @@ from math import inf
 from typing import Dict, Callable, Sequence, List, Optional
 from collections.abc import Sequence as _SeqABC
 
-from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_kontext, protokolliere_msg, protokolliere_doc, make_docbundle, make_protokoll, merge_protokoll
+from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_kontext, protokolliere_msg, protokolliere_doc, make_docbundle, make_protokoll, merge_protokoll, collect_docs
 from windlast_CORE.datenstruktur.enums import Norm, RechenmethodeGleiten, VereinfachungKonstruktion, Lasttyp, Variabilitaet, Severity
 from windlast_CORE.datenstruktur.konstanten import _EPS, aktuelle_konstanten
 from windlast_CORE.rechenfunktionen.sicherheitsbeiwert import sicherheitsbeiwert
@@ -18,6 +18,14 @@ from windlast_CORE.rechenfunktionen.standsicherheit_utils import (
     gleit_envelope_pro_bauelement,
 )
 from windlast_CORE.rechenfunktionen.geom3d import Vec3, vektoren_addieren, vektor_laenge
+
+def _emit_docs_with_role(*, dst_protokoll, docs, base_ctx: dict, role: str, extra_ctx: dict | None = None):
+    for bundle, ctx in docs:
+        ktx = merge_kontext(base_ctx, ctx or {})
+        ktx["rolle"] = role
+        if extra_ctx:
+            ktx.update(extra_ctx)
+        protokolliere_doc(dst_protokoll, bundle=bundle, kontext=ktx)
 
 def _validate_inputs(
     konstruktion,
@@ -107,6 +115,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
         )
         sicherheitsbeiwert_ballast = sicherheitsbeiwert(norm, ballastkraft_dummy, ist_guenstig=True, protokoll=protokoll, kontext=base_ctx)
         pool = obtain_pool(konstruktion, reset_berechnungen)
+        dir_records = []
 
         for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen, protokoll=protokoll, kontext=base_ctx):
             sub_prot = make_protokoll()
@@ -142,9 +151,38 @@ def _gleitsicherheit_DinEn13814_2005_06(
             normal_effektiv = max(0.0, total_normal_down - total_normal_up)
             reibkraft = reibwert_min * normal_effektiv
 
+            # === Zwischendocs (Aggregat der Richtung) ===
+            protokolliere_doc(
+                sub_prot,
+                bundle=make_docbundle(
+                    titel="Gleit-Aggregate (Richtung)",
+                    wert=None,
+                    einzelwerte=[
+                        ("|T|_sum", horizontal_betrag),
+                        ("N_down_sum", total_normal_down),
+                        ("N_up_sum", total_normal_up),
+                        ("μ_min", reibwert_min),
+                        ("R = μ*N_eff", reibkraft),
+                    ],
+                    quelle_einzelwerte=["intern"],
+                ),
+                kontext={"nachweis": "GLEIT", "doc_type": "dir_aggregate", "windrichtung_deg": winkel},
+            )
+
             if horizontal_betrag > _EPS:
                 sicherheit = reibkraft / horizontal_betrag
-                sicherheit_min_global = min(dir_min_sicherheit, sicherheit)
+                dir_min_sicherheit = min(dir_min_sicherheit, sicherheit)
+                protokolliere_doc(
+                    sub_prot,
+                    bundle=make_docbundle(
+                        titel="Richtungs-Sicherheit S_dir",
+                        wert=sicherheit,
+                        formel="S = R / T",
+                        formelzeichen=["R", "T"],
+                        quelle_formel="---",
+                    ),
+                    kontext={"nachweis": "GLEIT", "doc_type": "dir_sicherheit", "windrichtung_deg": winkel},
+                )
 
             if reibwert_min <= _EPS:
                 if horizontal_betrag > _EPS:
@@ -157,16 +195,58 @@ def _gleitsicherheit_DinEn13814_2005_06(
             if ballastkraft > dir_ballast_max:
                 dir_ballast_max = ballastkraft
 
-        # Entscheidung & Merge nach Abschluss der Richtung
-        if dir_min_sicherheit < sicherheit_min_global:
-            merge_protokoll(sub_prot, protokoll, only_errors=False)  # Gewinner: alles
-            sicherheit_min_global = dir_min_sicherheit
-            ballast_erforderlich_max = dir_ballast_max
-        else:
-            merge_protokoll(sub_prot, protokoll, only_errors=True)   # Verlierer: nur ERROR
+            # Ballast-Doc (Richtung)
+            protokolliere_doc(
+                sub_prot,
+                bundle=make_docbundle(
+                    titel="Richtungs-Ballast ΔN_down,erf_dir",
+                    wert=ballastkraft,
+                    formel="ΔN_down,erf = T/μ + ΣN_up − ΣN_down",
+                    formelzeichen=["T", "μ", "N_up", "N_down"],
+                    quelle_formel="---",
+                ),
+                kontext={"nachweis": "GLEIT", "doc_type": "dir_ballast", "windrichtung_deg": winkel},
+            )
 
+            # Record ablegen (WICHTIG: innerhalb der Schleife!)
+            dir_records.append({
+                "winkel_deg": winkel,
+                "dir_min_sicherheit": dir_min_sicherheit,
+                "dir_ballast_max": dir_ballast_max,
+                "docs": collect_docs(sub_prot),
+                "sub_prot": sub_prot,
+            })
+
+        # --- Globale Entscheidung & Rollenvergabe ---
+        if not dir_records:
+            return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
+
+        winner_idx = min(range(len(dir_records)), key=lambda i: dir_records[i]["dir_min_sicherheit"])
+        winner = dir_records[winner_idx]
+
+        # Messages: Gewinner alles, Verlierer nur Errors
+        for i, rec in enumerate(dir_records):
+            if i == winner_idx:
+                merge_protokoll(rec["sub_prot"], protokoll, only_errors=False)
+            else:
+                merge_protokoll(rec["sub_prot"], protokoll, only_errors=True)
+
+        # Docs mit Rollen ausspielen
+        for i, rec in enumerate(dir_records):
+            role = "entscheidungsrelevant" if i == winner_idx else "irrelevant"
+            _emit_docs_with_role(
+                dst_protokoll=protokoll,
+                docs=rec["docs"],
+                base_ctx=merge_kontext(base_ctx, {"nachweis": "GLEIT", "windrichtung_deg": rec["winkel_deg"]}),
+                role=role,
+            )
+
+        sicherheit_min_global = dir_records[winner_idx]["dir_min_sicherheit"]
+        ballast_erforderlich_max = dir_records[winner_idx]["dir_ballast_max"]
+
+        # Endwerte (relevant)
         erdbeschleunigung = aktuelle_konstanten().erdbeschleunigung
-        ballast_kg = ballast_erforderlich_max / erdbeschleunigung  # in N -> in kg
+        ballast_kg = ballast_erforderlich_max / erdbeschleunigung
 
         protokolliere_doc(
             protokoll,
@@ -177,7 +257,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
                 formelzeichen=["R", "T"],
                 quelle_formel="---",
             ),
-            kontext=base_ctx,
+            kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "rolle": "relevant", "windrichtung_deg": winner["winkel_deg"]}),
         )
         protokolliere_doc(
             protokoll,
@@ -188,7 +268,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
                 formelzeichen=["T", "μ", "N_up", "N_down"],
                 quelle_formel="---",
             ),
-            kontext=base_ctx,
+            kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "rolle": "relevant", "windrichtung_deg": winner["winkel_deg"]}),
         )
 
         return [Zwischenergebnis(wert=sicherheit_min_global), Zwischenergebnis(wert=ballast_kg)]
@@ -241,6 +321,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
         )
         sicherheitsbeiwert_ballast = sicherheitsbeiwert(norm, ballastkraft_dummy, ist_guenstig=True, protokoll=protokoll, kontext=base_ctx)
         pool = obtain_pool(konstruktion, reset_berechnungen)
+        dir_records = []
 
         for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen, protokoll=protokoll, kontext=base_ctx):
             sub_prot = make_protokoll()
@@ -276,9 +357,38 @@ def _gleitsicherheit_DinEn17879_2024_08(
             normal_effektiv = max(0.0, total_normal_down - total_normal_up)
             reibkraft = reibwert_min * normal_effektiv
 
+            # === Zwischendocs (Aggregat der Richtung) ===
+            protokolliere_doc(
+                sub_prot,
+                bundle=make_docbundle(
+                    titel="Gleit-Aggregate (Richtung)",
+                    wert=None,
+                    einzelwerte=[
+                        ("|T|_sum", horizontal_betrag),
+                        ("N_down_sum", total_normal_down),
+                        ("N_up_sum", total_normal_up),
+                        ("μ_min", reibwert_min),
+                        ("R = μ*N_eff", reibkraft),
+                    ],
+                    quelle_einzelwerte=["intern"],
+                ),
+                kontext={"nachweis": "GLEIT", "doc_type": "dir_aggregate", "windrichtung_deg": winkel},
+            )
+
             if horizontal_betrag > _EPS:
                 sicherheit = reibkraft / horizontal_betrag
-                sicherheit_min_global = min(dir_min_sicherheit, sicherheit)
+                dir_min_sicherheit = min(dir_min_sicherheit, sicherheit)
+                protokolliere_doc(
+                    sub_prot,
+                    bundle=make_docbundle(
+                        titel="Richtungs-Sicherheit S_dir",
+                        wert=sicherheit,
+                        formel="S = R / T",
+                        formelzeichen=["R", "T"],
+                        quelle_formel="---",
+                    ),
+                    kontext={"nachweis": "GLEIT", "doc_type": "dir_sicherheit", "windrichtung_deg": winkel},
+                )
 
             if reibwert_min <= _EPS:
                 if horizontal_betrag > _EPS:
@@ -291,16 +401,58 @@ def _gleitsicherheit_DinEn17879_2024_08(
             if ballastkraft > dir_ballast_max:
                 dir_ballast_max = ballastkraft
 
-        # Entscheidung & Merge nach Abschluss der Richtung
-        if dir_min_sicherheit < sicherheit_min_global:
-            merge_protokoll(sub_prot, protokoll, only_errors=False)  # Gewinner: alles
-            sicherheit_min_global = dir_min_sicherheit
-            ballast_erforderlich_max = dir_ballast_max
-        else:
-            merge_protokoll(sub_prot, protokoll, only_errors=True)   # Verlierer: nur ERROR
+            # Ballast-Doc (Richtung)
+            protokolliere_doc(
+                sub_prot,
+                bundle=make_docbundle(
+                    titel="Richtungs-Ballast ΔN_down,erf_dir",
+                    wert=ballastkraft,
+                    formel="ΔN_down,erf = T/μ + ΣN_up − ΣN_down",
+                    formelzeichen=["T", "μ", "N_up", "N_down"],
+                    quelle_formel="---",
+                ),
+                kontext={"nachweis": "GLEIT", "doc_type": "dir_ballast", "windrichtung_deg": winkel},
+            )
 
+            # Record ablegen (WICHTIG: innerhalb der Schleife!)
+            dir_records.append({
+                "winkel_deg": winkel,
+                "dir_min_sicherheit": dir_min_sicherheit,
+                "dir_ballast_max": dir_ballast_max,
+                "docs": collect_docs(sub_prot),
+                "sub_prot": sub_prot,
+            })
+
+        # --- Globale Entscheidung & Rollenvergabe ---
+        if not dir_records:
+            return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
+
+        winner_idx = min(range(len(dir_records)), key=lambda i: dir_records[i]["dir_min_sicherheit"])
+        winner = dir_records[winner_idx]
+
+        # Messages: Gewinner alles, Verlierer nur Errors
+        for i, rec in enumerate(dir_records):
+            if i == winner_idx:
+                merge_protokoll(rec["sub_prot"], protokoll, only_errors=False)
+            else:
+                merge_protokoll(rec["sub_prot"], protokoll, only_errors=True)
+
+        # Docs mit Rollen ausspielen
+        for i, rec in enumerate(dir_records):
+            role = "entscheidungsrelevant" if i == winner_idx else "irrelevant"
+            _emit_docs_with_role(
+                dst_protokoll=protokoll,
+                docs=rec["docs"],
+                base_ctx=merge_kontext(base_ctx, {"nachweis": "GLEIT", "windrichtung_deg": rec["winkel_deg"]}),
+                role=role,
+            )
+
+        sicherheit_min_global = dir_records[winner_idx]["dir_min_sicherheit"]
+        ballast_erforderlich_max = dir_records[winner_idx]["dir_ballast_max"]
+
+        # Endwerte (relevant)
         erdbeschleunigung = aktuelle_konstanten().erdbeschleunigung
-        ballast_kg = ballast_erforderlich_max / erdbeschleunigung  # in N -> in kg
+        ballast_kg = ballast_erforderlich_max / erdbeschleunigung
 
         protokolliere_doc(
             protokoll,
@@ -311,7 +463,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
                 formelzeichen=["R", "T"],
                 quelle_formel="---",
             ),
-            kontext=base_ctx,
+            kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "rolle": "relevant", "windrichtung_deg": winner["winkel_deg"]}),
         )
         protokolliere_doc(
             protokoll,
@@ -322,7 +474,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
                 formelzeichen=["T", "μ", "N_up", "N_down"],
                 quelle_formel="---",
             ),
-            kontext=base_ctx,
+            kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "rolle": "relevant", "windrichtung_deg": winner["winkel_deg"]}),
         )
 
         return [Zwischenergebnis(wert=sicherheit_min_global), Zwischenergebnis(wert=ballast_kg)]

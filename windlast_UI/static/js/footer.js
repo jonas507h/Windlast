@@ -93,6 +93,124 @@ const CONTEXT_BLACKLIST_PREFIXES = [
   /^internal_/,
 ];
 
+const RESULTS_SELECTOR = "#results"; // ggf. anpassen an euren Container
+const CELL_SELECTOR = 'td[data-norm-key][data-nachweis], td.res-kipp, td.res-gleit, td.res-abhebe';
+
+function wireZwischenergebnisseUI() {
+  const root = document.querySelector(".results-table"); // <— statt #results
+  if (!root) { console.warn("[ZwRes] .results-table nicht gefunden"); return; }
+
+  root.addEventListener("click", (e) => {
+    const td = e.target.closest('td[data-norm-key][data-nachweis], td[data-alt][data-nachweis][data-norm-key]');
+    if (!td) return;
+    // Debug:
+    console.log("[ZwRes] Klick auf Ergebniszelle", td.dataset);
+    const ctx = resolveCellContext(td);
+    if (!ctx) { console.warn("[ZwRes] Kein Kontext ermittelbar"); return; }
+    const docs = getDocsForModal(ctx);
+    openZwischenergebnisseModal(ctx, docs);
+  }, true);
+}
+
+function wireZwischenergebnisseUIOnce() {
+  if (window.__zwresSetup) return;
+  window.__zwresSetup = true;
+  wireZwischenergebnisseUI(); // deine Funktion mit addEventListener auf #results
+}
+
+function onResultCellClick(e) {
+  const td = e.target.closest(CELL_SELECTOR);
+  if (!td) return;
+  const ctx = resolveCellContext(td);
+  if (!ctx) return;
+
+  const docs = getDocsForModal(ctx);
+  openZwischenergebnisseModal(ctx, docs);
+}
+
+function resolveCellContext(td) {
+  const normKey = td.dataset.normKey || td.closest('[data-norm-key]')?.dataset.normKey;
+  let nachweis = td.dataset.nachweis;
+  let altName  = td.dataset.alt ?? null;
+
+  if (!nachweis) {
+    if (td.classList.contains('res-kipp'))  nachweis = "KIPP";
+    if (td.classList.contains('res-gleit')) nachweis = "GLEIT";
+    if (td.classList.contains('res-abhebe')) nachweis = "ABHEB";
+  }
+  if (!altName) {
+    altName = td.closest('tr[data-alt]')?.dataset.alt ?? null;
+  }
+  if (!normKey || !nachweis) return null;
+  return { normKey, nachweis, altName };
+}
+
+function getDocsForModal({ normKey, nachweis, altName=null }) {
+  const norm = ResultsVM?.payload?.normen?.[normKey] || {};
+  const src = altName ? (norm.alternativen?.[altName]?.docs || []) : (norm.docs || []);
+  // Filter NUR auf diesen Nachweis, Reihenfolge egal
+  return src.filter(d => (d?.context?.nachweis ?? null) === nachweis);
+}
+
+function openZwischenergebnisseModal({ normKey, nachweis, altName }, docs) {
+  const header = `
+    <div class="modal-hdr">
+      <div class="modal-title">Zwischenergebnisse</div>
+      <div class="modal-subtitle">
+        ${escapeHtml(normKey)} · ${escapeHtml(nachweis)}${altName ? ` · ${escapeHtml(altName)}` : ""}
+      </div>
+    </div>
+  `;
+
+  const listHtml = renderDocsSimpleList(docs);
+
+  const wrap = document.createElement("div");
+  wrap.innerHTML = header + listHtml;
+  Modal.open(wrap);
+}
+
+function renderDocsSimpleList(docs) {
+  if (!docs || !docs.length) {
+    return `<div class="muted" style="padding:0.75rem 0;">Keine Zwischenergebnisse vorhanden.</div>`;
+  }
+  const lis = docs.map(d => {
+    const title = escapeHtml(d?.title ?? "—");
+    const val   = formatNumber(d?.value);
+    // Kontext als kompakter Text für nativen Tooltip:
+    const ctxTip = buildContextTitle(d?.context || {});
+    return `
+      <li class="doc-li" title="${escapeHtml(ctxTip)}">
+        <span class="doc-title">${title}</span>
+        <span class="doc-sep"> — </span>
+        <span class="doc-val">${val}</span>
+      </li>
+    `;
+  }).join("");
+
+  return `<ul class="doc-list">${lis}</ul>`;
+}
+
+function formatNumber(v) {
+  if (v === "INF" || v === "-INF" || v == null) return String(v);
+  const n = Number(v);
+  if (!Number.isFinite(n)) return String(v);
+  return n.toLocaleString(undefined, { maximumFractionDigits: 3 });
+}
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));   }
+
+function buildContextTitle(ctx) {
+  // sortiere Kernfelder zuerst (Analog zu euren Message-Kontext-Regeln)
+  const order = ["szenario","nachweis","doc_type","windrichtung_deg","element_id","segment_index","achse_index","rolle","ref_nachweis"];
+  const keys = Object.keys(ctx || {});
+  keys.sort((a,b) => {
+    const ia = order.indexOf(a); const ib = order.indexOf(b);
+    if (ia !== -1 || ib !== -1) return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+    return a.localeCompare(b);
+  });
+  const parts = keys.map(k => `${k}: ${String(ctx[k])}`);
+  return parts.join(" · ");
+}
+
 // Helper
 function isBlacklistedKey(k) {
   if (!k) return false;
@@ -223,6 +341,16 @@ function formatBallast(val_kg) {
 function setBallastCell(id, val) {
   const el = document.getElementById(id);
   if (!el) return;
+  try {
+    const m = /^([a-z]+)_(.+)$/.exec(id);
+    if (m) {
+      const suf = m[2];
+      const normKey = Object.entries(NORM_ID).find(([,v]) => v === suf)?.[0] || null;
+      if (normKey) el.dataset.normKey = normKey;
+      el.dataset.nachweis = "BALLAST";
+      if (el.dataset.alt) delete el.dataset.alt;
+    }
+  } catch {}
   el.textContent = formatBallast(val);
   el.title = "";
 }
@@ -245,6 +373,25 @@ function setCell(id, val) {
       el.title = "";
     }
   }
+
+  
+  // Kontext für den Klick-Handler setzen (normKey + nachweis)
+  try {
+    const m = /^([a-z]+)_(.+)$/.exec(id); // z.B. "kipp_en13814_2005"
+    if (m) {
+      const key = m[1];               // kipp|gleit|abhebe|ballast
+      const suf = m[2];               // en13814_2005 | en17879_2024 | en1991_2010
+      const normKey = Object.entries(NORM_ID).find(([,v]) => v === suf)?.[0] || null;
+      if (normKey) el.dataset.normKey = normKey;
+      el.dataset.nachweis =
+        key === "ballast" ? "BALLAST" :
+        key === "kipp"    ? "KIPP"    :
+        key === "gleit"   ? "GLEIT"   :
+        key === "abhebe"  ? "ABHEB"   : "";
+      // Hauptzellen haben kein alt:
+      if (el.dataset.alt) delete el.dataset.alt;
+    }
+  } catch {}
 
   // Klasse setzen (grün/rot)
   klassifizierung_anwenden(el, sicherheit_klassifizieren(val));
@@ -350,6 +497,16 @@ function renderAlternativenBlocksVM(vm) {
         const altName = (altLists[normKey] && altLists[normKey][i]) ? altLists[normKey][i] : null;
         const v = altName ? vm.getAltValue(normKey, altName, row.key) : undefined;
 
+        // data-* für Klick-Handler
+        td.dataset.normKey  = normKey;
+        td.dataset.nachweis =
+          row.key === "ballast" ? "BALLAST" :
+          row.key === "kipp"    ? "KIPP"    :
+          row.key === "gleit"   ? "GLEIT"   :
+          row.key === "abhebe"  ? "ABHEB"   : "";
+        if (altName) td.dataset.alt = altName;
+        else delete td.dataset.alt;
+
         if (row.isSafety) _setSafetyOnTdAlt(td, v);
         else _setBallastOnTdAlt(td, v);
 
@@ -390,6 +547,8 @@ function updateFooter(payload) {
 
   // Alternativen rendern (neu: auf Basis der VM)
   renderAlternativenBlocksVM(ResultsVM);
+
+  wireZwischenergebnisseUIOnce();
 }
 
 window.addEventListener("message", (ev) => {

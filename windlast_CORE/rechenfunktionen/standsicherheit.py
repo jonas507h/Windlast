@@ -14,10 +14,10 @@ from windlast_CORE.datenstruktur.enums import (
 )
 from windlast_CORE.datenstruktur.zeit import Dauer
 from windlast_CORE.datenstruktur.standsicherheit_ergebnis import (
-    StandsicherheitErgebnis, NormErgebnis, SafetyValue, Message, Meta,
+    StandsicherheitErgebnis, NormErgebnis, SafetyValue, Message, Meta, NormStatus, NormDetails
 )
 from windlast_CORE.rechenfunktionen.staudruecke import staudruecke  # type: ignore
-from windlast_CORE.datenstruktur.zwischenergebnis import make_protokoll, collect_messages, merge_kontext, Protokoll
+from windlast_CORE.datenstruktur.zwischenergebnis import make_protokoll, collect_messages, merge_kontext, Protokoll, collect_docs
 
 def dataclass_to_json(obj):
     """
@@ -298,8 +298,21 @@ def standsicherheit(
         except Exception:
             pass
 
+        
+        # NEU: Docs einsammeln und in details hängen
+        docs = []
+        try:
+            docs = collect_docs(prot)  # Liste von (bundle, ctx)
+        except Exception:
+            docs = []
+
         status = NormStatus.ERROR if any(m.severity == Severity.ERROR for m in reasons_all) else NormStatus.CALCULATED
-        return NormErgebnis(status=status, reasons=reasons_all, werte=werte, alternativen=alternativen)
+        details = NormDetails()  # falls du bisher None gelassen hast
+        details.notes = details.notes or []
+        details.windrichtungen = details.windrichtungen or []
+        details.docs = docs
+
+        return NormErgebnis(status=status, reasons=reasons_all, werte=werte, alternativen=alternativen, details=details)
 
     # --------------------------
     # DIN EN 13814:2005-06

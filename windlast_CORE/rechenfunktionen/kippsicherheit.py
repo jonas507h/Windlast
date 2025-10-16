@@ -4,7 +4,7 @@ from math import inf
 from typing import Dict, Callable, Sequence, List, Optional, Tuple, Iterable
 from collections.abc import Sequence as _SeqABC
 
-from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_kontext, protokolliere_msg, protokolliere_doc, make_docbundle, merge_protokoll, make_protokoll
+from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_kontext, protokolliere_msg, protokolliere_doc, make_docbundle, merge_protokoll, make_protokoll, collect_docs
 from windlast_CORE.datenstruktur.enums import Norm, RechenmethodeKippen, VereinfachungKonstruktion, Lasttyp, Variabilitaet, Severity
 from windlast_CORE.datenstruktur.konstanten import _EPS, aktuelle_konstanten
 from windlast_CORE.datenstruktur.kraefte import Kraefte
@@ -18,6 +18,18 @@ from windlast_CORE.rechenfunktionen.standsicherheit_utils import (
     get_or_create_lastset,
     kipp_envelope_pro_bauelement,
 )
+
+def _emit_docs_with_role(*, dst_protokoll, docs, base_ctx: dict, role: str, extra_ctx: dict | None = None):
+    """
+    Schreibt eine Menge (bundle, ctx)-Docs ins Zielprotokoll und setzt/merged Rolle + Kontext.
+    'docs' ist das Ergebnis von collect_docs(sub_prot), also Liste[Tuple[bundle, ctx]].
+    """
+    for bundle, ctx in docs:
+        ktx = merge_kontext(base_ctx, ctx)
+        ktx["rolle"] = role
+        if extra_ctx:
+            ktx.update(extra_ctx)
+        protokolliere_doc(dst_protokoll, bundle=bundle, kontext=ktx)
 
 def _validate_inputs(
     konstruktion,
@@ -116,6 +128,7 @@ def _kippsicherheit_DinEn13814_2005_06(
         ballast_erforderlich_max = 0.0
 
         pool = obtain_pool(konstruktion, reset_berechnungen)
+        dir_records = []  # (winkel, richtung, min_sicherheit, ballast_max)
 
         for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen, protokoll=protokoll, kontext=base_ctx):
             sub_prot = make_protokoll()
@@ -136,9 +149,12 @@ def _kippsicherheit_DinEn13814_2005_06(
             # Richtungs-lokale Aggregation
             dir_min_sicherheit = inf
             dir_ballast_max = 0.0 
+            best_achse_idx = None
+            achse_idx = -1
 
             # 2c) Für jede Achse: Envelope je Bauelement → summieren → η bilden
             for achse in achsen:
+                achse_idx += 1
                 total_kipp = 0.0
                 total_stand = 0.0
 
@@ -153,8 +169,40 @@ def _kippsicherheit_DinEn13814_2005_06(
                 else:
                     sicherheit = total_stand / total_kipp
 
+                protokolliere_doc(
+                    sub_prot,
+                    bundle=make_docbundle(
+                        titel="Momente je Achse",
+                        wert=None,
+                        formel=None,
+                        einzelwerte=[("M_stand", total_stand), ("M_kipp", total_kipp)],
+                        quelle_einzelwerte=["intern"]
+                    ),
+                    kontext=merge_kontext(base_ctx, {
+                        "nachweis": "KIPP",
+                        "doc_type": "axis_momente",
+                        "achse_index": achse_idx,
+                    }),
+                )
+                protokolliere_doc(
+                    sub_prot,
+                    bundle=make_docbundle(
+                        titel="Achs-Sicherheit S_achse",
+                        wert=sicherheit,
+                        formel="S = M_stand / M_kipp",
+                        formelzeichen=["M_stand", "M_kipp"],
+                        quelle_formelzeichen=["intern"]
+                    ),
+                    kontext=merge_kontext(base_ctx, {
+                        "nachweis": "KIPP",
+                        "doc_type": "axis_sicherheit",
+                        "achse_index": achse_idx,
+                    }),
+                )
+
                 if sicherheit < dir_min_sicherheit:
                     dir_min_sicherheit = sicherheit
+                    best_achse_idx = achse_idx
 
                 moment_defizit = max(0.0, total_kipp - total_stand)
 
@@ -177,17 +225,64 @@ def _kippsicherheit_DinEn13814_2005_06(
                 if ballastkraft > dir_ballast_max:
                     dir_ballast_max = ballastkraft
 
-        # >>> Nach Abschluss der Achsen: Entscheidung & Merge
-        if dir_min_sicherheit < sicherheit_min_global:
-            # Gewinner-Richtung: komplettes Sub-Protokoll übernehmen
-            merge_protokoll(sub_prot, protokoll, only_errors=False)
-            sicherheit_min_global = dir_min_sicherheit
-            if dir_ballast_max > ballast_erforderlich_max:
-                ballast_erforderlich_max = dir_ballast_max
-        else:
-            # Verworfen: nur Fehler übernehmen
-            merge_protokoll(sub_prot, protokoll, only_errors=True)
+            dir_records.append({
+                "winkel_deg": winkel,
+                "dir_min_sicherheit": dir_min_sicherheit,
+                "dir_ballast_max": dir_ballast_max,
+                "best_achse_idx": best_achse_idx,
+                "docs": collect_docs(sub_prot),   # Liste[(bundle, ctx)]
+                "sub_prot": sub_prot,             # nur für Messages
+            })
 
+        # --- Globale Entscheidung & Rollenvergabe ---
+        if not dir_records:
+            # defensive: nichts gerechnet → Exit wie bisher
+            return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
+
+        # 1) Gewinner-Richtung finden (minimale Sicherheit)
+        winner_idx = min(range(len(dir_records)), key=lambda i: dir_records[i]["dir_min_sicherheit"])
+        winner = dir_records[winner_idx]
+
+        # 2) Messages: wie gehabt – Gewinner komplett, Verlierer nur Errors
+        for i, rec in enumerate(dir_records):
+            sub_prot = rec["sub_prot"]
+            if i == winner_idx:
+                merge_protokoll(sub_prot, protokoll, only_errors=False)
+            else:
+                merge_protokoll(sub_prot, protokoll, only_errors=True)
+
+        # 3) Docs (neu): mit Rollen ins Hauptprotokoll heben
+        for i, rec in enumerate(dir_records):
+            role_block = "irrelevant" if i != winner_idx else "entscheidungsrelevant"  # Default pro Richtung
+            # alle Docs der Richtung übernehmen – Grundrolle je Richtung
+            _emit_docs_with_role(
+                dst_protokoll=protokoll,
+                docs=rec["docs"],
+                base_ctx=merge_kontext(base_ctx, {"nachweis": "KIPP", "windrichtung_deg": rec["winkel_deg"]}),
+                role=role_block,
+            )
+            # Gewinner-Achse in Gewinner-Richtung aufwerten → 'relevant'
+            if i == winner_idx:
+                best_ax = rec["best_achse_idx"]
+                if best_ax is not None:
+                    for bundle, ctx in rec["docs"]:
+                        if ctx.get("doc_type") in ("axis_sicherheit", "axis_momente") and ctx.get("achse_index") == best_ax:
+                            # diesen Eintrag explizit nochmal als 'relevant' schreiben (UI darf dupl.-frei konsolidieren)
+                            protokolliere_doc(
+                                protokoll,
+                                bundle=bundle,
+                                kontext=merge_kontext(base_ctx, {
+                                    "nachweis": "KIPP",
+                                    "windrichtung_deg": rec["winkel_deg"],
+                                    "achse_index": best_ax,
+                                    "doc_type": ctx.get("doc_type"),
+                                    "rolle": "relevant",
+                                }),
+                            )
+
+        # 4) Globale Ergebnis-Docs (beste Richtung) kennzeichnen
+        sicherheit_min_global = winner["dir_min_sicherheit"]
+        ballast_erforderlich_max = winner["dir_ballast_max"]
         erdbeschleunigung = aktuelle_konstanten().erdbeschleunigung
         ballast_kg = ballast_erforderlich_max / erdbeschleunigung
 
@@ -201,7 +296,7 @@ def _kippsicherheit_DinEn13814_2005_06(
                 formelzeichen=["M_stand", "M_kipp"],
                 quelle_formelzeichen=["---"],
             ),
-            kontext=base_ctx,
+            kontext=merge_kontext(base_ctx, {"nachweis": "KIPP", "rolle": "relevant", "windrichtung_deg": winner["winkel_deg"]}),
         )
         protokolliere_doc(
             protokoll,
@@ -213,7 +308,7 @@ def _kippsicherheit_DinEn13814_2005_06(
                 formelzeichen=["M_kipp", "M_stand", "γ_g", "m_stand,1N", "g"],
                 quelle_formelzeichen=["---"],
             ),
-            kontext=base_ctx,
+            kontext=merge_kontext(base_ctx, {"nachweis": "KIPP", "rolle": "relevant", "windrichtung_deg": winner["winkel_deg"]}),
         )
 
         return [Zwischenergebnis(wert=sicherheit_min_global), Zwischenergebnis(wert=ballast_kg)]
@@ -243,7 +338,7 @@ def _kippsicherheit_DinEn17879_2024_08(
 ) -> List[Zwischenergebnis]:
     base_ctx = merge_kontext(kontext, {
         "funktion": "_kippsicherheit",
-        "norm": "DIN_EN_13814_2005_06",
+        "norm": "DIN_EN_17879_2024_08",
         "methode": methode.name,
     })
 
@@ -257,7 +352,7 @@ def _kippsicherheit_DinEn17879_2024_08(
 
     if methode == RechenmethodeKippen.STANDARD:
         # 1) Eckpunkte sammeln → Kippachsen bestimmen
-        achsen = sammle_kippachsen(konstruktion)
+        achsen = sammle_kippachsen(konstruktion, protokoll=protokoll, kontext=base_ctx)
         if not achsen:
             return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
         # 1.1) Grundgrößen für Ballast bestimmen
@@ -276,6 +371,7 @@ def _kippsicherheit_DinEn17879_2024_08(
         ballast_erforderlich_max = 0.0
 
         pool = obtain_pool(konstruktion, reset_berechnungen)
+        dir_records = []  # (winkel, richtung, min_sicherheit, ballast_max)
 
         for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen, protokoll=protokoll, kontext=base_ctx):
             sub_prot = make_protokoll()
@@ -296,9 +392,12 @@ def _kippsicherheit_DinEn17879_2024_08(
             # Richtungs-lokale Aggregation
             dir_min_sicherheit = inf           # <<< NEU: kleinstes S dieser Richtung
             dir_ballast_max = 0.0              # <<< NEU: größter Ballast dieser Richtung
+            best_achse_idx = None
+            achse_idx = -1
 
             # 2c) Für jede Achse: Envelope je Bauelement → summieren → η bilden
             for achse in achsen:
+                achse_idx += 1
                 total_kipp = 0.0
                 total_stand = 0.0
 
@@ -313,9 +412,41 @@ def _kippsicherheit_DinEn17879_2024_08(
                 else:
                     sicherheit = total_stand / total_kipp
 
+                protokolliere_doc(
+                    sub_prot,
+                    bundle=make_docbundle(
+                        titel="Momente je Achse",
+                        wert=None,
+                        formel=None,
+                        einzelwerte=[("M_stand", total_stand), ("M_kipp", total_kipp)],
+                        quelle_einzelwerte=["intern"]
+                    ),
+                    kontext=merge_kontext(base_ctx, {
+                        "nachweis": "KIPP",
+                        "doc_type": "axis_momente",
+                        "achse_index": achse_idx,
+                    }),
+                )
+                protokolliere_doc(
+                    sub_prot,
+                    bundle=make_docbundle(
+                        titel="Achs-Sicherheit S_achse",
+                        wert=sicherheit,
+                        formel="S = M_stand / M_kipp",
+                        formelzeichen=["M_stand", "M_kipp"],
+                        quelle_formelzeichen=["intern"]
+                    ),
+                    kontext=merge_kontext(base_ctx, {
+                        "nachweis": "KIPP",
+                        "doc_type": "axis_sicherheit",
+                        "achse_index": achse_idx,
+                    }),
+                )
+
                 # Richtungs-Minimum aktualisieren
                 if sicherheit < dir_min_sicherheit:
                     dir_min_sicherheit = sicherheit
+                    best_achse_idx = achse_idx
 
                 moment_defizit = max(0.0, total_kipp - total_stand)
 
@@ -338,17 +469,64 @@ def _kippsicherheit_DinEn17879_2024_08(
                 if ballastkraft > dir_ballast_max:
                     dir_ballast_max = ballastkraft
 
-        # >>> Nach Abschluss der Achsen: Entscheidung & Merge
-        if dir_min_sicherheit < sicherheit_min_global:
-            # Gewinner-Richtung: komplettes Sub-Protokoll übernehmen
-            merge_protokoll(sub_prot, protokoll, only_errors=False)
-            sicherheit_min_global = dir_min_sicherheit
-            if dir_ballast_max > ballast_erforderlich_max:
-                ballast_erforderlich_max = dir_ballast_max
-        else:
-            # Verworfen: nur Fehler übernehmen
-            merge_protokoll(sub_prot, protokoll, only_errors=True)
+            dir_records.append({
+                "winkel_deg": winkel,
+                "dir_min_sicherheit": dir_min_sicherheit,
+                "dir_ballast_max": dir_ballast_max,
+                "best_achse_idx": best_achse_idx,
+                "docs": collect_docs(sub_prot),   # Liste[(bundle, ctx)]
+                "sub_prot": sub_prot,             # nur für Messages
+            })
 
+        # --- Globale Entscheidung & Rollenvergabe ---
+        if not dir_records:
+            # defensive: nichts gerechnet → Exit wie bisher
+            return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
+
+        # 1) Gewinner-Richtung finden (minimale Sicherheit)
+        winner_idx = min(range(len(dir_records)), key=lambda i: dir_records[i]["dir_min_sicherheit"])
+        winner = dir_records[winner_idx]
+
+        # 2) Messages: wie gehabt – Gewinner komplett, Verlierer nur Errors
+        for i, rec in enumerate(dir_records):
+            sub_prot = rec["sub_prot"]
+            if i == winner_idx:
+                merge_protokoll(sub_prot, protokoll, only_errors=False)
+            else:
+                merge_protokoll(sub_prot, protokoll, only_errors=True)
+
+        # 3) Docs (neu): mit Rollen ins Hauptprotokoll heben
+        for i, rec in enumerate(dir_records):
+            role_block = "irrelevant" if i != winner_idx else "entscheidungsrelevant"  # Default pro Richtung
+            # alle Docs der Richtung übernehmen – Grundrolle je Richtung
+            _emit_docs_with_role(
+                dst_protokoll=protokoll,
+                docs=rec["docs"],
+                base_ctx=merge_kontext(base_ctx, {"nachweis": "KIPP", "windrichtung_deg": rec["winkel_deg"]}),
+                role=role_block,
+            )
+            # Gewinner-Achse in Gewinner-Richtung aufwerten → 'relevant'
+            if i == winner_idx:
+                best_ax = rec["best_achse_idx"]
+                if best_ax is not None:
+                    for bundle, ctx in rec["docs"]:
+                        if ctx.get("doc_type") in ("axis_sicherheit", "axis_momente") and ctx.get("achse_index") == best_ax:
+                            # diesen Eintrag explizit nochmal als 'relevant' schreiben (UI darf dupl.-frei konsolidieren)
+                            protokolliere_doc(
+                                protokoll,
+                                bundle=bundle,
+                                kontext=merge_kontext(base_ctx, {
+                                    "nachweis": "KIPP",
+                                    "windrichtung_deg": rec["winkel_deg"],
+                                    "achse_index": best_ax,
+                                    "doc_type": ctx.get("doc_type"),
+                                    "rolle": "relevant",
+                                }),
+                            )
+
+        # 4) Globale Ergebnis-Docs (beste Richtung) kennzeichnen
+        sicherheit_min_global = winner["dir_min_sicherheit"]
+        ballast_erforderlich_max = winner["dir_ballast_max"]
         erdbeschleunigung = aktuelle_konstanten().erdbeschleunigung
         ballast_kg = ballast_erforderlich_max / erdbeschleunigung
 
@@ -362,7 +540,7 @@ def _kippsicherheit_DinEn17879_2024_08(
                 formelzeichen=["M_stand", "M_kipp"],
                 quelle_formelzeichen=["---"],
             ),
-            kontext=base_ctx,
+            kontext=merge_kontext(base_ctx, {"nachweis": "KIPP", "rolle": "relevant", "windrichtung_deg": winner["winkel_deg"]}),
         )
         protokolliere_doc(
             protokoll,
@@ -374,7 +552,7 @@ def _kippsicherheit_DinEn17879_2024_08(
                 formelzeichen=["M_kipp", "M_stand", "γ_g", "m_stand,1N", "g"],
                 quelle_formelzeichen=["---"],
             ),
-            kontext=base_ctx,
+            kontext=merge_kontext(base_ctx, {"nachweis": "KIPP", "rolle": "relevant", "windrichtung_deg": winner["winkel_deg"]}),
         )
 
         return [Zwischenergebnis(wert=sicherheit_min_global), Zwischenergebnis(wert=ballast_kg)]

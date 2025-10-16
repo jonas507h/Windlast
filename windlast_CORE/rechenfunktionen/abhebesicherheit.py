@@ -4,7 +4,7 @@ from math import inf
 from typing import Dict, Callable, Sequence, List, Optional
 from collections.abc import Sequence as _SeqABC
 
-from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_kontext, protokolliere_msg, protokolliere_doc, make_docbundle, merge_protokoll, make_protokoll
+from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_kontext, protokolliere_msg, protokolliere_doc, make_docbundle, merge_protokoll, make_protokoll, collect_docs
 from windlast_CORE.datenstruktur.enums import Norm, RechenmethodeAbheben, VereinfachungKonstruktion, Lasttyp, Variabilitaet, Severity
 from windlast_CORE.datenstruktur.konstanten import _EPS, aktuelle_konstanten
 from windlast_CORE.datenstruktur.kraefte import Kraefte
@@ -16,6 +16,14 @@ from windlast_CORE.rechenfunktionen.standsicherheit_utils import (
     get_or_create_lastset,
     abhebe_envelope_pro_bauelement,
 )
+
+def _emit_docs_with_role(*, dst_protokoll, docs, base_ctx: dict, role: str, extra_ctx: dict | None = None):
+    for bundle, ctx in docs:
+        ktx = merge_kontext(base_ctx, ctx or {})
+        ktx["rolle"] = role
+        if extra_ctx:
+            ktx.update(extra_ctx)
+        protokolliere_doc(dst_protokoll, bundle=bundle, kontext=ktx)
 
 def _validate_inputs(
     konstruktion,
@@ -104,6 +112,7 @@ def _abhebesicherheit_DinEn13814_2005_06(
             Angriffsflaeche_Einzelkraefte=[[(0.0, 0.0, 0.0)]],
         )
         sicherheitsbeiwert_ballast = sicherheitsbeiwert(norm, ballastkraft_dummy, ist_guenstig=True, protokoll=protokoll, kontext=base_ctx)
+        dir_records = []
 
         for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen, protokoll=protokoll, kontext=base_ctx):
             sub_prot = make_protokoll()
@@ -129,25 +138,90 @@ def _abhebesicherheit_DinEn13814_2005_06(
                 total_normal_down += N_down_b
                 total_normal_up += N_up_b
 
+            # Richtungs-Aggregate dokumentieren
+            protokolliere_doc(
+                sub_prot,
+                bundle=make_docbundle(
+                    titel="Abhebe-Aggregate (Richtung)",
+                    wert=None,
+                    einzelwerte=[
+                        ("N_down_sum", total_normal_down),
+                        ("N_up_sum",   total_normal_up),
+                    ],
+                    quelle_einzelwerte=["intern"],
+                ),
+                kontext={"nachweis": "ABHEB", "doc_type": "dir_aggregate", "windrichtung_deg": winkel},
+            )
+
             sicherheit = inf if total_normal_up <= _EPS else (total_normal_down / total_normal_up)
-            # Auswahl & Merge
-            if sicherheit < sicherheit_min_global:
-                sicherheit_min_global = sicherheit
-                merge_protokoll(sub_prot, protokoll, only_errors=False)  # Gewinner: alles
-            else:
-                merge_protokoll(sub_prot, protokoll, only_errors=True)   # Verlierer: nur ERROR
+            protokolliere_doc(
+                sub_prot,
+                bundle=make_docbundle(
+                    titel="Richtungs-Sicherheit S_dir",
+                    wert=sicherheit,
+                    formel="S = ΣN_down / ΣN_up",
+                    formelzeichen=["N_down", "N_up"],
+                    quelle_formel="---",
+                ),
+                kontext={"nachweis": "ABHEB", "doc_type": "dir_sicherheit", "windrichtung_deg": winkel},
+            )
 
             if total_normal_up <= _EPS:
                 ballastkraft = 0.0
             else:
                 ballastkraft = max(0.0, total_normal_up - total_normal_down) / sicherheitsbeiwert_ballast.wert
-            
+
             if ballastkraft > ballast_erforderlich_max:
                 ballast_erforderlich_max = ballastkraft
-            
-        erdbeschleunigung = aktuelle_konstanten().erdbeschleunigung
-        ballast_kg = ballast_erforderlich_max / erdbeschleunigung  # in N -> in kg
 
+            protokolliere_doc(
+                sub_prot,
+                bundle=make_docbundle(
+                    titel="Richtungs-Ballast ΔN_down,erf_dir",
+                    wert=ballastkraft,
+                    formel="ΔN_down,erf = max(0, ΣN_up − ΣN_down) / γ_g",
+                    formelzeichen=["N_up", "N_down", "γ_g"],
+                    quelle_formel="---",
+                ),
+                kontext={"nachweis": "ABHEB", "doc_type": "dir_ballast", "windrichtung_deg": winkel},
+            )
+
+            # WICHTIG: nicht hier schon mergen/entscheiden – erst sammeln:
+            dir_records.append({
+                "winkel_deg": winkel,
+                "dir_min_sicherheit": sicherheit,        # (hier ist S_dir für diese Richtung bereits die relevante Größe)
+                "dir_ballast_max": ballastkraft,
+                "docs": collect_docs(sub_prot),
+                "sub_prot": sub_prot,
+            })
+            
+        if not dir_records:
+            return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
+
+        winner_idx = min(range(len(dir_records)), key=lambda i: dir_records[i]["dir_min_sicherheit"])
+        winner = dir_records[winner_idx]
+
+        # Messages: Gewinner alles, Verlierer nur Errors
+        for i, rec in enumerate(dir_records):
+            merge_protokoll(rec["sub_prot"], protokoll, only_errors=(i != winner_idx))
+
+        # Docs mit Rollen ausspielen
+        for i, rec in enumerate(dir_records):
+            role = "entscheidungsrelevant" if i == winner_idx else "irrelevant"
+            _emit_docs_with_role(
+                dst_protokoll=protokoll,
+                docs=rec["docs"],
+                base_ctx=merge_kontext(base_ctx, {"nachweis": "ABHEB", "windrichtung_deg": rec["winkel_deg"]}),
+                role=role,
+            )
+
+        sicherheit_min_global = winner["dir_min_sicherheit"]
+        ballast_erforderlich_max = max(r["dir_ballast_max"] for r in dir_records)
+
+        erdbeschleunigung = aktuelle_konstanten().erdbeschleunigung
+        ballast_kg = ballast_erforderlich_max / erdbeschleunigung
+
+        # Endwerte (relevant)
         protokolliere_doc(
             protokoll,
             bundle=make_docbundle(
@@ -158,7 +232,7 @@ def _abhebesicherheit_DinEn13814_2005_06(
                 quelle_formel="---",
                 quelle_formelzeichen=["---"],
             ),
-            kontext=base_ctx,
+            kontext=merge_kontext(base_ctx, {"nachweis": "ABHEB", "rolle": "relevant", "windrichtung_deg": winner["winkel_deg"]}),
         )
         protokolliere_doc(
             protokoll,
@@ -170,11 +244,10 @@ def _abhebesicherheit_DinEn13814_2005_06(
                 quelle_formel="---",
                 quelle_formelzeichen=["---"],
             ),
-            kontext=base_ctx,
+            kontext=merge_kontext(base_ctx, {"nachweis": "ABHEB", "rolle": "relevant", "windrichtung_deg": winner["winkel_deg"]}),
         )
 
-        return [Zwischenergebnis(wert=sicherheit_min_global),
-                Zwischenergebnis(wert=ballast_kg)]
+        return [Zwischenergebnis(wert=sicherheit_min_global), Zwischenergebnis(wert=ballast_kg)]
 
     else:
         protokolliere_msg(
@@ -223,6 +296,7 @@ def _abhebesicherheit_DinEn17879_2024_08(
             Angriffsflaeche_Einzelkraefte=[[(0.0, 0.0, 0.0)]],
         )
         sicherheitsbeiwert_ballast = sicherheitsbeiwert(norm, ballastkraft_dummy, ist_guenstig=True, protokoll=protokoll, kontext=base_ctx)
+        dir_records = []
 
         for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen, protokoll=protokoll, kontext=base_ctx):
             sub_prot = make_protokoll()
@@ -248,25 +322,90 @@ def _abhebesicherheit_DinEn17879_2024_08(
                 total_normal_down += N_down_b
                 total_normal_up += N_up_b
 
+            # Richtungs-Aggregate dokumentieren
+            protokolliere_doc(
+                sub_prot,
+                bundle=make_docbundle(
+                    titel="Abhebe-Aggregate (Richtung)",
+                    wert=None,
+                    einzelwerte=[
+                        ("N_down_sum", total_normal_down),
+                        ("N_up_sum",   total_normal_up),
+                    ],
+                    quelle_einzelwerte=["intern"],
+                ),
+                kontext={"nachweis": "ABHEB", "doc_type": "dir_aggregate", "windrichtung_deg": winkel},
+            )
+
             sicherheit = inf if total_normal_up <= _EPS else (total_normal_down / total_normal_up)
-            # Auswahl & Merge
-            if sicherheit < sicherheit_min_global:
-                sicherheit_min_global = sicherheit
-                merge_protokoll(sub_prot, protokoll, only_errors=False)  # Gewinner: alles
-            else:
-                merge_protokoll(sub_prot, protokoll, only_errors=True)   # Verlierer: nur ERROR
+            protokolliere_doc(
+                sub_prot,
+                bundle=make_docbundle(
+                    titel="Richtungs-Sicherheit S_dir",
+                    wert=sicherheit,
+                    formel="S = ΣN_down / ΣN_up",
+                    formelzeichen=["N_down", "N_up"],
+                    quelle_formel="---",
+                ),
+                kontext={"nachweis": "ABHEB", "doc_type": "dir_sicherheit", "windrichtung_deg": winkel},
+            )
 
             if total_normal_up <= _EPS:
                 ballastkraft = 0.0
             else:
                 ballastkraft = max(0.0, total_normal_up - total_normal_down) / sicherheitsbeiwert_ballast.wert
-            
+
             if ballastkraft > ballast_erforderlich_max:
                 ballast_erforderlich_max = ballastkraft
-            
-        erdbeschleunigung = aktuelle_konstanten().erdbeschleunigung
-        ballast_kg = ballast_erforderlich_max / erdbeschleunigung  # in N -> in kg
 
+            protokolliere_doc(
+                sub_prot,
+                bundle=make_docbundle(
+                    titel="Richtungs-Ballast ΔN_down,erf_dir",
+                    wert=ballastkraft,
+                    formel="ΔN_down,erf = max(0, ΣN_up − ΣN_down) / γ_g",
+                    formelzeichen=["N_up", "N_down", "γ_g"],
+                    quelle_formel="---",
+                ),
+                kontext={"nachweis": "ABHEB", "doc_type": "dir_ballast", "windrichtung_deg": winkel},
+            )
+
+            # WICHTIG: nicht hier schon mergen/entscheiden – erst sammeln:
+            dir_records.append({
+                "winkel_deg": winkel,
+                "dir_min_sicherheit": sicherheit,        # (hier ist S_dir für diese Richtung bereits die relevante Größe)
+                "dir_ballast_max": ballastkraft,
+                "docs": collect_docs(sub_prot),
+                "sub_prot": sub_prot,
+            })
+            
+        if not dir_records:
+            return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
+
+        winner_idx = min(range(len(dir_records)), key=lambda i: dir_records[i]["dir_min_sicherheit"])
+        winner = dir_records[winner_idx]
+
+        # Messages: Gewinner alles, Verlierer nur Errors
+        for i, rec in enumerate(dir_records):
+            merge_protokoll(rec["sub_prot"], protokoll, only_errors=(i != winner_idx))
+
+        # Docs mit Rollen ausspielen
+        for i, rec in enumerate(dir_records):
+            role = "entscheidungsrelevant" if i == winner_idx else "irrelevant"
+            _emit_docs_with_role(
+                dst_protokoll=protokoll,
+                docs=rec["docs"],
+                base_ctx=merge_kontext(base_ctx, {"nachweis": "ABHEB", "windrichtung_deg": rec["winkel_deg"]}),
+                role=role,
+            )
+
+        sicherheit_min_global = winner["dir_min_sicherheit"]
+        ballast_erforderlich_max = max(r["dir_ballast_max"] for r in dir_records)
+
+        erdbeschleunigung = aktuelle_konstanten().erdbeschleunigung
+        ballast_kg = ballast_erforderlich_max / erdbeschleunigung
+
+        # Endwerte (relevant)
         protokolliere_doc(
             protokoll,
             bundle=make_docbundle(
@@ -277,7 +416,7 @@ def _abhebesicherheit_DinEn17879_2024_08(
                 quelle_formel="---",
                 quelle_formelzeichen=["---"],
             ),
-            kontext=base_ctx,
+            kontext=merge_kontext(base_ctx, {"nachweis": "ABHEB", "rolle": "relevant", "windrichtung_deg": winner["winkel_deg"]}),
         )
         protokolliere_doc(
             protokoll,
@@ -289,11 +428,10 @@ def _abhebesicherheit_DinEn17879_2024_08(
                 quelle_formel="---",
                 quelle_formelzeichen=["---"],
             ),
-            kontext=base_ctx,
+            kontext=merge_kontext(base_ctx, {"nachweis": "ABHEB", "rolle": "relevant", "windrichtung_deg": winner["winkel_deg"]}),
         )
 
-        return [Zwischenergebnis(wert=sicherheit_min_global),
-                Zwischenergebnis(wert=ballast_kg)]
+        return [Zwischenergebnis(wert=sicherheit_min_global), Zwischenergebnis(wert=ballast_kg)]
 
     else:
         protokolliere_msg(

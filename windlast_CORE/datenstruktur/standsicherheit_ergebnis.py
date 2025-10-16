@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Mapping, Optional
+from typing import Dict, List, Mapping, Optional, Tuple, Any
 
 # Import der Enums aus deinem Projekt
 from windlast_CORE.datenstruktur.enums import (
@@ -74,6 +74,7 @@ class NormDetails:
     """
     windrichtungen: List[WindrichtungErgebnis] = field(default_factory=list)
     notes: List[Message] = field(default_factory=list)
+    docs: List[tuple] = field(default_factory=list)  # List[Tuple[Any, dict]]
 
 
 # ---------- Norm-Ergebnis / Gesamtergebnis ----------

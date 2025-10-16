@@ -99,6 +99,66 @@ def _collect_messages_from_list(items: Iterable[Any], fallback_szenario: str | N
         })
     return out
 
+# ----- docs: (bundle, ctx) -> JSON -----
+
+_ROLE_ORDER = {"relevant": 3, "entscheidungsrelevant": 2, "irrelevant": 1, None: 0}
+
+def _normalize_doc_bundle(bundle, ctx):
+    """
+    bundle: Mapping[str, Any] (siehe make_docbundle), ctx: dict
+    -> JSON-sicheres Dict
+    """
+    b = dict(bundle or {})
+    out = {
+        "title": b.get("titel") or b.get("title"),
+        "value": _to_primitive(b.get("wert")),
+        "formula": b.get("formel"),
+        "formula_source": b.get("quelle_formel"),
+        "symbols": _to_primitive(b.get("formelzeichen")),
+        "symbols_source": _to_primitive(b.get("quelle_formelzeichen")),
+        "items": _to_primitive(b.get("einzelwerte")),
+        "items_source": _to_primitive(b.get("quelle_einzelwerte")),
+        "context": _to_primitive(ctx or {}),
+    }
+    return out
+
+def _collect_docs_from_list(items):
+    """
+    items: List[Tuple[bundle, ctx]]
+    - normalisiert Bundles
+    - dedupliziert *nur* echte Duplikate über einen erweiterten Schlüssel:
+      (title, doc_type, nachweis, szenario, windrichtung_deg, achse_index, element_id, segment_index, ref_nachweis)
+      → Falls identisch, gewinnt die höhere Rolle (relevant > entscheidungsrelevant > irrelevant).
+    """
+    if not items:
+        return []
+
+    dedup = {}  # key -> doc
+    for bundle, ctx in items:
+        doc = _normalize_doc_bundle(bundle, ctx)
+        c = doc["context"] or {}
+        key = (
+            doc["title"],
+            c.get("doc_type"),
+            c.get("nachweis"),                         # wichtig: pro Nachweis getrennt
+            c.get("szenario") or c.get("scenario"),
+            c.get("windrichtung_deg"),
+            c.get("achse_index"),
+            c.get("element_id") or c.get("element_id_intern"),
+            c.get("segment_index"),
+            c.get("ref_nachweis"),                     # z.B. LOADS, falls gesetzt
+        )
+        role_new = (c.get("rolle") or c.get("role"))
+
+        if key in dedup:
+            role_old = (dedup[key]["context"] or {}).get("rolle")
+            if _ROLE_ORDER.get(role_new, 0) > _ROLE_ORDER.get(role_old, 0):
+                dedup[key] = doc
+        else:
+            dedup[key] = doc
+
+    return list(dedup.values())
+
 # ---------- main mapper ----------
 def build_api_output(ergebnis, input_payload: Dict[str, Any]) -> Dict[str, Any]:
     """
@@ -117,6 +177,18 @@ def build_api_output(ergebnis, input_payload: Dict[str, Any]) -> Dict[str, Any]:
               {"severity":"warn","text":"...","code":"...","context":{"szenario":"IN_BETRIEB", ...}},
               ...
             ]
+            "docs": [
+                {
+                "title": "Gleit-Aggregate (Richtung)",
+                "value": null,
+                "items": [["|T|_sum", 123.4], ["N_down_sum", 456.7], ...],
+                "context": {
+                    "nachweis": "GLEIT",
+                    "doc_type": "dir_aggregate",
+                    "windrichtung_deg": 270.0,
+                    "rolle": "entscheidungsrelevant"
+                }
+            },
           },
           ...
         },
@@ -187,9 +259,49 @@ def build_api_output(ergebnis, input_payload: Dict[str, Any]) -> Dict[str, Any]:
         if details is not None:
             messages += _collect_messages_from_list(getattr(details, "notes", None))
 
-        # (You can add more sources here if your model has them)
+         # ========= NEU: Messages in Haupt vs. Alternativen splitten =========
+        messages_main: list[dict] = []
+        alt_msgs_map: Dict[str, list[dict]] = { name: [] for name in (alts.keys() if alts else []) }
+        if messages:
+            alt_names = set(alts.keys())
+            for m in messages:
+                ctx = m.get("context") or {}
+                sc = ctx.get("szenario") or ctx.get("scenario")
+                sc = None if sc is None else str(sc).strip()
+                if sc in alt_names:
+                    alt_msgs_map[sc].append(m)
+                else:
+                    messages_main.append(m)
+        # ====================================================================
 
-        out_normen[key] = { **main, "messages": messages }
+        # --- docs per norm (Zwischenergebnisse) ---
+        docs_main: list[dict] = []
+        alt_docs_map: Dict[str, list[dict]] = { name: [] for name in (alts.keys() if alts else []) }
+
+        details = getattr(nres, "details", None)
+        if details is not None:
+            raw_docs = getattr(details, "docs", None)  # erwartet: List[(bundle, ctx)]
+            if raw_docs:
+                docs_all = _collect_docs_from_list(raw_docs)
+                # ========= NEU: Docs in Haupt vs. Alternativen splitten =========
+                alt_names = set(alts.keys())
+                for d in docs_all:
+                    ctx = d.get("context") or {}
+                    sc = ctx.get("szenario") or ctx.get("scenario")
+                    sc = None if sc is None else str(sc).strip()
+                    if sc in alt_names:
+                        alt_docs_map[sc].append(d)
+                    else:
+                        docs_main.append(d)
+                # =================================================================
+
+        # --- attach split messages/docs to alternatives ---
+        if alts:
+            for name in alts.keys():
+                alts[name]["messages"] = alt_msgs_map.get(name, [])
+                alts[name]["docs"] = alt_docs_map.get(name, [])
+
+        out_normen[key] = { **main, "messages": messages_main, "docs": docs_main }
 
     # ---- meta unchanged ----
     return {

@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, PositiveFloat
-from typing import Literal, Dict, Any, List
+from typing import Literal, Dict, Any, List, Optional
 
 # Input-Modelle
 class DauerInput(BaseModel):
@@ -23,11 +23,16 @@ class TorInput(BaseModel):
 
 NumberLike = float | str | None  # "INF" | "-INF" | None | float
 
-class ResultNormAltVals(BaseModel):
-    kipp:    NumberLike
-    gleit:   NumberLike
-    abhebe:  NumberLike
-    ballast: NumberLike = None  # kg
+class ResultDoc(BaseModel):
+    title: Optional[str] = None
+    value: Any = None
+    formula: Optional[str] = None
+    formula_source: Optional[str] = None
+    symbols: Optional[List[Any]] = None
+    symbols_source: Optional[List[Any]] = None
+    items: Optional[List[Any]] = None          # i.d.R. Liste von ["Name", Wert]-Paaren
+    items_source: Optional[List[Any]] = None
+    context: Dict[str, Any] = Field(default_factory=dict)
 
 class ResultMessage(BaseModel):
     # wir erlauben jeden String für mögliche Erweiterungen; Tooltips filtern/normalisieren später
@@ -35,6 +40,14 @@ class ResultMessage(BaseModel):
     text: str | None = None
     code: str | None = None
     context: Dict[str, Any] = Field(default_factory=dict)
+
+class ResultNormAltVals(BaseModel):
+    kipp:    NumberLike
+    gleit:   NumberLike
+    abhebe:  NumberLike
+    ballast: NumberLike = None  # kg
+    messages: List[ResultMessage] = Field(default_factory=list)
+    docs: List[ResultDoc] = Field(default_factory=list)
 
 class ResultNormVals(BaseModel):
     kipp:    NumberLike
@@ -44,6 +57,7 @@ class ResultNormVals(BaseModel):
     alternativen: Dict[str, ResultNormAltVals] | None = None  # z.B. {"IN_BETRIEB": {...}}
     # NEU: flache Nachrichtenliste pro Norm (Text, Severity, Kontext)
     messages: List[ResultMessage] = Field(default_factory=list)
+    docs: List[ResultDoc] = Field(default_factory=list)
 
 class Result(BaseModel):
     normen: Dict[str, ResultNormVals]
