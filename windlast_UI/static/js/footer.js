@@ -404,18 +404,69 @@ function groupDocsByElement(docs) {
 function renderDocsByElement(docsInDir) {
   const { groups, keys } = groupDocsByElement(docsInDir);
   const blocks = keys.map((k, idx) => {
-    const list = groups.get(k) || [];
+    let list = groups.get(k) || [];
     const title = (k === "__allgemein__") ? "allgemein" : `Element ${k}`;
     const countBadge = `<span class="muted" style="font-weight:400; margin-left:.5rem;">(${list.length})</span>`;
-    const lis = renderDocsListItems(list);
+    // NEU: innerhalb "allgemein" noch eine Ebene nach Achse
+    const innerHtml = (k === "__allgemein__")
+      ? renderDocsByAxis(list)
+      : `<ul class="doc-list">${renderDocsListItems(list)}</ul>`;
+
     return `
       <details class="elem-group"${idx === 0 ? " open" : ""}>
         <summary class="elem-summary">${escapeHtml(title)} ${countBadge}</summary>
-        <ul class="doc-list">${lis}</ul>
+        <div class="axis-groups">
+          ${innerHtml}
+        </div>
       </details>
     `;
   }).join("");
   return blocks || "";
+}
+
+// ---- Achs-Index aus dem Kontext lesen (mehrere mögliche Keys absichern) ---
+function _pickAxisIndex(ctx) {
+  if (!ctx) return null;
+  const v =
+    ctx.achse_index ??    // bevorzugt (kommt in euren Kontexten vor)
+    null;
+
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+// --- Gruppierung nach Achse (nur für "allgemein") ---------------------------
+function groupDocsByAxis(docs) {
+  const groups = new Map(); // key -> array
+  for (const d of (docs || [])) {
+    const ax = _pickAxisIndex(d?.context);
+    const key = (ax == null) ? "__ohne_achse__" : Number(ax);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(d);
+  }
+  const keys = [...groups.keys()].sort((a, b) => {
+    if (a === "__ohne_achse__" && b === "__ohne_achse__") return 0;
+    if (a === "__ohne_achse__") return 1;
+    if (b === "__ohne_achse__") return -1;
+    return Number(a) - Number(b);
+  });
+  return { groups, keys };
+}
+
+function renderDocsByAxis(docs) {
+  const { groups, keys } = groupDocsByAxis(docs);
+  return keys.map((k, idx) => {
+    const list = groups.get(k) || [];
+    const title = (k === "__ohne_achse__") ? "ohne Achse" : `Achse ${k}`;
+    const countBadge = `<span class="muted" style="font-weight:400; margin-left:.5rem;">(${list.length})</span>`;
+    const lis = renderDocsListItems(list); // nutzt dein bestehendes LI-Markup
+    return `
+      <details class="axis-group"${idx === 0 ? " open" : ""}>
+        <summary class="axis-summary">${escapeHtml(title)} ${countBadge}</summary>
+        <ul class="doc-list">${lis}</ul>
+      </details>
+    `;
+  }).join("");
 }
 
 // Helper
