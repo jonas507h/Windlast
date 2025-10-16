@@ -320,7 +320,7 @@ function groupDocsByWindrichtung(docs) {
 
 function renderDocsListItems(docs) {
   return (docs || []).map(d => {
-    const titleHtml = escapeHtml(d?.title ?? "—");
+    const titleHtml = formatLabelWithSubscripts(d?.title ?? "—");
     const val   = formatSig4(d?.value);
     const unit  = d?.unit ? ` ${String(d.unit)}` : "";
 
@@ -354,12 +354,14 @@ function renderDocsByWindrichtung(docs) {
     const elemGroupsHtml = renderDocsByElement(list);
 
     return `
-      <details class="dir-group"${idx === 0 ? " open" : ""}>
-        <summary class="dir-summary">${escapeHtml(title)} ${countBadge}</summary>
-        <div class="elem-groups">
-          ${elemGroupsHtml}
-        </div>
-      </details>
+      <div class="group-card dir-card">
+        <details class="dir-group"${idx === 0 ? " open" : ""}>
+          <summary class="dir-summary">${escapeHtml(title)} ${countBadge}</summary>
+          <div class="elem-groups">
+            ${elemGroupsHtml}
+          </div>
+        </details>
+      </div>
     `;
   }).join("");
 
@@ -413,12 +415,16 @@ function renderDocsByElement(docsInDir) {
       : `<ul class="doc-list">${renderDocsListItems(list)}</ul>`;
 
     return `
-      <details class="elem-group"${idx === 0 ? " open" : ""}>
-        <summary class="elem-summary">${escapeHtml(title)} ${countBadge}</summary>
-        <div class="axis-groups">
-          ${innerHtml}
-        </div>
-      </details>
+      <div class="group-card elem-card">
+        <details class="elem-group"${idx === 0 ? " open" : ""}>
+          <summary class="elem-summary">${escapeHtml(title)} ${countBadge}</summary>
+          <div class="elem-body">
+            <div class="axis-groups">
+              ${innerHtml}
+            </div>
+          </div>
+        </details>
+      </div>
     `;
   }).join("");
   return blocks || "";
@@ -461,10 +467,12 @@ function renderDocsByAxis(docs) {
     const countBadge = `<span class="muted" style="font-weight:400; margin-left:.5rem;">(${list.length})</span>`;
     const lis = renderDocsListItems(list); // nutzt dein bestehendes LI-Markup
     return `
-      <details class="axis-group"${idx === 0 ? " open" : ""}>
-        <summary class="axis-summary">${escapeHtml(title)} ${countBadge}</summary>
-        <ul class="doc-list">${lis}</ul>
-      </details>
+      <div class="group-card axis-card">
+        <details class="axis-group"${idx === 0 ? " open" : ""}>
+          <summary class="axis-summary">${escapeHtml(title)} ${countBadge}</summary>
+          <ul class="doc-list">${lis}</ul>
+        </details>
+      </div>
     `;
   }).join("");
 }

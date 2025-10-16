@@ -91,3 +91,193 @@
   padding-right: 12px;     /* kleiner Innenabstand, damit Scrollbar Text nicht überlappt */
   box-sizing: border-box;
 }
+
+/* ===== Hierarchie-Einrückungen & Optik im Docs-Modal ===== */
+/* Klassen kommen aus footer.js: .dir-group/.dir-summary, .elem-group/.elem-summary,
+   .axis-group/.axis-summary, .doc-list li.doc-li */
+/* Ebene 0: Container */
+#modal-root .doc-groups { margin-top: 6px; }
+
+/* Ebene 1: Windrichtung */
+#modal-root .dir-group {
+  margin: 6px 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+#modal-root .dir-summary {
+  cursor: pointer;
+  padding: 8px 10px;
+  font-weight: 700;
+  background: var(--panel);
+}
+#modal-root .dir-group[open] .dir-summary {
+  border-bottom: 1px solid var(--border);
+}
+#modal-root .dir-group > .elem-groups {
+  padding: 8px 12px 10px 14px;
+}
+
+/* Ebene 2: Element */
+#modal-root .elem-group {
+  margin: 6px 0 8px 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+#modal-root .elem-summary {
+  cursor: pointer;
+  padding: 7px 9px;
+  font-weight: 600;
+}
+#modal-root .elem-group[open] .elem-summary {
+  border-bottom: 1px solid var(--border);
+}
+#modal-root .elem-group > .axis-groups {
+  padding: 6px 10px 8px 12px;
+}
+
+/* Ebene 3: Achse */
+#modal-root .axis-group {
+  margin: 6px 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+#modal-root .axis-summary {
+  cursor: pointer;
+  padding: 6px 8px;
+  font-weight: 600;
+}
+#modal-root .axis-group[open] .axis-summary {
+  border-bottom: 1px solid var(--border);
+}
+#modal-root .axis-group > .doc-list {
+  padding: 6px 8px 8px 12px;
+}
+
+/* Liste der Einträge (unterste Ebene) */
+#modal-root .doc-list {
+  list-style: none;
+  margin: 4px 0 8px 0;
+  padding: 0;
+}
+#modal-root .doc-list .doc-li {
+  display: flex;
+  gap: .4rem;
+  align-items: baseline;
+  padding: 2px 0;
+  line-height: 1.45;
+}
+#modal-root .doc-list .doc-title { font-weight: 500; }
+#modal-root .doc-list .doc-eq { opacity: .6; }
+#modal-root .doc-list .doc-val { margin-left: auto; }
+
+/* Kleines Finetuning für dunkle Themes (nutzt vorhandene CSS-Variablen) */
+@media (prefers-color-scheme: dark) {
+  #modal-root .dir-summary,
+  #modal-root .elem-summary,
+  #modal-root .axis-summary { background: var(--panel); }
+}
+
+/* === Card-Wrapper je Ebene: Rahmen/Rundung sitzen außerhalb des Inhalts === */
+#modal-root .group-card{
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel);
+  overflow: hidden;          /* Inhalt an Rundung clippen */
+  margin: 6px 0;
+}
+#modal-root .axis-card { border-radius: 8px; }   /* wie vorher für Achs-Ebene */
+#modal-root .elem-card { border-style: solid; }
+#modal-root .axis-card { border-style: solid;  }
+
+/* Details selbst bekommen keinen eigenen Border/Hintergrund mehr */
+#modal-root .dir-group,
+#modal-root .elem-group,
+#modal-root .axis-group {
+  border: none;
+  background: transparent;
+  border-radius: 0;
+}
+
+/* Trenner beim Aufklappen: sauber innerhalb der Card */
+#modal-root .dir-group[open]  > .dir-summary,
+#modal-root .elem-group[open] > .elem-summary,
+#modal-root .axis-group[open] > .axis-summary {
+  border-bottom: 1px solid var(--border);
+}
+
+/* Kleine Paddings für die neuen Bodies (nur Elem hat einen .elem-body) */
+#modal-root .elem-body { padding: 2px 0; }
+
+/* ======= Paddings & Abstände innerhalb der Cards wiederherstellen ======= */
+
+/* Summary-Titel (Windrichtung / Element / Achse) */
+#modal-root .dir-summary,
+#modal-root .elem-summary,
+#modal-root .axis-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;          /* <-- vorher klebte am Rand */
+  font-weight: 600;
+}
+
+/* Unterelemente in der Card leicht eingerückt */
+#modal-root .dir-card   .elem-groups   { padding: 6px 14px 8px 14px; }
+#modal-root .elem-card  .axis-groups   { padding: 6px 12px 8px 12px; }
+#modal-root .axis-card  .doc-list      { padding: 6px 12px 8px 12px; }
+
+/* Die eigentlichen Listeneinträge */
+#modal-root .doc-list {
+  list-style: none;
+  margin: 4px 0 8px 0;
+  padding: 0;
+}
+#modal-root .doc-list .doc-li {
+  display: flex;
+  justify-content: space-between;  /* Titel links, Wert rechts */
+  align-items: baseline;
+  gap: 0.4rem;
+  padding: 2px 4px;                /* kleine Luft links/rechts */
+  line-height: 1.4;
+}
+
+/* Optional: kleine optische Trennung unten zwischen Gruppen */
+#modal-root .group-card:not(:last-child) {
+  margin-bottom: 8px;
+}
+
+/* --- kleines Aus/Einklapp-Dreieck vor den Summary-Titeln --- */
+
+/* native Marker ausblenden, damit wir vollen Stil haben */
+#modal-root .dir-summary::-webkit-details-marker,
+#modal-root .elem-summary::-webkit-details-marker,
+#modal-root .axis-summary::-webkit-details-marker { display: none; }
+
+/* Summary normal lassen – kein flex, kein zentrieren */
+#modal-root .dir-summary,
+#modal-root .elem-summary,
+#modal-root .axis-summary {
+  position: relative;
+  padding-left: 1.2em;    /* Platz für den Pfeil schaffen */
+}
+
+/* Pfeil absolut davor platzieren */
+#modal-root .dir-summary::before,
+#modal-root .elem-summary::before,
+#modal-root .axis-summary::before {
+  content: "▸";
+  position: absolute;
+  left: 0.3em;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.8;
+  font-size: 0.9em;
+}
+
+/* Geöffneter Zustand */
+#modal-root .dir-group[open]  > .dir-summary::before,
+#modal-root .elem-group[open] > .elem-summary::before,
+#modal-root .axis-group[open] > .axis-summary::before {
+  content: "▾";
+}
