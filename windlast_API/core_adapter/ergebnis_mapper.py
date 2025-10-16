@@ -112,6 +112,7 @@ def _normalize_doc_bundle(bundle, ctx):
     out = {
         "title": b.get("titel") or b.get("title"),
         "value": _to_primitive(b.get("wert")),
+        "unit": b.get("einheit") or b.get("unit"),
         "formula": b.get("formel"),
         "formula_source": b.get("quelle_formel"),
         "symbols": _to_primitive(b.get("formelzeichen")),

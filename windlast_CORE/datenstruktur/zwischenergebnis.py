@@ -95,6 +95,7 @@ def make_docbundle(
     *,
     titel: str,
     wert: Union[float, Sequence[float], Vec3, None],
+    einheit: Optional[str] = None,
     formel: Optional[str] = None,
     quelle_formel: Optional[str] = None,
     formelzeichen: Optional[Sequence[str]] = None,
@@ -109,6 +110,7 @@ def make_docbundle(
     return {
         "titel": titel,
         "wert": wert,
+        "einheit": einheit,
         "formel": formel,
         "quelle_formel": quelle_formel,
         "formelzeichen": list(formelzeichen) if formelzeichen is not None else None,

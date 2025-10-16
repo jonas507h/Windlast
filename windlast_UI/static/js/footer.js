@@ -176,13 +176,26 @@ function renderDocsSimpleList(docs) {
   const lis = docs.map(d => {
     const title = escapeHtml(d?.title ?? "—");
     const val   = formatNumber(d?.value);
-    // Kontext als kompakter Text für nativen Tooltip:
-    const ctxTip = buildContextTitle(d?.context || {});
+    const unit  = d?.unit ? ` ${escapeHtml(String(d.unit))}` : "";
+    // Kontext aufbereiten wie bei Fehlermeldungen:
+    let ctxText = "";
+    try {
+      const ctx = d?.context || {};
+      const ordered = orderContextEntries(ctx);
+      const parts = ordered.map(([k, v]) => {
+        const label = prettyKey(k);
+        const pretty = prettyVal(k, v);
+        return `${label}: ${pretty}`;
+      });
+      if (parts.length) ctxText = parts.join("\n");
+    } catch {
+      ctxText = JSON.stringify(d?.context || {});
+    }
     return `
-      <li class="doc-li" title="${escapeHtml(ctxTip)}">
+      <li class="doc-li" ${ctxText ? `data-ctx="${escapeHtml(ctxText)}"` : ""}>
         <span class="doc-title">${title}</span>
         <span class="doc-sep"> — </span>
-        <span class="doc-val">${val}</span>
+        <span class="doc-val">${val}${unit}</span>
       </li>
     `;
   }).join("");
@@ -760,6 +773,16 @@ function openMessagesModalFor(normKey, szenario = null) {
 // Tooltip für Meldungseinträge im Modal: zeigt den Kontext
 Tooltip.register('#modal-root .messages-list li[data-ctx]', {
   // wichtig: auch Treffer auf Kindelementen zulassen
+  predicate: (el) => !!el.closest('li[data-ctx]'),
+  content: (_ev, el) => {
+    const li = el.closest('li[data-ctx]');
+    return li ? (li.getAttribute('data-ctx') || "") : "";
+  },
+  delay: 80
+});
+
+// Tooltip für Zwischenergebnis-Einträge im Modal: nutzt exakt dieselbe Logik
+Tooltip.register('#modal-root .doc-list li[data-ctx]', {
   predicate: (el) => !!el.closest('li[data-ctx]'),
   content: (_ev, el) => {
     const li = el.closest('li[data-ctx]');

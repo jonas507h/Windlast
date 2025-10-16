@@ -63,6 +63,7 @@ def _eingeschlossene_flaeche_default(
                 bundle=make_docbundle(
                     titel="Eingeschlossene Fläche A_e",
                     wert=float("nan"),
+                    einheit="m²",
                     einzelwerte=[laenge, hoehe],
                     formel="A_e = L · h",
                 ),
@@ -77,6 +78,7 @@ def _eingeschlossene_flaeche_default(
             bundle=make_docbundle(
                 titel="Eingeschlossene Fläche A_e",
                 wert=wert,
+                einheit="m²",
                 einzelwerte=[laenge, hoehe],
                 formel="A_e = L · h",
             ),
@@ -104,6 +106,7 @@ def _eingeschlossene_flaeche_default(
                 bundle=make_docbundle(
                     titel="Eingeschlossene Fläche A_e",
                     wert=float("nan"),
+                    einheit="m²",
                     einzelwerte=[laenge, d_aussen],
                     formel="A_e = L · d_aussen",
                 ),
@@ -118,6 +121,7 @@ def _eingeschlossene_flaeche_default(
             bundle=make_docbundle(
                 titel="Eingeschlossene Fläche A_e",
                 wert=wert,
+                einheit="m²",
                 einzelwerte=[laenge, d_aussen],
                 formel="A_e = L · d_aussen",
             ),

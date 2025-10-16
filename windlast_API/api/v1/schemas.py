@@ -26,6 +26,7 @@ NumberLike = float | str | None  # "INF" | "-INF" | None | float
 class ResultDoc(BaseModel):
     title: Optional[str] = None
     value: Any = None
+    unit: Optional[str] = None
     formula: Optional[str] = None
     formula_source: Optional[str] = None
     symbols: Optional[List[Any]] = None
