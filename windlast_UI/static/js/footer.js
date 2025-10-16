@@ -168,9 +168,9 @@ function openZwischenergebnisseModal({ normKey, nachweis, altName }, docs) {
   h.className = "modal-title";
   wrap.appendChild(h);
 
-  // Liste anhängen (weiterhin mit .doc-list, damit der Tooltip greift)
+  // Gruppierte Ansicht: je Windrichtung ein auf-/zuklappbarer Block
   const list = document.createElement("div");
-  list.innerHTML = renderDocsSimpleList(docs);
+  list.innerHTML = renderDocsByWindrichtung(docs);
   wrap.appendChild(list);
 
   Modal.open(wrap);
@@ -296,6 +296,70 @@ function buildContextTitle(ctx) {
   });
   const parts = keys.map(k => `${k}: ${String(ctx[k])}`);
   return parts.join(" · ");
+}
+
+// --- Gruppieren nach Windrichtung ---------------------------------
+
+function groupDocsByWindrichtung(docs) {
+  const groups = new Map(); // key -> array
+  for (const d of (docs || [])) {
+    const dir = d?.context?.windrichtung_deg;
+    const key = (dir === undefined || dir === null || dir === "") ? "__none__" : Number(dir);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(d);
+  }
+  // sort keys: numeric ascending, "__none__" last
+  const keys = [...groups.keys()].sort((a, b) => {
+    if (a === "__none__" && b === "__none__") return 0;
+    if (a === "__none__") return 1;
+    if (b === "__none__") return -1;
+    return Number(a) - Number(b);
+  });
+  return { groups, keys };
+}
+
+function renderDocsListItems(docs) {
+  return (docs || []).map(d => {
+    const titleHtml = escapeHtml(d?.title ?? "—");
+    const val   = formatSig4(d?.value);
+    const unit  = d?.unit ? ` ${String(d.unit)}` : "";
+
+    // Für den Tooltip: Rohdaten speichern
+    const formula = d?.formula ? String(d.formula) : "";
+    const ctxJson = escapeHtml(JSON.stringify(d?.context || {}));
+    const dataAttr = `data-formula="${escapeHtml(formula)}" data-ctx-json="${ctxJson}"`;
+
+    return `
+      <li class="doc-li" ${dataAttr}>
+        <span class="doc-title">${titleHtml}</span>
+        <span class="doc-eq"> = </span>
+        <span class="doc-val">${escapeHtml(withUnit(val, unit))}</span>
+      </li>
+    `;
+  }).join("");
+}
+
+// Akkordeon pro Windrichtung (Details/Summary ist simpel & barrierearm)
+function renderDocsByWindrichtung(docs) {
+  const { groups, keys } = groupDocsByWindrichtung(docs);
+  if (!keys.length) {
+    return `<div class="muted" style="padding:0.75rem 0;">Keine Zwischenergebnisse vorhanden.</div>`;
+  }
+
+  const blocks = keys.map((k, idx) => {
+    const list = groups.get(k) || [];
+    const title = (k === "__none__") ? "ohne Richtung" : `Windrichtung ${k}°`;
+    const countBadge = `<span class="muted" style="font-weight:400; margin-left:.5rem;">(${list.length})</span>`;
+    const lis = renderDocsListItems(list);
+    return `
+      <details class="dir-group"${idx === 0 ? " open" : ""}>
+        <summary class="dir-summary">${escapeHtml(title)} ${countBadge}</summary>
+        <ul class="doc-list">${lis}</ul>
+      </details>
+    `;
+  }).join("");
+
+  return `<div class="doc-groups">${blocks}</div>`;
 }
 
 // Helper
