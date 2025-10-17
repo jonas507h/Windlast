@@ -182,8 +182,8 @@ function renderDocsSimpleList(docs) {
   }
   const lis = docs.map(d => {
     const titleHtml = escapeHtml(d?.title ?? "—");
-    const val   = formatSig4(d?.value);
-    const unit  = d?.unit ? ` ${String(d.unit)}` : "";
+    const val   = formatNumberDE(d?.value);
+    const unitHtml  = d?.unit ? ` ${escapeHtml(String(d.unit))}` : "";
 
     // Für den Tooltip nur Rohdaten speichern: Formel + Kontext (JSON)
     const formula = d?.formula ? String(d.formula) : "";
@@ -194,7 +194,7 @@ function renderDocsSimpleList(docs) {
       <li class="doc-li" ${dataAttr}>
         <span class="doc-title">${titleHtml}</span>
         <span class="doc-eq"> = </span>
-        <span class="doc-val">${escapeHtml(withUnit(val, unit))}</span>
+        <span class="doc-val">${val}${unitHtml}</span>
       </li>
     `;
   }).join("");
@@ -209,18 +209,37 @@ function formatNumber(v) {
   return n.toLocaleString(undefined, { maximumFractionDigits: 3 });
 }
 
-function formatSig4(v) {
-  // Strings wie "INF"/"-INF"/null sauber durchreichen
-  if (v === "INF" || v === "-INF" || v == null) return String(v);
-  const n = Number(v);
-  if (!Number.isFinite(n)) return String(v);
+function formatNumberDE(value, sig = 4) {
+  if (value == null || value === "INF" || value === "-INF" || Number.isNaN(value)) return String(value);
 
-  // 4 signifikante Stellen
-  // z.B. 12345 -> "1.235e+4", 0.00123456 -> "0.001235", 12.3456 -> "12.35"
-  const s = n.toPrecision(4);
-  // toPrecision kann unnötige trailing zeros geben -> minimal hübschen
-  // und "e" Schreibweise lassen wir so (ist für große/kleine Zahlen ok)
-  return s;
+  const num = Number(value);
+  if (!Number.isFinite(num)) return String(value);
+
+  // ➜ Ganzzahlen direkt ohne Nachkommastellen
+  if (Number.isInteger(num)) {
+    return num.toString(); // keine Kommata oder Nachkommastellen
+  }
+
+  // wissenschaftliche Notation auseinandernehmen
+  let [mantissa, exp] = num.toExponential(sig - 1).split("e");
+  exp = Number(exp);
+
+  // Standardfall: keine Exponentialdarstellung, normale Zahl
+  if (exp > -3 && exp < 4) {
+    const rounded = num.toPrecision(sig);
+    // Punkt durch Komma ersetzen
+    return rounded.replace(".", ",");
+  }
+
+  // wissenschaftliche Darstellung →  mantissa ×10^exp
+  const mant = parseFloat(mantissa).toString().replace(".", ",");
+  return `${mant}×10<sup>${exp}</sup>`;
+}
+
+function formatVectorDE(vec, sig = 4) {
+  if (!Array.isArray(vec)) return formatNumberDE(vec, sig);
+  const parts = vec.map(v => formatNumberDE(v, sig));
+  return `(${parts.join("; ")})`;
 }
 
 // Einheit hübsch anhängen (schmales Leerzeichen)
@@ -321,8 +340,14 @@ function groupDocsByWindrichtung(docs) {
 function renderDocsListItems(docs) {
   return (docs || []).map(d => {
     const titleHtml = formatLabelWithSubscripts(d?.title ?? "—");
-    const val   = formatSig4(d?.value);
-    const unit  = d?.unit ? ` ${String(d.unit)}` : "";
+    // Zahl ODER Vektor formatiert; Unit separat escapen
+    const isVec = Array.isArray(d?.value) ||
+                  (d?.value && typeof d.value === "object" &&
+                   ["x","y","z"].every(k => k in d.value));
+    const val   = isVec
+      ? formatVectorDE(Array.isArray(d.value) ? d.value : [d.value.x, d.value.y, d.value.z], 4)
+      : formatNumberDE(d?.value, 4);
+    const unitHtml = d?.unit ? ` ${escapeHtml(String(d.unit))}` : "";
 
     // Für den Tooltip: Rohdaten speichern
     const formula = d?.formula ? String(d.formula) : "";
@@ -333,7 +358,7 @@ function renderDocsListItems(docs) {
       <li class="doc-li" ${dataAttr}>
         <span class="doc-title">${titleHtml}</span>
         <span class="doc-eq"> = </span>
-        <span class="doc-val">${escapeHtml(withUnit(val, unit))}</span>
+        <span class="doc-val">${val}${unitHtml}</span>
       </li>
     `;
   }).join("");
@@ -509,15 +534,22 @@ function prettyVal(k, v) {
   // Booleans auf Deutsch
   if (typeof v === "boolean") return v ? "Ja" : "Nein";
 
-  // Arrays als kommagetrennte Liste
-  if (Array.isArray(v)) return v.map((x) => prettyVal(k, x)).join(", ");
+  // Arrays: wenn rein numerisch (2/3/… Werte) -> als Vektor ausgeben
+  if (Array.isArray(v)) {
+    const numeric = v.every(x => x !== null && x !== undefined && isFinite(Number(x)));
+    if (numeric) return formatVectorDE(v, 4);
+    return v.map((x) => prettyVal(k, x)).join(", ");
+  }
 
   // Objekte kompakt serialisieren
   if (v && typeof v === "object") {
     try { return JSON.stringify(v); } catch { return String(v); }
   }
 
-  // Standard: Wert direkt
+  // Standard: Zahlen deutsch, Rest als String
+  if (typeof v === "number" || (typeof v === "string" && isFinite(Number(v)))) {
+    return formatNumberDE(v, 4);
+  }
   return String(v);
 }
 
