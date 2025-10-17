@@ -561,6 +561,37 @@ function prettyVal(k, v) {
   return String(v);
 }
 
+// HTML-fähige Ausgabe für Tooltip-Werte (Zahlen/Vektoren mit ×10<sup>…</sup>)
+function prettyValHTML(k, v) {
+  if (v === null || v === undefined) return "—";
+
+  // Szenario-Aliase
+  if ((k === "szenario" || k === "scenario") && typeof v === "string") {
+    return escapeHtml(displayAltName(v) || v);
+  }
+
+  // Booleans
+  if (typeof v === "boolean") return v ? "Ja" : "Nein";
+
+  // Vektor als Array -> (x; y; z) mit 4 sig.
+  if (Array.isArray(v)) {
+    const numeric = v.every(x => x !== null && x !== undefined && isFinite(Number(x)));
+    return numeric ? formatVectorDE(v, 4) : v.map(x => escapeHtml(String(x))).join(", ");
+  }
+
+  // Objekt mit x/y/z als Vektor
+  if (v && typeof v === "object" && ["x","y","z"].every(p => p in v)) {
+    return formatVectorDE([v.x, v.y, v.z], 4);
+  }
+
+  // Reine Zahl (oder numeric String) -> deutsch + ×10<sup>…</sup>
+  if (typeof v === "number" || (typeof v === "string" && isFinite(Number(v)))) {
+    return formatNumberDE(v, 4);
+  }
+
+  // Rest sicher escapen
+  return escapeHtml(String(v));
+}
 
 // Sortiert Kontext-Einträge: erst laut CONTEXT_ORDER, dann Rest in Quell-Reihenfolge
 function orderContextEntries(ctx, pref = CONTEXT_ORDER) {
@@ -1128,7 +1159,7 @@ Tooltip.register('#modal-root .doc-list li', {
         kEl.textContent = prettyKey(k) + ": ";
         const vEl = document.createElement('span');
         vEl.className = 'ctx-v';
-        vEl.textContent = prettyVal(k, v);
+        vEl.innerHTML = prettyValHTML(k, v);
         row.appendChild(kEl);
         row.appendChild(vEl);
         root.appendChild(row);
