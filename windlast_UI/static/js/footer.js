@@ -97,19 +97,10 @@ const RESULTS_SELECTOR = "#results"; // ggf. anpassen an euren Container
 const CELL_SELECTOR = 'td[data-norm-key][data-nachweis], td.res-kipp, td.res-gleit, td.res-abhebe';
 
 function wireZwischenergebnisseUI() {
-  const root = document.querySelector(".results-table"); // <— statt #results
+  const root = document.querySelector(".results-table");
   if (!root) { console.warn("[ZwRes] .results-table nicht gefunden"); return; }
-
-  root.addEventListener("click", (e) => {
-    const td = e.target.closest('td[data-norm-key][data-nachweis], td[data-alt][data-nachweis][data-norm-key]');
-    if (!td) return;
-    // Debug:
-    console.log("[ZwRes] Klick auf Ergebniszelle", td.dataset);
-    const ctx = resolveCellContext(td);
-    if (!ctx) { console.warn("[ZwRes] Kein Kontext ermittelbar"); return; }
-    const docs = getDocsForModal(ctx);
-    openZwischenergebnisseModal(ctx, docs);
-  }, true);
+  // Delegation an den gemeinsamen Handler (öffnet ALLE Docs + UI-Filter)
+  root.addEventListener("click", onResultCellClick, true);
 }
 
 function wireZwischenergebnisseUIOnce() {
@@ -124,8 +115,8 @@ function onResultCellClick(e) {
   const ctx = resolveCellContext(td);
   if (!ctx) return;
 
-  const docs = getDocsForModal(ctx);
-  openZwischenergebnisseModal(ctx, docs);
+  const docsAll = getAllDocsForModal(ctx);
+  openZwischenergebnisseModal(ctx, docsAll, { initialNachweis: ctx.nachweis });
 }
 
 function resolveCellContext(td) {
@@ -152,7 +143,7 @@ function getDocsForModal({ normKey, nachweis, altName=null }) {
   return src.filter(d => (d?.context?.nachweis ?? null) === nachweis);
 }
 
-function openZwischenergebnisseModal({ normKey, nachweis, altName }, docs) {
+function openZwischenergebnisseModal({ normKey, nachweis, altName }, docsAll, { initialNachweis=null } = {}) {
   // Titel exakt wie bei Meldungen bauen
   const normName = getNormDisplayName(normKey);
   const niceScenario = altName ? (displayAltName ? displayAltName(altName) : altName) : null;
@@ -168,10 +159,34 @@ function openZwischenergebnisseModal({ normKey, nachweis, altName }, docs) {
   h.className = "modal-title";
   wrap.appendChild(h);
 
+  // --- Nachweis-Filterleiste ---
+  const bar = document.createElement("div");
+  bar.className = "nachweis-filter";
+  const choices = ["ALLE", "KIPP", "GLEIT", "ABHEB", "BALLAST", "LOADS"];
+  const start = (initialNachweis && choices.includes(initialNachweis)) ? initialNachweis : "ALLE";
+  bar.innerHTML = choices.map(c =>
+    `<button class="nf-chip${c===start?" active":""}" data-nachweis="${c}">${c==="ALLE"?"Alle":c}</button>`
+  ).join("");
+  wrap.appendChild(bar);
+
   // Gruppierte Ansicht: je Windrichtung ein auf-/zuklappbarer Block
   const list = document.createElement("div");
-  list.innerHTML = renderDocsByWindrichtung(docs);
+  const apply = (sel) => {
+    const filter = (sel && sel!=="ALLE") ? sel : null;
+    const docs = filter ? docsAll.filter(d => (d?.context?.nachweis ?? null) === filter) : docsAll;
+    list.innerHTML = renderDocsByWindrichtung(docs);
+  };
+  apply(start);
   wrap.appendChild(list);
+
+  // Click-Handler für die Chips
+  bar.addEventListener("click", (ev) => {
+    const btn = ev.target.closest(".nf-chip");
+    if (!btn) return;
+    bar.querySelectorAll(".nf-chip.active").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    apply(btn.dataset.nachweis);
+  });
 
   Modal.open(wrap);
 }
@@ -508,6 +523,12 @@ function renderDocsByAxis(docs) {
       </div>
     `;
   }).join("");
+}
+
+// NEU: holt alle Docs für Norm × (optional) Alternative – ohne Nachweis-Filter
+function getAllDocsForModal({ normKey, altName=null }) {
+  const norm = ResultsVM?.payload?.normen?.[normKey] || {};
+  return altName ? (norm.alternativen?.[altName]?.docs || []) : (norm.docs || []);
 }
 
 // Helper

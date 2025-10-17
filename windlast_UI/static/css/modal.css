@@ -281,3 +281,12 @@
 #modal-root .axis-group[open] > .axis-summary::before {
   content: "▾";
 }
+
+#modal-root .nachweis-filter {
+  display: flex; gap: .5rem; margin: .5rem 0 .75rem;
+}
+#modal-root .nf-chip {
+  border: 1px solid var(--border); border-radius: 999px; padding: .25rem .6rem;
+  background: var(--panel); cursor: pointer; font-size: .9rem;
+}
+#modal-root .nf-chip.active { background: var(--tab-bg); border-color: var(--tab-active-border); }
