@@ -66,6 +66,7 @@ def _eingeschlossene_flaeche_default(
                     einheit="m²",
                     einzelwerte=[laenge, hoehe],
                     formel="A_e = L · h",
+                    quelle_formel="Norm xyz (Abschnitt ...)",
                 ),
                 kontext=merge_kontext(base_ctx, {"nan": True}),
             )
@@ -81,6 +82,7 @@ def _eingeschlossene_flaeche_default(
                 einheit="m²",
                 einzelwerte=[laenge, hoehe],
                 formel="A_e = L · h",
+                quelle_formel="Norm xyz (Abschnitt ...)",
             ),
             kontext=base_ctx,
         )
@@ -109,6 +111,7 @@ def _eingeschlossene_flaeche_default(
                     einheit="m²",
                     einzelwerte=[laenge, d_aussen],
                     formel="A_e = L · d_aussen",
+                    quelle_formel="Norm xyz (Abschnitt ...)",
                 ),
                 kontext=merge_kontext(base_ctx, {"nan": True}),
             )
@@ -124,6 +127,7 @@ def _eingeschlossene_flaeche_default(
                 einheit="m²",
                 einzelwerte=[laenge, d_aussen],
                 formel="A_e = L · d_aussen",
+                quelle_formel="Norm xyz (Abschnitt ...)",
             ),
             kontext=base_ctx,
         )

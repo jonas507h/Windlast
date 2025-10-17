@@ -66,3 +66,13 @@
   background-color: rgba(100, 100, 100, 0.08);
   color: var(--text, #555);
 }
+
+/* Divider zwischen Formel/Quelle und Kontext im Tooltip */
+.ctx-tooltip .tt-divider,
+#modal-root .ctx-tooltip .tt-divider {   /* falls du Modal-Scoped Styles nutzt */
+  height: 1px;
+  width: 100%;
+  background: var(--border);
+  margin: 4px 0;
+  display: block;
+}

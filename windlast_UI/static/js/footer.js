@@ -187,8 +187,12 @@ function renderDocsSimpleList(docs) {
 
     // Für den Tooltip nur Rohdaten speichern: Formel + Kontext (JSON)
     const formula = d?.formula ? String(d.formula) : "";
+    const formulaSource = d?.formula_source ? String(d?.formula_source) : "";
     const ctxJson = escapeHtml(JSON.stringify(d?.context || {}));
-    const dataAttr = `data-formula="${escapeHtml(formula)}" data-ctx-json="${ctxJson}"`;
+    const dataAttr =
+      `data-formula="${escapeHtml(formula)}" ` +
+      `data-formula_source="${escapeHtml(String(formulaSource))}" ` +
+      `data-ctx-json="${ctxJson}"`
 
     return `
       <li class="doc-li" ${dataAttr}>
@@ -351,8 +355,12 @@ function renderDocsListItems(docs) {
 
     // Für den Tooltip: Rohdaten speichern
     const formula = d?.formula ? String(d.formula) : "";
+    const formulaSource = d?.formula_source ? String(d?.formula_source) : "";
     const ctxJson = escapeHtml(JSON.stringify(d?.context || {}));
-    const dataAttr = `data-formula="${escapeHtml(formula)}" data-ctx-json="${ctxJson}"`;
+    const dataAttr =
+      `data-formula="${escapeHtml(formula)}" ` +
+      `data-formula_source="${escapeHtml(String(formulaSource))}" ` +
+      `data-ctx-json="${ctxJson}"`
 
     return `
       <li class="doc-li" ${dataAttr}>
@@ -1073,6 +1081,7 @@ Tooltip.register('#modal-root .doc-list li', {
     const li = el.closest('li.doc-li');
     if (!li) return "";
     const formula = li.getAttribute('data-formula') || "";
+    const formulaSource = li.getAttribute('data-formula_source') || "";
     let ctx = {};
     try { ctx = JSON.parse(li.getAttribute('data-ctx-json') || "{}"); } catch {}
 
@@ -1088,7 +1097,22 @@ Tooltip.register('#modal-root .doc-list li', {
       root.appendChild(f);
     }
 
-    // 2) Kontext wie bei Fehlermeldungen
+    // 2) Quellenangabe (falls vorhanden)
+    if (formulaSource) {
+      const fs = document.createElement('div');
+      fs.className = 'ctx-formula-source';
+      fs.textContent = `Quelle: ${escapeHtml(formulaSource)}`;
+      root.appendChild(fs);
+    }
+
+    // Falls es Formel/Quelle gibt, Trennlinie einfügen
+    if (formula || formulaSource) {
+      const divider = document.createElement("div");
+      divider.className = "tt-divider";
+      root.appendChild(divider);
+    }
+
+    // 3) Kontext wie bei Fehlermeldungen
     const ordered = orderContextEntries(ctx);
     if (ordered.length === 0) {
       const empty = document.createElement('div');
