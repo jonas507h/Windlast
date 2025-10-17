@@ -69,12 +69,26 @@ def _ermittle_staudruecke(
     z = Obergrenzen, q = Staudrücke, beide als List[float].
     """
     reasons: List[Message] = []
-    base_ctx = merge_kontext(kontext, {"szenario_anzeigename": s.anzeigename, "szenario": s.label, "norm": s.norm.value})
+    base_ctx = merge_kontext(kontext, {
+        "szenario_anzeigename": s.anzeigename,
+        "szenario": s.label,
+        "norm": s.norm.value
+    })
+    # Alle Protokoll-Einträge der Staudruck-Ermittlung klar als "LOADS" kennzeichnen
+    loads_ctx = merge_kontext(base_ctx, {"nachweis": "LOADS"})
     try:
         if s.modus == "betrieb":
-            zl1, zl2 = staudruecke(s.norm, konstruktion, s.betriebszustand, aufstelldauer=aufstelldauer, windzone=None, protokoll=protokoll, kontext=base_ctx)
+            zl1, zl2 = staudruecke(
+                s.norm, konstruktion, s.betriebszustand,
+                aufstelldauer=aufstelldauer, windzone=None,
+                protokoll=protokoll, kontext=loads_ctx
+            )
         else:  # "schutz"
-            zl1, zl2 = staudruecke(s.norm, konstruktion, s.schutz,           aufstelldauer=aufstelldauer, windzone=s.windzone, protokoll=protokoll, kontext=base_ctx)
+            zl1, zl2 = staudruecke(
+                s.norm, konstruktion, s.schutz,
+                aufstelldauer=aufstelldauer, windzone=s.windzone,
+                protokoll=protokoll, kontext=loads_ctx
+            )
         z = list(zl1.wert)  # Obergrenzen
         q = list(zl2.wert)  # Staudrücke
 
@@ -99,7 +113,7 @@ def _ermittle_staudruecke(
         reasons.append(Message(
             code=code, severity=sev,
             text=f"{txt} ({s.norm.name}, {s.label}) fehlgeschlagen: {e}",
-            context={},
+            context={"nachweis": "LOADS"},
         ))
         return None, None, reasons
 

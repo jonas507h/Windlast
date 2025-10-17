@@ -173,7 +173,12 @@ function openZwischenergebnisseModal({ normKey, nachweis, altName }, docsAll, { 
   const list = document.createElement("div");
   const apply = (sel) => {
     const filter = (sel && sel!=="ALLE") ? sel : null;
-    const docs = filter ? docsAll.filter(d => (d?.context?.nachweis ?? null) === filter) : docsAll;
+    const docs = filter
+     ? docsAll.filter(d => {
+         const n = d?.context?.nachweis ?? null;
+         return n === filter || n === "LOADS" || n === null;
+       })
+     : docsAll;
     list.innerHTML = renderDocsByWindrichtung(docs);
   };
   apply(start);

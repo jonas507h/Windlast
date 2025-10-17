@@ -142,7 +142,7 @@ def _kippsicherheit_DinEn13814_2005_06(
                 obergrenzen=obergrenzen,
                 konst=konst,
                 protokoll=sub_prot,
-                kontext=base_ctx,
+                kontext=merge_kontext(base_ctx, {"nachweis": "LOADS"}),
             )
             kraefte_nach_element = lastset.kraefte_nach_element
 
@@ -385,7 +385,7 @@ def _kippsicherheit_DinEn17879_2024_08(
                 obergrenzen=obergrenzen,
                 konst=konst,
                 protokoll=sub_prot,
-                kontext=base_ctx,
+                kontext=merge_kontext(base_ctx, {"nachweis": "LOADS"}),
             )
             kraefte_nach_element = lastset.kraefte_nach_element
 
