@@ -489,6 +489,9 @@ function _pickAxisIndex(ctx) {
   const v =
     ctx.achse_index ??    // bevorzugt (kommt in euren Kontexten vor)
     null;
+  
+  if (v === null || v === undefined || v === "") return null;
+  if (typeof v === "boolean") return null; // Safety, falls mal true/false reinkommt
 
   const n = Number(v);
   return Number.isFinite(n) ? n : null;
@@ -514,16 +517,26 @@ function groupDocsByAxis(docs) {
 
 function renderDocsByAxis(docs) {
   const { groups, keys } = groupDocsByAxis(docs);
+
+  // Hat das Set IRGENDEINE numerische Achse?
+  const hasAxes = keys.some(k => k !== "__ohne_achse__");
+
+  // Fall A: keine Achsen → direkt Liste unter "allgemein"
+  if (!hasAxes) {
+    const only = groups.get("__ohne_achse__") || [];
+    return `<ul class="doc-list">${renderDocsListItems(only)}</ul>`;
+  }
+
+  // Fall B: Achsen vorhanden → Achse 0/1/… UND „ohne Achse“ separat rendern
   return keys.map((k, idx) => {
     const list = groups.get(k) || [];
     const title = (k === "__ohne_achse__") ? "ohne Achse" : `Achse ${k}`;
-    const countBadge = `<span class="muted" style="font-weight:400; margin-left:.5rem;">(${list.length})</span>`;
-    const lis = renderDocsListItems(list); // nutzt dein bestehendes LI-Markup
+    const count = `<span class="muted" style="font-weight:400; margin-left:.5rem;">(${list.length})</span>`;
     return `
       <div class="group-card axis-card">
         <details class="axis-group"${idx === 0 ? " open" : ""}>
-          <summary class="axis-summary">${escapeHtml(title)} ${countBadge}</summary>
-          <ul class="doc-list">${lis}</ul>
+          <summary class="axis-summary">${escapeHtml(title)} ${count}</summary>
+          <ul class="doc-list">${renderDocsListItems(list)}</ul>
         </details>
       </div>
     `;
