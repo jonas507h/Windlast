@@ -1105,6 +1105,7 @@ function openMessagesModalFor(normKey, szenario = null) {
       if (ctxText) {
         li.setAttribute("data-ctx", ctxText);
       }
+      try { li.setAttribute("data-ctx-json", JSON.stringify(m?.context || {})); } catch {}
 
       ul.appendChild(li);
     }
@@ -1141,16 +1142,44 @@ function openMessagesModalFor(normKey, szenario = null) {
   }, { passive: true });
 })();
 
-// Tooltip für Meldungseinträge im Modal: zeigt den Kontext
-Tooltip.register('#modal-root .messages-list li[data-ctx]', {
-  // wichtig: auch Treffer auf Kindelementen zulassen
-  predicate: (el) => !!el.closest('li[data-ctx]'),
+// Tooltip für Meldungseinträge im Modal: zeigt den Kontext (HTML-fähig)
+Tooltip.register('#modal-root .messages-list li', {
+  predicate: (el) => !!el.closest('li'),
   content: (_ev, el) => {
-    const li = el.closest('li[data-ctx]');
-    return li ? (li.getAttribute('data-ctx') || "") : "";
+    const li = el.closest('li');
+    if (!li) return "";
+
+    // wenn JSON vorhanden -> schöne HTML-Ansicht; sonst Fallback auf data-ctx Text
+    let ctx = {};
+    try { ctx = JSON.parse(li.getAttribute('data-ctx-json') || "{}"); } catch {}
+
+    const root = document.createElement("div");
+    root.className = "ctx-tooltip";
+
+    const ordered = orderContextEntries(ctx);
+    if (!ordered.length) {
+      const plain = li.getAttribute('data-ctx') || "";
+      return plain || ""; // Fallback (alter Modus)
+    }
+
+    for (const [k, v] of ordered) {
+      const row = document.createElement('div');
+      row.className = 'ctx-row';
+      const kEl = document.createElement('span');
+      kEl.className = 'ctx-k';
+      kEl.textContent = prettyKey(k) + ": ";
+      const vEl = document.createElement('span');
+      vEl.className = 'ctx-v';
+      vEl.innerHTML = prettyValHTML(k, v); // ← HTML: Vektoren mit ×10<sup>…</sup>
+      row.appendChild(kEl);
+      row.appendChild(vEl);
+      root.appendChild(row);
+    }
+    return root;
   },
   delay: 80
 });
+
 
 // Tooltip für Zwischenergebnis-Einträge im Modal (Node-basiert => HTML möglich)
 Tooltip.register('#modal-root .doc-list li', {
