@@ -290,3 +290,39 @@
   background: var(--panel); cursor: pointer; font-size: .9rem;
 }
 #modal-root .nf-chip.active { background: var(--tab-bg); border-color: var(--tab-active-border); }
+
+/* Nachweis-Filter: Farben immer aus dem Theme holen */
+#modal-root .nachweis-filter .nf-chip {
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: .25rem .6rem;
+  font-size: .9rem;
+  line-height: 1;
+  cursor: pointer;
+
+  /* Buttons verhalten sich überall gleich */
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+}
+
+#modal-root .nachweis-filter .nf-chip:hover {
+  filter: brightness(0.97);
+}
+
+#modal-root .nachweis-filter .nf-chip:focus-visible {
+  box-shadow: 0 0 0 2px var(--tab-active-border);
+}
+
+#modal-root .nachweis-filter .nf-chip.active {
+  background: var(--tab-bg);
+  border-color: var(--tab-active-border);
+  color: var(--text); /* wichtig: nicht invertieren */
+}
+
+/* Optional: Badge-Zahlen dezenter */
+#modal-root .nachweis-filter .nf-chip .muted {
+  color: var(--muted);
+}
