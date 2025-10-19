@@ -326,3 +326,59 @@
 #modal-root .nachweis-filter .nf-chip .muted {
   color: var(--muted);
 }
+
+/* ===== Rollen-Highlighting für Zwischenergebnisse ===== */
+/* Grundidee: leichter Hintergrund + linker Akzentbalken, wie bei Meldungen */
+
+#modal-root .doc-list .doc-li {
+  position: relative;
+  border-radius: 4px;                  /* sanfte Ecken wie .tt-line */
+  margin-bottom: 1px;
+}
+
+/* Default = Light */
+:root {
+  --role-key-bg: rgba(45, 108, 223, 0.12);
+  --role-key-fg:  #2d6cdf;
+
+  --role-rel-bg: rgba(46, 204, 93, 0.322);
+  --role-rel-fg:  #2e8b57;
+
+  --role-irr-bg: rgba(100, 100, 100, 0.08);
+  --role-irr-fg:  var(--text, #555);
+}
+
+/* System-Dark Fallback (falls kein explizites Theme gesetzt ist) */
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]):not(.light) {
+    --role-key-bg: rgba(45, 108, 223, 0.12);
+    --role-key-fg:  #2d6cdf;
+    --role-rel-bg: rgba(46, 204, 93, 0.322);
+    --role-rel-fg:  #76d39a;
+    --role-irr-bg: rgba(100, 100, 100, 0.08);
+    --role-irr-fg:  var(--text, #555);
+  }
+}
+
+/* App-Toggle Dark (passe deinen Selector an: data-theme oder .dark o.ä.) */
+:root[data-theme="dark"], .dark {
+  --role-key-bg: rgba(45, 108, 223, 0.12);
+  --role-key-fg:  #2d6cdf;
+  --role-rel-bg: rgba(46, 204, 93, 0.322);
+  --role-rel-fg:  #76d39a;
+  --role-irr-bg: rgba(100, 100, 100, 0.08);
+  --role-irr-fg:  var(--text, #555);
+}
+
+#modal-root .doc-list .doc-li.role-key {
+  background-color: var(--role-key-bg);
+  color: var(--role-key-fg);
+}
+#modal-root .doc-list .doc-li.role-rel {
+  background-color: var(--role-rel-bg);
+  color: var(--role-rel-fg);
+}
+#modal-root .doc-list .doc-li.role-irr {
+  background-color: var(--role-irr-bg);
+  color: var(--role-irr-fg);
+}

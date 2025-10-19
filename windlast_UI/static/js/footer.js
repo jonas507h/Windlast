@@ -382,8 +382,16 @@ function renderDocsListItems(docs) {
       `data-formula_source="${escapeHtml(String(formulaSource))}" ` +
       `data-ctx-json="${ctxJson}"`
 
+    // Rolle (relevant | entscheidungsrelevant | irrelevant) als Klasse
+    const roleRaw = (d?.context?.rolle ?? d?.context?.role ?? "").toString().toLowerCase();
+    const roleClass =
+      roleRaw === "entscheidungsrelevant" ? "role-key" :
+      roleRaw === "relevant"              ? "role-rel" :
+      roleRaw === "irrelevant"            ? "role-irr" : "";
+    const roleAttr = roleRaw ? ` data-rolle="${escapeHtml(roleRaw)}"` : "";
+
     return `
-      <li class="doc-li" ${dataAttr}>
+      <li class="doc-li ${roleClass}" ${dataAttr}${roleAttr}>
         <span class="doc-title">${titleHtml}</span>
         <span class="doc-eq"> = </span>
         <span class="doc-val">${val}${unitHtml}</span>
