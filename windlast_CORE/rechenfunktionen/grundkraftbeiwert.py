@@ -57,11 +57,10 @@ def _validate_inputs(
     if not isinstance(objekttyp, ObjektTyp):
         raise TypeError("objekttyp muss vom Typ ObjektTyp sein.")
 
-    n_wind = vektor_laenge(windrichtung)
-    if not (0.999 <= n_wind <= 1.001):
-        raise ValueError(f"windrichtung soll Einheitsvektor sein (||v||≈1), ist {n_wind:.6f}.")
-
     if objekttyp == ObjektTyp.TRAVERSE:
+        n_wind = vektor_laenge(windrichtung)
+        if not (0.999 <= n_wind <= 1.001):
+            raise ValueError(f"windrichtung soll Einheitsvektor sein (||v||≈1), ist {n_wind:.6f}.")
         if not objekt_name_intern:
             raise ValueError("Für TRAVERSE ist objekt_name_intern erforderlich.")
         if not isinstance(punkte, (list, tuple)) or len(punkte) < 3:
@@ -246,7 +245,19 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
         return Zwischenergebnis(wert=wert)
 
     else:
-        raise NotImplementedError(f"Objekttyp '{objekttyp}' wird aktuell nicht unterstützt.")
+        protokolliere_msg(
+            protokoll,
+            severity=Severity.ERROR,
+            code="GRUNDKRAFT/NOT_IMPLEMENTED",
+            text=f"Grundkraftbeiwert für Objekttyp '{objekttyp.value}' ist noch nicht implementiert.",
+            kontext=base_ctx,
+        )
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(titel="Grundkraftbeiwert c₀", wert=float("nan")),
+            kontext=merge_kontext(base_ctx, {"nan": True}),
+        )
+        return Zwischenergebnis(wert=float("nan"))
 
 _DISPATCH: Dict[Norm, Callable[..., Zwischenergebnis]] = {
     Norm.DEFAULT: _grundkraftbeiwert_DinEn1991_1_4_2010_12,

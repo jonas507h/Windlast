@@ -21,17 +21,17 @@ def _validate_inputs(
     windrichtung: Vec3,   # Einheitsvektor
 ) -> None:
     if not isinstance(objekttyp, ObjektTyp):
-        raise TypeError("objekttyp muss vom Typ ObjektTyp sein.")
+        raise TypeError("Objekttyp muss vom Typ ObjektTyp sein.")
     if not math.isfinite(windkraft) or windkraft < 0:
-        raise ValueError("windkraft muss endlich und ≥ 0 sein.")
+        raise ValueError("Windkraft muss endlich und ≥ 0 sein.")
 
     n = vektor_laenge(windrichtung)
     if not (0.999 <= n <= 1.001):
-        raise ValueError(f"windrichtung soll Einheitsvektor sein (||v||≈1), ist {n:.6f}.")
+        raise ValueError(f"Windrichtung soll Einheitsvektor sein (||v||≈1), ist {n:.6f}.")
 
     # punkte ist optional. Wenn übergeben, kurz prüfen:
     if punkte is not None and not isinstance(punkte, (list, tuple)):
-        raise ValueError("punkte muss eine Sequenz sein, falls gesetzt.")
+        raise ValueError("Punkte muss eine Sequenz sein, falls gesetzt.")
     
 def _windkraft_zu_vektor_default(
     objekttyp: ObjektTyp,
@@ -62,13 +62,49 @@ def _windkraft_zu_vektor_default(
                 wert=kraft_vec,
                 einzelwerte=[windkraft, ex, ey, ez],
                 formel="F⃗ = F · ê",
+                einheit="N",
                 formelzeichen=["F⃗", "F", "ê"],
                 quelle_formelzeichen=["Projektinterne Bezeichnungen"],
             ),
             kontext=base_ctx,
         )
         return Zwischenergebnis_Vektor(wert=kraft_vec)
-    raise NotImplementedError(f"windkraft_zu_vektor für Objekttyp '{objekttyp}' ist noch nicht implementiert.")
+    
+    if objekttyp == ObjektTyp.ROHR:
+        # Für Rohr: Richtung der Windkraft = Windrichtung
+        ex, ey, ez = windrichtung
+        kraft_vec: Vec3 = (windkraft * ex, windkraft * ey, windkraft * ez)
+
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(
+                titel="Windkraft-Vektor F⃗_w",
+                wert=kraft_vec,
+                einzelwerte=[windkraft, ex, ey, ez],
+                formel="F⃗ = F · ê",
+                einheit="N",
+                formelzeichen=["F⃗", "F", "ê"],
+                quelle_formelzeichen=["Projektinterne Bezeichnungen"],
+            ),
+            kontext=base_ctx,
+        )
+        return Zwischenergebnis_Vektor(wert=kraft_vec)
+    
+    else:
+        protokolliere_msg(
+            protokoll,
+            severity=Severity.ERROR,
+            code="WINDVEK/NOT_IMPLEMENTED",
+            text=f"Windkraft-Vektor für Objekttyp {objekttyp.value} ist noch nicht implementiert.",
+            kontext=base_ctx,
+        )
+        bad = (float("nan"), float("nan"), float("nan"))
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(titel="Windkraft-Vektor F⃗_w", wert=bad),
+            kontext=merge_kontext(base_ctx, {"nan": True}),
+        )
+        return Zwischenergebnis_Vektor(wert=bad)
 
 _DISPATCH: Dict[Norm, Callable[..., Zwischenergebnis_Vektor]] = {
     Norm.DEFAULT: _windkraft_zu_vektor_default,

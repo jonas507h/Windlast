@@ -44,7 +44,6 @@ def _reynoldszahl_DinEn1991_1_4_2010_12(
     })
 
     if objekttyp == ObjektTyp.TRAVERSE:
-        geschwindigkeit = math.sqrt(2.0 * staudruck / luftdichte)
         traverse = catalog.get_traverse(objekt_name_intern)
         charak_Laenge = traverse.d_gurt  # charakteristische Länge (hier: Durchmesser Gurt)
         
@@ -68,6 +67,20 @@ def _reynoldszahl_DinEn1991_1_4_2010_12(
             )
             return Zwischenergebnis(wert=float("nan"))
         
+        geschwindigkeit = math.sqrt(2.0 * staudruck / luftdichte)
+
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(
+                titel="Strömungsgeschwindigkeit v",
+                wert=geschwindigkeit,
+                einzelwerte=[staudruck, luftdichte],
+                formel="v = √(2·q/ρ)",
+                einheit="m/s",
+            ),
+            kontext=base_ctx,
+        )
+
         wert = geschwindigkeit * charak_Laenge / zaehigkeit
 
         protokolliere_doc(

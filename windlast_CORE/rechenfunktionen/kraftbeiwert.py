@@ -56,6 +56,20 @@ def _kraftbeiwert_default(
             kontext=base_ctx,
         )
         return Zwischenergebnis(wert=wert)
+    
+    if objekttyp == ObjektTyp.ROHR:
+        wert = grundkraftbeiwert * abminderungsfaktor_schlankheit
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(
+                titel="Kraftbeiwert c",
+                wert=wert,
+                einzelwerte=[grundkraftbeiwert, abminderungsfaktor_schlankheit],
+                formel="c = c₀ · η_schlank",
+            ),
+            kontext=base_ctx,
+        )
+        return Zwischenergebnis(wert=wert)
 
     # Andere Objekttypen:
     raise NotImplementedError(f"Schlankheit für Objekttyp '{objekttyp}' ist noch nicht implementiert.")

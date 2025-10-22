@@ -51,6 +51,7 @@ def _windkraft_default(
                 wert=wert,
                 einzelwerte=[kraftbeiwert, staudruck, projizierte_flaeche],
                 formel="F = c · q · A",
+                einheit="N",
                 formelzeichen=["F", "c", "q", "A"],
                 quelle_formelzeichen=["Projektinterne Bezeichnungen"],
             ),
@@ -61,8 +62,42 @@ def _windkraft_default(
         )
         return Zwischenergebnis(wert=wert)
     
-    # Andere Objekttypen:
-    raise NotImplementedError(f"Schlankheit für Objekttyp '{objekttyp}' ist noch nicht implementiert.")
+    elif objekttyp == ObjektTyp.ROHR:
+        wert = kraftbeiwert * staudruck * projizierte_flaeche
+
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(
+                titel="Windkraft F_w",
+                wert=wert,
+                einzelwerte=[kraftbeiwert, staudruck, projizierte_flaeche],
+                formel="F = c · q · A",
+                einheit="N",
+                formelzeichen=["F", "c", "q", "A"],
+                quelle_formelzeichen=["Projektinterne Bezeichnungen"],
+            ),
+            kontext=merge_kontext(kontext, {
+                "funktion": "Windkraft",
+                "objekttyp": getattr(objekttyp, "value", str(objekttyp)),
+            }),
+        )
+        return Zwischenergebnis(wert=wert)
+    
+    else:
+        # Andere Objekttypen:
+        protokolliere_msg(
+            protokoll,
+            severity=Severity.ERROR,
+            code="WINDKRAFT/NOT_IMPLEMENTED",
+            text=f"Windkraft für Objekttyp '{objekttyp.value}' ist noch nicht implementiert.",
+            kontext=kontext,
+        )
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(titel="Windkraft F_w", wert=float("nan")),
+            kontext=kontext,
+        )
+        return Zwischenergebnis(wert=float("nan"))
 
 _DISPATCH: Dict[Norm, Callable[..., Zwischenergebnis]] = {
     Norm.DEFAULT: _windkraft_default,

@@ -30,6 +30,13 @@ def _validate_inputs(
             raise ValueError("Start- und Endpunkt dürfen nicht identisch (bzw. zu nah) sein.")
         if not objekt_name_intern:
             raise ValueError("Für TRAVERSE ist objekt_name_intern erforderlich.")
+    elif objekttyp == ObjektTyp.ROHR:
+        if not isinstance(punkte, (list, tuple)) or len(punkte) < 2:
+            raise ValueError("Für ROHR werden [start, ende] erwartet.")
+        if abstand_punkte(punkte[0], punkte[1]) <= _EPS:
+            raise ValueError("Start- und Endpunkt dürfen nicht identisch (bzw. zu nah) sein.")
+        if not objekt_name_intern:
+            raise ValueError("Für ROHR ist objekt_name_intern erforderlich.")
     else:
         # Für andere Objekttypen noch unklar → Platzhalter
         raise NotImplementedError(f"Schlankheit für Objekttyp '{objekttyp}' ist noch nicht implementiert.")
@@ -199,7 +206,6 @@ def schlankheit(
         )
         return Zwischenergebnis(wert=float("nan"))
     
-    _validate_inputs(objekttyp, objekt_name_intern, punkte)
     funktion = _DISPATCH.get(norm, _DISPATCH[Norm.DEFAULT])
     return funktion(
         objekttyp, objekt_name_intern, punkte,
