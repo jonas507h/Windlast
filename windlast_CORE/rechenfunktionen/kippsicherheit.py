@@ -582,7 +582,7 @@ def _kippsicherheit_DinEn17879_2024_08(
             _emit_docs_with_role(
                 dst_protokoll=protokoll,
                 docs=rec["docs"],
-                base_ctx=merge_kontext(base_ctx, {"nachweis": "KIPP", "windrichtung_deg": rec["winkel_deg"]}),
+                base_ctx=merge_kontext(base_ctx, {"nachweis": "KIPP"}),
                 role=role_block,
             )
             # Gewinner-Achse in Gewinner-Richtung aufwerten → 'relevant'
@@ -597,8 +597,6 @@ def _kippsicherheit_DinEn17879_2024_08(
                                 bundle=bundle,
                                 kontext=merge_kontext(base_ctx, {
                                     "nachweis": "KIPP",
-                                    "windrichtung_deg": rec["winkel_deg"],
-                                    "achse_index": best_ax,
                                     "doc_type": ctx.get("doc_type"),
                                     "rolle": "relevant",
                                 }),
@@ -613,26 +611,26 @@ def _kippsicherheit_DinEn17879_2024_08(
         protokolliere_doc(
             protokoll,
             bundle=make_docbundle(
-                titel="Kippsicherheit S",
+                titel="Kippsicherheit S_kipp",
                 wert=sicherheit_min_global,
-                formel="S = ΣM_St / ΣM_K",
+                formel="S_kipp = ΣM_St / ΣM_K",
                 quelle_formel="---",
                 formelzeichen=["M_St", "M_K"],
                 quelle_formelzeichen=["---"],
             ),
-            kontext=merge_kontext(base_ctx, {"nachweis": "KIPP", "rolle": "relevant", "windrichtung_deg": winner["winkel_deg"]}),
+            kontext=merge_kontext(base_ctx, {"nachweis": "KIPP", "rolle": "relevant"}),
         )
         protokolliere_doc(
             protokoll,
             bundle=make_docbundle(
-                titel="Erforderlicher Ballast ΔW",
+                titel="Erforderlicher Ballast m_Ballast,kipp",
                 wert=ballast_kg,
-                formel="ΔW = max(0, ΣM_K − ΣM_St) / (γ_g · m_stand,1N)",
+                formel="m_Ballast,kipp = max(0, ΣM_K − ΣM_St) / (γ_g · m_stand,1N)",
                 quelle_formel="---",
                 formelzeichen=["M_K", "M_St", "γ_g", "m_stand,1N", "g"],
                 quelle_formelzeichen=["---"],
             ),
-            kontext=merge_kontext(base_ctx, {"nachweis": "KIPP", "rolle": "relevant", "windrichtung_deg": winner["winkel_deg"]}),
+            kontext=merge_kontext(base_ctx, {"nachweis": "KIPP", "rolle": "relevant"}),
         )
 
         return [Zwischenergebnis(wert=sicherheit_min_global), Zwischenergebnis(wert=ballast_kg)]

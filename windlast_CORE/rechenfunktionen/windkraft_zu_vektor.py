@@ -58,12 +58,12 @@ def _windkraft_zu_vektor_default(
         protokolliere_doc(
             protokoll,
             bundle=make_docbundle(
-                titel="Windkraft-Vektor F⃗_w",
+                titel="Windkraft-Vektor F_W",
                 wert=kraft_vec,
                 einzelwerte=[windkraft, ex, ey, ez],
-                formel="F⃗ = F · ê",
+                formel="F_W = F · ê",
                 einheit="N",
-                formelzeichen=["F⃗", "F", "ê"],
+                formelzeichen=["F_W", "F", "ê"],
                 quelle_formelzeichen=["Projektinterne Bezeichnungen"],
             ),
             kontext=base_ctx,
@@ -78,12 +78,12 @@ def _windkraft_zu_vektor_default(
         protokolliere_doc(
             protokoll,
             bundle=make_docbundle(
-                titel="Windkraft-Vektor F⃗_w",
+                titel="Windkraft (Vektor) F_W",
                 wert=kraft_vec,
                 einzelwerte=[windkraft, ex, ey, ez],
-                formel="F⃗ = F · ê",
+                formel="F_W = F · ê",
                 einheit="N",
-                formelzeichen=["F⃗", "F", "ê"],
+                formelzeichen=["F_W", "F", "ê"],
                 quelle_formelzeichen=["Projektinterne Bezeichnungen"],
             ),
             kontext=base_ctx,
@@ -101,7 +101,7 @@ def _windkraft_zu_vektor_default(
         bad = (float("nan"), float("nan"), float("nan"))
         protokolliere_doc(
             protokoll,
-            bundle=make_docbundle(titel="Windkraft-Vektor F⃗_w", wert=bad),
+            bundle=make_docbundle(titel="Windkraft (Vektor) F_W", wert=bad),
             kontext=merge_kontext(base_ctx, {"nan": True}),
         )
         return Zwischenergebnis_Vektor(wert=bad)

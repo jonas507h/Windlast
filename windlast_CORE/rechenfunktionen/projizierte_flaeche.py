@@ -77,10 +77,9 @@ def _projizierte_flaeche_default(
             protokolliere_doc(
                 protokoll,
                 bundle=make_docbundle(
-                    titel="Projizierte Fläche A_p",
+                    titel="Projizierte Fläche A",
                     wert=float("nan"),
-                    einzelwerte=[laenge, getattr(traverse, 'd_gurt', None), getattr(traverse, 'd_diagonalen', None)],
-                    formel="A_p = 2·L·d_gurt + 3,2·L·d_diag (Ebner-Vereinfachung)",
+                    formel="A = 2·L·d_gurt + 3,2·L·d_diag (Ebner-Vereinfachung)",
                 ),
                 kontext=merge_kontext(base_ctx, {"nan": True}),
             )
@@ -100,10 +99,9 @@ def _projizierte_flaeche_default(
             protokolliere_doc(
                 protokoll,
                 bundle=make_docbundle(
-                    titel="Projizierte Fläche A_p",
+                    titel="Projizierte Fläche A",
                     wert=float("nan"),
-                    einzelwerte=[laenge, d_gurt, d_diag],
-                    formel="A_p = 2·L·d_gurt + 3,2·L·d_diag",
+                    formel="A = 2·L·d_gurt + 3,2·L·d_diag",
                 ),
                 kontext=merge_kontext(base_ctx, {"nan": True}),
             )
@@ -115,10 +113,10 @@ def _projizierte_flaeche_default(
         protokolliere_doc(
             protokoll,
             bundle=make_docbundle(
-                titel="Projizierte Fläche A_p",
+                titel="Projizierte Fläche A",
                 wert=wert,
-                einzelwerte=[laenge, d_gurt, d_diag],
-                formel="A_p = 2·L·d_gurt + 3,2·L·d_diag",
+                einheit="m²",
+                formel="A = 2·L·d_gurt + 3,2·L·d_diag",
             ),
             kontext=base_ctx,
         )
@@ -142,10 +140,9 @@ def _projizierte_flaeche_default(
             protokolliere_doc(
                 protokoll,
                 bundle=make_docbundle(
-                    titel="Projizierte Fläche A_p",
+                    titel="Projizierte Fläche A",
                     wert=float("nan"),
-                    einzelwerte=[laenge, d_aussen],
-                    formel="A_p = L·d_aussen",
+                    formel="A = L·d_aussen",
                 ),
                 kontext=merge_kontext(base_ctx, {"nan": True}),
             )
@@ -156,10 +153,10 @@ def _projizierte_flaeche_default(
         protokolliere_doc(
             protokoll,
             bundle=make_docbundle(
-                titel="Projizierte Fläche A_p",
+                titel="Projizierte Fläche A",
                 wert=wert,
-                einzelwerte=[laenge, d_aussen],
-                formel="A_p = L·d_aussen",
+                einheit="m²",
+                formel="A = L·d_aussen",
             ),
             kontext=base_ctx,
         )

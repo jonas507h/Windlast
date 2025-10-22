@@ -213,6 +213,7 @@ def _winddruck_DinEn13814_2005_06(
         bundle=make_docbundle(
             titel="Obergrenzen z_max",
             wert=obergrenzen,
+            einheit="m",
             formel="z_max Klassen",
             quelle_formel="DIN EN 13814:2005-06 (Tabelle q vs. Bauhöhe)",
             formelzeichen=["z_max"],
@@ -225,6 +226,7 @@ def _winddruck_DinEn13814_2005_06(
         bundle=make_docbundle(
             titel="Staudrücke q",
             wert=q_werte,
+            einheit="N/m²",
             formel="q(z)",
             quelle_formel="DIN EN 13814:2005-06 (Tabelle q vs. Bauhöhe)",
             formelzeichen=["q"],
@@ -286,6 +288,7 @@ def _winddruck_DinEn17879_2024_08(
         bundle=make_docbundle(
             titel="Obergrenzen z_max",
             wert=obergrenzen,
+            einheit="m",
             formel="z_max Klassen",
             quelle_formel="DIN EN 17879:2024-08 (Tabelle q vs. Bauhöhe)",
             formelzeichen=["z_max"],
@@ -298,6 +301,7 @@ def _winddruck_DinEn17879_2024_08(
         bundle=make_docbundle(
             titel="Staudrücke q",
             wert=q_werte,
+            einheit="N/m²",
             formel="q(z)",
             quelle_formel="DIN EN 17879:2024-08 (Tabelle q vs. Bauhöhe)",
             formelzeichen=["q"],
@@ -397,6 +401,7 @@ def _geschwindigkeitsdruck_DinEn1991_1_4_2010_12(
         bundle=make_docbundle(
             titel="z_max (Klassen-Obergrenze zu h)",
             wert=[gueltige_obergrenze],
+            einheit="m",
             formel="z_max (zu h)",
             quelle_formel="DIN EN 1991-1-4:2010-12 (Zonen-Tabelle)",
             formelzeichen=["z_max"],
@@ -409,6 +414,7 @@ def _geschwindigkeitsdruck_DinEn1991_1_4_2010_12(
         bundle=make_docbundle(
             titel="Geschwindigkeitsdruck q",
             wert=[q_eff],
+            einheit="N/m²",
             formel="q(z=h)",
             quelle_formel="DIN EN 1991-1-4:2010-12 (Zonen-Tabelle); ggf. Faktor für vorübergehenden Zustand",
             formelzeichen=["q"],

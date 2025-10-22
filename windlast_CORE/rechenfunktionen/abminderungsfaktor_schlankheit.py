@@ -44,6 +44,7 @@ def _abminderungsfaktor_schlankheit_default(
 ) -> Zwischenergebnis:
     """
     Bilineare Interpolation des Abminderungsfaktors auf Tabelle (λ vs. φ).
+).
     Werte außerhalb des Tabellenbereichs werden auf den Randbereich geklemmt.
     Der Objekttyp ist zzt. ohne Einfluss (Platzhalter für zukünftige Spezialisierungen).
     """
@@ -88,11 +89,11 @@ def _abminderungsfaktor_schlankheit_default(
     protokolliere_doc(
         protokoll,
         bundle=make_docbundle(
-            titel="Abminderungsfaktor η_schlank",
+            titel="Abminderungsfaktor ψ_λ",
             wert=wert,
-            formel="bilinear λ–φ → η",
+            formel="bilinear λ–φ → ψ_λ",
             quelle_formel="Projekt-/Tabellenwerte (λ×φ → Abminderungsfaktor)",
-            formelzeichen=["η", "λ", "φ"],
+            formelzeichen=["ψ", "λ", "φ"],
             quelle_formelzeichen=["Projektinterne Bezeichnungen"],
             einzelwerte=[x, y],
         ),
@@ -134,7 +135,7 @@ def abminderungsfaktor_schlankheit(
         )
         protokolliere_doc(
             protokoll,
-            bundle=make_docbundle(titel="Abminderungsfaktor η_schlank", wert=float("nan")),
+            bundle=make_docbundle(titel="Abminderungsfaktor ψ_λ", wert=float("nan")),
             kontext=merge_kontext(base_ctx, {"nan": True}),
         )
         return Zwischenergebnis(wert=float("nan"))

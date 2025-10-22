@@ -111,13 +111,12 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
                 protokoll,
                 severity=Severity.ERROR,
                 code="GRUNDKRAFT/RE_OUT_OF_RANGE",
-                text=f"Reynoldszahl {reynoldszahl:.3g} > 2·10^5: c₀ nicht definiert.",
+                text=f"Reynoldszahl {reynoldszahl:.3g} > 2·10^5: c_f,0 nicht definiert.",
                 kontext=base_ctx,
             )
             protokolliere_doc(
                 protokoll,
-                bundle=make_docbundle(titel="Grundkraftbeiwert c₀", wert=float("nan"),
-                                      einzelwerte=[voelligkeitsgrad, reynoldszahl]),
+                bundle=make_docbundle(titel="Grundkraftbeiwert c_f,0", wert=float("nan")),
                 kontext=merge_kontext(base_ctx, {"nan": True}),
             )
             return Zwischenergebnis(wert=float("nan"))
@@ -204,8 +203,7 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
             )
             protokolliere_doc(
                 protokoll,
-                bundle=make_docbundle(titel="Grundkraftbeiwert c₀", wert=float("nan"),
-                                      einzelwerte=[voelligkeitsgrad, reynoldszahl, str(anstroemrichtung)]),
+                bundle=make_docbundle(titel="Grundkraftbeiwert c_f,0", wert=float("nan")),
                 kontext=merge_kontext(base_ctx, {"nan": True}),
             )
             return Zwischenergebnis(wert=float("nan"))
@@ -213,10 +211,8 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
         protokolliere_doc(
             protokoll,
             bundle=make_docbundle(
-                titel="Grundkraftbeiwert c₀",
+                titel="Grundkraftbeiwert c_f,0",
                 wert=wert,
-                einzelwerte=[voelligkeitsgrad, reynoldszahl, str(anstroemrichtung), traversentyp.name],
-                # formel/quelle kannst du ergänzen, sobald referenziert
             ),
             kontext=base_ctx,
         )
@@ -228,7 +224,7 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
                 protokoll,
                 severity=Severity.WARN,
                 code="GRUNDKRAFT/RE_HIGH_SET_1_2",
-                text=f"Re={reynoldszahl:.3g} > 1,8·10^5: setze c₀ = 1,2 (ungünstigster Wert).",
+                text=f"Re={reynoldszahl:.3g} > 1,8·10^5: setze c_f,0 = 1,2 (ungünstigster Wert).",
                 kontext=base_ctx,
             )
         
@@ -236,9 +232,8 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
         protokolliere_doc(
             protokoll,
             bundle=make_docbundle(
-                titel="Grundkraftbeiwert c₀",
+                titel="Grundkraftbeiwert c_f,0",
                 wert=wert,
-                einzelwerte=[reynoldszahl],
             ),
             kontext=base_ctx,
         )
@@ -254,7 +249,7 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
         )
         protokolliere_doc(
             protokoll,
-            bundle=make_docbundle(titel="Grundkraftbeiwert c₀", wert=float("nan")),
+            bundle=make_docbundle(titel="Grundkraftbeiwert c_f,0", wert=float("nan")),
             kontext=merge_kontext(base_ctx, {"nan": True}),
         )
         return Zwischenergebnis(wert=float("nan"))
@@ -299,7 +294,7 @@ def grundkraftbeiwert(
         )
         protokolliere_doc(
             protokoll,
-            bundle=make_docbundle(titel="Grundkraftbeiwert c₀", wert=float("nan")),
+            bundle=make_docbundle(titel="Grundkraftbeiwert c_f,0", wert=float("nan")),
             kontext=merge_kontext(base_ctx, {"nan": True}),
         )
         return Zwischenergebnis(wert=float("nan"))

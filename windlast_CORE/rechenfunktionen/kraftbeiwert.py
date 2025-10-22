@@ -48,7 +48,7 @@ def _kraftbeiwert_default(
         protokolliere_doc(
             protokoll,
             bundle=make_docbundle(
-                titel="Kraftbeiwert c",
+                titel="Kraftbeiwert c_f",
                 wert=wert,
                 einzelwerte=[grundkraftbeiwert, abminderungsfaktor_schlankheit],
                 formel="c = c₀ · η_schlank",
@@ -62,7 +62,7 @@ def _kraftbeiwert_default(
         protokolliere_doc(
             protokoll,
             bundle=make_docbundle(
-                titel="Kraftbeiwert c",
+                titel="Kraftbeiwert c_f",
                 wert=wert,
                 einzelwerte=[grundkraftbeiwert, abminderungsfaktor_schlankheit],
                 formel="c = c₀ · η_schlank",

@@ -33,7 +33,7 @@ def generiere_windrichtungen(
 
     protokolliere_doc(
         protokoll,
-        bundle=make_docbundle(titel="Windrichtungen (deg)", wert=[w for w, _ in result]),
+        bundle=make_docbundle(titel="Windrichtungen", wert=[w for w, _ in result], einheit="°"),
         kontext=base_ctx,
     )
     return result
@@ -158,12 +158,6 @@ def get_or_create_lastset(
         )
         ls = LastSet(winkel_deg=winkel_deg, windrichtung=windrichtung, kraefte_nach_element=kbe)
         pool.nach_winkel[key] = ls
-
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(titel="LastSet erstellt", wert={"winkel_deg": winkel_deg, "anzahl_elemente": len(kbe)}),
-            kontext=base_ctx,
-        )
     return ls
 
 # Kippsicherheit Utils --------------------------------------------
@@ -403,11 +397,6 @@ def ermittle_min_reibwert(
         return 0.0
 
     mu_min = min(mu_werte)
-    protokolliere_doc(
-        protokoll,
-        bundle=make_docbundle(titel="Reibwerte μ (min)", wert={"min": mu_min, "alle": mu_werte}),
-        kontext=base_ctx,
-    )
     return mu_min
 
 def bewerte_lastfall_fuer_gleiten(

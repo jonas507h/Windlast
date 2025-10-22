@@ -61,11 +61,11 @@ def _eingeschlossene_flaeche_default(
             protokolliere_doc(
                 protokoll,
                 bundle=make_docbundle(
-                    titel="Eingeschlossene Fläche A_e",
+                    titel="Eingeschlossene Fläche A_c",
                     wert=float("nan"),
                     einheit="m²",
                     einzelwerte=[laenge, hoehe],
-                    formel="A_e = L · h",
+                    formel="A_c = L · h",
                     quelle_formel="Norm xyz (Abschnitt ...)",
                 ),
                 kontext=merge_kontext(base_ctx, {"nan": True}),
@@ -77,11 +77,11 @@ def _eingeschlossene_flaeche_default(
         protokolliere_doc(
             protokoll,
             bundle=make_docbundle(
-                titel="Eingeschlossene Fläche A_e",
+                titel="Eingeschlossene Fläche A_c",
                 wert=wert,
                 einheit="m²",
                 einzelwerte=[laenge, hoehe],
-                formel="A_e = L · h",
+                formel="A_c = L · h",
                 quelle_formel="Norm xyz (Abschnitt ...)",
             ),
             kontext=base_ctx,
@@ -106,11 +106,11 @@ def _eingeschlossene_flaeche_default(
             protokolliere_doc(
                 protokoll,
                 bundle=make_docbundle(
-                    titel="Eingeschlossene Fläche A_e",
+                    titel="Eingeschlossene Fläche A_c",
                     wert=float("nan"),
                     einheit="m²",
                     einzelwerte=[laenge, d_aussen],
-                    formel="A_e = L · d_aussen",
+                    formel="A_c = L · d_aussen",
                     quelle_formel="Norm xyz (Abschnitt ...)",
                 ),
                 kontext=merge_kontext(base_ctx, {"nan": True}),
@@ -122,11 +122,11 @@ def _eingeschlossene_flaeche_default(
         protokolliere_doc(
             protokoll,
             bundle=make_docbundle(
-                titel="Eingeschlossene Fläche A_e",
+                titel="Eingeschlossene Fläche A_c",
                 wert=wert,
                 einheit="m²",
                 einzelwerte=[laenge, d_aussen],
-                formel="A_e = L · d_aussen",
+                formel="A_c = L · d_aussen",
                 quelle_formel="Norm xyz (Abschnitt ...)",
             ),
             kontext=base_ctx,
