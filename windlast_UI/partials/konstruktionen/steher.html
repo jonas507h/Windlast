@@ -10,13 +10,11 @@
   <section>
     <form id="steher-form" onsubmit="return false;">
       <!-- Reihe 1: Dropdowns (Traverse, Rohr, Bodenplatte, Untergrund) -->
-      <div class="row row-4">
+      <div class="row row-5">
         <div class="field">
           <label for="traverse">Traverse</label>
           <select id="traverse" name="traverse_name_intern" required>
             <option value="">Bitte wählen …</option>
-            <option value="prolyte_h30v">Prolyte H30V</option>
-            <option value="prolyte_h40v">Prolyte H40V</option>
           </select>
         </div>
 
@@ -24,9 +22,6 @@
           <label for="rohr">Rohr</label>
           <select id="rohr" name="rohr_name_intern" required>
             <option value="">Bitte wählen …</option>
-            <option value="rohr_48">Rohr Ø 48 mm</option>
-            <option value="rohr_60">Rohr Ø 60 mm</option>
-            <!-- später dynamisch -->
           </select>
         </div>
 
@@ -34,8 +29,13 @@
           <label for="bodenplatte">Bodenplatte</label>
           <select id="bodenplatte" name="bodenplatte_name_intern" required>
             <option value="">Bitte wählen …</option>
-            <option value="bp_1m">Bodenplatte 1×1 m</option>
-            <option value="bp_08m">Bodenplatte 0.8×0.8 m</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="gummimatte">Gummimatte</label>
+          <select id="gummimatte">
+            <option value="">Bitte wählen …</option>
           </select>
         </div>
 
@@ -43,9 +43,6 @@
           <label for="untergrund">Untergrund</label>
           <select id="untergrund" name="untergrund_typ" required>
             <option value="">Bitte wählen …</option>
-            <option value="beton">Beton</option>
-            <option value="asphalt">Asphalt</option>
-            <option value="rasen">Rasen</option>
           </select>
         </div>
       </div>
