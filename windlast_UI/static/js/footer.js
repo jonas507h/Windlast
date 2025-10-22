@@ -280,7 +280,7 @@ function formatLabelWithSubscripts(input) {
   // - y[,z] werden kleingeschrieben (F_W → F<sub>w</sub>)
   // - alles sauber geescaped
   return raw.replace(
-    /([A-Za-z\u0370-\u03FF])_(\{[^}]+\}|[A-Za-z0-9,]+)(?![^<]*>)/g,
+    /([A-Za-z\u0370-\u03FF])_(\{[^}]+\}|[^\s^_<>()]+)(?![^<]*>)/g,
     (_, base, sub) => {
       const inner = sub.startsWith("{") ? sub.slice(1, -1) : sub;
       return `${escapeHtml(base)}<sub>${escapeHtml(inner)}</sub>`;
@@ -295,7 +295,7 @@ function formatMathWithSubSup(input) {
   const s = String(input ?? "");
   // Wir bauen output sicher auf: zwischen Matches wird ge-escaped,
   // in den Matches escapen wir Base und Innenleben separat.
-  const pattern = /([A-Za-z\u0370-\u03FF0-9])_(\{[^}]+\}|[A-Za-z0-9]+)|([A-Za-z\u0370-\u03FF0-9])\^(\{[^}]+\}|[A-Za-z0-9]+)/g;
+  const pattern = /([A-Za-z\u0370-\u03FF0-9])_(\{[^}]+\}|[^\s^_<>()]+)|([A-Za-z\u0370-\u03FF0-9])\^(\{[^}]+\}|[^\s^_<>()]+)/g;
   let out = "";
   let last = 0;
 
