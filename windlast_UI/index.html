@@ -156,6 +156,16 @@
         if (btn && typeof window.submitTor === "function") {
           btn.addEventListener("click", window.submitTor);
         }
+      }else if (name === "steher") {
+        // Dropdowns füllen
+        if (typeof window.initSteherDropdowns === "function") {
+          await window.initSteherDropdowns();
+        }
+        // Button-Handler anbinden (weil DOM jetzt da ist)
+        const btn = document.getElementById("btn-berechnen-steher");
+        if (btn && typeof window.submitSteher === "function") {
+          btn.addEventListener("click", window.submitSteher);
+        }
       }
     }
 

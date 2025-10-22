@@ -24,6 +24,10 @@ def get_traversen():
 def get_bodenplatten():
     return jsonify({"options": _options_from_dict(catalog.bodenplatten)})
 
+@bp_v1.get("/catalog/rohre")
+def get_rohre():
+    return jsonify({"options": _options_from_dict(catalog.rohre)})
+
 @bp_v1.get("/catalog/untergruende")
 def get_untergruende():
     # Enum-Werte sind bereits als Anzeigetext gedacht → value=label=Enum.value

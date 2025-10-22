@@ -160,6 +160,32 @@ def _collect_docs_from_list(items):
 
     return list(dedup.values())
 
+# ====== Eingaben Meta ======
+_DENY_KEYS = {
+    "headers", "header", "authorization", "auth", "token", "csrf_token",
+    "client", "user_agent", "cookies", "session", "trace_id", "request_id"
+}
+def _make_meta_eingaben(payload: Mapping[str, Any]) -> Dict[str, Any]:
+    """
+    Baut die meta.eingaben dynamisch aus dem tatsächlichen input_payload.
+    - filtert offensichtliche Transport-/Security-Felder (Blacklist),
+    - normalisiert Enums/Dataclasses/Iterables via _to_primitive,
+    - hebt Zahlen JSON-sicher (NaN/INF) via _jsonify_number.
+    """
+    if not isinstance(payload, Mapping):
+        return {}
+    out: Dict[str, Any] = {}
+    for k, v in payload.items():
+        # Blacklist
+        if k in _DENY_KEYS:
+            continue
+        # Zahlen gezielt über _jsonify_number, sonst generisch
+        if isinstance(v, (int, float)):
+            out[k] = _jsonify_number(v)
+        else:
+            out[k] = _to_primitive(v)
+    return out
+
 # ---------- main mapper ----------
 def build_api_output(ergebnis, input_payload: Dict[str, Any]) -> Dict[str, Any]:
     """
@@ -309,14 +335,6 @@ def build_api_output(ergebnis, input_payload: Dict[str, Any]) -> Dict[str, Any]:
         "normen": out_normen,
         "meta": {
             "version": ergebnis.meta.version,
-            "eingaben": {
-                "breite_m":               input_payload["breite_m"],
-                "hoehe_m":                input_payload["hoehe_m"],
-                "traverse_name_intern":   input_payload["traverse_name_intern"],
-                "bodenplatte_name_intern":input_payload["bodenplatte_name_intern"],
-                "untergrund_typ":         input_payload["untergrund_typ"],
-                "aufstelldauer":          input_payload.get("aufstelldauer"),
-                "windzone":               input_payload["windzone"],
-            },
+            "eingaben": _make_meta_eingaben(input_payload),
         },
     }

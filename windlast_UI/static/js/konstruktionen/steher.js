@@ -97,9 +97,9 @@ async function submitSteher() {
 
     // Sammeln der Eingabewerte und verpacken
     const payload = {
-      hoehe:  parseFloat(document.getElementById("hoehe").value),
-      rohr_laenge: parseFloat(document.getElementById("rohr_laenge").value),
-      rohr_hoehe: parseFloat(document.getElementById("rohr_hoehe").value),
+      hoehe_m:  parseFloat(document.getElementById("hoehe_m").value),
+      rohr_laenge_m: parseFloat(document.getElementById("rohr_laenge_m").value),
+      rohr_hoehe_m: parseFloat(document.getElementById("rohr_hoehe_m").value),
       traverse_name_intern: document.getElementById("traverse_name_intern").value,
       rohr_name_intern: document.getElementById("rohr_name_intern").value,
       bodenplatte_name_intern: document.getElementById("bodenplatte_name_intern").value,

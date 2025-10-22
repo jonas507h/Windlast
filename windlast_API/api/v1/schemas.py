@@ -17,6 +17,18 @@ class TorInput(BaseModel):
     aufstelldauer: DauerInput | None = None
     windzone: str  # Windzone Enum-Name (z.B. "III_Binnenland")
 
+class SteherInput(BaseModel):
+    hoehe_m: PositiveFloat
+    rohr_laenge_m: PositiveFloat
+    rohr_hoehe_m: PositiveFloat
+    traverse_name_intern: str
+    bodenplatte_name_intern: str
+    rohr_name_intern: str
+    untergrund_typ: str  # MaterialTyp.value (z.B. "beton")
+    gummimatte: bool = True
+    aufstelldauer: DauerInput | None = None
+    windzone: str  # Windzone Enum-Name (z.B. "III_Binnenland")
+
 # =========================
 # Output-Modelle
 # =========================
