@@ -171,7 +171,7 @@ def _kippsicherheit_DinEn13814_2005_06(
                             "nachweis": "KIPP",
                             "doc_type": "axis_momente",
                             "achse_index": achse_idx,
-                            "element_id_intern": str(element),
+                            "element_id": str(element),
                         }),
                     )
                     protokolliere_doc(
@@ -185,7 +185,7 @@ def _kippsicherheit_DinEn13814_2005_06(
                             "nachweis": "KIPP",
                             "doc_type": "axis_momente",
                             "achse_index": achse_idx,
-                            "element_id_intern": str(element),
+                            "element_id": str(element),
                         }),
                     )
                     total_kipp += kipp_b
@@ -454,7 +454,7 @@ def _kippsicherheit_DinEn17879_2024_08(
                             "nachweis": "KIPP",
                             "doc_type": "axis_momente",
                             "achse_index": achse_idx,
-                            "element_id_intern": str(element),
+                            "element_id": str(element),
                         }),
                     )
                     protokolliere_doc(
@@ -468,7 +468,7 @@ def _kippsicherheit_DinEn17879_2024_08(
                             "nachweis": "KIPP",
                             "doc_type": "axis_momente",
                             "achse_index": achse_idx,
-                            "element_id_intern": str(element),
+                            "element_id": str(element),
                         }),
                     )
                     total_kipp += kipp_b

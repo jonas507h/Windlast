@@ -283,8 +283,7 @@ function formatLabelWithSubscripts(input) {
     /([A-Za-z\u0370-\u03FF])_(\{[^}]+\}|[A-Za-z0-9,]+)(?![^<]*>)/g,
     (_, base, sub) => {
       const inner = sub.startsWith("{") ? sub.slice(1, -1) : sub;
-      const lowered = inner.toLowerCase();
-      return `${escapeHtml(base)}<sub>${escapeHtml(lowered)}</sub>`;
+      return `${escapeHtml(base)}<sub>${escapeHtml(inner)}</sub>`;
     }
   ).replace(/(^|[^>])_([^>]|$)/g, (m) => {
     // übrige Unterstriche (keine Subscript-Pattern) entschärfen
@@ -470,10 +469,8 @@ function renderDocsByElement(docsInDir) {
     let list = groups.get(k) || [];
     const title = (k === "__allgemein__") ? "allgemein" : `Element ${k}`;
     const countBadge = `<span class="muted" style="font-weight:400; margin-left:.5rem;">(${list.length})</span>`;
-    // NEU: innerhalb "allgemein" noch eine Ebene nach Achse
-    const innerHtml = (k === "__allgemein__")
-      ? renderDocsByAxis(list)
-      : `<ul class="doc-list">${renderDocsListItems(list)}</ul>`;
+    // Gruppierung nach Achsen
+    const innerHtml = renderDocsByAxis(list);
 
     return `
       <div class="group-card elem-card">
