@@ -228,9 +228,9 @@ def _kippsicherheit_DinEn13814_2005_06(
                 protokolliere_doc(
                     sub_prot,
                     bundle=make_docbundle(
-                        titel=f"Achs-Sicherheit S_Achse{achse_idx}",
+                        titel=f"Achs-Sicherheit S_kipp,Achse{achse_idx}",
                         wert=sicherheit,
-                        formel=f"S_Achse{achse_idx} = ΣM_St / ΣM_K",
+                        formel=f"S_kipp,Achse{achse_idx} = ΣM_St / ΣM_K",
                         formelzeichen=["M_St", "M_K"],
                     ),
                     kontext=merge_kontext(base_ctx, {
@@ -268,9 +268,9 @@ def _kippsicherheit_DinEn13814_2005_06(
                 protokolliere_doc(
                     sub_prot,
                     bundle=make_docbundle(
-                        titel=f"Achs-Ballast m_Ballast,Achse{achse_idx}",
+                        titel=f"Achs-Ballast m_Ballast,kipp,Achse{achse_idx}",
                         wert=ballastkraft / aktuelle_konstanten().erdbeschleunigung,  # kg
-                        formel="m_Ballast,Achse = max(0, ΣM_K − ΣM_St) / (γ_g · m_stand,1N)",
+                        formel="m_Ballast,kipp,Achse = max(0, ΣM_K − ΣM_St) / (γ_g · m_stand,1N)",
                         formelzeichen=["M_K", "M_St", "γ_g", "m_stand,1N", "g"],
                         einheit="kg",
                     ),
@@ -337,7 +337,7 @@ def _kippsicherheit_DinEn13814_2005_06(
 
         # 3) Docs (neu): mit Rollen ins Hauptprotokoll heben
         for i, rec in enumerate(dir_records):
-            role_block = "irrelevant" if i != winner_idx else "entscheidungsrelevant"  # Default pro Richtung
+            role_block = "entscheidungsrelevant" if i != winner_idx else "relevant"  # Default pro Richtung
             # alle Docs der Richtung übernehmen – Grundrolle je Richtung
             _emit_docs_with_role(
                 dst_protokoll=protokoll,
@@ -556,9 +556,9 @@ def _kippsicherheit_DinEn17879_2024_08(
                 protokolliere_doc(
                     sub_prot,
                     bundle=make_docbundle(
-                        titel=f"Achs-Sicherheit S_Achse{achse_idx}",
+                        titel=f"Achs-Sicherheit S_kipp,Achse{achse_idx}",
                         wert=sicherheit,
-                        formel=f"S_Achse{achse_idx} = ΣM_St / ΣM_K",
+                        formel=f"S_kipp,Achse{achse_idx} = ΣM_St / ΣM_K",
                         formelzeichen=["M_St", "M_K"],
                     ),
                     kontext=merge_kontext(base_ctx, {
@@ -597,10 +597,10 @@ def _kippsicherheit_DinEn17879_2024_08(
                 protokolliere_doc(
                     sub_prot,
                     bundle=make_docbundle(
-                        titel=f"Achs-Ballast m_Ballast,Achse{achse_idx}",
+                        titel=f"Achs-Ballast m_Ballast,kipp,Achse{achse_idx}",
                         wert=ballastkraft / aktuelle_konstanten().erdbeschleunigung,  # kg
                         einheit= "kg",
-                        formel="m_Ballast,Achse = max(0, ΣM_K − ΣM_St) / (γ_g · m_stand,1N)",
+                        formel="m_Ballast,kipp,Achse = max(0, ΣM_K − ΣM_St) / (γ_g · m_stand,1N)",
                         formelzeichen=["M_K", "M_St", "γ_g", "m_stand,1N", "g"],
                     ),
                     kontext=merge_kontext(base_ctx, {
@@ -667,7 +667,7 @@ def _kippsicherheit_DinEn17879_2024_08(
 
         # 3) Docs (neu): mit Rollen ins Hauptprotokoll heben
         for i, rec in enumerate(dir_records):
-            role_block = "irrelevant" if i != winner_idx else "entscheidungsrelevant"  # Default pro Richtung
+            role_block = "entscheidungsrelevant" if i != winner_idx else "relevant"  # Default pro Richtung
             # alle Docs der Richtung übernehmen – Grundrolle je Richtung
             _emit_docs_with_role(
                 dst_protokoll=protokoll,

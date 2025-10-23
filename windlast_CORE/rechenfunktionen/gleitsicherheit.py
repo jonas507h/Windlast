@@ -311,7 +311,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
 
         # Docs mit Rollen ausspielen
         for i, rec in enumerate(dir_records):
-            role = "entscheidungsrelevant" if i == winner_idx else "irrelevant"
+            role = "relevant" if i == winner_idx else "entscheidungsrelevant"
             _emit_docs_with_role(
                 dst_protokoll=protokoll,
                 docs=rec["docs"],
@@ -595,7 +595,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
 
         # Docs mit Rollen ausspielen
         for i, rec in enumerate(dir_records):
-            role = "entscheidungsrelevant" if i == winner_idx else "irrelevant"
+            role = "relevant" if i == winner_idx else "entscheidungsrelevant"
             _emit_docs_with_role(
                 dst_protokoll=protokoll,
                 docs=rec["docs"],
