@@ -93,7 +93,6 @@ const CONTEXT_BLACKLIST_PREFIXES = [
   /^internal_/,
 ];
 
-const RESULTS_SELECTOR = "#results"; // ggf. anpassen an euren Container
 const CELL_SELECTOR = 'td[data-norm-key][data-nachweis], td.res-kipp, td.res-gleit, td.res-abhebe';
 
 function wireZwischenergebnisseUI() {
@@ -134,13 +133,6 @@ function resolveCellContext(td) {
   }
   if (!normKey || !nachweis) return null;
   return { normKey, nachweis, altName };
-}
-
-function getDocsForModal({ normKey, nachweis, altName=null }) {
-  const norm = ResultsVM?.payload?.normen?.[normKey] || {};
-  const src = altName ? (norm.alternativen?.[altName]?.docs || []) : (norm.docs || []);
-  // Filter NUR auf diesen Nachweis, Reihenfolge egal
-  return src.filter(d => (d?.context?.nachweis ?? null) === nachweis);
 }
 
 function openZwischenergebnisseModal({ normKey, nachweis, altName }, docsAll, { initialNachweis=null } = {}) {
@@ -196,43 +188,6 @@ function openZwischenergebnisseModal({ normKey, nachweis, altName }, docsAll, { 
   Modal.open(wrap);
 }
 
-function renderDocsSimpleList(docs) {
-  if (!docs || !docs.length) {
-    return `<div class="muted" style="padding:0.75rem 0;">Keine Zwischenergebnisse vorhanden.</div>`;
-  }
-  const lis = docs.map(d => {
-    const titleHtml = escapeHtml(d?.title ?? "—");
-    const val   = formatNumberDE(d?.value);
-    const unitHtml  = d?.unit ? ` ${escapeHtml(String(d.unit))}` : "";
-
-    // Für den Tooltip nur Rohdaten speichern: Formel + Kontext (JSON)
-    const formula = d?.formula ? String(d.formula) : "";
-    const formulaSource = d?.formula_source ? String(d?.formula_source) : "";
-    const ctxJson = escapeHtml(JSON.stringify(d?.context || {}));
-    const dataAttr =
-      `data-formula="${escapeHtml(formula)}" ` +
-      `data-formula_source="${escapeHtml(String(formulaSource))}" ` +
-      `data-ctx-json="${ctxJson}"`
-
-    return `
-      <li class="doc-li" ${dataAttr}>
-        <span class="doc-title">${titleHtml}</span>
-        <span class="doc-eq"> = </span>
-        <span class="doc-val">${val}${unitHtml}</span>
-      </li>
-    `;
-  }).join("");
-
-  return `<ul class="doc-list">${lis}</ul>`;
-}
-
-function formatNumber(v) {
-  if (v === "INF" || v === "-INF" || v == null) return String(v);
-  const n = Number(v);
-  if (!Number.isFinite(n)) return String(v);
-  return n.toLocaleString(undefined, { maximumFractionDigits: 3 });
-}
-
 function formatNumberDE(value, sig = 4) {
   if (value == null || value === "INF" || value === "-INF" || Number.isNaN(value)) return String(value);
 
@@ -264,11 +219,6 @@ function formatVectorDE(vec, sig = 4) {
   if (!Array.isArray(vec)) return formatNumberDE(vec, sig);
   const parts = vec.map(v => formatNumberDE(v, sig));
   return `(${parts.join("; ")})`;
-}
-
-// Einheit hübsch anhängen (schmales Leerzeichen)
-function withUnit(valStr, unit) {
-  return unit ? `${valStr}\u2009${String(unit)}` : valStr;
 }
 
 function formatLabelWithSubscripts(input) {
@@ -326,19 +276,6 @@ function formatMathWithSubSup(input) {
 }
 
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));   }
-
-function buildContextTitle(ctx) {
-  // sortiere Kernfelder zuerst (Analog zu euren Message-Kontext-Regeln)
-  const order = ["szenario","nachweis","doc_type","windrichtung_deg","element_id","segment_index","achse_index","rolle","ref_nachweis"];
-  const keys = Object.keys(ctx || {});
-  keys.sort((a,b) => {
-    const ia = order.indexOf(a); const ib = order.indexOf(b);
-    if (ia !== -1 || ib !== -1) return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
-    return a.localeCompare(b);
-  });
-  const parts = keys.map(k => `${k}: ${String(ctx[k])}`);
-  return parts.join(" · ");
-}
 
 // --- Gruppieren nach Windrichtung ---------------------------------
 
