@@ -876,85 +876,70 @@ window.addEventListener("message", (ev) => {
   }
 });
 
-// ---- Tooltip: Summen pro Norm im Kopf anzeigen ----
-// normale Berechnung
-Tooltip.register('.results-table thead th', {
-  predicate: el => !!el.dataset.normKey,  // nur echte Norm-Spalten
-  content: (_ev, el) => {
-    const key = el.dataset.normKey;
-    if (!ResultsVM) return "Keine Daten";
+// ---- Meldungs-Tooltip ----
+//Helper
+function countsClass(c) {
+  if (!c) return "tt-info";
+  if (c.error > 0) return "tt-error";
+  if (c.warn  > 0) return "tt-warn";
+  if (c.hint  > 0) return "tt-hint";
+  return "tt-info";
+}
 
-    const c = ResultsVM.getCountsMainOnly(key); // Gesamt je Norm
-    // hübsches Node bauen (mehrzeilig, gut lesbar)
-    const wrap = document.createElement("div");
-    const mk = (cls, label, n) => {
-      const div = document.createElement("div");
-      div.className = `tt-line ${cls}`;
-      div.textContent = `${n} ${label}`;
-      return div;
-    };
-    wrap.appendChild(mk("error", "Fehler",    c.error));
-    wrap.appendChild(mk("warn",  "Warnungen", c.warn));
-    wrap.appendChild(mk("hint",  "Hinweise",  c.hint));
-    wrap.appendChild(mk("info",  "Infos",     c.info));
-    return wrap;
-  },
-  // Rahmenfarbe = gravierendste vorhandene Meldung
-  className: el => {
-    const key = el?.dataset?.normKey;
-    if (!ResultsVM || !key) return "tt-info";
-    const c = ResultsVM.getCountsMainOnly(key);
-    if (c.error > 0) return "tt-error";
-    if (c.warn  > 0) return "tt-warn";
-    if (c.hint  > 0) return "tt-hint";
-    return "tt-info";
-  },
-  priority: 50,
-  delay: 120
-});
-
-// Alternativen-Berechnung
-Tooltip.register('.results-table .alt-title th[data-szenario]', {
-  predicate: el => !!el.dataset.normKey && !!el.dataset.szenario,
-  content: (_ev, el) => {
-    if (!ResultsVM) return "Keine Daten";
-    const normKey = el.dataset.normKey;
-    const szenario = el.dataset.szenario;
-
-    const c = ResultsVM.getCounts(normKey, szenario); // nur diese Alternative
-    // hübsches Node mit 4 Zeilen zurückgeben
-    const wrap = document.createElement("div");
+function mkCountsNode(c, headerText) {
+  const wrap = document.createElement("div");
+  if (headerText) {
     const header = document.createElement("div");
     header.style.fontWeight = "600";
-    header.textContent = displayAltName ? `Alternative: ${displayAltName(szenario)}` : `Alternative: ${szenario}`;
+    header.textContent = headerText;
     wrap.appendChild(header);
+  }
+  const mk = (cls, label, n) => {
+    const div = document.createElement("div");
+    div.className = `tt-line ${cls}`;
+    div.textContent = `${n} ${label}`;
+    return div;
+  };
+  wrap.appendChild(mk("error", "Fehler",    c?.error ?? 0));
+  wrap.appendChild(mk("warn",  "Warnungen", c?.warn  ?? 0));
+  wrap.appendChild(mk("hint",  "Hinweise",  c?.hint  ?? 0));
+  wrap.appendChild(mk("info",  "Infos",     c?.info  ?? 0));
+  return wrap;
+}
 
-    const mk = (cls, label, n) => {
-      const div = document.createElement("div");
-      div.className = `tt-line ${cls}`;
-      div.textContent = `${n} ${label}`;
-      return div;
-    };
-    wrap.appendChild(mk("error", "Fehler",    c.error));
-    wrap.appendChild(mk("warn",  "Warnungen", c.warn));
-    wrap.appendChild(mk("hint",  "Hinweise",  c.hint));
-    wrap.appendChild(mk("info",  "Infos",     c.info));
-    return wrap;
-  },
-  // Rahmenfarbe = gravierendste vorhandene Meldung
-  className: (el) => {
-    if (!ResultsVM) return "tt-info";
-    const normKey = el?.dataset?.normKey;
-    const szenario = el?.dataset?.szenario;
-    if (!normKey || !szenario) return "tt-info";
-    const c = ResultsVM.getCounts(normKey, szenario);
-    if (c.error > 0) return "tt-error";
-    if (c.warn  > 0) return "tt-warn";
-    if (c.hint  > 0) return "tt-hint";
-    return "tt-info";
-  },
-  priority: 50,
-  delay: 120
+function registerCountsTooltip(selector, { getCounts, getHeaderText, predicate, priority=50, delay=120 } = {}) {
+  Tooltip.register(selector, {
+    predicate: predicate || (() => true),
+    content: (_ev, el) => {
+      if (!ResultsVM) return "Keine Daten";
+      const c = getCounts(el);
+      return mkCountsNode(c, getHeaderText ? getHeaderText(el) : undefined);
+    },
+    className: (el) => {
+      if (!ResultsVM) return "tt-info";
+      const c = getCounts(el);
+      return countsClass(c);
+    },
+    priority,
+    delay
+  });
+}
+
+// Register normale Berechnung
+registerCountsTooltip('.results-table thead th', {
+  predicate: el => !!el.dataset.normKey,
+  getCounts: (el) => ResultsVM?.getCountsMainOnly(el.dataset.normKey)
+});
+
+// Register Alternativen-Berechnung
+registerCountsTooltip('.results-table .alt-title th[data-szenario]', {
+  predicate: el => !!el.dataset.normKey && !!el.dataset.szenario,
+  getCounts: (el) => ResultsVM?.getCounts(el.dataset.normKey, el.dataset.szenario),
+  getHeaderText: (el) => {
+    const raw = el.dataset.szenario;
+    const nice = displayAltName ? displayAltName(raw) : raw;
+    return `Alternative: ${nice}`;
+  }
 });
 
 function sortMessagesBySeverity(msgs) {
