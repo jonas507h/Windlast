@@ -886,6 +886,19 @@ function formatBallast(val_kg) {
 }
 
 //=== Zell-Setter ===
+function hasErrorFor(normKey, szenario = null) {
+  const counts = szenario
+    ? ResultsVM?.getCounts(normKey, szenario)
+    : ResultsVM?.getCountsMainOnly(normKey);
+  return (counts?.error ?? 0) > 0;
+}
+
+function getScenarioForCell(el) {
+  // Zellen in Alternativenzeilen tragen meist data-alt auf der Zelle
+  // oder data-szenario am Zeilen-Header:
+  return el.dataset.alt || el.closest("tr")?.dataset.szenario || null;
+}
+
 function applySafetyToCell(td, val, { allowBlank=false } = {}) {
   if (!td) return;
   if (val === "INF" || val === "-INF") {
@@ -956,6 +969,19 @@ function setDatasetFromId(el, id) {
 function setBallastCell(id, val) {
   const el = document.getElementById(id);
   if (!el) return;
+  // Norm/Nachweis in die Datenattribute schreiben (falls noch nicht passiert)
+  try { setDatasetFromId(el, id); } catch {}
+
+  // Szenario ermitteln & vor der Darstellung auf Fehler prüfen
+  const normKey  = el.dataset.normKey || null;
+  const szenario = getScenarioForCell(el);
+  if (normKey && hasErrorFor(normKey, szenario)) {
+    el.textContent = "--";
+    el.title = "";
+    el.classList.remove("val-ok");
+    el.classList.add("val-bad");
+    return;
+  }
   applyBallastToCell(el, val, { allowBlank:false });
 }
 
@@ -963,21 +989,54 @@ function setCell(id, val) {
   const el = document.getElementById(id);
   if (!el) return;
 
-  // Text setzen
-  applySafetyToCell(el, val, { allowBlank:false });
-  
-  // Kontext für den Klick-Handler setzen (normKey + nachweis)
+  // Norm/Nachweis zuerst setzen, damit wir normKey/szenario kennen
   try { setDatasetFromId(el, id); } catch {}
+  const normKey  = el.dataset.normKey || null;
+  const szenario = getScenarioForCell(el);
 
-  // Klasse setzen (grün/rot)
+  // Fehler? → alles unterdrücken
+  if (normKey && hasErrorFor(normKey, szenario)) {
+    el.textContent = "--";
+    el.title = "";
+    el.classList.remove("val-ok");
+    el.classList.add("val-bad");
+    return;
+  }
+
+  // Kein Fehler → normal formatieren
+  applySafetyToCell(el, val, { allowBlank:false });
+  // Falls applySafetyToCell nicht selbst klassifiziert, dann:
   klassifizierung_anwenden(el, sicherheit_klassifizieren(val));
 }
 
 function _setSafetyOnTdAlt(td, val) {
+  const normKey  = td.dataset.normKey || null;
+  const szenario = getScenarioForCell(td);
+  const hasAlt   = !!td.dataset.alt; // nur echte Alternative markieren
+
+  if (hasAlt && normKey && hasErrorFor(normKey, szenario)) {
+    td.textContent = "--";
+    td.title = "";
+    td.classList.remove("val-ok");
+    td.classList.add("val-bad");
+    return;
+  }
+  // Leere Slots (ohne Alternative) dürfen wirklich leer bleiben
   applySafetyToCell(td, val, { allowBlank:true });
 }
 
 function _setBallastOnTdAlt(td, valKg) {
+  const normKey  = td.dataset.normKey || null;
+  const szenario = getScenarioForCell(td);
+  const hasAlt   = !!td.dataset.alt;
+
+  if (hasAlt && normKey && hasErrorFor(normKey, szenario)) {
+    td.textContent = "--";
+    td.title = "";
+    td.classList.remove("val-ok");
+    td.classList.add("val-bad");
+    return;
+  }
   applyBallastToCell(td, valKg, { allowBlank:true });
 }
 
