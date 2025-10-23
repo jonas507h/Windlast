@@ -193,6 +193,8 @@ function prettyValHTML(k, v) {
   return formatVal(k, v, { html: true });
 }
 
+// === Zwischenergebnisse UI Handler ===
+
 function wireZwischenergebnisseUI() {
   const root = document.querySelector(".results-table");
   if (!root) { console.warn("[ZwRes] .results-table nicht gefunden"); return; }
@@ -340,25 +342,135 @@ function formatMathWithSubSup(input) {
   return out;
 }
 
-// --- Gruppieren nach Windrichtung ---------------------------------
-
-function groupDocsByWindrichtung(docs) {
-  const groups = new Map(); // key -> array
+// === Gruppierungen ===
+function groupBy(docs, { keyFn, emptyKey="__none__", sort="numeric", emptyLast=true }) {
+  const groups = new Map();
   for (const d of (docs || [])) {
-    const dir = d?.context?.windrichtung_deg;
-    const key = (dir === undefined || dir === null || dir === "") ? "__none__" : Number(dir);
-    if (!groups.has(key)) groups.set(key, []);
-    groups.get(key).push(d);
+    const raw = keyFn(d);
+    const k = (raw === undefined || raw === null || raw === "") ? emptyKey : raw;
+    if (!groups.has(k)) groups.set(k, []);
+    groups.get(k).push(d);
   }
-  // sort keys: numeric ascending, "__none__" last
+
   const keys = [...groups.keys()].sort((a, b) => {
-    if (a === "__none__" && b === "__none__") return 0;
-    if (a === "__none__") return 1;
-    if (b === "__none__") return -1;
+    // leeren Marker (z.B. "__none__", "__allgemein__", "__ohne_achse__") ans Ende
+    if (emptyLast) {
+      if (a === emptyKey && b === emptyKey) return 0;
+      if (a === emptyKey) return 1;
+      if (b === emptyKey) return -1;
+    }
+
+    if (sort === "alnum") {
+      // numerisch, sonst localeCompare (für Element-IDs)
+      const na = Number(a), nb = Number(b);
+      const an = Number.isFinite(na), bn = Number.isFinite(nb);
+      if (an && bn) return na - nb;
+      return String(a).localeCompare(String(b), undefined, { numeric:true, sensitivity:"base" });
+    }
+
+    // default: numeric
     return Number(a) - Number(b);
   });
+
   return { groups, keys };
 }
+
+// Windrichtung (deg)
+function _pickDir(d){
+  return d?.context?.windrichtung_deg ?? null;
+}  // :contentReference[oaicite:8]{index=8}
+
+// Element-ID bevorzugt; sonst sinnvolle Fallbacks
+function _pickElementKey(ctx){
+  if (!ctx) return null;
+  return ctx.element_id ?? ctx.element ?? ctx.bauteil ?? ctx.komponente ?? null; // :contentReference[oaicite:9]{index=9}
+}
+
+// Achsindex (nur numerisch zulassen)
+function _pickAxisIndex(ctx){
+  if (!ctx) return null;
+  const v = ctx.achse_index ?? null; // :contentReference[oaicite:10]{index=10}
+  if (v === "" || typeof v === "boolean") return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+function renderAccordionGroup({ cardClass, detailsClass, summaryClass, title, count, bodyHtml, open=false }) {
+  return `
+    <div class="group-card ${cardClass}">
+      <details class="${detailsClass}"${open ? " open" : ""}>
+        <summary class="${summaryClass}">${escapeHtml(title)} ${count}</summary>
+        ${bodyHtml}
+      </details>
+    </div>
+  `;
+}
+
+function renderDocsByWindrichtung(docs){
+  const { groups, keys } = groupBy(docs, { keyFn: _pickDir, emptyKey:"__none__", sort:"numeric", emptyLast:true });
+  if (!keys.length) {
+    return `<div class="muted" style="padding:0.75rem 0;">Keine Zwischenergebnisse vorhanden.</div>`;
+  }
+  const blocks = keys.map((k, idx) => {
+    const list = groups.get(k) || [];
+    const title = (k === "__none__") ? "ohne Richtung" : `Windrichtung ${k}°`;
+    const count = `<span class="muted" style="font-weight:400; margin-left:.5rem;">(${list.length})</span>`;
+    // innerhalb jeder Richtung weiter nach Element gruppieren
+    const elemGroupsHtml = renderDocsByElement(list);
+    return renderAccordionGroup({
+      cardClass:"dir-card", detailsClass:"dir-group", summaryClass:"dir-summary",
+      title, count, bodyHtml:`<div class="elem-groups">${elemGroupsHtml}</div>`, open: idx===0
+    });
+  }).join("");
+  return `<div class="doc-groups">${blocks}</div>`;
+}
+
+function renderDocsByElement(docsInDir){
+  const { groups, keys } = groupBy(docsInDir, {
+    keyFn: d => _pickElementKey(d?.context),
+    emptyKey: "__allgemein__",
+    sort: "alnum",
+    emptyLast: true
+  });
+  return keys.map((k, idx) => {
+    const list = groups.get(k) || [];
+    const title = (k === "__allgemein__") ? "allgemein" : `Element ${k}`;
+    const count = `<span class="muted" style="font-weight:400; margin-left:.5rem;">(${list.length})</span>`;
+    const axisHtml = renderDocsByAxis(list);
+    return renderAccordionGroup({
+      cardClass:"elem-card", detailsClass:"elem-group", summaryClass:"elem-summary",
+      title, count, bodyHtml:`<div class="elem-body"><div class="axis-groups">${axisHtml}</div></div>`, open: idx===0
+    });
+  }).join("");
+}
+
+function renderDocsByAxis(docs){
+  const { groups, keys } = groupBy(docs, {
+    keyFn: d => _pickAxisIndex(d?.context),
+    emptyKey: "__ohne_achse__",
+    sort: "numeric",
+    emptyLast: true
+  });
+
+  const hasAxes = keys.some(k => k !== "__ohne_achse__");
+  if (!hasAxes) {
+    const only = groups.get("__ohne_achse__") || [];
+    return `<ul class="doc-list">${renderDocsListItems(only)}</ul>`;
+  }
+
+  return keys.map((k, idx) => {
+    const list = groups.get(k) || [];
+    const title = (k === "__ohne_achse__") ? "ohne Achse" : `Achse ${k}`;
+    const count = `<span class="muted" style="font-weight:400; margin-left:.5rem;">(${list.length})</span>`;
+    const body = `<ul class="doc-list">${renderDocsListItems(list)}</ul>`;
+    return renderAccordionGroup({
+      cardClass:"axis-card", detailsClass:"axis-group", summaryClass:"axis-summary",
+      title, count, bodyHtml: body, open: idx===0
+    });
+  }).join("");
+}
+
+// --- Gruppieren nach Windrichtung ---------------------------------
 
 function renderDocsListItems(docs) {
   return (docs || []).map(d => {
@@ -399,35 +511,6 @@ function renderDocsListItems(docs) {
   }).join("");
 }
 
-// Akkordeon pro Windrichtung (Details/Summary ist simpel & barrierearm)
-function renderDocsByWindrichtung(docs) {
-  const { groups, keys } = groupDocsByWindrichtung(docs);
-  if (!keys.length) {
-    return `<div class="muted" style="padding:0.75rem 0;">Keine Zwischenergebnisse vorhanden.</div>`;
-  }
-
-  const blocks = keys.map((k, idx) => {
-    const list = groups.get(k) || [];
-    const title = (k === "__none__") ? "ohne Richtung" : `Windrichtung ${k}°`;
-    const countBadge = `<span class="muted" style="font-weight:400; margin-left:.5rem;">(${list.length})</span>`;
-    // NEU: innerhalb jeder Windrichtung nach Element-ID gruppieren
-    const elemGroupsHtml = renderDocsByElement(list);
-
-    return `
-      <div class="group-card dir-card">
-        <details class="dir-group"${idx === 0 ? " open" : ""}>
-          <summary class="dir-summary">${escapeHtml(title)} ${countBadge}</summary>
-          <div class="elem-groups">
-            ${elemGroupsHtml}
-          </div>
-        </details>
-      </div>
-    `;
-  }).join("");
-
-  return `<div class="doc-groups">${blocks}</div>`;
-}
-
 // --- Sub-Gruppierung nach Element-ID (oder ähnliche Felder) -----------------
 // Bevorzugte Keys im Kontext: element_id > element > bauteil > komponente
 function _pickElementKey(ctx) {
@@ -439,53 +522,6 @@ function _pickElementKey(ctx) {
     ctx.komponente ??
     null
   );
-}
-
-function groupDocsByElement(docs) {
-  const groups = new Map(); // key -> array
-  for (const d of (docs || [])) {
-    const k = _pickElementKey(d?.context);
-    const key = (k === undefined || k === null || k === "") ? "__allgemein__" : String(k);
-    if (!groups.has(key)) groups.set(key, []);
-    groups.get(key).push(d);
-  }
-  // Sortierung: alphanumerisch, "__allgemein__" am Ende
-  const keys = [...groups.keys()].sort((a, b) => {
-    if (a === "__allgemein__" && b === "__allgemein__") return 0;
-    if (a === "__allgemein__") return 1;
-    if (b === "__allgemein__") return -1;
-    // try numeric if both look like numbers, else localeCompare
-    const na = Number(a), nb = Number(b);
-    const an = Number.isFinite(na), bn = Number.isFinite(nb);
-    if (an && bn) return na - nb;
-    return String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: "base" });
-  });
-  return { groups, keys };
-}
-
-function renderDocsByElement(docsInDir) {
-  const { groups, keys } = groupDocsByElement(docsInDir);
-  const blocks = keys.map((k, idx) => {
-    let list = groups.get(k) || [];
-    const title = (k === "__allgemein__") ? "allgemein" : `Element ${k}`;
-    const countBadge = `<span class="muted" style="font-weight:400; margin-left:.5rem;">(${list.length})</span>`;
-    // Gruppierung nach Achsen
-    const innerHtml = renderDocsByAxis(list);
-
-    return `
-      <div class="group-card elem-card">
-        <details class="elem-group"${idx === 0 ? " open" : ""}>
-          <summary class="elem-summary">${escapeHtml(title)} ${countBadge}</summary>
-          <div class="elem-body">
-            <div class="axis-groups">
-              ${innerHtml}
-            </div>
-          </div>
-        </details>
-      </div>
-    `;
-  }).join("");
-  return blocks || "";
 }
 
 // ---- Achs-Index aus dem Kontext lesen (mehrere mögliche Keys absichern) ---
@@ -500,52 +536,6 @@ function _pickAxisIndex(ctx) {
 
   const n = Number(v);
   return Number.isFinite(n) ? n : null;
-}
-
-// --- Gruppierung nach Achse (nur für "allgemein") ---------------------------
-function groupDocsByAxis(docs) {
-  const groups = new Map(); // key -> array
-  for (const d of (docs || [])) {
-    const ax = _pickAxisIndex(d?.context);
-    const key = (ax == null) ? "__ohne_achse__" : Number(ax);
-    if (!groups.has(key)) groups.set(key, []);
-    groups.get(key).push(d);
-  }
-  const keys = [...groups.keys()].sort((a, b) => {
-    if (a === "__ohne_achse__" && b === "__ohne_achse__") return 0;
-    if (a === "__ohne_achse__") return 1;
-    if (b === "__ohne_achse__") return -1;
-    return Number(a) - Number(b);
-  });
-  return { groups, keys };
-}
-
-function renderDocsByAxis(docs) {
-  const { groups, keys } = groupDocsByAxis(docs);
-
-  // Hat das Set IRGENDEINE numerische Achse?
-  const hasAxes = keys.some(k => k !== "__ohne_achse__");
-
-  // Fall A: keine Achsen → direkt Liste unter "allgemein"
-  if (!hasAxes) {
-    const only = groups.get("__ohne_achse__") || [];
-    return `<ul class="doc-list">${renderDocsListItems(only)}</ul>`;
-  }
-
-  // Fall B: Achsen vorhanden → Achse 0/1/… UND „ohne Achse“ separat rendern
-  return keys.map((k, idx) => {
-    const list = groups.get(k) || [];
-    const title = (k === "__ohne_achse__") ? "ohne Achse" : `Achse ${k}`;
-    const count = `<span class="muted" style="font-weight:400; margin-left:.5rem;">(${list.length})</span>`;
-    return `
-      <div class="group-card axis-card">
-        <details class="axis-group"${idx === 0 ? " open" : ""}>
-          <summary class="axis-summary">${escapeHtml(title)} ${count}</summary>
-          <ul class="doc-list">${renderDocsListItems(list)}</ul>
-        </details>
-      </div>
-    `;
-  }).join("");
 }
 
 // NEU: holt alle Docs für Norm × (optional) Alternative – ohne Nachweis-Filter
