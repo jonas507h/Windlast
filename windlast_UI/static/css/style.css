@@ -159,3 +159,20 @@ nav.tabs { display:flex; gap:8px; margin:0 0 10px; }
 
 .results-table td.value.val-ok  { background: var(--ok-bg);  transition: background .2s ease; }
 .results-table td.value.val-bad { background: var(--bad-bg); transition: background .2s ease; }
+
+/* Positionierung im Header */
+.results-table thead th.has-count-badge,
+.results-table .alt-title th.has-count-badge { position: relative; padding-right: 2.2rem; }
+
+.count-badge {
+  position: absolute; right: .5rem; top: 50%; transform: translateY(-50%);
+  min-width: 1.6rem; padding: 0 .45rem; border-radius: 999px;
+  font-size: .75rem; line-height: 1.6rem; text-align: center; font-weight: 600;
+  border: 1px solid transparent;
+}
+
+/* Farben je Severity – gern an deine Token anpassen */
+.count-badge.badge-error { background: rgba(255, 107, 107, 0.15); color: #ff4c4c; border-color: #ff6b6b; }
+.count-badge.badge-warn  { background: rgba(240, 173, 78, 0.15); color: #d99000; border-color: #f0ad4e; }
+.count-badge.badge-hint  { background: rgba(45, 108, 223, 0.12); color: #2d6cdf; border-color: #2d6cdf; }
+.count-badge.badge-info  { background: rgba(100, 100, 100, 0.08); color: #555; border-color: #555; }

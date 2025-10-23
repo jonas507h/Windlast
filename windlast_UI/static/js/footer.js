@@ -781,6 +781,59 @@ function orderContextEntries(ctx, pref = CONTEXT_ORDER) {
 
 let ResultsVM = null; // hält das von ResultsIndex.build(...) erzeugte ViewModel
 
+function severityFromCounts(c) {
+  if (!c) return "info";
+  if (c.error > 0) return "error";
+  if (c.warn  > 0) return "warn";
+  if (c.hint  > 0) return "hint";
+  return "info";
+}
+function totalFromCounts(c) {
+  return (c?.error ?? 0) + (c?.warn ?? 0) + (c?.hint ?? 0) + (c?.info ?? 0);
+}
+
+function updateHeaderBadge(th, counts) {
+  if (!th) return;
+  // Badge holen/erzeugen
+  let badge = th.querySelector(".count-badge");
+  if (!badge) {
+    badge = document.createElement("span");
+    badge.className = "count-badge";
+    th.appendChild(badge);
+    // Platz rechts reservieren, falls nötig
+    th.classList.add("has-count-badge");
+  }
+
+  const total = totalFromCounts(counts);
+  const sev   = severityFromCounts(counts);
+
+  // Optional: bei 0 ausblenden (oder `.muted` anzeigen – Geschmackssache)
+  if (!total) {
+    badge.hidden = true;
+    return;
+  }
+  badge.hidden = false;
+  badge.textContent = String(total);
+
+  // Severity-Klassen setzen
+  badge.classList.remove("badge-error","badge-warn","badge-hint","badge-info");
+  badge.classList.add(`badge-${sev}`);
+}
+
+function refreshHeaderBadges() {
+  // Hauptberechnung pro Norm (thead)
+  document.querySelectorAll(".results-table thead th[data-norm-key]").forEach(th => {
+    const c = ResultsVM?.getCountsMainOnly(th.dataset.normKey);
+    updateHeaderBadge(th, c);
+  });
+
+  // Alternativen-Zeilen (pro Norm + Szenario)
+  document.querySelectorAll(".results-table .alt-title th[data-norm-key][data-szenario]").forEach(th => {
+    const c = ResultsVM?.getCounts(th.dataset.normKey, th.dataset.szenario);
+    updateHeaderBadge(th, c);
+  });
+}
+
 function attachNormKeysToHeader() {
   // ordnet thead-ths der COLS-Reihenfolge zu
   const ths = document.querySelectorAll('.results-table thead th');
@@ -1036,6 +1089,7 @@ function updateFooter(payload) {
   renderAlternativenBlocksVM(ResultsVM);
 
   wireZwischenergebnisseUIOnce();
+  refreshHeaderBadges();
 }
 
 window.addEventListener("message", (ev) => {
