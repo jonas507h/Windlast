@@ -20,8 +20,8 @@ def _validate_inputs(
 ) -> None:
     if not isinstance(objekttyp, ObjektTyp):
         raise TypeError("objekttyp muss vom Typ ObjektTyp sein.")
-    if not math.isfinite(grundkraftbeiwert) or grundkraftbeiwert <= 0:
-        raise ValueError("grundkraftbeiwert muss endlich und > 0 sein.")
+    if not math.isfinite(grundkraftbeiwert) or grundkraftbeiwert < 0:
+        raise ValueError("grundkraftbeiwert muss endlich und >= 0 sein.")
     if objekttyp == ObjektTyp.TRAVERSE:
         # Pflicht und positiv (0 < η < ∞), außerdem endlich
         if abminderungsfaktor_schlankheit is None:

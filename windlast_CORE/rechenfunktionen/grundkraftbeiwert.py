@@ -44,6 +44,9 @@ _TRUSS_TO_FACES = {
 def anzahl_flaechen(typ: TraversenTyp) -> int:
     return _TRUSS_TO_FACES[typ]
 
+def _angle_mod180(theta: float) -> float:
+    t = theta % 180.0
+    return 180.0 if abs(t - 180.0) < 1e-12 else t
 
 def _validate_inputs(
     objekttyp: ObjektTyp,
@@ -133,28 +136,20 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
 
         # Anströmrichtung
         if vektor_laenge(windrichtung_projiziert) < 1e-9:
-            anstroemrichtung = Anstroemrichtung.PARALLEL
+            wert = 0.0
+
+            protokolliere_msg(
+                protokoll,
+                severity=Severity.INFO,
+                code="WIND/ANSTROEM_NULL",
+                text="Windvektor ist parallel zur Traversenachse; Grundkraftbeiwert wird auf 0 gesetzt.",
+                kontext=base_ctx,
+            )
         else:
             winkel = vektor_winkel(windrichtung_projiziert, orientierung)
-            if traversentyp == TraversenTyp.DREI_PUNKT:
-                winkel += 90.0
+            winkel = _angle_mod180(winkel)
 
-            halbe_Abschnittgroesse = 180.0 / anzahl_flaechen(traversentyp)
-            rest = math.fmod(winkel, halbe_Abschnittgroesse)
-            if rest < 0:
-                rest += halbe_Abschnittgroesse
-            if rest < halbe_Abschnittgroesse / 2:
-                anstroemrichtung = Anstroemrichtung.FLAECHE
-            elif rest < halbe_Abschnittgroesse:
-                anstroemrichtung = Anstroemrichtung.ECKE
-            else:
-                anstroemrichtung = Anstroemrichtung.MITTE
-
-        wert: Optional[float] = None
-        if traversentyp == TraversenTyp.ZWEI_PUNKT:
-            if anstroemrichtung in (Anstroemrichtung.FLAECHE, Anstroemrichtung.MITTE, Anstroemrichtung.PARALLEL):
-                wert = 1.1
-            elif anstroemrichtung == Anstroemrichtung.ECKE:
+            if traversentyp == TraversenTyp.ZWEI_PUNKT:
                 x = [0.2, 0.35, 0.55]
                 y = [0.7, 0.6, 0.5]
                 if not (x[0] - _EPS <= voelligkeitsgrad <= x[-1] + _EPS):
@@ -163,26 +158,21 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
                         text=f"Völligkeitsgrad {voelligkeitsgrad:.3f} außerhalb [{x[0]}, {x[-1]}] – Interpolation extrapoliert.",
                         kontext=merge_kontext(base_ctx, {"bereich": [x[0], x[-1]]}),
                     )
-                wert = interpol_2D(x, y, voelligkeitsgrad)
+                wert_Ecke = interpol_2D(x, y, voelligkeitsgrad)
+                wert_Seite = 1.1
 
-        elif traversentyp == TraversenTyp.DREI_PUNKT:
-            if anstroemrichtung in (Anstroemrichtung.FLAECHE, Anstroemrichtung.PARALLEL):
-                wert = 1.3
-            elif anstroemrichtung in (Anstroemrichtung.ECKE, Anstroemrichtung.MITTE):
-                wert = 1.45
+                definierte_winkel = [0.0, 90.0, 180.0]
+                definierte_werte = [wert_Ecke, wert_Seite, wert_Ecke]
 
-        elif traversentyp == TraversenTyp.VIER_PUNKT:
-            if anstroemrichtung in (Anstroemrichtung.FLAECHE, Anstroemrichtung.PARALLEL):
-                x = [0.2, 0.35, 0.55]
-                y = [1.85, 1.6, 1.4]
-                if not (x[0] - _EPS <= voelligkeitsgrad <= x[-1] + _EPS):
-                    protokolliere_msg(
-                        protokoll, severity=Severity.WARN, code="GRUNDKRAFT/EXTRAPOLATION_V",
-                        text=f"Völligkeitsgrad {voelligkeitsgrad:.3f} außerhalb [{x[0]}, {x[-1]}] – Interpolation extrapoliert.",
-                        kontext=merge_kontext(base_ctx, {"bereich": [x[0], x[-1]]}),
-                    )
-                wert = interpol_2D(x, y, voelligkeitsgrad)
-            elif anstroemrichtung == Anstroemrichtung.ECKE:
+                wert = interpol_2D(definierte_winkel, definierte_werte, winkel)
+
+            elif traversentyp == TraversenTyp.DREI_PUNKT:
+                definierte_winkel = [0.0, 30.0, 60.0, 90.0, 120.0, 150.0, 180.0]
+                definierte_werte = [1.45, 1.3, 1.45, 1.3, 1.45, 1.3, 1.45]
+
+                wert = interpol_2D(definierte_winkel, definierte_werte, winkel)
+
+            elif traversentyp == TraversenTyp.VIER_PUNKT:
                 x = [0.25, 0.5]
                 y = [2.0, 1.9]
                 if not (x[0] - _EPS <= voelligkeitsgrad <= x[-1] + _EPS):
@@ -191,22 +181,36 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
                         text=f"Völligkeitsgrad {voelligkeitsgrad:.3f} außerhalb [{x[0]}, {x[-1]}] – Interpolation extrapoliert.",
                         kontext=merge_kontext(base_ctx, {"bereich": [x[0], x[-1]]}),
                     )
-                wert = interpol_2D(x, y, voelligkeitsgrad)
+                wert_Ecke = interpol_2D(x, y, voelligkeitsgrad)
 
-        if wert is None:
-            protokolliere_msg(
-                protokoll,
-                severity=Severity.ERROR,
-                code="GRUNDKRAFT/NICHT_ZUGEORDNET",
-                text=f"Keine Zuordnung für {traversentyp.value} bei Anströmung {anstroemrichtung.value}.",
-                kontext=base_ctx,
-            )
-            protokolliere_doc(
-                protokoll,
-                bundle=make_docbundle(titel="Grundkraftbeiwert c_f,0", wert=float("nan")),
-                kontext=merge_kontext(base_ctx, {"nan": True}),
-            )
-            return Zwischenergebnis(wert=float("nan"))
+                x = [0.2, 0.35, 0.55]
+                y = [1.85, 1.6, 1.4]
+                if not (x[0] - _EPS <= voelligkeitsgrad <= x[-1] + _EPS):
+                    protokolliere_msg(
+                        protokoll, severity=Severity.WARN, code="GRUNDKRAFT/EXTRAPOLATION_V",
+                        text=f"Völligkeitsgrad {voelligkeitsgrad:.3f} außerhalb [{x[0]}, {x[-1]}] – Interpolation extrapoliert.",
+                        kontext=merge_kontext(base_ctx, {"bereich": [x[0], x[-1]]}),
+                    )
+                wert_Seite = interpol_2D(x, y, voelligkeitsgrad)
+
+                definierte_winkel = [0.0, 45.0, 90.0, 135.0, 180.0]
+                definierte_werte = [wert_Seite, wert_Ecke, wert_Seite, wert_Ecke, wert_Seite]
+
+                wert = interpol_2D(definierte_winkel, definierte_werte, winkel)
+            else:
+                protokolliere_msg(
+                    protokoll,
+                    severity=Severity.ERROR,
+                    code="GRUNDKRAFT/NOT_IMPLEMENTED",
+                    text=f"Grundkraftbeiwert für {traversentyp.value} ist noch nicht implementiert.",
+                    kontext=base_ctx,
+                )
+                protokolliere_doc(
+                    protokoll,
+                    bundle=make_docbundle(titel="Grundkraftbeiwert c_f,0", wert=float("nan")),
+                    kontext=merge_kontext(base_ctx, {"nan": True}),
+                )
+                return Zwischenergebnis(wert=float("nan"))
 
         protokolliere_doc(
             protokoll,
