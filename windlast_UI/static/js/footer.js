@@ -235,6 +235,35 @@ function resolveCellContext(td) {
   return { normKey, nachweis, altName };
 }
 
+// === Modal ===
+const NACHWEIS_CHOICES = ["ALLE", "KIPP", "GLEIT", "ABHEB", "BALLAST", "LOADS"];
+
+function filterDocsByNachweis(docs, sel) {
+  if (!sel || sel === "ALLE") return docs;
+  return (docs || []).filter(d => {
+    const n = d?.context?.nachweis ?? null;
+    // LOADS zählen immer dazu, ebenso Docs ohne Nachweis (Meta/Allgemein)
+    return n === sel || n === "LOADS" || n === null;
+  });
+}
+
+function buildModal(titleText, bodyNodeOrHtml) {
+  const wrap = document.createElement("div");
+  const h = document.createElement("h3");
+  h.textContent = titleText;
+  h.className = "modal-title";
+  wrap.appendChild(h);
+
+  if (typeof bodyNodeOrHtml === "string") {
+    const div = document.createElement("div");
+    div.innerHTML = bodyNodeOrHtml;
+    wrap.appendChild(div);
+  } else if (bodyNodeOrHtml instanceof Node) {
+    wrap.appendChild(bodyNodeOrHtml);
+  }
+  return wrap;
+}
+
 function openZwischenergebnisseModal({ normKey, nachweis, altName }, docsAll, { initialNachweis=null } = {}) {
   // Titel exakt wie bei Meldungen bauen
   const normName = getNormDisplayName(normKey);
@@ -245,32 +274,20 @@ function openZwischenergebnisseModal({ normKey, nachweis, altName }, docsAll, { 
     : `Zwischenergebnisse – ${normName} (Hauptberechnung)`;
 
   // Gleiches Markup: <h3 class="modal-title">…</h3>
-  const wrap = document.createElement("div");
-  const h = document.createElement("h3");
-  h.textContent = title;
-  h.className = "modal-title";
-  wrap.appendChild(h);
+  const wrap = buildModal(title, document.createElement("div"));
+  const contentRoot = wrap.lastElementChild; // unser body-Container
 
   // --- Nachweis-Filterleiste ---
   const bar = document.createElement("div");
   bar.className = "nachweis-filter";
-  const choices = ["ALLE", "KIPP", "GLEIT", "ABHEB", "BALLAST", "LOADS"];
-  const start = (initialNachweis && choices.includes(initialNachweis)) ? initialNachweis : "ALLE";
-  bar.innerHTML = choices.map(c =>
-    `<button class="nf-chip${c===start?" active":""}" data-nachweis="${c}">${c==="ALLE"?"Alle":c}</button>`
+  const start = (initialNachweis && NACHWEIS_CHOICES.includes(initialNachweis)) ? initialNachweis : "ALLE";
+  bar.innerHTML = NACHWEIS_CHOICES.map(c =>
+    `<button class="nf-chip${c===start?" active":""}" data-nachweis="${c}" aria-pressed="${c===start}">${c==="ALLE"?"Alle":c}</button>`
   ).join("");
-  wrap.appendChild(bar);
 
-  // Gruppierte Ansicht: je Windrichtung ein auf-/zuklappbarer Block
   const list = document.createElement("div");
   const apply = (sel) => {
-    const filter = (sel && sel!=="ALLE") ? sel : null;
-    const docs = filter
-     ? docsAll.filter(d => {
-         const n = d?.context?.nachweis ?? null;
-         return n === filter || n === "LOADS" || n === null;
-       })
-     : docsAll;
+    const docs = filterDocsByNachweis(docsAll, sel);
     list.innerHTML = renderDocsByWindrichtung(docs);
   };
   apply(start);
@@ -280,13 +297,141 @@ function openZwischenergebnisseModal({ normKey, nachweis, altName }, docsAll, { 
   bar.addEventListener("click", (ev) => {
     const btn = ev.target.closest(".nf-chip");
     if (!btn) return;
-    bar.querySelectorAll(".nf-chip.active").forEach(b => b.classList.remove("active"));
+    bar.querySelectorAll(".nf-chip.active").forEach(b => { b.classList.remove("active"); b.setAttribute("aria-pressed","false"); });
     btn.classList.add("active");
+    btn.setAttribute("aria-pressed","true");
     apply(btn.dataset.nachweis);
   });
 
   Modal.open(wrap);
 }
+
+function sortMessagesBySeverity(msgs) {
+  return [...msgs].sort((a, b) => {
+    const sa = (a.severity || "").toLowerCase();
+    const sb = (b.severity || "").toLowerCase();
+    const ia = SEVERITY_ORDER.indexOf(sa);
+    const ib = SEVERITY_ORDER.indexOf(sb);
+    // unbekannte Severities hängen wir ans Ende
+    const ra = ia >= 0 ? ia : SEVERITY_ORDER.length;
+    const rb = ib >= 0 ? ib : SEVERITY_ORDER.length;
+    return ra - rb;
+  });
+}
+
+// ---- Messages im Modal rendern (Texte; Kontext wird als Tooltip gezeigt) ----
+function openMessagesModalFor(normKey, szenario = null) {
+  if (!ResultsVM) return;
+
+  // Meldungen holen (Objekte; s.o.)
+  const msgs = szenario
+    ? (ResultsVM.listMessages ? ResultsVM.listMessages(normKey, szenario) : [])
+    : (ResultsVM.listMessagesMainOnly ? ResultsVM.listMessagesMainOnly(normKey) : []);
+  const sortedMsgs = sortMessagesBySeverity(msgs);
+
+  // Normname hübsch machen
+  const normName = getNormDisplayName(normKey);
+  const niceScenario = szenario ? (displayAltName ? displayAltName(szenario) : szenario) : null;
+
+  const title = szenario
+    ? `Meldungen – ${normName} (${niceScenario})`
+    : `Meldungen – ${normName} (Hauptberechnung)`;
+
+  // DOM für Modal
+  const wrap = buildModal(title, document.createElement("div"));
+  const contentRoot = wrap.lastElementChild;
+
+  if (!msgs || msgs.length === 0) {
+    const p = document.createElement("p");
+    p.textContent = "Keine Meldungen vorhanden.";
+    contentRoot.appendChild(p);
+  } else {
+    const ul = document.createElement("ul");
+    ul.className = "messages-list";
+    // … li's bauen …
+    contentRoot.appendChild(ul);
+  }
+
+  if (!msgs || msgs.length === 0) {
+    const p = document.createElement("p");
+    p.textContent = "Keine Meldungen vorhanden.";
+    wrap.appendChild(p);
+  } else {
+    const ul = document.createElement("ul");
+    ul.className = "messages-list";
+    for (const m of sortedMsgs) {
+      const li = document.createElement("li");
+
+      const line = document.createElement("div");
+      const sev = (m.severity || "").toLowerCase();
+      const sevClass = (sev === "error" || sev === "warn" || sev === "hint" || sev === "info")
+        ? sev
+        : "info"; // Fallback
+      line.className = `tt-line ${sevClass}`;
+      line.textContent = m.text || "";
+      li.appendChild(line);
+
+      // Kontext generisch sammeln -> Tooltip-Attribut
+      // Kontext generisch, nach CONTEXT_ORDER, Rest in Quell-Reihenfolge
+      let ctxText = "";
+      try {
+        const ctx = m?.context || {};
+        const ordered = orderContextEntries(ctx);
+        const parts = ordered.map(([k, v]) => {
+          const label = prettyKey(k);
+          const val   = prettyVal(k, v);
+          return `${label}: ${val}`;
+        });
+
+        // "code" anhängen, wenn noch nicht enthalten
+        if (m.code && !parts.some(line => /^\s*code\s*:/.test(line))) {
+          parts.push(`code: ${m.code}`);
+        }
+
+        if (parts.length) ctxText = parts.join("\n");
+      } catch {
+        ctxText = JSON.stringify(m?.context || {});
+      }
+
+      if (ctxText) {
+        li.setAttribute("data-ctx", ctxText);
+      }
+      try { li.setAttribute("data-ctx-json", JSON.stringify(m?.context || {})); } catch {}
+
+      ul.appendChild(li);
+    }
+    wrap.appendChild(ul);
+  }
+
+  Modal.open(wrap);
+}
+
+// ---- Modal-Trigger: beim Klick auf die Tooltip-Zellen ein Modal öffnen ----
+(function setupMessageModalOnce(){
+  if (window.__messageModalSetup) return;
+  window.__messageModalSetup = true;
+
+  document.addEventListener("click", (ev) => {
+    const target = ev.target;
+
+    // 1) Kopfzellen je Norm
+    const thHead = target.closest(".results-table thead th");
+    if (thHead && thHead.dataset && thHead.dataset.normKey) {
+      const normKey = thHead.dataset.normKey;
+      openMessagesModalFor(normKey, null); // Hauptberechnung
+      return;
+    }
+
+    // 2) Alternativ-Titelzellen
+    const thAlt = target.closest(".results-table .alt-title th[data-szenario]");
+    if (thAlt) {
+      const normKey  = thAlt.dataset.normKey;
+      const szenario = thAlt.dataset.szenario;
+      openMessagesModalFor(normKey, szenario); // spezifische Variante
+      return;
+    }
+  }, { passive: true });
+})();
 
 function formatLabelWithSubscripts(input) {
   if (input == null) return "";
@@ -381,16 +526,27 @@ function _pickDir(d){
 }  // :contentReference[oaicite:8]{index=8}
 
 // Element-ID bevorzugt; sonst sinnvolle Fallbacks
-function _pickElementKey(ctx){
+function _pickElementKey(ctx) {
   if (!ctx) return null;
-  return ctx.element_id ?? ctx.element ?? ctx.bauteil ?? ctx.komponente ?? null; // :contentReference[oaicite:9]{index=9}
+  return (
+    ctx.element_id ??
+    ctx.element ??
+    ctx.bauteil ??
+    ctx.komponente ??
+    null
+  );
 }
 
 // Achsindex (nur numerisch zulassen)
-function _pickAxisIndex(ctx){
+function _pickAxisIndex(ctx) {
   if (!ctx) return null;
-  const v = ctx.achse_index ?? null; // :contentReference[oaicite:10]{index=10}
-  if (v === "" || typeof v === "boolean") return null;
+  const v =
+    ctx.achse_index ??    // bevorzugt (kommt in euren Kontexten vor)
+    null;
+  
+  if (v === null || v === undefined || v === "") return null;
+  if (typeof v === "boolean") return null; // Safety, falls mal true/false reinkommt
+
   const n = Number(v);
   return Number.isFinite(n) ? n : null;
 }
@@ -399,7 +555,7 @@ function renderAccordionGroup({ cardClass, detailsClass, summaryClass, title, co
   return `
     <div class="group-card ${cardClass}">
       <details class="${detailsClass}"${open ? " open" : ""}>
-        <summary class="${summaryClass}">${escapeHtml(title)} ${count}</summary>
+        <summary class="${summaryClass}" aria-label="${escapeHtml(title)}">${escapeHtml(title)} ${count}</summary>
         ${bodyHtml}
       </details>
     </div>
@@ -470,8 +626,6 @@ function renderDocsByAxis(docs){
   }).join("");
 }
 
-// --- Gruppieren nach Windrichtung ---------------------------------
-
 function renderDocsListItems(docs) {
   return (docs || []).map(d => {
     const titleHtml = formatLabelWithSubscripts(d?.title ?? "—");
@@ -509,33 +663,6 @@ function renderDocsListItems(docs) {
       </li>
     `;
   }).join("");
-}
-
-// --- Sub-Gruppierung nach Element-ID (oder ähnliche Felder) -----------------
-// Bevorzugte Keys im Kontext: element_id > element > bauteil > komponente
-function _pickElementKey(ctx) {
-  if (!ctx) return null;
-  return (
-    ctx.element_id ??
-    ctx.element ??
-    ctx.bauteil ??
-    ctx.komponente ??
-    null
-  );
-}
-
-// ---- Achs-Index aus dem Kontext lesen (mehrere mögliche Keys absichern) ---
-function _pickAxisIndex(ctx) {
-  if (!ctx) return null;
-  const v =
-    ctx.achse_index ??    // bevorzugt (kommt in euren Kontexten vor)
-    null;
-  
-  if (v === null || v === undefined || v === "") return null;
-  if (typeof v === "boolean") return null; // Safety, falls mal true/false reinkommt
-
-  const n = Number(v);
-  return Number.isFinite(n) ? n : null;
 }
 
 // NEU: holt alle Docs für Norm × (optional) Alternative – ohne Nachweis-Filter
@@ -637,21 +764,78 @@ function formatBallast(val_kg) {
   return `${rounded.toLocaleString("de-DE")} t`;
 }
 
+//=== Zell-Setter ===
+function applySafetyToCell(td, val, { allowBlank=false } = {}) {
+  if (!td) return;
+  if (val === "INF" || val === "-INF") {
+    td.textContent = val === "INF" ? "∞" : "−∞";
+    td.title = "";
+    klassifizierung_anwenden(td, sicherheit_klassifizieren(val));
+    return;
+  }
+  const num = typeof val === "string" ? Number(val) : val;
+  if (!Number.isFinite(num)) {
+    td.textContent = allowBlank ? "" : "—";
+    td.title = "";
+    td.classList.remove("val-ok", "val-bad");
+    return;
+  }
+  td.textContent = (Math.floor(num * 100) / 100).toFixed(2);
+  td.title = "";
+  klassifizierung_anwenden(td, sicherheit_klassifizieren(num));
+}
+
+function applyBallastToCell(td, valKg, { allowBlank=false } = {}) {
+  if (!td) return;
+  if (valKg === "INF" || valKg === "-INF") {
+    td.textContent = valKg === "INF" ? "∞" : "−∞";
+    td.title = "";
+    td.classList.remove("val-ok", "val-bad"); // bei Ballast keine Klassifizierung
+    return;
+  }
+  const n = typeof valKg === "string" ? Number(valKg) : valKg;
+  if (!Number.isFinite(n)) {
+    td.textContent = allowBlank ? "" : "—";
+    td.title = "";
+    td.classList.remove("val-ok", "val-bad");
+    return;
+  }
+  td.textContent = formatBallast(n);
+  td.title = "";
+}
+
+function _clearAltRows() {
+  const tbody = document.querySelector(".results-table tbody");
+  if (!tbody) return;
+  tbody.querySelectorAll('tr[data-alt-row="1"]').forEach(tr => tr.remove());
+}
+
+function parseCellId(id) {
+  const m = /^([a-z]+)_(.+)$/.exec(id || "");
+  if (!m) return null;
+  const key = m[1];
+  const suf = m[2];
+  const normKey = Object.entries(NORM_ID).find(([, v]) => v === suf)?.[0] || null;
+  return { key, suf, normKey };
+}
+
+function setDatasetFromId(el, id) {
+  const parsed = parseCellId(id);
+  if (!parsed) return;
+  const { key, normKey } = parsed;
+  if (normKey) el.dataset.normKey = normKey;
+  el.dataset.nachweis =
+    key === "ballast" ? "BALLAST" :
+    key === "kipp"    ? "KIPP"    :
+    key === "gleit"   ? "GLEIT"   :
+    key === "abhebe"  ? "ABHEB"   : "";
+  if (el.dataset.alt) delete el.dataset.alt;
+}
+
 function setBallastCell(id, val) {
   const el = document.getElementById(id);
   if (!el) return;
-  try {
-    const m = /^([a-z]+)_(.+)$/.exec(id);
-    if (m) {
-      const suf = m[2];
-      const normKey = Object.entries(NORM_ID).find(([,v]) => v === suf)?.[0] || null;
-      if (normKey) el.dataset.normKey = normKey;
-      el.dataset.nachweis = "BALLAST";
-      if (el.dataset.alt) delete el.dataset.alt;
-    }
-  } catch {}
-  el.textContent = formatBallast(val);
-  el.title = "";
+  applyBallastToCell(el, val, { allowBlank:false });
 }
 
 function setCell(id, val) {
@@ -659,85 +843,21 @@ function setCell(id, val) {
   if (!el) return;
 
   // Text setzen
-  if (val === "INF" || val === "-INF") {
-    el.textContent = val === "INF" ? "∞" : "−∞";
-    el.title = "";
-  } else {
-    const num = typeof val === "string" ? Number(val) : val;
-    if (num === null || num === undefined || Number.isNaN(num)) {
-      el.textContent = "—";
-      el.title = "";
-    } else {
-      el.textContent = (Math.floor(num * 100) / 100).toFixed(2);
-      el.title = "";
-    }
-  }
-
+  applySafetyToCell(el, val, { allowBlank:false });
   
   // Kontext für den Klick-Handler setzen (normKey + nachweis)
-  try {
-    const m = /^([a-z]+)_(.+)$/.exec(id); // z.B. "kipp_en13814_2005"
-    if (m) {
-      const key = m[1];               // kipp|gleit|abhebe|ballast
-      const suf = m[2];               // en13814_2005 | en17879_2024 | en1991_2010
-      const normKey = Object.entries(NORM_ID).find(([,v]) => v === suf)?.[0] || null;
-      if (normKey) el.dataset.normKey = normKey;
-      el.dataset.nachweis =
-        key === "ballast" ? "BALLAST" :
-        key === "kipp"    ? "KIPP"    :
-        key === "gleit"   ? "GLEIT"   :
-        key === "abhebe"  ? "ABHEB"   : "";
-      // Hauptzellen haben kein alt:
-      if (el.dataset.alt) delete el.dataset.alt;
-    }
-  } catch {}
+  try { setDatasetFromId(el, id); } catch {}
 
   // Klasse setzen (grün/rot)
   klassifizierung_anwenden(el, sicherheit_klassifizieren(val));
 }
 
-// --- NEU: Helpers für dynamisch erzeugte Zellen (Alternativen) ---
-function _clearAltRows() {
-  const tbody = document.querySelector(".results-table tbody");
-  if (!tbody) return;
-  tbody.querySelectorAll('tr[data-alt-row="1"]').forEach(tr => tr.remove());
-}
-
 function _setSafetyOnTdAlt(td, val) {
-  // Alternative: fehlende Werte -> leer & keine Klasse
-  if (val === "INF" || val === "-INF") {
-    td.textContent = val === "INF" ? "∞" : "−∞";
-    klassifizierung_anwenden(td, sicherheit_klassifizieren(val));
-    return;
-  }
-  const num = typeof val === "string" ? Number(val) : val;
-  if (num === null || num === undefined || Number.isNaN(num)) {
-    td.textContent = "";
-    td.title = "";
-    td.classList.remove("val-ok", "val-bad");
-  } else {
-    td.textContent = (Math.floor(num * 100) / 100).toFixed(2);
-    td.title = "";
-    klassifizierung_anwenden(td, sicherheit_klassifizieren(num));
-  }
+  applySafetyToCell(td, val, { allowBlank:true });
 }
 
 function _setBallastOnTdAlt(td, valKg) {
-  // Alternative: fehlende Werte -> leer & keine Klasse
-  if (valKg === null || valKg === undefined) {
-    td.textContent = "";
-    td.title = "";
-    td.classList.remove("val-ok", "val-bad");
-    return;
-  }
-  if (typeof valKg === "string" && Number.isNaN(Number(valKg))) {
-    td.textContent = "";
-    td.title = "";
-    td.classList.remove("val-ok", "val-bad");
-    return;
-  }
-  td.textContent = formatBallast(valKg);
-  td.title = "";
+  applyBallastToCell(td, valKg, { allowBlank:true });
 }
 
 function renderAlternativenBlocksVM(vm) {
@@ -922,125 +1042,6 @@ registerCountsTooltip('.results-table .alt-title th[data-szenario]', {
     return `Alternative: ${nice}`;
   }
 });
-
-function sortMessagesBySeverity(msgs) {
-  return [...msgs].sort((a, b) => {
-    const sa = (a.severity || "").toLowerCase();
-    const sb = (b.severity || "").toLowerCase();
-    const ia = SEVERITY_ORDER.indexOf(sa);
-    const ib = SEVERITY_ORDER.indexOf(sb);
-    // unbekannte Severities hängen wir ans Ende
-    const ra = ia >= 0 ? ia : SEVERITY_ORDER.length;
-    const rb = ib >= 0 ? ib : SEVERITY_ORDER.length;
-    return ra - rb;
-  });
-}
-
-// ---- Messages im Modal rendern (Texte; Kontext wird als Tooltip gezeigt) ----
-function openMessagesModalFor(normKey, szenario = null) {
-  if (!ResultsVM) return;
-
-  // Meldungen holen (Objekte; s.o.)
-  const msgs = szenario
-    ? (ResultsVM.listMessages ? ResultsVM.listMessages(normKey, szenario) : [])
-    : (ResultsVM.listMessagesMainOnly ? ResultsVM.listMessagesMainOnly(normKey) : []);
-  const sortedMsgs = sortMessagesBySeverity(msgs);
-
-  // Normname hübsch machen
-  const normName = getNormDisplayName(normKey);
-  const niceScenario = szenario ? (displayAltName ? displayAltName(szenario) : szenario) : null;
-
-  const title = szenario
-    ? `Meldungen – ${normName} (${niceScenario})`
-    : `Meldungen – ${normName} (Hauptberechnung)`;
-
-  // DOM für Modal
-  const wrap = document.createElement("div");
-  const h = document.createElement("h3");
-  h.textContent = title;
-  h.className = "modal-title";
-  wrap.appendChild(h);
-
-  if (!msgs || msgs.length === 0) {
-    const p = document.createElement("p");
-    p.textContent = "Keine Meldungen vorhanden.";
-    wrap.appendChild(p);
-  } else {
-    const ul = document.createElement("ul");
-    ul.className = "messages-list";
-    for (const m of sortedMsgs) {
-      const li = document.createElement("li");
-
-      const line = document.createElement("div");
-      const sev = (m.severity || "").toLowerCase();
-      const sevClass = (sev === "error" || sev === "warn" || sev === "hint" || sev === "info")
-        ? sev
-        : "info"; // Fallback
-      line.className = `tt-line ${sevClass}`;
-      line.textContent = m.text || "";
-      li.appendChild(line);
-
-      // Kontext generisch sammeln -> Tooltip-Attribut
-      // Kontext generisch, nach CONTEXT_ORDER, Rest in Quell-Reihenfolge
-      let ctxText = "";
-      try {
-        const ctx = m?.context || {};
-        const ordered = orderContextEntries(ctx);
-        const parts = ordered.map(([k, v]) => {
-          const label = prettyKey(k);
-          const val   = prettyVal(k, v);
-          return `${label}: ${val}`;
-        });
-
-        // "code" anhängen, wenn noch nicht enthalten
-        if (m.code && !parts.some(line => /^\s*code\s*:/.test(line))) {
-          parts.push(`code: ${m.code}`);
-        }
-
-        if (parts.length) ctxText = parts.join("\n");
-      } catch {
-        ctxText = JSON.stringify(m?.context || {});
-      }
-
-      if (ctxText) {
-        li.setAttribute("data-ctx", ctxText);
-      }
-      try { li.setAttribute("data-ctx-json", JSON.stringify(m?.context || {})); } catch {}
-
-      ul.appendChild(li);
-    }
-    wrap.appendChild(ul);
-  }
-
-  Modal.open(wrap);
-}
-
-// ---- Modal-Trigger: beim Klick auf die Tooltip-Zellen ein Modal öffnen ----
-(function setupMessageModalOnce(){
-  if (window.__messageModalSetup) return;
-  window.__messageModalSetup = true;
-
-  document.addEventListener("click", (ev) => {
-    const target = ev.target;
-
-    // 1) Kopfzellen je Norm
-    const thHead = target.closest(".results-table thead th");
-    if (thHead && thHead.dataset && thHead.dataset.normKey) {
-      const normKey = thHead.dataset.normKey;
-      openMessagesModalFor(normKey, null); // Hauptberechnung
-      return;
-    }
-
-    // 2) Alternativ-Titelzellen
-    const thAlt = target.closest(".results-table .alt-title th[data-szenario]");
-    if (thAlt) {
-      const normKey  = thAlt.dataset.normKey;
-      const szenario = thAlt.dataset.szenario;
-      openMessagesModalFor(normKey, szenario); // spezifische Variante
-      return;
-    }
-  }, { passive: true });
-})();
 
 // Tooltip für Meldungseinträge im Modal: zeigt den Kontext (HTML-fähig)
 Tooltip.register('#modal-root .messages-list li', {
