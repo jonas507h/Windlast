@@ -95,6 +95,104 @@ const CONTEXT_BLACKLIST_PREFIXES = [
 
 const CELL_SELECTOR = 'td[data-norm-key][data-nachweis], td.res-kipp, td.res-gleit, td.res-abhebe';
 
+// === Formatierungen ===
+
+function displayAltName(name) {
+  return (name && ALT_LABELS[name]) || name || "";
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+}
+
+function formatNumberDE(value, sig = 4) {
+  if (value == null || value === "INF" || value === "-INF" || Number.isNaN(value)) return String(value);
+
+  const num = Number(value);
+  if (!Number.isFinite(num)) return String(value);
+
+  // ➜ Ganzzahlen direkt ohne Nachkommastellen
+  if (Number.isInteger(num)) {
+    return num.toString(); // keine Kommata oder Nachkommastellen
+  }
+
+  // wissenschaftliche Notation auseinandernehmen
+  let [mantissa, exp] = num.toExponential(sig - 1).split("e");
+  exp = Number(exp);
+
+  // Standardfall: keine Exponentialdarstellung, normale Zahl
+  if (exp > -3 && exp < 4) {
+    const rounded = num.toPrecision(sig);
+    // Punkt durch Komma ersetzen
+    return rounded.replace(".", ",");
+  }
+
+  // wissenschaftliche Darstellung →  mantissa ×10^exp
+  const mant = parseFloat(mantissa).toString().replace(".", ",");
+  return `${mant}×10<sup>${exp}</sup>`;
+}
+
+function formatVectorDE(vec, sig = 4) {
+  if (!Array.isArray(vec)) return formatNumberDE(vec, sig);
+  const parts = vec.map(v => formatNumberDE(v, sig));
+  return `(${parts.join("; ")})`;
+}
+
+function formatVal(k, v, { html = false } = {}) {
+  // Nullish → Gedankenstrich
+  if (v === null || v === undefined) return "—";
+
+  // Szenario-Alias
+  if ((k === "szenario" || k === "scenario") && typeof v === "string") {
+    const s = displayAltName(v) || v;
+    return html ? escapeHtml(s) : s;
+  }
+
+  // Booleans → Ja/Nein
+  if (typeof v === "boolean") return v ? "Ja" : "Nein";
+
+  // Arrays → Vektor, falls numerisch; sonst CSV
+  if (Array.isArray(v)) {
+    const numeric = v.every(x => x !== null && x !== undefined && isFinite(Number(x)));
+    if (numeric) return formatVectorDE(v, 4);
+    const items = v.map(x => html ? escapeHtml(String(x)) : String(x));
+    return items.join(", ");
+  }
+
+  // Objekte mit x/y/z → als Vektor behandeln
+  if (v && typeof v === "object" && ["x","y","z"].every(p => p in v)) {
+    return formatVectorDE([v.x, v.y, v.z], 4);
+  }
+
+  // Andere Objekte → kompakt serialisieren (nur Plaintext sinnvoll)
+  if (v && typeof v === "object") {
+    try {
+      const s = JSON.stringify(v);
+      return html ? escapeHtml(s) : s;
+    } catch {
+      const s = String(v);
+      return html ? escapeHtml(s) : s;
+    }
+  }
+
+  // Zahlen / numerische Strings → deutsch + ×10<sup>…</sup> (HTML-tauglich)
+  if (typeof v === "number" || (typeof v === "string" && isFinite(Number(v)))) {
+    return formatNumberDE(v, 4);
+  }
+
+  // Fallback String
+  const s = String(v);
+  return html ? escapeHtml(s) : s;
+}
+
+function prettyVal(k, v) {
+  return formatVal(k, v, { html: false });
+}
+
+function prettyValHTML(k, v) {
+  return formatVal(k, v, { html: true });
+}
+
 function wireZwischenergebnisseUI() {
   const root = document.querySelector(".results-table");
   if (!root) { console.warn("[ZwRes] .results-table nicht gefunden"); return; }
@@ -188,39 +286,6 @@ function openZwischenergebnisseModal({ normKey, nachweis, altName }, docsAll, { 
   Modal.open(wrap);
 }
 
-function formatNumberDE(value, sig = 4) {
-  if (value == null || value === "INF" || value === "-INF" || Number.isNaN(value)) return String(value);
-
-  const num = Number(value);
-  if (!Number.isFinite(num)) return String(value);
-
-  // ➜ Ganzzahlen direkt ohne Nachkommastellen
-  if (Number.isInteger(num)) {
-    return num.toString(); // keine Kommata oder Nachkommastellen
-  }
-
-  // wissenschaftliche Notation auseinandernehmen
-  let [mantissa, exp] = num.toExponential(sig - 1).split("e");
-  exp = Number(exp);
-
-  // Standardfall: keine Exponentialdarstellung, normale Zahl
-  if (exp > -3 && exp < 4) {
-    const rounded = num.toPrecision(sig);
-    // Punkt durch Komma ersetzen
-    return rounded.replace(".", ",");
-  }
-
-  // wissenschaftliche Darstellung →  mantissa ×10^exp
-  const mant = parseFloat(mantissa).toString().replace(".", ",");
-  return `${mant}×10<sup>${exp}</sup>`;
-}
-
-function formatVectorDE(vec, sig = 4) {
-  if (!Array.isArray(vec)) return formatNumberDE(vec, sig);
-  const parts = vec.map(v => formatNumberDE(v, sig));
-  return `(${parts.join("; ")})`;
-}
-
 function formatLabelWithSubscripts(input) {
   if (input == null) return "";
   const raw = String(input);
@@ -274,8 +339,6 @@ function formatMathWithSubSup(input) {
   out += esc(s.slice(last));
   return out;
 }
-
-function escapeHtml(s){ return String(s).replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));   }
 
 // --- Gruppieren nach Windrichtung ---------------------------------
 
@@ -506,74 +569,6 @@ function prettyKey(k) {
   return k.replace(/_/g, " ").replace(/\b\p{L}/gu, (c) => c.toUpperCase());
 }
 
-// Werte ggf. hübscher darstellen
-function prettyVal(k, v) {
-  if (v === null || v === undefined) return "—";
-
-  // Norm-Schlüssel hübsch machen, falls im Kontext als Key "norm" steckt
-  /*if ((k === "norm" || k === "norm_used") && typeof v === "string") {
-    return getNormDisplayName(v);
-  }*/
-
-  // Szenario-Namen ggf. durch ALT_LABELS mappen
-  if ((k === "szenario" || k === "scenario") && typeof v === "string") {
-    return displayAltName(v) || v;
-  }
-
-  // Booleans auf Deutsch
-  if (typeof v === "boolean") return v ? "Ja" : "Nein";
-
-  // Arrays: wenn rein numerisch (2/3/… Werte) -> als Vektor ausgeben
-  if (Array.isArray(v)) {
-    const numeric = v.every(x => x !== null && x !== undefined && isFinite(Number(x)));
-    if (numeric) return formatVectorDE(v, 4);
-    return v.map((x) => prettyVal(k, x)).join(", ");
-  }
-
-  // Objekte kompakt serialisieren
-  if (v && typeof v === "object") {
-    try { return JSON.stringify(v); } catch { return String(v); }
-  }
-
-  // Standard: Zahlen deutsch, Rest als String
-  if (typeof v === "number" || (typeof v === "string" && isFinite(Number(v)))) {
-    return formatNumberDE(v, 4);
-  }
-  return String(v);
-}
-
-// HTML-fähige Ausgabe für Tooltip-Werte (Zahlen/Vektoren mit ×10<sup>…</sup>)
-function prettyValHTML(k, v) {
-  if (v === null || v === undefined) return "—";
-
-  // Szenario-Aliase
-  if ((k === "szenario" || k === "scenario") && typeof v === "string") {
-    return escapeHtml(displayAltName(v) || v);
-  }
-
-  // Booleans
-  if (typeof v === "boolean") return v ? "Ja" : "Nein";
-
-  // Vektor als Array -> (x; y; z) mit 4 sig.
-  if (Array.isArray(v)) {
-    const numeric = v.every(x => x !== null && x !== undefined && isFinite(Number(x)));
-    return numeric ? formatVectorDE(v, 4) : v.map(x => escapeHtml(String(x))).join(", ");
-  }
-
-  // Objekt mit x/y/z als Vektor
-  if (v && typeof v === "object" && ["x","y","z"].every(p => p in v)) {
-    return formatVectorDE([v.x, v.y, v.z], 4);
-  }
-
-  // Reine Zahl (oder numeric String) -> deutsch + ×10<sup>…</sup>
-  if (typeof v === "number" || (typeof v === "string" && isFinite(Number(v)))) {
-    return formatNumberDE(v, 4);
-  }
-
-  // Rest sicher escapen
-  return escapeHtml(String(v));
-}
-
 // Sortiert Kontext-Einträge: erst laut CONTEXT_ORDER, dann Rest in Quell-Reihenfolge
 function orderContextEntries(ctx, pref = CONTEXT_ORDER) {
   if (!ctx || typeof ctx !== "object") return [];
@@ -609,10 +604,6 @@ function attachNormKeysToHeader() {
     const th = ths[i];
     th.dataset.normKey = COLS[i - 1]; // "EN_13814_2005" etc.
   }
-}
-
-function displayAltName(name) {
-  return (name && ALT_LABELS[name]) || name || "";
 }
 
 function klassifizierung_anwenden(el, good) {
