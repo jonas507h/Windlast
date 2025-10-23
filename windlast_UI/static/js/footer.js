@@ -247,6 +247,30 @@ function filterDocsByNachweis(docs, sel) {
   });
 }
 
+// Rollen-Filterzustand als Set der aktivierten Rollen
+const ROLE_FILTER_CHOICES = ["entscheidungsrelevant", "irrelevant"];
+
+function filterDocsByRole(docs, activeRoles /* Set<string> */) {
+  const getRole = d => (d?.context?.rolle ?? d?.context?.role ?? "")
+    .toString().toLowerCase();
+
+  // KEIN Chip aktiv → NUR "relevant" zeigen
+  if (!activeRoles || activeRoles.size === 0) {
+    return (docs || []).filter(d => getRole(d) === "relevant");
+  }
+
+  // Mind. ein Chip aktiv:
+  // - "relevant" immer zeigen
+  // - zusätzlich: alle ausgewählten Rollen
+  // - Items ohne Rolle NICHT zeigen
+  return (docs || []).filter(d => {
+    const role = getRole(d);
+    if (role === "relevant") return true;
+    if (!role) return false;
+    return activeRoles.has(role);
+  });
+}
+
 function buildModal(titleText, bodyNodeOrHtml) {
   const wrap = document.createElement("div");
   const h = document.createElement("h3");
@@ -284,23 +308,67 @@ function openZwischenergebnisseModal({ normKey, nachweis, altName }, docsAll, { 
   bar.innerHTML = NACHWEIS_CHOICES.map(c =>
     `<button class="nf-chip${c===start?" active":""}" data-nachweis="${c}" aria-pressed="${c===start}">${c==="ALLE"?"Alle":c}</button>`
   ).join("");
+  contentRoot.appendChild(bar);
 
+  // --- Rollen-Filterleiste (Mehrfachauswahl) ---
+  const roleBar = document.createElement("div");
+  roleBar.className = "nachweis-filter";
+  // beide Chips sind initial AUS (keine .active) → d.h. kein Filter aktiv
+  roleBar.innerHTML = `
+    <button type="button" class="nf-chip" data-role="entscheidungsrelevant" aria-pressed="false">Entscheidungsrelevant</button>
+    <button type="button" class="nf-chip" data-role="irrelevant" aria-pressed="false">Irrelevant</button>
+  `;
+  contentRoot.appendChild(roleBar);
+
+  // --- Ergebnisbereich ---
   const list = document.createElement("div");
-  const apply = (sel) => {
-    const docs = filterDocsByNachweis(docsAll, sel);
-    list.innerHTML = renderDocsByWindrichtung(docs);
-  };
-  apply(start);
-  wrap.appendChild(list);
 
-  // Click-Handler für die Chips
+  // aktueller Zustand
+  let activeNachweis = (initialNachweis && ["ALLE","KIPP","GLEIT","ABHEB","BALLAST","LOADS"].includes(initialNachweis))
+    ? initialNachweis : "ALLE";
+  const activeRoles = new Set(); // leer = kein Rollenfilter
+
+  const apply = () => {
+    // 1) Nachweis-Filter
+    const docsByNachweis = (activeNachweis && activeNachweis !== "ALLE")
+      ? (docsAll || []).filter(d => {
+          const n = d?.context?.nachweis ?? null;
+          return n === activeNachweis || n === "LOADS" || n === null;
+        })
+      : docsAll;
+
+    // 2) Rollen-Filter (Mehrfachauswahl; Relevant immer sichtbar)
+    const docsFinal = filterDocsByRole(docsByNachweis, activeRoles);
+
+    // rendern
+    list.innerHTML = renderDocsByWindrichtung(docsFinal);
+  };
+
+  // initial render
+  apply();
+  contentRoot.appendChild(list);
+
+  // --- Events: Nachweis Single-Select (wie gehabt) ---
   bar.addEventListener("click", (ev) => {
     const btn = ev.target.closest(".nf-chip");
     if (!btn) return;
     bar.querySelectorAll(".nf-chip.active").forEach(b => { b.classList.remove("active"); b.setAttribute("aria-pressed","false"); });
     btn.classList.add("active");
     btn.setAttribute("aria-pressed","true");
-    apply(btn.dataset.nachweis);
+    activeNachweis = btn.dataset.nachweis;
+    apply();
+  });
+
+  // --- Events: Rolle Multi-Select (Toggle) ---
+  roleBar.addEventListener("click", (ev) => {
+    const btn = ev.target.closest(".nf-chip");
+    if (!btn) return;
+    const role = btn.dataset.role;
+    const isActive = btn.classList.toggle("active");
+    btn.setAttribute("aria-pressed", isActive ? "true" : "false");
+    if (isActive) activeRoles.add(role);
+    else activeRoles.delete(role);
+    apply();
   });
 
   Modal.open(wrap);
