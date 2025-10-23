@@ -81,6 +81,11 @@ def _validate_inputs(
         if reynoldszahl <= 0:
             raise ValueError("reynoldszahl muss > 0 sein.")
     elif objekttyp == ObjektTyp.ROHR:
+        n_wind = vektor_laenge(windrichtung)
+        if not (0.999 <= n_wind <= 1.001):
+            raise ValueError(f"windrichtung soll Einheitsvektor sein (||v||≈1), ist {n_wind:.6f}.")
+        if not isinstance(punkte, (list, tuple)) or len(punkte) < 2:
+            raise ValueError("Für ROHR werden [start, ende] erwartet.")
         if reynoldszahl is not None and reynoldszahl <= 0:
             raise ValueError("reynoldszahl muss > 0 sein (falls übergeben).")
 
@@ -223,6 +228,24 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
         return Zwischenergebnis(wert=wert)
 
     elif objekttyp == ObjektTyp.ROHR:
+        rohr_achse = vektor_normieren(vektor_zwischen_punkten(punkte[0], punkte[1]))
+        wind_proj = projektion_vektor_auf_ebene(windrichtung, rohr_achse)
+        if vektor_laenge(wind_proj) < 1e-9:
+            # Wind läuft (nahezu) parallel zur Rohrachse → keine angeströmte Fläche → c_f,0 = 0
+            protokolliere_msg(
+                protokoll,
+                severity=Severity.INFO,
+                code="GRUNDKRAFT/WIND_PARALLEL_ROHR",
+                text="Windrichtung verläuft (nahezu) parallel zur Rohrachse – c_f,0 = 0.",
+                kontext=base_ctx,
+            )
+            protokolliere_doc(
+                protokoll,
+                bundle=make_docbundle(titel="Grundkraftbeiwert c_f,0", wert=0.0),
+                kontext=base_ctx,
+            )
+            return Zwischenergebnis(wert=0.0)
+
         if reynoldszahl is not None and reynoldszahl > 1.8e5:
             protokolliere_msg(
                 protokoll,

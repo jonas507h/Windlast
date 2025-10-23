@@ -71,7 +71,7 @@ class Steher:
                 material=MaterialTyp.STAHL,
                 untergrund=MaterialTyp.BETON,
                 gummimatte=gummi,
-                element_id_intern="Bodenplatte_Links",
+                element_id_intern="Bodenplatte",
             )
             self.bauelemente.extend([bodenplatte])
 

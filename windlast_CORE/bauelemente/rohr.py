@@ -126,50 +126,43 @@ class Rohr:
                 norm, self.objekttyp, self.rohr_name_intern, staudruck, _zaehigkeit, _luftdichte,
                 protokoll=protokoll, kontext=seg_ctx,
             )
-            print(f"reynoldszahl Rohr Segment {i}: {_reynoldszahl.wert}")
             _projizierte_Flaeche = projizierte_flaeche(
                 norm, self.objekttyp, self.rohr_name_intern,
                 [start_lokal, ende_lokal], windrichtung,
                 protokoll=protokoll, kontext=seg_ctx,
             )
-            print(f"projizierte_Flaeche Rohr Segment {i}: {_projizierte_Flaeche.wert}")
             _eingeschlossene_Flaeche = eingeschlossene_flaeche(
                 norm, self.objekttyp, self.rohr_name_intern, [start_lokal, ende_lokal],
                 protokoll=protokoll, kontext=seg_ctx,
             )
-            print(f"eingeschlossene_Flaeche Rohr Segment {i}: {_eingeschlossene_Flaeche.wert}")
             _voelligkeitsgrad = voelligkeitsgrad(
                 norm, _projizierte_Flaeche.wert, _eingeschlossene_Flaeche.wert,
                 protokoll=protokoll, kontext=seg_ctx,
             )
-            print(f"voelligkeitsgrad Rohr Segment {i}: {_voelligkeitsgrad.wert}")
             _grundkraftbeiwert = grundkraftbeiwert(
                 norm,
                 self.objekttyp,
                 reynoldszahl=_reynoldszahl.wert,
+                windrichtung=windrichtung,
+                punkte=[start_lokal, ende_lokal],
                 protokoll=protokoll, kontext=seg_ctx,
             )
-            print(f"grundkraftbeiwert Rohr Segment {i}: {_grundkraftbeiwert.wert}")
             _abminderungsfaktor_schlankheit = abminderungsfaktor_schlankheit(
                 norm, self.objekttyp, _schlankheit.wert, _voelligkeitsgrad.wert,
                 protokoll=protokoll, kontext=seg_ctx,
             )
-            print(f"abminderungsfaktor_schlankheit Rohr Segment {i}: {_abminderungsfaktor_schlankheit.wert}")
             _kraftbeiwert = kraftbeiwert(
                 norm, self.objekttyp, _grundkraftbeiwert.wert, _abminderungsfaktor_schlankheit.wert,
                 protokoll=protokoll, kontext=seg_ctx,
             )
-            print(f"kraftbeiwert Rohr Segment {i}: {_kraftbeiwert.wert}")
             _windkraft = windkraft(
                 norm, self.objekttyp, _kraftbeiwert.wert, staudruck, _projizierte_Flaeche.wert,
                 protokoll=protokoll, kontext=seg_ctx,
             )
-            print(f"windkraft Rohr Segment {i}: {_windkraft.wert}")
             _windkraft_vec = windkraft_zu_vektor(
                 norm, self.objekttyp, None, _windkraft.wert, windrichtung,
                 protokoll=protokoll, kontext=seg_ctx,
             )
-            print(f"windkraft_vec Rohr Segment {i}: {_windkraft_vec.wert}")
 
             einzelkraefte_vektoren.append(_windkraft_vec.wert)
             angriffsbereiche.append([start_lokal, ende_lokal])
