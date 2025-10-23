@@ -90,21 +90,37 @@
   function scheduleMove(x, y) {
     lastMouse = { x, y };
     if (MOVE_RAF.id) return;
+
     MOVE_RAF.id = requestAnimationFrame(() => {
       MOVE_RAF.id = 0;
-      const nx = lastMouse.x + OFFSET.x;
-      const ny = lastMouse.y + OFFSET.y;
 
-      // einfache Kanten-Kollisionsvermeidung (Viewport)
       const vw = document.documentElement.clientWidth;
       const vh = document.documentElement.clientHeight;
-      root.style.transform = `translate(${nx}px, ${ny}px)`;
-      root.style.maxWidth = Math.min(360, vw - nx - 8) + "px";
 
-      // wenn zu nah am unteren Rand, leicht nach oben versetzen
-      const rect = root.getBoundingClientRect();
-      if (rect.bottom > vh) {
-        root.style.transform = `translate(${nx}px, ${Math.max(8, vh - rect.height - 8)}px)`;
+      // Wunschposition (Mausfolge)
+      const wantX = lastMouse.x + OFFSET.x;
+      const wantY = lastMouse.y + OFFSET.y;
+
+      // WICHTIG: nie schmaler machen – volle Breite behalten
+      root.style.maxWidth = "none";
+
+      // Kurz an Wunschposition setzen, um echte Größe zu messen
+      root.style.transform = `translate(${wantX}px, ${wantY}px)`;
+      let rect = root.getBoundingClientRect();
+
+      // X hart einklemmen: so weit rechts wie möglich, min. 8px Padding links
+      let nx = Math.min(wantX, Math.max(8, vw - rect.width - 8));
+      // Y wie gehabt, danach ggf. unten korrigieren
+      let ny = wantY;
+
+      // finale Position
+      root.style.transform = `translate(${nx}px, ${ny}px)`;
+      rect = root.getBoundingClientRect();
+
+      // Unterkante schützen
+      if (rect.bottom > vh - 8) {
+        ny = Math.max(8, vh - rect.height - 8);
+        root.style.transform = `translate(${nx}px, ${ny}px)`;
       }
     });
   }
