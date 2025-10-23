@@ -18,9 +18,20 @@ from windlast_CORE.rechenfunktionen.standsicherheit_utils import (
 )
 
 def _emit_docs_with_role(*, dst_protokoll, docs, base_ctx: dict, role: str, extra_ctx: dict | None = None):
+    """
+    Schreibt eine Menge (bundle, ctx)-Docs ins Zielprotokoll und setzt/merged Rolle + Kontext.
+    Nur Top-Level-Vergleichswerte dürfen 'entscheidungsrelevant' bleiben.
+    """
+    TOPLEVEL = {"dir_sicherheit", "dir_min_sicherheit"}  # nur diese werden verglichen
     for bundle, ctx in docs:
         ktx = merge_kontext(base_ctx, ctx or {})
-        ktx["rolle"] = role
+        doc_type = (ktx.get("doc_type") or (ctx or {}).get("doc_type"))
+
+        eff_role = role
+        if role == "entscheidungsrelevant" and doc_type not in TOPLEVEL:
+            eff_role = "irrelevant"
+
+        ktx["rolle"] = eff_role
         if extra_ctx:
             ktx.update(extra_ctx)
         protokolliere_doc(dst_protokoll, bundle=bundle, kontext=ktx)

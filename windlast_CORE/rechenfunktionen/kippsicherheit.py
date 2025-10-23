@@ -21,12 +21,19 @@ from windlast_CORE.rechenfunktionen.standsicherheit_utils import (
 
 def _emit_docs_with_role(*, dst_protokoll, docs, base_ctx: dict, role: str, extra_ctx: dict | None = None):
     """
-    Schreibt eine Menge (bundle, ctx)-Docs ins Zielprotokoll und setzt/merged Rolle + Kontext.
-    'docs' ist das Ergebnis von collect_docs(sub_prot), also Liste[Tuple[bundle, ctx]].
+    Nur die Richtungs-Minimalsicherheit bleibt 'entscheidungsrelevant'.
+    Achsen-Details in Verlierer-Richtungen sind irrelevant.
     """
+    TOPLEVEL = {"dir_min_sicherheit"}  # Richtungsebene (Vergleich zwischen Richtungen)
     for bundle, ctx in docs:
-        ktx = merge_kontext(base_ctx, ctx)
-        ktx["rolle"] = role
+        ktx = merge_kontext(base_ctx, ctx or {})
+        doc_type = (ktx.get("doc_type") or (ctx or {}).get("doc_type"))
+
+        eff_role = role
+        if role == "entscheidungsrelevant" and doc_type not in TOPLEVEL:
+            eff_role = "irrelevant"
+
+        ktx["rolle"] = eff_role
         if extra_ctx:
             ktx.update(extra_ctx)
         protokolliere_doc(dst_protokoll, bundle=bundle, kontext=ktx)
