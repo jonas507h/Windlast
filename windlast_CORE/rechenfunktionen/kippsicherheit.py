@@ -19,23 +19,48 @@ from windlast_CORE.rechenfunktionen.standsicherheit_utils import (
     kipp_envelope_pro_bauelement,
 )
 
-def _emit_docs_with_role(*, dst_protokoll, docs, base_ctx: dict, role: str, extra_ctx: dict | None = None):
+def _emit_kipp_docs_two_stage(
+    *,
+    dst_protokoll,
+    docs,
+    base_ctx: dict,
+    is_global_winner: bool,
+    best_achse_idx: int | None,
+):
     """
-    Nur die Richtungs-Minimalsicherheit bleibt 'entscheidungsrelevant'.
-    Achsen-Details in Verlierer-Richtungen sind irrelevant.
+    Gewinner-Richtung:
+      - relevant:
+          * alle Docs OHNE achse_index (richtungsweite Zwischenwerte: Windkräfte etc.)
+          * alle Docs der besten Achse (achse_index == best_achse_idx)
+          * alle Richtungs-Docs (doc_type startet mit 'dir_')
+      - entscheidungsrelevant:
+          * 'axis_sicherheit' der NICHT besten Achsen
+      - irrelevant:
+          * übrige Docs der NICHT besten Achsen
+
+    Verlierer-Richtung:
+      - entscheidungsrelevant: nur 'dir_min_sicherheit'
+      - irrelevant:            alles andere
     """
-    TOPLEVEL = {"dir_min_sicherheit"}  # Richtungsebene (Vergleich zwischen Richtungen)
     for bundle, ctx in docs:
         ktx = merge_kontext(base_ctx, ctx or {})
-        doc_type = (ktx.get("doc_type") or (ctx or {}).get("doc_type"))
+        doc_type    = (ktx.get("doc_type") or "")
+        achse_index = ktx.get("achse_index")
 
-        eff_role = role
-        if role == "entscheidungsrelevant" and doc_type not in TOPLEVEL:
-            eff_role = "irrelevant"
+        if is_global_winner:
+            if (
+                achse_index is None                              # ⟵ NEU: alle nicht-achsbezogenen Werte grün
+                or (isinstance(doc_type, str) and doc_type.startswith("dir_"))
+                or (best_achse_idx is not None and achse_index == best_achse_idx)
+            ):
+                ktx["rolle"] = "relevant"
+            else:
+                # andere Achsen in der Gewinner-Richtung
+                ktx["rolle"] = "entscheidungsrelevant" if doc_type == "axis_sicherheit" else "irrelevant"
+        else:
+            # Verlierer-Richtungen: nur Richtungs-Sicherheit ist blau
+            ktx["rolle"] = "entscheidungsrelevant" if doc_type == "dir_min_sicherheit" else "irrelevant"
 
-        ktx["rolle"] = eff_role
-        if extra_ctx:
-            ktx.update(extra_ctx)
         protokolliere_doc(dst_protokoll, bundle=bundle, kontext=ktx)
 
 def _validate_inputs(
@@ -298,7 +323,8 @@ def _kippsicherheit_DinEn13814_2005_06(
                 ),
                 kontext=merge_kontext(base_ctx, {
                     "nachweis": "KIPP",
-                    "winkel": winkel,
+                    "doc_type": "dir_min_sicherheit",
+                    "winkel_deg": winkel,  
                 }),
             )
             protokolliere_doc(
@@ -312,6 +338,7 @@ def _kippsicherheit_DinEn13814_2005_06(
                 ),
                 kontext=merge_kontext(base_ctx, {
                     "nachweis": "KIPP",
+                    "doc_type": "dir_ballast",
                     "winkel_deg": winkel,
                 }),
             )
@@ -344,32 +371,13 @@ def _kippsicherheit_DinEn13814_2005_06(
 
         # 3) Docs (neu): mit Rollen ins Hauptprotokoll heben
         for i, rec in enumerate(dir_records):
-            role_block = "entscheidungsrelevant" if i != winner_idx else "relevant"  # Default pro Richtung
-            # alle Docs der Richtung übernehmen – Grundrolle je Richtung
-            _emit_docs_with_role(
+            _emit_kipp_docs_two_stage(
                 dst_protokoll=protokoll,
                 docs=rec["docs"],
                 base_ctx=merge_kontext(base_ctx, {"nachweis": "KIPP", "windrichtung_deg": rec["winkel_deg"]}),
-                role=role_block,
+                is_global_winner=(i == winner_idx),
+                best_achse_idx=rec.get("best_achse_idx"),
             )
-            # Gewinner-Achse in Gewinner-Richtung aufwerten → 'relevant'
-            if i == winner_idx:
-                best_ax = rec["best_achse_idx"]
-                if best_ax is not None:
-                    for bundle, ctx in rec["docs"]:
-                        if ctx.get("doc_type") in ("axis_sicherheit", "axis_momente", "axis_ballast") and ctx.get("achse_index") == best_ax:
-                            # diesen Eintrag explizit nochmal als 'relevant' schreiben (UI darf dupl.-frei konsolidieren)
-                            protokolliere_doc(
-                                protokoll,
-                                bundle=bundle,
-                                kontext=merge_kontext(base_ctx, {
-                                    "nachweis": "KIPP",
-                                    "windrichtung_deg": rec["winkel_deg"],
-                                    "achse_index": best_ax,
-                                    "doc_type": ctx.get("doc_type"),
-                                    "rolle": "relevant",
-                                }),
-                            )
 
         # 4) Globale Ergebnis-Docs (beste Richtung) kennzeichnen
         sicherheit_min_global = winner["dir_min_sicherheit"]
@@ -627,6 +635,7 @@ def _kippsicherheit_DinEn17879_2024_08(
                 ),
                 kontext=merge_kontext(base_ctx, {
                     "nachweis": "KIPP",
+                    "doc_type": "dir_min_sicherheit",
                     "winkel_deg": winkel,
                 }),
             )
@@ -641,6 +650,7 @@ def _kippsicherheit_DinEn17879_2024_08(
                 ),
                 kontext=merge_kontext(base_ctx, {
                     "nachweis": "KIPP",
+                    "doc_type": "dir_ballast",
                     "winkel_deg": winkel,
                 }),
             )
@@ -674,32 +684,13 @@ def _kippsicherheit_DinEn17879_2024_08(
 
         # 3) Docs (neu): mit Rollen ins Hauptprotokoll heben
         for i, rec in enumerate(dir_records):
-            role_block = "entscheidungsrelevant" if i != winner_idx else "relevant"  # Default pro Richtung
-            # alle Docs der Richtung übernehmen – Grundrolle je Richtung
-            _emit_docs_with_role(
+            _emit_kipp_docs_two_stage(
                 dst_protokoll=protokoll,
                 docs=rec["docs"],
                 base_ctx=merge_kontext(base_ctx, {"nachweis": "KIPP", "windrichtung_deg": rec["winkel_deg"]}),
-                role=role_block,
+                is_global_winner=(i == winner_idx),
+                best_achse_idx=rec.get("best_achse_idx"),
             )
-            # Gewinner-Achse in Gewinner-Richtung aufwerten → 'relevant'
-            if i == winner_idx:
-                best_ax = rec["best_achse_idx"]
-                if best_ax is not None:
-                    for bundle, ctx in rec["docs"]:
-                        if ctx.get("doc_type") in ("axis_sicherheit", "axis_momente", "axis_ballast") and ctx.get("achse_index") == best_ax:
-                            # diesen Eintrag explizit nochmal als 'relevant' schreiben (UI darf dupl.-frei konsolidieren)
-                            protokolliere_doc(
-                                protokoll,
-                                bundle=bundle,
-                                kontext=merge_kontext(base_ctx, {
-                                    "nachweis": "KIPP",
-                                    "windrichtung_deg": rec["winkel_deg"],
-                                    "achse_index": best_ax,
-                                    "doc_type": ctx.get("doc_type"),
-                                    "rolle": "relevant",
-                                }),
-                            )
 
         # 4) Globale Ergebnis-Docs (beste Richtung) kennzeichnen
         sicherheit_min_global = winner["dir_min_sicherheit"]
