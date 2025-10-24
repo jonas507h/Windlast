@@ -23,7 +23,7 @@ def _emit_docs_with_role(*, dst_protokoll, docs, base_ctx: dict, role: str, extr
     """
     Nur Top-Level-Vergleichswerte dürfen 'entscheidungsrelevant' bleiben.
     """
-    TOPLEVEL = {"dir_sicherheit", "dir_min_sicherheit"}
+    TOPLEVEL = {"dir_sicherheit", "dir_min_sicherheit", "dir_ballast"}
     for bundle, ctx in docs:
         ktx = merge_kontext(base_ctx, ctx or {})
         doc_type = (ktx.get("doc_type") or (ctx or {}).get("doc_type"))
@@ -290,6 +290,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
                 bundle=make_docbundle(
                     titel=f"Richtungs-Ballast m_Ballast,gleit,{int(winkel)}°",
                     wert=ballastkraft,
+                    einheit="kg",
                     formel="Δm_Ballast,gleit = T/μ + ΣN_up − ΣN_down",
                     formelzeichen=["T", "μ", "N_up", "N_down"],
                     quelle_formel="---",
@@ -574,6 +575,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
                 bundle=make_docbundle(
                     titel=f"Richtungs-Ballast m_Ballast,gleit,{int(winkel)}°",
                     wert=ballastkraft,
+                    einheit="kg",
                     formel=f"m_Ballast,gleit,{int(winkel)}° = T/μ + ΣN_up − ΣN_down",
                     formelzeichen=["T", "μ", "N_up", "N_down"],
                     quelle_formel="---",

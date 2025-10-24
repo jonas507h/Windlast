@@ -22,7 +22,7 @@ def _emit_docs_with_role(*, dst_protokoll, docs, base_ctx: dict, role: str, extr
     Schreibt eine Menge (bundle, ctx)-Docs ins Zielprotokoll und setzt/merged Rolle + Kontext.
     Nur Top-Level-Vergleichswerte dürfen 'entscheidungsrelevant' bleiben.
     """
-    TOPLEVEL = {"dir_sicherheit", "dir_min_sicherheit"}  # nur diese werden verglichen
+    TOPLEVEL = {"dir_sicherheit", "dir_min_sicherheit", "dir_ballast"}
     for bundle, ctx in docs:
         ktx = merge_kontext(base_ctx, ctx or {})
         doc_type = (ktx.get("doc_type") or (ctx or {}).get("doc_type"))
@@ -273,6 +273,7 @@ def _abhebesicherheit_DinEn13814_2005_06(
             bundle=make_docbundle(
                 titel="Erforderlicher Ballast m_Ballast,abheb",
                 wert=ballast_kg,
+                einheit="kg",
                 formel="m_Ballast,abheb = max(0, ΣN_up − ΣN_down) / γ_g",
                 formelzeichen=["N_up", "N_down", "γ_g"],
                 quelle_formel="---",
@@ -480,6 +481,7 @@ def _abhebesicherheit_DinEn17879_2024_08(
             bundle=make_docbundle(
                 titel="Erforderlicher Ballast m_Ballast,abheb",
                 wert=ballast_kg,
+                einheit="kg",
                 formel="m_Ballast,abheb = max(0, ΣN_up − ΣN_down) / γ_g",
                 formelzeichen=["N_up", "N_down", "γ_g"],
                 quelle_formel="---",

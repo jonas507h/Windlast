@@ -56,10 +56,13 @@ def _emit_kipp_docs_two_stage(
                 ktx["rolle"] = "relevant"
             else:
                 # andere Achsen in der Gewinner-Richtung
-                ktx["rolle"] = "entscheidungsrelevant" if doc_type == "axis_sicherheit" else "irrelevant"
+                if doc_type in ("axis_sicherheit", "axis_ballast"):
+                    ktx["rolle"] = "entscheidungsrelevant"
+                else:
+                    ktx["rolle"] = "irrelevant"
         else:
             # Verlierer-Richtungen: nur Richtungs-Sicherheit ist blau
-            ktx["rolle"] = "entscheidungsrelevant" if doc_type == "dir_min_sicherheit" else "irrelevant"
+            ktx["rolle"] = "entscheidungsrelevant" if doc_type in ("dir_min_sicherheit", "dir_ballast") else "irrelevant"
 
         protokolliere_doc(dst_protokoll, bundle=bundle, kontext=ktx)
 
