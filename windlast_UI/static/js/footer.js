@@ -656,6 +656,18 @@ function renderDocsByElement(docsInDir){
     sort: "alnum",
     emptyLast: true
   });
+
+  // NEU: Wenn es ausschließlich "allgemein"-Ergebnisse gibt,
+  // dann KEINE "allgemein"-Gruppe anzeigen, sondern direkt
+  // die Achs-Gruppierung unter der Windrichtung rendern.
+  const hasSpecificElements = keys.some(k => k !== "__allgemein__");
+  if (!hasSpecificElements) {
+    const onlyGeneral = groups.get("__allgemein__") || [];
+    // direkt unter der Windrichtung anzeigen (mit Achs-Gruppierung)
+    return `<div class="axis-groups">${renderDocsByAxis(onlyGeneral)}</div>`;
+  }
+
+  // Es gibt mind. ein spezifisches Element → normale Element-Gruppierung
   return keys.map((k, idx) => {
     const list = groups.get(k) || [];
     const title = (k === "__allgemein__") ? "allgemein" : `Element ${k}`;

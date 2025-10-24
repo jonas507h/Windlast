@@ -92,84 +92,63 @@
   box-sizing: border-box;
 }
 
-/* ===== Hierarchie-Einrückungen & Optik im Docs-Modal ===== */
-/* Klassen kommen aus footer.js: .dir-group/.dir-summary, .elem-group/.elem-summary,
-   .axis-group/.axis-summary, .doc-list li.doc-li */
-/* Ebene 0: Container */
-#modal-root .doc-groups { margin-top: 6px; }
+/* ===========================================
+   ZWISCHENERGEBNIS-MODAL – KOMPAKTE VERSION
+   =========================================== */
 
-/* Ebene 1: Windrichtung */
-#modal-root .dir-group {
-  margin: 6px 0;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  overflow: hidden;
-}
-#modal-root .dir-summary {
-  cursor: pointer;
-  padding: 8px 10px;
-  font-weight: 700;
-  background: var(--panel);
-}
-#modal-root .dir-group[open] .dir-summary {
-  border-bottom: 1px solid var(--border);
-}
-#modal-root .dir-group > .elem-groups {
-  padding: 8px 12px 10px 14px;
-}
-
-/* Ebene 2: Element */
-#modal-root .elem-group {
-  margin: 6px 0 8px 0;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-}
-#modal-root .elem-summary {
-  cursor: pointer;
-  padding: 7px 9px;
-  font-weight: 600;
-}
-#modal-root .elem-group[open] .elem-summary {
-  border-bottom: 1px solid var(--border);
-}
-#modal-root .elem-group > .axis-groups {
-  padding: 6px 10px 8px 12px;
-}
-
-/* Ebene 3: Achse */
-#modal-root .axis-group {
-  margin: 6px 0;
-  border: 1px solid var(--border);
+.group-card {
+  margin: 4px 0;
   border-radius: 8px;
 }
-#modal-root .axis-summary {
+
+/* Header (Windrichtung / Element / Achse) */
+.dir-summary,
+.elem-summary,
+.axis-summary {
+  padding: 4px 10px;      /* kompakter als vorher 8px 12px */
+  line-height: 1.2;
+  font-size: 13px;
+  padding-left: 1em;      /* Platz für Pfeil leicht reduziert */
   cursor: pointer;
-  padding: 6px 8px;
-  font-weight: 600;
-}
-#modal-root .axis-group[open] .axis-summary {
-  border-bottom: 1px solid var(--border);
-}
-#modal-root .axis-group > .doc-list {
-  padding: 6px 8px 8px 12px;
+  user-select: none;
 }
 
-/* Liste der Einträge (unterste Ebene) */
-#modal-root .doc-list {
-  list-style: none;
-  margin: 4px 0 8px 0;
-  padding: 0;
+/* Pfeil kleiner und dichter am Text */
+.dir-summary::before,
+.elem-summary::before,
+.axis-summary::before {
+  font-size: .85em;
+  left: .2em;
+  opacity: .75;
 }
-#modal-root .doc-list .doc-li {
-  display: flex;
-  gap: .4rem;
-  align-items: baseline;
-  padding: 2px 0;
-  line-height: 1.45;
+
+/* Body-Bereiche kompakter */
+.dir-card   .elem-groups { padding: 4px 10px 6px; }
+.elem-card  .axis-groups { padding: 4px 10px 6px; }
+.axis-card  .doc-list    { padding: 4px 10px 6px; }
+
+/* Listen-Layout */
+.doc-list { 
+  margin: 2px 0 6px;
 }
-#modal-root .doc-list .doc-title { font-weight: 500; }
-#modal-root .doc-list .doc-eq { opacity: .6; }
-#modal-root .doc-list .doc-val { margin-left: auto; }
+.doc-list .doc-li {
+  padding: 1px 2px;
+  line-height: 1.3;
+  gap: .35rem;
+}
+
+/* Zähler (z. B. (13)) dezenter */
+.muted {
+  font-size: .9em;
+  margin-left: .4rem;
+}
+
+/* Offene Gruppen – dezenter Trenner */
+.dir-group[open]  > .dir-summary,
+.elem-group[open] > .elem-summary,
+.axis-group[open] > .axis-summary {
+  border-bottom: 1px solid var(--border);
+}
 
 /* Kleines Finetuning für dunkle Themes (nutzt vorhandene CSS-Variablen) */
 @media (prefers-color-scheme: dark) {

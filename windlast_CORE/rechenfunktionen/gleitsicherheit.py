@@ -354,6 +354,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
             bundle=make_docbundle(
                 titel="Erforderlicher Ballast m_Ballast,gleit",
                 wert=ballast_kg,
+                einheit="kg",
                 formel="Δm_Ballast,gleit = T/μ + ΣN_up − ΣN_down",
                 formelzeichen=["T", "μ", "N_up", "N_down"],
                 quelle_formel="---",
@@ -639,6 +640,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
             bundle=make_docbundle(
                 titel="Erforderlicher Ballast m_Ballast,gleit",
                 wert=ballast_kg,
+                einheit="kg",
                 formel="m_Ballast,gleit = T/μ + ΣN_up − ΣN_down",
                 formelzeichen=["T", "μ", "N_up", "N_down"],
                 quelle_formel="---",
