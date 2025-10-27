@@ -188,7 +188,7 @@ class Tisch:
         if found:
             return max_h
 
-        # Fallback: falls Tor selbst eine Höhe definiert hat
+        # Fallback: falls Tisch selbst eine Höhe definiert hat
         if self.hoehe is not None:
             return float(self.hoehe)
 

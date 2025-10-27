@@ -193,8 +193,10 @@ def _kippsicherheit_DinEn13814_2005_06(
                 total_kipp = 0.0
                 total_stand = 0.0
 
+                achse_ctx = merge_kontext(base_ctx, {"achse_index": achse_idx, "windrichtung_deg": f"{winkel}°", "windrichtung": richtung, "nachweis": "KIPP"})
+
                 for element, lastfaelle_elem in kraefte_nach_element.items():
-                    kipp_b, stand_b = kipp_envelope_pro_bauelement(norm, achse, lastfaelle_elem, protokoll=sub_prot, kontext=base_ctx)
+                    kipp_b, stand_b = kipp_envelope_pro_bauelement(norm, achse, lastfaelle_elem, protokoll=sub_prot, kontext=merge_kontext(achse_ctx, {"element_id": str(element)}))
                     protokolliere_doc(
                         sub_prot,
                         bundle=make_docbundle(
@@ -327,7 +329,7 @@ def _kippsicherheit_DinEn13814_2005_06(
                 kontext=merge_kontext(base_ctx, {
                     "nachweis": "KIPP",
                     "doc_type": "dir_min_sicherheit",
-                    "winkel_deg": winkel,  
+                    "windrichtung_deg": f"{winkel}°",
                 }),
             )
             protokolliere_doc(
@@ -342,12 +344,12 @@ def _kippsicherheit_DinEn13814_2005_06(
                 kontext=merge_kontext(base_ctx, {
                     "nachweis": "KIPP",
                     "doc_type": "dir_ballast",
-                    "winkel_deg": winkel,
+                    "windrichtung_deg": f"{winkel}°",
                 }),
             )
 
             dir_records.append({
-                "winkel_deg": winkel,
+                "windrichtung_deg": f"{winkel}°",
                 "dir_min_sicherheit": dir_min_sicherheit,
                 "dir_ballast_max": dir_ballast_max,
                 "best_achse_idx": best_achse_idx,
@@ -377,7 +379,7 @@ def _kippsicherheit_DinEn13814_2005_06(
             _emit_kipp_docs_two_stage(
                 dst_protokoll=protokoll,
                 docs=rec["docs"],
-                base_ctx=merge_kontext(base_ctx, {"nachweis": "KIPP", "windrichtung_deg": rec["winkel_deg"]}),
+                base_ctx=merge_kontext(base_ctx, {"nachweis": "KIPP", "windrichtung_deg": rec["windrichtung_deg"]}),
                 is_global_winner=(i == winner_idx),
                 best_achse_idx=rec.get("best_achse_idx"),
             )
@@ -504,8 +506,10 @@ def _kippsicherheit_DinEn17879_2024_08(
                 total_kipp = 0.0
                 total_stand = 0.0
 
+                achse_ctx = merge_kontext(base_ctx, {"achse_index": achse_idx, "windrichtung_deg": f"{winkel}°", "windrichtung": richtung, "nachweis": "KIPP"})
+
                 for element, lastfaelle_elem in kraefte_nach_element.items():
-                    kipp_b, stand_b = kipp_envelope_pro_bauelement(norm, achse, lastfaelle_elem, protokoll=sub_prot, kontext=base_ctx)
+                    kipp_b, stand_b = kipp_envelope_pro_bauelement(norm, achse, lastfaelle_elem, protokoll=sub_prot, kontext=merge_kontext(achse_ctx, {"element_id": str(element)}))
                     protokolliere_doc(
                         sub_prot,
                         bundle=make_docbundle(
@@ -639,7 +643,7 @@ def _kippsicherheit_DinEn17879_2024_08(
                 kontext=merge_kontext(base_ctx, {
                     "nachweis": "KIPP",
                     "doc_type": "dir_min_sicherheit",
-                    "winkel_deg": winkel,
+                    "windrichtung_deg": f"{winkel}°",
                 }),
             )
             protokolliere_doc(
@@ -654,12 +658,12 @@ def _kippsicherheit_DinEn17879_2024_08(
                 kontext=merge_kontext(base_ctx, {
                     "nachweis": "KIPP",
                     "doc_type": "dir_ballast",
-                    "winkel_deg": winkel,
+                    "windrichtung_deg": f"{winkel}°",
                 }),
             )
 
             dir_records.append({
-                "winkel_deg": winkel,
+                "windrichtung_deg": f"{winkel}°",
                 "dir_min_sicherheit": dir_min_sicherheit,
                 "dir_ballast_max": dir_ballast_max,
                 "best_achse_idx": best_achse_idx,
@@ -690,7 +694,7 @@ def _kippsicherheit_DinEn17879_2024_08(
             _emit_kipp_docs_two_stage(
                 dst_protokoll=protokoll,
                 docs=rec["docs"],
-                base_ctx=merge_kontext(base_ctx, {"nachweis": "KIPP", "windrichtung_deg": rec["winkel_deg"]}),
+                base_ctx=merge_kontext(base_ctx, {"nachweis": "KIPP", "windrichtung_deg": rec["windrichtung_deg"]}),
                 is_global_winner=(i == winner_idx),
                 best_achse_idx=rec.get("best_achse_idx"),
             )

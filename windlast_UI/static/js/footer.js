@@ -33,7 +33,7 @@ function getNormDisplayName(normKey) {
 // Wunschreihenfolge für Kontext-Felder (anpassbar)
 const CONTEXT_ORDER = [
   "anzahl_windrichtungen",
-  "windrichtung", "winkel_deg",
+  "windrichtung", "windrichtung_deg",
   "szenario", "scenario", "szenario_anzeigename",
   "windzone",
   "nachweis",
@@ -75,7 +75,7 @@ const CONTEXT_ALIASES = {
   h_max: "Max. gültige Höhe",
   z_max: "Max. erlaubte Höhe",
   windzone: "Windzone",
-  winkel_deg: "Windrichtung (°)",
+  windrichtung_deg: "Windrichtung",
   paarung: "Materialpaarung",
   norm_used: "Verwendete Norm",
 };
@@ -637,7 +637,7 @@ function renderDocsByWindrichtung(docs){
   }
   const blocks = keys.map((k, idx) => {
     const list = groups.get(k) || [];
-    const title = (k === "__none__") ? "ohne Richtung" : `Windrichtung ${k}°`;
+    const title = (k === "__none__") ? "ohne Richtung" : `Windrichtung ${k}`;
     const count = `<span class="muted" style="font-weight:400; margin-left:.5rem;">(${list.length})</span>`;
     // innerhalb jeder Richtung weiter nach Element gruppieren
     const elemGroupsHtml = renderDocsByElement(list);

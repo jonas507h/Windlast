@@ -282,7 +282,7 @@ def bewerte_lastfall_fuer_achse(
 
         # 2) Sicherheitsbeiwert nach Günstigkeit bestimmen
         ist_guenstig = (m_kipp <= _EPS)
-        gamma = sicherheitsbeiwert(norm, lastfall, ist_guenstig).wert
+        gamma = sicherheitsbeiwert(norm, lastfall, ist_guenstig, protokoll=protokoll, kontext=base_ctx).wert
 
         # 3) Aufteilen in kippend vs. stabilisierend
         if m_kipp > _EPS:
@@ -323,7 +323,7 @@ def kipp_envelope_pro_bauelement(
     other_pairs: List[Tuple[float, float]] = []
 
     for k in lastfaelle:
-        kipp, stand = bewerte_lastfall_fuer_achse(norm, achse, k)
+        kipp, stand = bewerte_lastfall_fuer_achse(norm, achse, k, protokoll=protokoll, kontext=base_ctx)
         if k.typ == Lasttyp.WIND:
             wind_kipp.append(kipp)
         elif k.typ == Lasttyp.GEWICHT:
@@ -419,8 +419,8 @@ def bewerte_lastfall_fuer_gleiten(
     N_down = 0.0
     N_up   = 0.0
 
-    gamma_unguenstig = sicherheitsbeiwert(norm, lastfall, ist_guenstig=False).wert
-    gamma_guenstig = sicherheitsbeiwert(norm, lastfall, ist_guenstig=True).wert
+    gamma_unguenstig = sicherheitsbeiwert(norm, lastfall, ist_guenstig=False, protokoll=protokoll, kontext=base_ctx).wert
+    gamma_guenstig = sicherheitsbeiwert(norm, lastfall, ist_guenstig=True, protokoll=protokoll, kontext=base_ctx).wert
 
     for Kraft in Einzelkraefte:
         fx = Kraft[0]

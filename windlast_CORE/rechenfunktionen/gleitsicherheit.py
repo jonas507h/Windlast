@@ -164,8 +164,10 @@ def _gleitsicherheit_DinEn13814_2005_06(
             total_normal_up = 0.0
             total_normal_down = 0.0
 
+            richtung_ctx = merge_kontext(base_ctx, {"windrichtung_deg": f"{winkel}°", "windrichtung": richtung, "nachweis": "GLEIT"})
+
             for element, lastfaelle_elem in kraefte_nach_element.items():
-                H_vec, N_down, N_up = gleit_envelope_pro_bauelement(norm, lastfaelle_elem, protokoll=sub_prot, kontext=base_ctx)
+                H_vec, N_down, N_up = gleit_envelope_pro_bauelement(norm, lastfaelle_elem, protokoll=sub_prot, kontext=merge_kontext(richtung_ctx, {"element_id": str(element)}))
                 protokolliere_doc(
                     sub_prot,
                     bundle=make_docbundle(
@@ -173,7 +175,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
                         wert=H_vec,
                         einheit="N",
                     ),
-                    kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "element_horizontalkraft", "windrichtung_deg": winkel, "element_id": str(element)}),
+                    kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "element_horizontalkraft", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
                 )
                 protokolliere_doc(
                     sub_prot,
@@ -182,7 +184,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
                         wert=N_down,
                         einheit="N",
                     ),
-                    kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "element_normalkraft_down", "windrichtung_deg": winkel, "element_id": str(element)}),
+                    kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "element_normalkraft_down", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
                 )
                 protokolliere_doc(
                     sub_prot,
@@ -191,7 +193,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
                         wert=N_up,
                         einheit="N",
                     ),
-                    kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "element_normalkraft_up", "windrichtung_deg": winkel, "element_id": str(element)}),
+                    kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "element_normalkraft_up", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
                 )
                 total_horizontal = vektoren_addieren([total_horizontal, H_vec])
                 total_normal_up += N_up
@@ -211,7 +213,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
                     formel="|T| = √(T_x² + T_y² + T_z²)",
                     formelzeichen=["T_x", "T_y", "T_z"],
                 ),
-                kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "horizontal_betrag", "windrichtung_deg": winkel}),
+                kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "horizontal_betrag", "windrichtung_deg": f"{winkel}°"}),
             )
             protokolliere_doc(
                 sub_prot,
@@ -222,7 +224,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
                     formel="ΣN_down = N_{down,Element}",
                     formelzeichen=["N_{down,Element}"],
                 ),
-                kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "normal_down", "windrichtung_deg": winkel}),
+                kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "normal_down", "windrichtung_deg": f"{winkel}°"}),
             )
             protokolliere_doc(
                 sub_prot,
@@ -233,7 +235,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
                     formel="ΣN_up = N_{up,Element}",
                     formelzeichen=["N_{up,Element}"],
                 ),
-                kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "normal_up", "windrichtung_deg": winkel}),
+                kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "normal_up", "windrichtung_deg": f"{winkel}°"}),
             )
             protokolliere_doc(
                 sub_prot,
@@ -244,7 +246,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
                     formel="N_eff = max(0, ΣN_down − ΣN_up)",
                     formelzeichen=["ΣN_down", "ΣN_up"],
                 ),
-                kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "normal_effektiv", "windrichtung_deg": winkel}),
+                kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "normal_effektiv", "windrichtung_deg": f"{winkel}°"}),
             )
             protokolliere_doc(
                 sub_prot,
@@ -255,7 +257,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
                     formel="R = μ_min · N_eff",
                     formelzeichen=["μ_min", "N_eff"],
                 ),
-                kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "reibkraft", "windrichtung_deg": winkel}),
+                kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "reibkraft", "windrichtung_deg": f"{winkel}°"}),
             )
 
             if horizontal_betrag > _EPS:
@@ -270,7 +272,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
                         formelzeichen=["R", "T"],
                         quelle_formel="---",
                     ),
-                    kontext={"nachweis": "GLEIT", "doc_type": "dir_sicherheit", "windrichtung_deg": winkel},
+                    kontext={"nachweis": "GLEIT", "doc_type": "dir_sicherheit", "windrichtung_deg": f"{winkel}°"},
                 )
 
             if reibwert_min <= _EPS:
@@ -295,12 +297,12 @@ def _gleitsicherheit_DinEn13814_2005_06(
                     formelzeichen=["T", "μ", "N_up", "N_down"],
                     quelle_formel="---",
                 ),
-                kontext={"nachweis": "GLEIT", "doc_type": "dir_ballast", "windrichtung_deg": winkel},
+                kontext={"nachweis": "GLEIT", "doc_type": "dir_ballast", "windrichtung_deg": f"{winkel}°"},
             )
 
             # Record ablegen (WICHTIG: innerhalb der Schleife!)
             dir_records.append({
-                "winkel_deg": winkel,
+                "windrichtung_deg": f"{winkel}°",
                 "dir_min_sicherheit": dir_min_sicherheit,
                 "dir_ballast_max": dir_ballast_max,
                 "docs": collect_docs(sub_prot),
@@ -327,7 +329,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
             _emit_docs_with_role(
                 dst_protokoll=protokoll,
                 docs=rec["docs"],
-                base_ctx=merge_kontext(base_ctx, {"nachweis": "GLEIT", "windrichtung_deg": rec["winkel_deg"]}),
+                base_ctx=merge_kontext(base_ctx, {"nachweis": "GLEIT", "windrichtung_deg": rec["windrichtung_deg"]}),
                 role=role,
             )
 
@@ -450,8 +452,10 @@ def _gleitsicherheit_DinEn17879_2024_08(
             total_normal_up = 0.0
             total_normal_down = 0.0
 
+            richtung_ctx = merge_kontext(base_ctx, {"windrichtung_deg": f"{winkel}°", "windrichtung": richtung, "nachweis": "GLEIT"})
+
             for element, lastfaelle_elem in kraefte_nach_element.items():
-                H_vec, N_down, N_up = gleit_envelope_pro_bauelement(norm, lastfaelle_elem, protokoll=sub_prot, kontext=base_ctx)
+                H_vec, N_down, N_up = gleit_envelope_pro_bauelement(norm, lastfaelle_elem, protokoll=sub_prot, kontext=merge_kontext(richtung_ctx, {"element_id": str(element)}))
                 protokolliere_doc(
                     sub_prot,
                     bundle=make_docbundle(
@@ -459,7 +463,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
                         wert=H_vec,
                         einheit="N",
                     ),
-                    kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "element_horizontalkraft", "windrichtung_deg": winkel, "element_id": str(element)}),
+                    kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "element_horizontalkraft", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
                 )
                 protokolliere_doc(
                     sub_prot,
@@ -468,7 +472,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
                         wert=N_down,
                         einheit="N",
                     ),
-                    kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "element_normalkraft_down", "windrichtung_deg": winkel, "element_id": str(element)}),
+                    kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "element_normalkraft_down", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
                 )
                 protokolliere_doc(
                     sub_prot,
@@ -477,7 +481,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
                         wert=N_up,
                         einheit="N",
                     ),
-                    kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "element_normalkraft_up", "windrichtung_deg": winkel, "element_id": str(element)}),
+                    kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "element_normalkraft_up", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
                 )
                 total_horizontal = vektoren_addieren([total_horizontal, H_vec])
                 total_normal_up += N_up
@@ -497,7 +501,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
                     formel="|T| = √(T_x² + T_y² + T_z²)",
                     formelzeichen=["T_x", "T_y", "T_z"],
                 ),
-                kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "horizontal_betrag", "windrichtung_deg": winkel}),
+                kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "horizontal_betrag", "windrichtung_deg": f"{winkel}°"}),
             )
             protokolliere_doc(
                 sub_prot,
@@ -508,7 +512,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
                     formel="ΣN_down = N_{down,Element}",
                     formelzeichen=["N_{down,Element}"],
                 ),
-                kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "normal_down", "windrichtung_deg": winkel}),
+                kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "normal_down", "windrichtung_deg": f"{winkel}°"}),
             )
             protokolliere_doc(
                 sub_prot,
@@ -519,7 +523,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
                     formel="ΣN_up = N_{up,Element}",
                     formelzeichen=["N_{up,Element}"],
                 ),
-                kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "normal_up", "windrichtung_deg": winkel}),
+                kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "normal_up", "windrichtung_deg": f"{winkel}°"}),
             )
             protokolliere_doc(
                 sub_prot,
@@ -530,7 +534,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
                     formel="N_eff = max(0, ΣN_down − ΣN_up)",
                     formelzeichen=["ΣN_down", "ΣN_up"],
                 ),
-                kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "normal_effektiv", "windrichtung_deg": winkel}),
+                kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "normal_effektiv", "windrichtung_deg": f"{winkel}°"}),
             )
             protokolliere_doc(
                 sub_prot,
@@ -541,7 +545,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
                     formel="R = μ_min · N_eff",
                     formelzeichen=["μ_min", "N_eff"],
                 ),
-                kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "reibkraft", "windrichtung_deg": winkel}),
+                kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "reibkraft", "windrichtung_deg": f"{winkel}°"}),
             )
 
             if horizontal_betrag > _EPS:
@@ -556,7 +560,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
                         formelzeichen=["R", "T"],
                         quelle_formel="---",
                     ),
-                    kontext={"nachweis": "GLEIT", "doc_type": "dir_sicherheit", "windrichtung_deg": winkel},
+                    kontext={"nachweis": "GLEIT", "doc_type": "dir_sicherheit", "windrichtung_deg": f"{winkel}°"},
                 )
 
             if reibwert_min <= _EPS:
@@ -581,12 +585,12 @@ def _gleitsicherheit_DinEn17879_2024_08(
                     formelzeichen=["T", "μ", "N_up", "N_down"],
                     quelle_formel="---",
                 ),
-                kontext={"nachweis": "GLEIT", "doc_type": "dir_ballast", "windrichtung_deg": winkel},
+                kontext={"nachweis": "GLEIT", "doc_type": "dir_ballast", "windrichtung_deg": f"{winkel}°"},
             )
 
             # Record ablegen (WICHTIG: innerhalb der Schleife!)
             dir_records.append({
-                "winkel_deg": winkel,
+                "windrichtung_deg": f"{winkel}°",
                 "dir_min_sicherheit": dir_min_sicherheit,
                 "dir_ballast_max": dir_ballast_max,
                 "docs": collect_docs(sub_prot),
@@ -613,7 +617,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
             _emit_docs_with_role(
                 dst_protokoll=protokoll,
                 docs=rec["docs"],
-                base_ctx=merge_kontext(base_ctx, {"nachweis": "GLEIT", "windrichtung_deg": rec["winkel_deg"]}),
+                base_ctx=merge_kontext(base_ctx, {"nachweis": "GLEIT", "windrichtung_deg": rec["windrichtung_deg"]}),
                 role=role,
             )
 
