@@ -489,17 +489,16 @@ def bewerte_lastfall_fuer_abheben(
     N_down = 0.0
     N_up = 0.0
 
-    gamma_unguenstig = sicherheitsbeiwert(norm, lastfall, ist_guenstig=False, protokoll=protokoll, kontext=base_ctx).wert
-    gamma_guenstig = sicherheitsbeiwert(norm, lastfall, ist_guenstig=True, protokoll=protokoll, kontext=base_ctx).wert
-
     for F in lastfall.Einzelkraefte:
         fz = F[2]
         if fz > _EPS:
             # nach oben → ungünstig
-            N_up += gamma_unguenstig * fz
+            gamma = sicherheitsbeiwert(norm, lastfall, ist_guenstig=False, protokoll=protokoll, kontext=base_ctx).wert
+            N_up += gamma * fz
         elif fz < -_EPS:
             # nach unten → günstig, positive Magnitude
-            N_down += gamma_guenstig * (-fz)
+            gamma = sicherheitsbeiwert(norm, lastfall, ist_guenstig=True, protokoll=protokoll, kontext=base_ctx).wert
+            N_down += gamma * (-fz)
 
     return N_down, N_up
 

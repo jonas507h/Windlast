@@ -39,6 +39,7 @@ def _beiwert_default(
 
     gamma: Optional[float] = None
     formel: str = ""
+    titel: str = f"Sicherheitsbeiwert ({kraft.typ.value}) γ_{'G' if kraft.typ == Lasttyp.GEWICHT else 'W' if kraft.typ == Lasttyp.WIND else 'R' if kraft.typ == Lasttyp.REIBUNG else ''}"
 
     if ist_guenstig:
         if kraft.typ == Lasttyp.GEWICHT and kraft.variabilitaet == Variabilitaet.STAENDIG:
@@ -73,7 +74,7 @@ def _beiwert_default(
             )
             protokolliere_doc(
                 protokoll,
-                bundle=make_docbundle(titel="Sicherheitsbeiwert γ", wert=float("nan")),
+                bundle=make_docbundle(titel=titel, wert=float("nan")),
                 kontext=merge_kontext(base_ctx, {"nan": True}),
             )
             return Zwischenergebnis(wert=float("nan"))
@@ -81,7 +82,7 @@ def _beiwert_default(
     protokolliere_doc(
         protokoll,
         bundle=make_docbundle(
-            titel="Sicherheitsbeiwert γ",
+            titel=titel,
             wert=gamma,
             formel=formel,
             quelle_formel="DIN EN 17879:2024-08 / DIN EN 13814:2005-06",
