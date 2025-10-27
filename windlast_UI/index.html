@@ -134,6 +134,7 @@
   <script src="/static/js/konstruktionen/wrapper.js"></script>
   <script src="/static/js/konstruktionen/tor.js"></script>
   <script src="/static/js/konstruktionen/steher.js"></script>
+  <script src="/static/js/konstruktionen/tisch.js"></script>
   <script src="/static/js/tooltip.js"></script>
   <script src="/static/js/ergebnis_zerlegen.js"></script>
   <script src="/static/js/footer.js"></script>
@@ -167,6 +168,16 @@
         const btn = document.getElementById("btn-berechnen-steher");
         if (btn && typeof window.submitSteher === "function") {
           btn.addEventListener("click", window.submitSteher);
+        }
+      }else if (name === "tisch") {
+        // Dropdowns füllen
+        if (typeof window.initTischDropdowns === "function") {
+          await window.initTischDropdowns();
+        }
+        // Button-Handler anbinden (weil DOM jetzt da ist)
+        const btn = document.getElementById("btn-berechnen");
+        if (btn && typeof window.submitTisch === "function") {
+          btn.addEventListener("click", window.submitTisch);
         }
       }
     }

@@ -41,16 +41,6 @@ async function initTischDropdowns() {
     fillSelect(document.getElementById("bodenplatte_name_intern"), bps);
     fillSelect(document.getElementById("untergrund_typ"), untergruende, { defaultValue: "Beton" });
 
-    // Statisches Dropdown: Traversen-Orientierung (Default: Spitze nach oben)
-    const trOri = document.getElementById("traversen_orientierung");
-    if (trOri) {
-      fillSelect(trOri, [
-        { value: "up",   label: "Spitze nach oben"   },
-        { value: "side", label: "Spitze seitlich"    },
-        { value: "down", label: "Spitze nach unten"  },
-      ], { defaultValue: "up" });
-    }
-
     // Statisches Dropdown: Gummimatte (Ja/Nein), Default = Ja
     const gm = document.getElementById("gummimatte");
     if (gm) {
@@ -62,13 +52,6 @@ async function initTischDropdowns() {
   } catch (e) {
     console.error("Tor-Dropdowns konnten nicht geladen werden:", e);
   }
-}
-
-function readTraversenOrientierung() {
-  const el = document.getElementById("traversen_orientierung");
-  const v = String(el?.value ?? "up").trim().toLowerCase();
-  // Nur erlaubte Tokens durchlassen; ansonsten Default "up"
-  return (v === "up" || v === "side" || v === "down") ? v : "up";
 }
 
 async function fetchJSON(url, opts) {
@@ -103,7 +86,7 @@ function readHeaderValues() {
   };
 }
 
-async function submitTor() {
+async function submitTisch() {
   // Formulardaten sammeln und an API senden
   try {
     // Gummimatte-Wert holen (ja/nein); wir reichen ihn als Boolean weiter
@@ -113,16 +96,16 @@ async function submitTor() {
     // Sammeln der Eingabewerte und verpacken
     const payload = {
       breite_m: parseFloat(document.getElementById("breite_m").value),
+      tiefe_m:  parseFloat(document.getElementById("tiefe_m").value),
       hoehe_m:  parseFloat(document.getElementById("hoehe_m").value),
       traverse_name_intern: document.getElementById("traverse_name_intern").value,
       bodenplatte_name_intern: document.getElementById("bodenplatte_name_intern").value,
       untergrund_typ: document.getElementById("untergrund_typ").value, // z.B. "beton"
       gummimatte: gummimatte_bool,
-      orientierung: readTraversenOrientierung(), // z.B. "up"
       ...readHeaderValues(),
     };
 
-    const data = await fetchJSON("/api/v1/tor/berechnen", {
+    const data = await fetchJSON("/api/v1/tisch/berechnen", {
       method: "POST",
       body: JSON.stringify(payload),
     });
@@ -135,7 +118,7 @@ async function submitTor() {
       document.dispatchEvent(new CustomEvent("results:update", { detail: data }));
     }
   } catch (e) {
-    console.error("Tor-Berechnung fehlgeschlagen:", e);
+    console.error("Tisch-Berechnung fehlgeschlagen:", e);
     // optional: ein schlichtes Toast-Event, falls du es nutzen willst
     document.dispatchEvent(new CustomEvent("toast", {
       detail: { level: "error", text: String(e?.message || e) }
@@ -146,5 +129,5 @@ async function submitTor() {
 // Funktion für Berechnen-Button, wenn das Dokument geladen ist
 document.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById("btn-berechnen");
-  if (btn) btn.addEventListener("click", submitTor);
+  if (btn) btn.addEventListener("click", submitTisch);
 });
