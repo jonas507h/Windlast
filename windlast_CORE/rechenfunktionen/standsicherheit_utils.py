@@ -419,22 +419,25 @@ def bewerte_lastfall_fuer_gleiten(
     N_down = 0.0
     N_up   = 0.0
 
-    gamma_unguenstig = sicherheitsbeiwert(norm, lastfall, ist_guenstig=False, protokoll=protokoll, kontext=base_ctx).wert
-    gamma_guenstig = sicherheitsbeiwert(norm, lastfall, ist_guenstig=True, protokoll=protokoll, kontext=base_ctx).wert
-
     for Kraft in Einzelkraefte:
         fx = Kraft[0]
         fy = Kraft[1]
         fz = Kraft[2]
 
-        Hx += gamma_unguenstig * fx
-        Hy += gamma_unguenstig * fy
+        if fx > _EPS:
+            gamma = sicherheitsbeiwert(norm, lastfall, ist_guenstig=False, protokoll=protokoll, kontext=base_ctx).wert
+            Hx += gamma * fx
+        if fy > _EPS:
+            gamma = sicherheitsbeiwert(norm, lastfall, ist_guenstig=False, protokoll=protokoll, kontext=base_ctx).wert
+            Hy += gamma * fy
 
         if fz > _EPS:
-            N_up += gamma_unguenstig * fz
+            gamma = sicherheitsbeiwert(norm, lastfall, ist_guenstig=False, protokoll=protokoll, kontext=base_ctx).wert
+            N_up += gamma * fz
         elif fz < -_EPS:
-            N_down += gamma_guenstig * (-fz)
-    
+            gamma = sicherheitsbeiwert(norm, lastfall, ist_guenstig=True, protokoll=protokoll, kontext=base_ctx).wert
+            N_down += gamma * (-fz)
+
     H_vec: Vec3 = (Hx, Hy, Hz)
 
     return H_vec, N_down, N_up
@@ -456,7 +459,7 @@ def gleit_envelope_pro_bauelement(
     best_N_up = 0.0
 
     for k in lastfaelle:
-        H_vec, N_down, N_up = bewerte_lastfall_fuer_gleiten(norm, k)
+        H_vec, N_down, N_up = bewerte_lastfall_fuer_gleiten(norm, k, protokoll=protokoll, kontext=base_ctx)
         H_betrag = vektor_laenge(H_vec)
         if k.typ == Lasttyp.WIND:
             if H_betrag > best_H_betrag:

@@ -50,9 +50,7 @@ def _beiwert_default(
             # alle anderen günstigen Lasten
             gamma = 0.0
             formel = "γ = 0.0 (günstige variable oder nicht zulässige Gutschrift)"
-            protokolliere_msg(protokoll, severity=Severity.INFO, code="SICHB/CASE",
-                              text="Günstig: variable/sonstige Lasten werden mit γ=0.0 angesetzt.",
-                              kontext=base_ctx)
+
     else:
         if kraft.typ == Lasttyp.WIND:
             # Wind ungünstig
