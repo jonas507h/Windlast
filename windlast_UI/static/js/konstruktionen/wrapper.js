@@ -7,7 +7,20 @@
 
   function switch_konstruktion(view){
     const iframe = document.getElementById('konstruktions_iframe');
-    iframe.src = './' + (view === 'steher' ? 'steher.html' : 'tor.html');
+    let filename;
+    
+    switch(view) {
+      case 'steher':
+        filename = 'steher.html';
+        break;
+      case 'tisch':
+        filename = 'tisch.html';
+        break;
+      default:
+        filename = 'tor.html';
+    }
+    
+    iframe.src = './' + filename;
     setActive(view);
   }
 
