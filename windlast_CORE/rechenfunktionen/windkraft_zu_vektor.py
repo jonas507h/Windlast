@@ -12,7 +12,14 @@ from windlast_CORE.datenstruktur.zwischenergebnis import (
     protokolliere_msg,
     protokolliere_doc,
 )
-from windlast_CORE.rechenfunktionen.geom3d import Vec3, vektor_laenge
+from windlast_CORE.rechenfunktionen.geom3d import (
+    Vec3,
+    vektor_laenge,
+    vektor_zwischen_punkten,
+    vektor_normieren,
+    vektor_senkrechtanteil,
+    vektor_multiplizieren,
+)
 
 def _validate_inputs(
     objekttyp: ObjektTyp,
@@ -29,9 +36,13 @@ def _validate_inputs(
     if not (0.999 <= n <= 1.001):
         raise ValueError(f"Windrichtung soll Einheitsvektor sein (||v||≈1), ist {n:.6f}.")
 
-    # punkte ist optional. Wenn übergeben, kurz prüfen:
-    if punkte is not None and not isinstance(punkte, (list, tuple)):
-        raise ValueError("Punkte muss eine Sequenz sein, falls gesetzt.")
+    if objekttyp in (ObjektTyp.TRAVERSE, ObjektTyp.ROHR):
+        if punkte is None or len(punkte) != 2:
+            raise ValueError("Für Traverse/Rohr werden genau zwei Punkte (Start, Ende) benötigt.")
+        start, ende = punkte
+        achse_vec = vektor_zwischen_punkten(start, ende)
+        if vektor_laenge(achse_vec) <= 1e-12:
+            raise ValueError("Start- und Endpunkt der Achse fallen (nahezu) zusammen.")
     
 def _windkraft_zu_vektor_default(
     objekttyp: ObjektTyp,
@@ -51,42 +62,44 @@ def _windkraft_zu_vektor_default(
     })
 
     if objekttyp == ObjektTyp.TRAVERSE:
-        # Für Traverse: Richtung der Windkraft = Windrichtung
-        ex, ey, ez = windrichtung
-        kraft_vec: Vec3 = (windkraft * ex, windkraft * ey, windkraft * ez)
+        start, ende = punkte
+        achse = vektor_normieren(vektor_zwischen_punkten(start, ende))
+        senkrechtanteil = vektor_senkrechtanteil(windrichtung, achse)
+        kraft_vec: Vec3 = vektor_multiplizieren(senkrechtanteil, windkraft)
 
         protokolliere_doc(
             protokoll,
             bundle=make_docbundle(
                 titel="Windkraft-Vektor F_W",
                 wert=kraft_vec,
-                einzelwerte=[windkraft, ex, ey, ez],
-                formel="F_W = F · ê",
+                einzelwerte=[windkraft, *senkrechtanteil, *achse],
+                formel="F_W = F · ( ê − (ê·t̂) t̂ )",
                 einheit="N",
-                formelzeichen=["F_W", "F", "ê"],
-                quelle_formelzeichen=["Projektinterne Bezeichnungen"],
+                formelzeichen=["F_W", "F", "ê", "t̂"],
+                quelle_formelzeichen=["Projektintern"],
             ),
-            kontext=base_ctx,
+            kontext=merge_kontext(base_ctx, {"start": start, "ende": ende}),
         )
         return Zwischenergebnis_Vektor(wert=kraft_vec)
     
     if objekttyp == ObjektTyp.ROHR:
-        # Für Rohr: Richtung der Windkraft = Windrichtung
-        ex, ey, ez = windrichtung
-        kraft_vec: Vec3 = (windkraft * ex, windkraft * ey, windkraft * ez)
+        start, ende = punkte
+        achse = vektor_normieren(vektor_zwischen_punkten(start, ende))
+        senkrechtanteil = vektor_senkrechtanteil(windrichtung, achse)
+        kraft_vec: Vec3 = vektor_multiplizieren(senkrechtanteil, windkraft)
 
         protokolliere_doc(
             protokoll,
             bundle=make_docbundle(
-                titel="Windkraft (Vektor) F_W",
+                titel="Windkraft-Vektor F_W",
                 wert=kraft_vec,
-                einzelwerte=[windkraft, ex, ey, ez],
-                formel="F_W = F · ê",
+                einzelwerte=[windkraft, *senkrechtanteil, *achse],
+                formel="F_W = F · ( ê − (ê·t̂) t̂ )",
                 einheit="N",
-                formelzeichen=["F_W", "F", "ê"],
-                quelle_formelzeichen=["Projektinterne Bezeichnungen"],
+                formelzeichen=["F_W", "F", "ê", "t̂"],
+                quelle_formelzeichen=["Projektintern"],
             ),
-            kontext=base_ctx,
+            kontext=merge_kontext(base_ctx, {"start": start, "ende": ende}),
         )
         return Zwischenergebnis_Vektor(wert=kraft_vec)
     

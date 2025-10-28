@@ -160,7 +160,7 @@ class Traversenstrecke:
                 protokoll=protokoll, kontext=seg_ctx,
             )
             _windkraft_vec = windkraft_zu_vektor(
-                norm, self.objekttyp, None, _windkraft.wert, windrichtung,
+                norm, self.objekttyp, [start_lokal, ende_lokal], _windkraft.wert, windrichtung,
                 protokoll=protokoll, kontext=seg_ctx,
             )
 

@@ -217,7 +217,7 @@ def standsicherheit(
     konst: Optional[Any] = None,
     methode: Optional[Tuple[RechenmethodeKippen, RechenmethodeGleiten, RechenmethodeAbheben]] = None,
     vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
-    anzahl_windrichtungen: int = 4,
+    anzahl_windrichtungen: int = 8,
 ) -> StandsicherheitErgebnis:
     """
     Rechnet Kipp-/Gleit-/Abhebesicherheit je Norm. Staudrücke/Alternativen laufen über Szenarien.
