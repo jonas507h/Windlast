@@ -41,6 +41,7 @@ class Steher:
                 raise ValueError("Höhe muss > 0 sein.")
 
             spec = catalog.get_traverse(self.traverse_name_intern)
+            t = float(spec.hoehe)
 
             truss = Traversenstrecke(
                 traverse_name_intern=self.traverse_name_intern,
@@ -52,8 +53,8 @@ class Steher:
             )
             rohr = Rohr(
                 rohr_name_intern=self.rohr_name_intern,
-                start=((-RL/2), 0.0, RH),
-                ende=(RL/2, 0.0, RH),
+                start=((-RL/2), -t/2, RH),
+                ende=(RL/2, -t/2, RH),
                 element_id_intern="Rohr_Steher",
             )
             self.bauelemente.extend([truss, rohr])
