@@ -1,5 +1,6 @@
 // footer.js  (als ES Module laden)
 import { configureMeldungen, setupMeldungenUI } from "./modal/meldungen.js";
+import { configureErgebnisse, setupErgebnisseUI } from "./modal/ergebnisse.js";
 import {
   ALT_LABELS,
   SEVERITY_ORDER,
@@ -807,16 +808,21 @@ function updateFooter(payload) {
   wireZwischenergebnisseUIOnce();
   refreshHeaderBadges();
 
-  const VM = ResultsVM; // oder wie dein ViewModel bei dir heißt
-
   configureMeldungen({
-    vm: VM,
+    vm: ResultsVM,
     buildModal,
-    Modal,   // falls bei dir als Objekt vorhanden
-    Tooltip, // falls bei dir als Objekt vorhanden
+    Modal,
+    Tooltip,
+  });
+  configureErgebnisse({
+    vm: ResultsVM,
+    Modal,
+    Tooltip, 
+    buildModal,
   });
 
   setupMeldungenUI();
+  setupErgebnisseUI();
 }
 
 window.addEventListener("message", (ev) => {
@@ -894,6 +900,7 @@ registerCountsTooltip('.results-table .alt-title th[data-szenario]', {
 
 
 // Tooltip für Zwischenergebnis-Einträge im Modal (Node-basiert => HTML möglich)
+/*
 Tooltip.register('#modal-root .doc-list li', {
   predicate: (el) => {
     return !!(APP_STATE?.flags?.show_zwischenergebnisse_tooltip) && !!el.closest('li.doc-li');
@@ -960,3 +967,4 @@ Tooltip.register('#modal-root .doc-list li', {
   },
   delay: 80
 });
+*/
