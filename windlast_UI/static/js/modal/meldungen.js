@@ -1,0 +1,184 @@
+// modal/meldungen.js (ES module)
+
+let DEPS = {
+  // Pflicht
+  getVM: null, // () => ResultsVM-Objekt
+
+  // Optional (mit Fallbacks)
+  getNormDisplayName: (k) => (k || ""),
+  displayAltName: (s) => s,
+  orderContextEntries: (ctx) => Object.entries(ctx || {}),
+  prettyKey: (k) => String(k),
+  prettyValHTML: (_k, v) => String(v),
+  buildModal: null,
+  Modal: null,
+  Tooltip: null,
+};
+
+// Aufrufer konfiguriert Dependencies einmalig
+export function configureMeldungen({
+  vm,
+  getVM, // alternativ zu vm
+  getNormDisplayName,
+  displayAltName,
+  orderContextEntries,
+  prettyKey,
+  prettyValHTML,
+  buildModal,
+  Modal,
+  Tooltip,
+} = {}) {
+  DEPS.getVM = getVM || (vm ? () => vm : null);
+  if (!DEPS.getVM) {
+    console.warn("[meldungen] configureMeldungen: getVM/vm fehlt");
+  }
+  if (getNormDisplayName) DEPS.getNormDisplayName = getNormDisplayName;
+  if (displayAltName) DEPS.displayAltName = displayAltName;
+  if (orderContextEntries) DEPS.orderContextEntries = orderContextEntries;
+  if (prettyKey) DEPS.prettyKey = prettyKey;
+  if (prettyValHTML) DEPS.prettyValHTML = prettyValHTML;
+  if (buildModal) DEPS.buildModal = buildModal;
+  if (Modal) DEPS.Modal = Modal;
+  if (Tooltip) DEPS.Tooltip = Tooltip;
+}
+
+function _fallbackBuildModal(titleText, bodyNodeOrHtml) {
+  const wrap = document.createElement("div");
+  const h = document.createElement("h3");
+  h.textContent = titleText;
+  h.className = "modal-title";
+  wrap.appendChild(h);
+  const cont = document.createElement("div");
+  if (typeof bodyNodeOrHtml === "string") cont.innerHTML = bodyNodeOrHtml;
+  else if (bodyNodeOrHtml instanceof Node) cont.appendChild(bodyNodeOrHtml);
+  wrap.appendChild(cont);
+  return wrap;
+}
+
+function sortMessagesBySeverity(msgs) {
+  const ORDER = ["error", "warn", "hint", "info"];
+  return [...(msgs || [])].sort((a, b) => {
+    const ia = ORDER.indexOf((a?.severity || "").toLowerCase());
+    const ib = ORDER.indexOf((b?.severity || "").toLowerCase());
+    return (ia >= 0 ? ia : ORDER.length) - (ib >= 0 ? ib : ORDER.length);
+  });
+}
+
+export function openMeldungenModal(normKey, szenario = null) {
+  const VM = DEPS.getVM?.();
+  if (!VM) return;
+
+  const msgs = szenario
+    ? (VM.listMessages ? VM.listMessages(normKey, szenario) : [])
+    : (VM.listMessagesMainOnly ? VM.listMessagesMainOnly(normKey) : []);
+
+  const normName = DEPS.getNormDisplayName(normKey);
+  const niceScenario = szenario ? DEPS.displayAltName(szenario) : null;
+  const title = szenario
+    ? `Meldungen – ${normName} (${niceScenario})`
+    : `Meldungen – ${normName} (Hauptberechnung)`;
+
+  const buildModal = DEPS.buildModal || _fallbackBuildModal;
+  const wrap = buildModal(title, document.createElement("div"));
+  const contentRoot = wrap.lastElementChild;
+
+  if (!msgs || msgs.length === 0) {
+    const p = document.createElement("p");
+    p.textContent = "Keine Meldungen vorhanden.";
+    contentRoot.appendChild(p);
+  } else {
+    const ul = document.createElement("ul");
+    ul.className = "messages-list";
+    for (const m of sortMessagesBySeverity(msgs)) {
+      const li = document.createElement("li");
+      const line = document.createElement("div");
+      const sev = (m.severity || "").toLowerCase();
+      line.className = `tt-line ${["error","warn","hint","info"].includes(sev) ? sev : "info"}`;
+      line.textContent = m.text || "";
+      li.appendChild(line);
+
+      // Tooltip-Daten
+      let ctx = {};
+      try { ctx = m?.context || {}; } catch {}
+      try { li.setAttribute("data-ctx-json", JSON.stringify(ctx)); } catch {}
+      ul.appendChild(li);
+    }
+    contentRoot.appendChild(ul);
+  }
+
+  (DEPS.Modal || window.Modal)?.open(wrap);
+}
+
+export function registerMeldungenContextTooltip() {
+  const Tooltip = DEPS.Tooltip || window.Tooltip;
+  if (!Tooltip || registerMeldungenContextTooltip.__done) return;
+  registerMeldungenContextTooltip.__done = true;
+
+  Tooltip.register('#modal-root .messages-list li', {
+    predicate: (el) => !!el.closest('li'),
+    content: (_ev, el) => {
+      const li = el.closest('li');
+      if (!li) return "";
+      let ctx = {};
+      try { ctx = JSON.parse(li.getAttribute('data-ctx-json') || "{}"); } catch {}
+      const ordered = DEPS.orderContextEntries(ctx);
+      if (!ordered.length) return "";
+
+      const root = document.createElement("div");
+      root.className = "ctx-tooltip";
+      for (const [k, v] of ordered) {
+        const row = document.createElement('div');
+        row.className = 'ctx-row';
+        const kEl = document.createElement('span');
+        kEl.className = 'ctx-k';
+        kEl.textContent = DEPS.prettyKey(k) + ": ";
+        const vEl = document.createElement('span');
+        vEl.className = 'ctx-v';
+        vEl.innerHTML = DEPS.prettyValHTML(k, v);
+        row.appendChild(kEl);
+        row.appendChild(vEl);
+        root.appendChild(row);
+      }
+      return root;
+    },
+    delay: 80
+  });
+}
+
+export function setupMeldungenTriggers() {
+  if (setupMeldungenTriggers.__done) return;
+  setupMeldungenTriggers.__done = true;
+
+  document.addEventListener("click", (ev) => {
+    const t = ev.target;
+
+    // th mit data-norm-key (dein DOM)
+    const thHead = t.closest(".results-table thead th[data-norm-key]");
+    if (thHead) {
+      const normKey = thHead.dataset.normKey;
+      if (normKey) openMeldungenModal(normKey, null);
+      return;
+    }
+
+    // alt-title mit Szenario
+    const altNode = t.closest(".results-table .alt-title [data-norm-key][data-szenario]");
+    if (altNode) {
+      const { normKey, szenario } = altNode.dataset;
+      if (normKey && szenario) openMeldungenModal(normKey, szenario);
+      return;
+    }
+
+    // optionaler generischer Trigger
+    const generic = t.closest('[data-open="meldungen"]');
+    if (generic) {
+      const normKey = generic.dataset.normKey;
+      const szenario = generic.dataset.szenario || null;
+      if (normKey) openMeldungenModal(normKey, szenario);
+    }
+  }, { passive: true });
+}
+
+export function setupMeldungenUI() {
+  registerMeldungenContextTooltip();
+  setupMeldungenTriggers();
+}

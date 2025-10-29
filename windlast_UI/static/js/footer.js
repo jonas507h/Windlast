@@ -1,3 +1,6 @@
+// footer.js  (als ES Module laden)
+import { configureMeldungen, setupMeldungenUI } from "./modal/meldungen.js";
+
 const NORM_ID = {
   "EN_13814_2005": "en13814_2005",
   "EN_17879_2024": "en17879_2024",
@@ -373,133 +376,6 @@ function openZwischenergebnisseModal({ normKey, nachweis, altName }, docsAll, { 
 
   Modal.open(wrap);
 }
-
-function sortMessagesBySeverity(msgs) {
-  return [...msgs].sort((a, b) => {
-    const sa = (a.severity || "").toLowerCase();
-    const sb = (b.severity || "").toLowerCase();
-    const ia = SEVERITY_ORDER.indexOf(sa);
-    const ib = SEVERITY_ORDER.indexOf(sb);
-    // unbekannte Severities hängen wir ans Ende
-    const ra = ia >= 0 ? ia : SEVERITY_ORDER.length;
-    const rb = ib >= 0 ? ib : SEVERITY_ORDER.length;
-    return ra - rb;
-  });
-}
-
-// ---- Messages im Modal rendern (Texte; Kontext wird als Tooltip gezeigt) ----
-function openMessagesModalFor(normKey, szenario = null) {
-  if (!ResultsVM) return;
-
-  // Meldungen holen (Objekte; s.o.)
-  const msgs = szenario
-    ? (ResultsVM.listMessages ? ResultsVM.listMessages(normKey, szenario) : [])
-    : (ResultsVM.listMessagesMainOnly ? ResultsVM.listMessagesMainOnly(normKey) : []);
-  const sortedMsgs = sortMessagesBySeverity(msgs);
-
-  // Normname hübsch machen
-  const normName = getNormDisplayName(normKey);
-  const niceScenario = szenario ? (displayAltName ? displayAltName(szenario) : szenario) : null;
-
-  const title = szenario
-    ? `Meldungen – ${normName} (${niceScenario})`
-    : `Meldungen – ${normName} (Hauptberechnung)`;
-
-  // DOM für Modal
-  const wrap = buildModal(title, document.createElement("div"));
-  const contentRoot = wrap.lastElementChild;
-
-  if (!msgs || msgs.length === 0) {
-    const p = document.createElement("p");
-    p.textContent = "Keine Meldungen vorhanden.";
-    contentRoot.appendChild(p);
-  } else {
-    const ul = document.createElement("ul");
-    ul.className = "messages-list";
-    // … li's bauen …
-    contentRoot.appendChild(ul);
-  }
-
-  if (!msgs || msgs.length === 0) {
-    const p = document.createElement("p");
-    p.textContent = "Keine Meldungen vorhanden.";
-    wrap.appendChild(p);
-  } else {
-    const ul = document.createElement("ul");
-    ul.className = "messages-list";
-    for (const m of sortedMsgs) {
-      const li = document.createElement("li");
-
-      const line = document.createElement("div");
-      const sev = (m.severity || "").toLowerCase();
-      const sevClass = (sev === "error" || sev === "warn" || sev === "hint" || sev === "info")
-        ? sev
-        : "info"; // Fallback
-      line.className = `tt-line ${sevClass}`;
-      line.textContent = m.text || "";
-      li.appendChild(line);
-
-      // Kontext generisch sammeln -> Tooltip-Attribut
-      // Kontext generisch, nach CONTEXT_ORDER, Rest in Quell-Reihenfolge
-      let ctxText = "";
-      try {
-        const ctx = m?.context || {};
-        const ordered = orderContextEntries(ctx);
-        const parts = ordered.map(([k, v]) => {
-          const label = prettyKey(k);
-          const val   = prettyVal(k, v);
-          return `${label}: ${val}`;
-        });
-
-        // "code" anhängen, wenn noch nicht enthalten
-        if (m.code && !parts.some(line => /^\s*code\s*:/.test(line))) {
-          parts.push(`code: ${m.code}`);
-        }
-
-        if (parts.length) ctxText = parts.join("\n");
-      } catch {
-        ctxText = JSON.stringify(m?.context || {});
-      }
-
-      if (ctxText) {
-        li.setAttribute("data-ctx", ctxText);
-      }
-      try { li.setAttribute("data-ctx-json", JSON.stringify(m?.context || {})); } catch {}
-
-      ul.appendChild(li);
-    }
-    wrap.appendChild(ul);
-  }
-
-  Modal.open(wrap);
-}
-
-// ---- Modal-Trigger: beim Klick auf die Tooltip-Zellen ein Modal öffnen ----
-(function setupMessageModalOnce(){
-  if (window.__messageModalSetup) return;
-  window.__messageModalSetup = true;
-
-  document.addEventListener("click", (ev) => {
-    const target = ev.target;
-
-    // 1) Kopfzellen je Norm
-    const thHead = target.closest(".results-table thead th");
-    if (thHead && thHead.dataset && thHead.dataset.normKey) {
-      const normKey = thHead.dataset.normKey;
-      openMessagesModalFor(normKey, null); // Hauptberechnung
-      return;
-    }
-
-    // 2) Alternativ-Titelzellen
-    const thAlt = target.closest(".results-table .alt-title th[data-szenario]");
-    if (thAlt) {
-      const normKey  = thAlt.dataset.normKey;
-      const szenario = thAlt.dataset.szenario;
-      openMessagesModalFor(normKey, szenario); // spezifische Variante
-      return;
-    }
-  }, { passive: true });
-})();
 
 function formatLabelWithSubscripts(input) {
   if (input == null) return "";
@@ -1161,6 +1037,22 @@ function updateFooter(payload) {
 
   wireZwischenergebnisseUIOnce();
   refreshHeaderBadges();
+
+  const VM = ResultsVM; // oder wie dein ViewModel bei dir heißt
+
+  configureMeldungen({
+    vm: VM,
+    getNormDisplayName,
+    displayAltName,
+    orderContextEntries,
+    prettyKey,
+    prettyValHTML,
+    buildModal,
+    Modal,   // falls bei dir als Objekt vorhanden
+    Tooltip, // falls bei dir als Objekt vorhanden
+  });
+
+  setupMeldungenUI();
 }
 
 window.addEventListener("message", (ev) => {
@@ -1234,44 +1126,6 @@ registerCountsTooltip('.results-table .alt-title th[data-szenario]', {
     const nice = displayAltName ? displayAltName(raw) : raw;
     return `Alternative: ${nice}`;
   }
-});
-
-// Tooltip für Meldungseinträge im Modal: zeigt den Kontext (HTML-fähig)
-Tooltip.register('#modal-root .messages-list li', {
-  predicate: (el) => !!el.closest('li'),
-  content: (_ev, el) => {
-    const li = el.closest('li');
-    if (!li) return "";
-
-    // wenn JSON vorhanden -> schöne HTML-Ansicht; sonst Fallback auf data-ctx Text
-    let ctx = {};
-    try { ctx = JSON.parse(li.getAttribute('data-ctx-json') || "{}"); } catch {}
-
-    const root = document.createElement("div");
-    root.className = "ctx-tooltip";
-
-    const ordered = orderContextEntries(ctx);
-    if (!ordered.length) {
-      const plain = li.getAttribute('data-ctx') || "";
-      return plain || ""; // Fallback (alter Modus)
-    }
-
-    for (const [k, v] of ordered) {
-      const row = document.createElement('div');
-      row.className = 'ctx-row';
-      const kEl = document.createElement('span');
-      kEl.className = 'ctx-k';
-      kEl.textContent = prettyKey(k) + ": ";
-      const vEl = document.createElement('span');
-      vEl.className = 'ctx-v';
-      vEl.innerHTML = prettyValHTML(k, v); // ← HTML: Vektoren mit ×10<sup>…</sup>
-      row.appendChild(kEl);
-      row.appendChild(vEl);
-      root.appendChild(row);
-    }
-    return root;
-  },
-  delay: 80
 });
 
 
