@@ -14,7 +14,7 @@
         <h2 id="modal-title" class="text-lg" style="margin:0 0 .5rem 0;">Hinweis</h2>
         <p style="margin:0 0 1rem 0;">
           Diese Anwendung liefert <strong>keine zertifizierten statischen Berechnungen</strong>.
-          Ergebnisse dienen als <em>Vorab-Abschätzung</em> ohne Gewähr.
+          Ergebnisse dienen als <em>Vorab-Abschätzung</em> ohne Gewähr. Die volle Verantwortung liegt beim Anwender.
         </p>
         <div style="display:flex; gap:.5rem; justify-content:flex-end;">
           <button type="button" class="btn btn-secondary" data-action="ok">OK</button>

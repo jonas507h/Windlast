@@ -1,5 +1,6 @@
 // config.js
 (function () {
+  const VERSION = "2.0.0-dev";
   // 1) Flags pro Rolle definieren
   const ROLE_FLAGS = {
     user:  Object.freeze({
@@ -31,6 +32,7 @@
   const state = {
     get role() { return currentRole; },
     get flags() { return ROLE_FLAGS[currentRole]; },
+    get version() { return VERSION; },
     // DOM-Hook für CSS (siehe unten)
     applyDomAttributes() {
       document.documentElement.setAttribute("data-role", currentRole);
@@ -53,6 +55,7 @@
   window.APP_STATE = Object.freeze({
     get role() { return state.role; },
     get flags() { return state.flags; },
+    get version() { return state.version; },
     setRole: state.setRole,                 // bewusst freigegeben
     onRoleChanged(handler) {                // kleine Helfer-API
       document.addEventListener("ui:role-changed", e => handler(e.detail.role));

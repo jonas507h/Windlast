@@ -198,3 +198,12 @@ label.required::after {
 }
 
 .error-text[hidden] { display: none; }
+
+.header-bar { display: flex; align-items: flex-start; gap: 16px; }
+.header-title { display: flex; flex-direction: column; }
+.version-label{
+  display:block;
+  font-size:.85rem;
+  color:#666;
+  margin-top:2px;
+}

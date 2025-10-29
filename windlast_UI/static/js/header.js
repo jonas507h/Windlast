@@ -42,3 +42,12 @@ async function initHeaderDropdowns() {
 }
 
 document.addEventListener("DOMContentLoaded", initHeaderDropdowns);
+
+document.addEventListener("DOMContentLoaded", () => {
+  const el = document.getElementById("program-version");
+  const v  = window.APP_STATE?.version;
+  if (el && v) {
+    el.textContent = `Version ${v}`;
+    el.hidden = false;
+  }
+});
