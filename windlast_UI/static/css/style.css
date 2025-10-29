@@ -176,3 +176,9 @@ nav.tabs { display:flex; gap:8px; margin:0 0 10px; }
 .count-badge.badge-warn  { background: rgba(240, 173, 78, 0.15); color: #d99000; border-color: #f0ad4e; }
 .count-badge.badge-hint  { background: rgba(45, 108, 223, 0.12); color: #2d6cdf; border-color: #2d6cdf; }
 .count-badge.badge-info  { background: rgba(100, 100, 100, 0.08); color: var(--text, #555); border-color: #555; }
+
+label.required::after {
+  content: " *";
+  color: var(--danger, #c23);
+  font-weight: 600;
+}
