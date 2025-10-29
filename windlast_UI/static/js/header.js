@@ -51,3 +51,26 @@ document.addEventListener("DOMContentLoaded", () => {
     el.hidden = false;
   }
 });
+
+document.addEventListener("DOMContentLoaded", () => {
+  const el = document.getElementById("role-label");
+  if (!el) return;
+
+  const role = window.APP_STATE?.role;
+  if (role && role !== "user") {
+    el.textContent = `Rolle: ${role}`;
+    el.hidden = false;
+  }
+});
+
+document.addEventListener("ui:role-changed", (e) => {
+  const el = document.getElementById("role-label");
+  if (!el) return;
+  const role = e.detail.role;
+  if (role !== "user") {
+    el.textContent = `Rolle: ${role}`;
+    el.hidden = false;
+  } else {
+    el.hidden = true;
+  }
+});

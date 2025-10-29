@@ -207,3 +207,30 @@ label.required::after {
   color:#666;
   margin-top:2px;
 }
+
+.footer-head {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;                /* kleiner Abstand zwischen Texten */
+  flex-wrap: wrap;         /* darf umbrechen, falls schmaler Screen */
+}
+
+.footer-title {
+  margin: 0;
+  flex: 0 0 auto;          /* nur so breit wie nötig */
+  width: auto !important;
+}
+
+.footer-note {
+  font-size: 0.85rem;
+  color: #666;
+  font-style: italic;
+  white-space: nowrap;     /* bleibt in einer Zeile */
+}
+
+.role-label {
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 4px;
+  text-align: center;
+}

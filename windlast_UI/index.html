@@ -69,6 +69,7 @@
 
     <div class="actions" style="margin:0;">
       <button type="button" class="btn" onclick="toggleTheme()">Dark / Light</button>
+      <div id="role-label" class="role-label" hidden></div>
     </div>
   </header>
 
@@ -91,7 +92,10 @@
 
   <!-- ========== FOOTER ========== -->
   <section class="panel wrap" id="results-section">
-    <h2 style="margin:0 0 10px;">Ergebnisse</h2>
+    <div class="footer-head">
+      <h2 class="footer-title">Ergebnisse</h2>
+      <span class="footer-note">(keine zertifizierten statischen Berechnungen)</span>
+    </div>
 
     <table class="results-table" aria-describedby="results-caption">
       <caption id="results-caption" style="text-align:left; margin-bottom:6px;">
