@@ -287,7 +287,7 @@ function _fallbackBuildModal(titleText, bodyNodeOrHtml) {
 }
 
 // Öffnet das Ergebnis-Modal (Haupt- oder Szenario-Berechnung)
-export function openErgebnisseModal(normKey, szenario = null) {
+export function openErgebnisseModal(normKey, szenario = null, { initialNachweis = null } = {}) {
   const VM = DEPS.getVM?.();
   if (!VM) return;
 
@@ -297,21 +297,14 @@ export function openErgebnisseModal(normKey, szenario = null) {
     ? `Ergebnisse – ${normName} (${niceScenario})`
     : `Ergebnisse – ${normName} (Hauptberechnung)`;
 
-  // Ergebnisse besorgen – wie früher im Footer: direkt aus dem Payload
-  // VM = ResultsIndex.build(payload)
-  let items = [];
+  // Daten holen
   const norm = VM?.payload?.normen?.[normKey] || {};
-  items = szenario
-    ? (norm.alternativen?.[szenario]?.docs || [])
-    : (norm.docs || []);
-
-    // ... (Titel & wrap wie gehabt)
+  const items = szenario ? (norm.alternativen?.[szenario]?.docs || []) : (norm.docs || []);
 
   const buildModal = DEPS.buildModal || _fallbackBuildModal;
   const wrap = buildModal(title, document.createElement("div"));
   const root = wrap.lastElementChild;
 
-  // --- Guard, falls keine Items ---
   if (!items.length) {
     const p = document.createElement("p");
     p.textContent = "Keine Ergebnisse vorhanden.";
@@ -320,16 +313,17 @@ export function openErgebnisseModal(normKey, szenario = null) {
     return;
   }
 
-  // --- Nachweis-Filterleiste (Single-Select) ---
+  // --- Filterleiste (Nachweis) mit initialNachweis aus Klick ---
   const bar = document.createElement("div");
   bar.className = "nachweis-filter";
-  const initialNachweis = "ALLE"; // wie vorher
+  const start = (initialNachweis && ["ALLE","KIPP","GLEIT","ABHEB","BALLAST","LOADS"].includes(initialNachweis))
+    ? initialNachweis : "ALLE";
   bar.innerHTML = NACHWEIS_CHOICES.map(c =>
-    `<button class="nf-chip${c===initialNachweis?" active":""}" data-nachweis="${c}" aria-pressed="${c===initialNachweis}">${c==="ALLE"?"Alle":c}</button>`
+    `<button class="nf-chip${c===start?" active":""}" data-nachweis="${c}" aria-pressed="${c===start}">${c==="ALLE"?"Alle":c}</button>`
   ).join("");
   root.appendChild(bar);
 
-  // --- Rollen-Filterleiste (Multi-Select; beide Chips initial AUS) ---
+  // --- Rollen-Filterleiste (Multi) ---
   const roleBar = document.createElement("div");
   roleBar.className = "nachweis-filter";
   roleBar.innerHTML = `
@@ -342,21 +336,18 @@ export function openErgebnisseModal(normKey, szenario = null) {
   const listWrap = document.createElement("div");
   root.appendChild(listWrap);
 
-  // Zustand
-  let activeNachweis = initialNachweis;
-  const activeRoles = new Set(); // leer = kein Rollenfilter → nur "relevant"
-
-  // Apply: 1) Nachweis → 2) Rolle → render
+  // Zustand + Apply
+  let activeNachweis = start;
+  const activeRoles = new Set(); // leer ⇒ nur "relevant"
   const apply = () => {
     const byNachweis = filterDocsByNachweis(items, activeNachweis);
     const finalDocs  = filterDocsByRole(byNachweis, activeRoles);
     listWrap.innerHTML = renderDocsByWindrichtung(finalDocs);
   };
 
-  // initial render
   apply();
 
-  // Events: Nachweis Single-Select
+  // Events
   bar.addEventListener("click", (ev) => {
     const btn = ev.target.closest(".nf-chip");
     if (!btn) return;
@@ -367,91 +358,94 @@ export function openErgebnisseModal(normKey, szenario = null) {
     apply();
   });
 
-  // Events: Rolle Multi-Select
   roleBar.addEventListener("click", (ev) => {
     const btn = ev.target.closest(".nf-chip");
     if (!btn) return;
     const role = btn.dataset.role;
     const isActive = btn.classList.toggle("active");
     btn.setAttribute("aria-pressed", isActive ? "true" : "false");
-    if (isActive) activeRoles.add(role);
-    else activeRoles.delete(role);
+    if (isActive) activeRoles.add(role); else activeRoles.delete(role);
     apply();
   });
 
   (DEPS.Modal || window.Modal)?.open(wrap);
+registerErgebnisseContextTooltip();
 }
 
 // Tooltip nur innerhalb des Ergebnis-Modals
 export function registerErgebnisseContextTooltip() {
-  const Tooltip = DEPS.Tooltip || window.Tooltip;
-  if (!Tooltip || registerErgebnisseContextTooltip.__done) return;
-  registerErgebnisseContextTooltip.__done = true;
+  // mehrfach aufrufen erlaubt – wir registrieren nur genau einmal erfolgreich
+  if (registerErgebnisseContextTooltip.__done) return;
 
+  const showFlag = !!(window.APP_STATE?.flags?.show_zwischenergebnisse_tooltip); // Fallback ohne UI.guard
+  if (!showFlag) return; // Flag aus → gar nicht registrieren
+
+  const Tooltip = DEPS.Tooltip || window.Tooltip;
+  if (!Tooltip) {
+    // Tooltip-Bibliothek noch nicht da → später nochmal probieren
+    // (kurzer Retry – idempotent)
+    if (!registerErgebnisseContextTooltip.__retries) registerErgebnisseContextTooltip.__retries = 0;
+    if (registerErgebnisseContextTooltip.__retries < 50) {
+      registerErgebnisseContextTooltip.__retries++;
+      setTimeout(registerErgebnisseContextTooltip, 100);
+    }
+    return;
+  }
+
+  // Ab hier können wir registrieren
   Tooltip.register('#modal-root .doc-list li, #modal-root .doc-list li *', {
-    // wir akzeptieren jeden Nachfahren, peilen aber immer die li.doc-li an
     predicate: (el) => !!el.closest('li.doc-li'),
     content: (_ev, el) => {
-        try {
-            const li = el.closest('li.doc-li');
-            if (!li) return "";
+      try {
+        const li = el.closest('li.doc-li');
+        if (!li) return "";
 
-            // --- 0) Daten holen ---
-            const formula = li.getAttribute('data-formula') || "";
-            const formulaSource = li.getAttribute('data-formula_source') || "";
+        const formula = li.getAttribute('data-formula') || "";
+        const formulaSource = li.getAttribute('data-formula_source') || "";
 
-            let ctx = {};
-            const raw = li.getAttribute('data-ctx-json');
-            if (raw) { try { ctx = JSON.parse(raw); } catch {} }
+        let ctx = {};
+        const raw = li.getAttribute('data-ctx-json');
+        if (raw) { try { ctx = JSON.parse(raw); } catch {} }
 
-            // --- 1) Root bauen ---
-            const root = document.createElement("div");
-            root.className = "ctx-tooltip";
+        const root = document.createElement("div");
+        root.className = "ctx-tooltip";
 
-            // --- 2) Formel (falls vorhanden) ---
-            if (formula) {
-                const f = document.createElement('div');
-                f.className = 'ctx-formula';
-                f.innerHTML = formatMathWithSubSup(formula);
-                root.appendChild(f);
-            }
-
-            // --- 3) Quellenangabe (falls vorhanden) ---
-            if (formulaSource) {
-                const fs = document.createElement('div');
-                fs.className = 'ctx-formula-source';
-                fs.textContent = `Quelle: ${formulaSource}`;
-                root.appendChild(fs);
-            }
-
-            // --- 4) Trennlinie, wenn Formel oder Quelle existiert ---
-            if (formula || formulaSource) {
-                const divider = document.createElement("div");
-                divider.className = "tt-divider";
-                root.appendChild(divider);
-            }
-
-            // --- 5) Kontext ---
-            const ordered = orderContextEntries(ctx);
-            if (!ordered.length) {
-                // (optional leer lassen, wie beim Footer: "Kein Kontext")
-                return root;
-            }
-
-            for (const [k, v] of ordered) {
-                const row = document.createElement('div'); row.className = 'ctx-row';
-                const kEl = document.createElement('span'); kEl.className = 'ctx-k'; kEl.textContent = prettyKey(k) + ": ";
-                const vEl = document.createElement('span'); vEl.className = 'ctx-v'; vEl.innerHTML = prettyValHTML(k, v);
-                row.appendChild(kEl); row.appendChild(vEl); root.appendChild(row);
-            }
-            return root;
-        } catch (e) {
-            console.debug("[ergebnisse-tooltip] content error:", e);
-            return "";
+        if (formula) {
+          const f = document.createElement('div');
+          f.className = 'ctx-formula';
+          f.innerHTML = formatMathWithSubSup(formula);
+          root.appendChild(f);
         }
-        },
+
+        if (formulaSource) {
+          const fs = document.createElement('div');
+          fs.className = 'ctx-formula-source';
+          fs.textContent = `Quelle: ${formulaSource}`;
+          root.appendChild(fs);
+        }
+
+        if (formula || formulaSource) {
+          const divider = document.createElement("div");
+          divider.className = "tt-divider";
+          root.appendChild(divider);
+        }
+
+        const ordered = orderContextEntries(ctx);
+        for (const [k, v] of ordered) {
+          const row = document.createElement('div'); row.className = 'ctx-row';
+          const kEl = document.createElement('span'); kEl.className = 'ctx-k'; kEl.textContent = prettyKey(k) + ": ";
+          const vEl = document.createElement('span'); vEl.className = 'ctx-v'; vEl.innerHTML = prettyValHTML(k, v);
+          row.appendChild(kEl); row.appendChild(vEl); root.appendChild(row);
+        }
+        return root;
+      } catch {
+        return "";
+      }
+    },
     delay: 80,
   });
+
+  registerErgebnisseContextTooltip.__done = true;
 }
 
 // Event-Delegation: klickbare Trigger
@@ -462,22 +456,21 @@ export function setupErgebnisseTriggers() {
   document.addEventListener("click", (ev) => {
     const t = ev.target;
 
-    // 1) Generischer Trigger irgendwo im UI:
-    //    <anything data-open="ergebnisse" data-norm-key="..." [data-szenario="..."]>
+    // 1) Generischer Trigger irgendwo im UI
     const generic = t.closest('[data-open="ergebnisse"]');
     if (generic) {
-      const normKey = generic.dataset.normKey || generic.closest('[data-norm-key]')?.dataset.normKey;
+      const normKey  = generic.dataset.normKey || generic.closest('[data-norm-key]')?.dataset.normKey;
       const szenario = generic.dataset.szenario || null;
-      if (normKey) openErgebnisseModal(normKey, szenario);
+      const nachweis = generic.dataset.nachweis || null; // ← NEU
+      if (normKey) openErgebnisseModal(normKey, szenario, { initialNachweis: nachweis });
       return;
     }
 
-    // 2) Tabellen-Zelle/Badge, die Ergebnisse symbolisiert
-    //    Passe die Selektoren ggf. an deine Struktur an
+    // 2) Tabellenzelle
     const cell = t.closest('.results-table td[data-norm-key][data-openable="ergebnisse"]');
     if (cell) {
-      const { normKey, szenario } = cell.dataset;
-      if (normKey) openErgebnisseModal(normKey, szenario || null);
+      const { normKey, szenario, nachweis } = cell.dataset;
+      if (normKey) openErgebnisseModal(normKey, szenario || null, { initialNachweis: nachweis || null });
       return;
     }
   }, { passive: true });

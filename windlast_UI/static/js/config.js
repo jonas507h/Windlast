@@ -17,7 +17,7 @@
   };
 
   // 2) Heutige „harte“ Voreinstellung: einfach hier ändern
-  let currentRole = "admin"; // "user" | "debug" | "admin"
+  let currentRole = "user"; // "user" | "debug" | "admin"
 
   // 3) Spätere Runtime-Overrides zulassen (Konsole/Passwort/LocalStorage)
   const LS_KEY = "windlast_ui_role";
