@@ -1,13 +1,52 @@
 // modal/ergebnisse.js  (ES module)
 
 import {
-  getNormDisplayName,
-  displayAltName,
-  orderContextEntries,
-  prettyKey,
-  prettyValHTML,
-  formatMathWithSubSup,
+    escapeHtml,
+    formatNumberDE,
+    formatVectorDE,
+    getNormDisplayName,
+    displayAltName,
+    orderContextEntries,
+    prettyKey,
+    prettyValHTML,
+    formatMathWithSubSup,
 } from "../utils/formatierung.js";
+
+// === Filter: Nachweis & Rollen (aus Footer übernommen) ===
+const NACHWEIS_CHOICES = ["ALLE", "KIPP", "GLEIT", "ABHEB", "BALLAST", "LOADS"];
+
+function filterDocsByNachweis(docs, sel) {
+  if (!sel || sel === "ALLE") return docs || [];
+  return (docs || []).filter(d => {
+    const n = d?.context?.nachweis ?? null;
+    // LOADS zählen immer dazu, ebenso Docs ohne Nachweis (Meta/Allgemein)
+    return n === sel || n === "LOADS" || n === null;
+  });
+}
+
+// Rollen-Filterzustand als Set der aktivierten Rollen (Mehrfachauswahl)
+const ROLE_FILTER_CHOICES = ["entscheidungsrelevant", "irrelevant"];
+
+function filterDocsByRole(docs, activeRoles /* Set<string> */) {
+  const getRole = d => (d?.context?.rolle ?? d?.context?.role ?? "")
+    .toString().toLowerCase();
+
+  // KEIN Chip aktiv → NUR "relevant" zeigen
+  if (!activeRoles || activeRoles.size === 0) {
+    return (docs || []).filter(d => getRole(d) === "relevant");
+  }
+
+  // Mind. ein Chip aktiv:
+  // - "relevant" immer zeigen
+  // - zusätzlich: alle ausgewählten Rollen
+  // - Items ohne Rolle NICHT zeigen
+  return (docs || []).filter(d => {
+    const role = getRole(d);
+    if (role === "relevant") return true;
+    if (!role) return false;
+    return activeRoles.has(role);
+  });
+}
 
 // ── Dependencies (per DI setzen, weil ResultsVM nicht global ist)
 let DEPS = {
@@ -16,6 +55,215 @@ let DEPS = {
   Tooltip: null,   // optional, sonst window.Tooltip
   buildModal: null // optional Fallback
 };
+
+function formatLabelWithSubscripts(input) {
+  if (input == null) return "";
+  const raw = String(input);
+
+  // Ersetze Muster:  X_y  oder  X_{y,z}  →  X<sub>y[,z]</sub>
+  // - X = einzelner Buchstabe (auch griechisch), bleibt wie ist
+  // - y[,z] werden kleingeschrieben (F_W → F<sub>w</sub>)
+  // - alles sauber geescaped
+  return raw.replace(
+    /([A-Za-z\u0370-\u03FF])_(\{[^}]+\}|[^\s^_<>()]+)(?![^<]*>)/g,
+    (_, base, sub) => {
+      const inner = sub.startsWith("{") ? sub.slice(1, -1) : sub;
+      return `${escapeHtml(base)}<sub>${escapeHtml(inner)}</sub>`;
+    }
+  ).replace(/(^|[^>])_([^>]|$)/g, (m) => {
+    // übrige Unterstriche (keine Subscript-Pattern) entschärfen
+    return m.replace("_", "&#95;");
+  });
+}
+
+function groupBy(docs, { keyFn, emptyKey="__none__", sort="numeric", emptyLast=true }) {
+  const groups = new Map();
+  for (const d of (docs || [])) {
+    const raw = keyFn(d);
+    const k = (raw === undefined || raw === null || raw === "") ? emptyKey : raw;
+    if (!groups.has(k)) groups.set(k, []);
+    groups.get(k).push(d);
+  }
+
+  const keys = [...groups.keys()].sort((a, b) => {
+    // leeren Marker (z.B. "__none__", "__allgemein__", "__ohne_achse__") ans Ende
+    if (emptyLast) {
+      if (a === emptyKey && b === emptyKey) return 0;
+      if (a === emptyKey) return 1;
+      if (b === emptyKey) return -1;
+    }
+
+    if (sort === "alnum") {
+      // numerisch, sonst localeCompare (für Element-IDs)
+      const na = Number(a), nb = Number(b);
+      const an = Number.isFinite(na), bn = Number.isFinite(nb);
+      if (an && bn) return na - nb;
+      return String(a).localeCompare(String(b), undefined, { numeric:true, sensitivity:"base" });
+    }
+
+    // default: numeric
+    return Number(a) - Number(b);
+  });
+
+  return { groups, keys };
+}
+
+// Windrichtung (deg)
+function _pickDir(d){
+  return d?.context?.windrichtung_deg ?? null;
+}  // :contentReference[oaicite:8]{index=8}
+
+// Element-ID bevorzugt; sonst sinnvolle Fallbacks
+function _pickElementKey(ctx) {
+  if (!ctx) return null;
+  return (
+    ctx.element_id ??
+    ctx.element ??
+    ctx.bauteil ??
+    ctx.komponente ??
+    null
+  );
+}
+
+// Achsindex (nur numerisch zulassen)
+function _pickAxisIndex(ctx) {
+  if (!ctx) return null;
+  const v =
+    ctx.achse_index ??    // bevorzugt (kommt in euren Kontexten vor)
+    null;
+  
+  if (v === null || v === undefined || v === "") return null;
+  if (typeof v === "boolean") return null; // Safety, falls mal true/false reinkommt
+
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+function renderAccordionGroup({ cardClass, detailsClass, summaryClass, title, count, bodyHtml, open=false }) {
+  return `
+    <div class="group-card ${cardClass}">
+      <details class="${detailsClass}"${open ? " open" : ""}>
+        <summary class="${summaryClass}" aria-label="${escapeHtml(title)}">${escapeHtml(title)} ${count}</summary>
+        ${bodyHtml}
+      </details>
+    </div>
+  `;
+}
+
+function renderDocsByWindrichtung(docs){
+  const { groups, keys } = groupBy(docs, { keyFn: _pickDir, emptyKey:"__none__", sort:"numeric", emptyLast:true });
+  if (!keys.length) {
+    return `<div class="muted" style="padding:0.75rem 0;">Keine Zwischenergebnisse vorhanden.</div>`;
+  }
+  const blocks = keys.map((k, idx) => {
+    const list = groups.get(k) || [];
+    const title = (k === "__none__") ? "ohne Richtung" : `Windrichtung ${k}`;
+    const count = `<span class="muted" style="font-weight:400; margin-left:.5rem;">(${list.length})</span>`;
+    // innerhalb jeder Richtung weiter nach Element gruppieren
+    const elemGroupsHtml = renderDocsByElement(list);
+    return renderAccordionGroup({
+      cardClass:"dir-card", detailsClass:"dir-group", summaryClass:"dir-summary",
+      title, count, bodyHtml:`<div class="elem-groups">${elemGroupsHtml}</div>`, open: idx===0
+    });
+  }).join("");
+  return `<div class="doc-groups">${blocks}</div>`;
+}
+
+function renderDocsByElement(docsInDir){
+  const { groups, keys } = groupBy(docsInDir, {
+    keyFn: d => _pickElementKey(d?.context),
+    emptyKey: "__allgemein__",
+    sort: "alnum",
+    emptyLast: true
+  });
+
+  // NEU: Wenn es ausschließlich "allgemein"-Ergebnisse gibt,
+  // dann KEINE "allgemein"-Gruppe anzeigen, sondern direkt
+  // die Achs-Gruppierung unter der Windrichtung rendern.
+  const hasSpecificElements = keys.some(k => k !== "__allgemein__");
+  if (!hasSpecificElements) {
+    const onlyGeneral = groups.get("__allgemein__") || [];
+    // direkt unter der Windrichtung anzeigen (mit Achs-Gruppierung)
+    return `<div class="axis-groups">${renderDocsByAxis(onlyGeneral)}</div>`;
+  }
+
+  // Es gibt mind. ein spezifisches Element → normale Element-Gruppierung
+  return keys.map((k, idx) => {
+    const list = groups.get(k) || [];
+    const title = (k === "__allgemein__") ? "allgemein" : `Element ${k}`;
+    const count = `<span class="muted" style="font-weight:400; margin-left:.5rem;">(${list.length})</span>`;
+    const axisHtml = renderDocsByAxis(list);
+    return renderAccordionGroup({
+      cardClass:"elem-card", detailsClass:"elem-group", summaryClass:"elem-summary",
+      title, count, bodyHtml:`<div class="elem-body"><div class="axis-groups">${axisHtml}</div></div>`, open: idx===0
+    });
+  }).join("");
+}
+
+function renderDocsByAxis(docs){
+  const { groups, keys } = groupBy(docs, {
+    keyFn: d => _pickAxisIndex(d?.context),
+    emptyKey: "__ohne_achse__",
+    sort: "numeric",
+    emptyLast: true
+  });
+
+  const hasAxes = keys.some(k => k !== "__ohne_achse__");
+  if (!hasAxes) {
+    const only = groups.get("__ohne_achse__") || [];
+    return `<ul class="doc-list">${renderDocsListItems(only)}</ul>`;
+  }
+
+  return keys.map((k, idx) => {
+    const list = groups.get(k) || [];
+    const title = (k === "__ohne_achse__") ? "ohne Achse" : `Achse ${k}`;
+    const count = `<span class="muted" style="font-weight:400; margin-left:.5rem;">(${list.length})</span>`;
+    const body = `<ul class="doc-list">${renderDocsListItems(list)}</ul>`;
+    return renderAccordionGroup({
+      cardClass:"axis-card", detailsClass:"axis-group", summaryClass:"axis-summary",
+      title, count, bodyHtml: body, open: idx===0
+    });
+  }).join("");
+}
+
+function renderDocsListItems(docs) {
+  return (docs || []).map(d => {
+    const titleHtml = formatLabelWithSubscripts(d?.title ?? "—");
+    // Zahl ODER Vektor formatiert; Unit separat escapen
+    const isVec = Array.isArray(d?.value) ||
+                  (d?.value && typeof d.value === "object" &&
+                   ["x","y","z"].every(k => k in d.value));
+    const val   = isVec
+      ? formatVectorDE(Array.isArray(d.value) ? d.value : [d.value.x, d.value.y, d.value.z], 4)
+      : formatNumberDE(d?.value, 4);
+    const unitHtml = d?.unit ? ` ${escapeHtml(String(d.unit))}` : "";
+
+    // Für den Tooltip: Rohdaten speichern
+    const formula = d?.formula ? String(d.formula) : "";
+    const formulaSource = d?.formula_source ? String(d?.formula_source) : "";
+    const ctxJson = escapeHtml(JSON.stringify(d?.context || {}));
+    const dataAttr =
+      `data-formula="${escapeHtml(formula)}" ` +
+      `data-formula_source="${escapeHtml(String(formulaSource))}" ` +
+      `data-ctx-json="${ctxJson}"`
+
+    // Rolle (relevant | entscheidungsrelevant | irrelevant) als Klasse
+    const roleRaw = (d?.context?.rolle ?? d?.context?.role ?? "").toString().toLowerCase();
+    const roleClass =
+      roleRaw === "entscheidungsrelevant" ? "role-key" :
+      roleRaw === "relevant"              ? "role-rel" :
+      roleRaw === "irrelevant"            ? "role-irr" : "";
+    const roleAttr = roleRaw ? ` data-rolle="${escapeHtml(roleRaw)}"` : "";
+
+    return `
+      <li class="doc-li ${roleClass}" ${dataAttr}${roleAttr}>
+        <span class="doc-title">${titleHtml}</span>
+        <span class="doc-eq"> = </span>
+        <span class="doc-val">${val}${unitHtml}</span>
+      </li>
+    `;
+  }).join("");
+}
 
 export function configureErgebnisse({ vm, getVM, Modal, Tooltip, buildModal } = {}) {
   DEPS.getVM = getVM || (vm ? () => vm : DEPS.getVM);
@@ -49,58 +297,87 @@ export function openErgebnisseModal(normKey, szenario = null) {
     ? `Ergebnisse – ${normName} (${niceScenario})`
     : `Ergebnisse – ${normName} (Hauptberechnung)`;
 
-  // Ergebnisse besorgen – gleiche VM-API wie bisher nutzen:
-  // Erwartete Methoden: listDocs / listZwischenergebnisse o.ä.
-  // Wir greifen defensiv zu: erst szenario-spezifisch, sonst main.
+  // Ergebnisse besorgen – wie früher im Footer: direkt aus dem Payload
+  // VM = ResultsIndex.build(payload)
   let items = [];
-  if (szenario && typeof VM.listZwischenergebnisse === "function") {
-    items = VM.listZwischenergebnisse(normKey, szenario) || [];
-  } else if (typeof VM.listZwischenergebnisseMainOnly === "function") {
-    items = VM.listZwischenergebnisseMainOnly(normKey) || [];
-  } else if (typeof VM.listDocs === "function") {
-    // Fallback auf generischere Quelle, falls vorhanden
-    items = szenario ? VM.listDocs(normKey, szenario) || [] : VM.listDocs(normKey) || [];
-  }
+  const norm = VM?.payload?.normen?.[normKey] || {};
+  items = szenario
+    ? (norm.alternativen?.[szenario]?.docs || [])
+    : (norm.docs || []);
+
+    // ... (Titel & wrap wie gehabt)
 
   const buildModal = DEPS.buildModal || _fallbackBuildModal;
   const wrap = buildModal(title, document.createElement("div"));
   const root = wrap.lastElementChild;
 
+  // --- Guard, falls keine Items ---
   if (!items.length) {
     const p = document.createElement("p");
     p.textContent = "Keine Ergebnisse vorhanden.";
     root.appendChild(p);
-  } else {
-    // Liste
-    const ul = document.createElement("ul");
-    ul.className = "doc-list";
-    for (const it of items) {
-      // Erwartete Felder analog bisher: text / title, context usw.
-      const li = document.createElement("li");
-      li.className = "doc-li";
-
-      // Hauptzeile
-      const line = document.createElement("div");
-      line.className = "tt-line";
-      line.textContent = it?.title || it?.text || "";
-      li.appendChild(line);
-
-      // Tooltip-Kontext ablegen
-      const ctx = it?.context || {};
-      try { li.setAttribute("data-ctx-json", JSON.stringify(ctx)); } catch {}
-
-      // Optional: zusätzliche Meta (Formel etc.) wie bisher genutzt
-      if (it?.formula) {
-        li.setAttribute("data-formula", String(it.formula));
-      }
-      if (it?.formula_source) {
-        li.setAttribute("data-formula_source", String(it.formula_source));
-      }
-
-      ul.appendChild(li);
-    }
-    root.appendChild(ul);
+    (DEPS.Modal || window.Modal)?.open(wrap);
+    return;
   }
+
+  // --- Nachweis-Filterleiste (Single-Select) ---
+  const bar = document.createElement("div");
+  bar.className = "nachweis-filter";
+  const initialNachweis = "ALLE"; // wie vorher
+  bar.innerHTML = NACHWEIS_CHOICES.map(c =>
+    `<button class="nf-chip${c===initialNachweis?" active":""}" data-nachweis="${c}" aria-pressed="${c===initialNachweis}">${c==="ALLE"?"Alle":c}</button>`
+  ).join("");
+  root.appendChild(bar);
+
+  // --- Rollen-Filterleiste (Multi-Select; beide Chips initial AUS) ---
+  const roleBar = document.createElement("div");
+  roleBar.className = "nachweis-filter";
+  roleBar.innerHTML = `
+    <button type="button" class="nf-chip" data-role="entscheidungsrelevant" aria-pressed="false">Entscheidungsrelevant</button>
+    <button type="button" class="nf-chip" data-role="irrelevant" aria-pressed="false">Irrelevant</button>
+  `;
+  root.appendChild(roleBar);
+
+  // --- Ergebnis-Container ---
+  const listWrap = document.createElement("div");
+  root.appendChild(listWrap);
+
+  // Zustand
+  let activeNachweis = initialNachweis;
+  const activeRoles = new Set(); // leer = kein Rollenfilter → nur "relevant"
+
+  // Apply: 1) Nachweis → 2) Rolle → render
+  const apply = () => {
+    const byNachweis = filterDocsByNachweis(items, activeNachweis);
+    const finalDocs  = filterDocsByRole(byNachweis, activeRoles);
+    listWrap.innerHTML = renderDocsByWindrichtung(finalDocs);
+  };
+
+  // initial render
+  apply();
+
+  // Events: Nachweis Single-Select
+  bar.addEventListener("click", (ev) => {
+    const btn = ev.target.closest(".nf-chip");
+    if (!btn) return;
+    bar.querySelectorAll(".nf-chip.active").forEach(b => { b.classList.remove("active"); b.setAttribute("aria-pressed","false"); });
+    btn.classList.add("active");
+    btn.setAttribute("aria-pressed","true");
+    activeNachweis = btn.dataset.nachweis;
+    apply();
+  });
+
+  // Events: Rolle Multi-Select
+  roleBar.addEventListener("click", (ev) => {
+    const btn = ev.target.closest(".nf-chip");
+    if (!btn) return;
+    const role = btn.dataset.role;
+    const isActive = btn.classList.toggle("active");
+    btn.setAttribute("aria-pressed", isActive ? "true" : "false");
+    if (isActive) activeRoles.add(role);
+    else activeRoles.delete(role);
+    apply();
+  });
 
   (DEPS.Modal || window.Modal)?.open(wrap);
 }

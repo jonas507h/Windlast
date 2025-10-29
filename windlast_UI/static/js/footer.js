@@ -41,7 +41,7 @@ const ROWS = [
 const CELL_SELECTOR = 'td[data-norm-key][data-nachweis], td.res-kipp, td.res-gleit, td.res-abhebe';
 
 // === Zwischenergebnisse UI Handler ===
-
+/*
 function wireZwischenergebnisseUI() {
   const root = document.querySelector(".results-table");
   if (!root) { console.warn("[ZwRes] .results-table nicht gefunden"); return; }
@@ -64,7 +64,7 @@ function onResultCellClick(e) {
   const docsAll = getAllDocsForModal(ctx);
   openZwischenergebnisseModal(ctx, docsAll, { initialNachweis: ctx.nachweis });
 }
-
+*/
 function resolveCellContext(td) {
   const normKey = td.dataset.normKey || td.closest('[data-norm-key]')?.dataset.normKey;
   let nachweis = td.dataset.nachweis;
@@ -134,7 +134,7 @@ function buildModal(titleText, bodyNodeOrHtml) {
   }
   return wrap;
 }
-
+/*
 function openZwischenergebnisseModal({ normKey, nachweis, altName }, docsAll, { initialNachweis=null } = {}) {
   // Titel exakt wie bei Meldungen bauen
   const normName = getNormDisplayName(normKey);
@@ -220,216 +220,8 @@ function openZwischenergebnisseModal({ normKey, nachweis, altName }, docsAll, { 
 
   Modal.open(wrap);
 }
-
-function formatLabelWithSubscripts(input) {
-  if (input == null) return "";
-  const raw = String(input);
-
-  // Ersetze Muster:  X_y  oder  X_{y,z}  →  X<sub>y[,z]</sub>
-  // - X = einzelner Buchstabe (auch griechisch), bleibt wie ist
-  // - y[,z] werden kleingeschrieben (F_W → F<sub>w</sub>)
-  // - alles sauber geescaped
-  return raw.replace(
-    /([A-Za-z\u0370-\u03FF])_(\{[^}]+\}|[^\s^_<>()]+)(?![^<]*>)/g,
-    (_, base, sub) => {
-      const inner = sub.startsWith("{") ? sub.slice(1, -1) : sub;
-      return `${escapeHtml(base)}<sub>${escapeHtml(inner)}</sub>`;
-    }
-  ).replace(/(^|[^>])_([^>]|$)/g, (m) => {
-    // übrige Unterstriche (keine Subscript-Pattern) entschärfen
-    return m.replace("_", "&#95;");
-  });
-}
-
+*/
 // === Gruppierungen ===
-function groupBy(docs, { keyFn, emptyKey="__none__", sort="numeric", emptyLast=true }) {
-  const groups = new Map();
-  for (const d of (docs || [])) {
-    const raw = keyFn(d);
-    const k = (raw === undefined || raw === null || raw === "") ? emptyKey : raw;
-    if (!groups.has(k)) groups.set(k, []);
-    groups.get(k).push(d);
-  }
-
-  const keys = [...groups.keys()].sort((a, b) => {
-    // leeren Marker (z.B. "__none__", "__allgemein__", "__ohne_achse__") ans Ende
-    if (emptyLast) {
-      if (a === emptyKey && b === emptyKey) return 0;
-      if (a === emptyKey) return 1;
-      if (b === emptyKey) return -1;
-    }
-
-    if (sort === "alnum") {
-      // numerisch, sonst localeCompare (für Element-IDs)
-      const na = Number(a), nb = Number(b);
-      const an = Number.isFinite(na), bn = Number.isFinite(nb);
-      if (an && bn) return na - nb;
-      return String(a).localeCompare(String(b), undefined, { numeric:true, sensitivity:"base" });
-    }
-
-    // default: numeric
-    return Number(a) - Number(b);
-  });
-
-  return { groups, keys };
-}
-
-// Windrichtung (deg)
-function _pickDir(d){
-  return d?.context?.windrichtung_deg ?? null;
-}  // :contentReference[oaicite:8]{index=8}
-
-// Element-ID bevorzugt; sonst sinnvolle Fallbacks
-function _pickElementKey(ctx) {
-  if (!ctx) return null;
-  return (
-    ctx.element_id ??
-    ctx.element ??
-    ctx.bauteil ??
-    ctx.komponente ??
-    null
-  );
-}
-
-// Achsindex (nur numerisch zulassen)
-function _pickAxisIndex(ctx) {
-  if (!ctx) return null;
-  const v =
-    ctx.achse_index ??    // bevorzugt (kommt in euren Kontexten vor)
-    null;
-  
-  if (v === null || v === undefined || v === "") return null;
-  if (typeof v === "boolean") return null; // Safety, falls mal true/false reinkommt
-
-  const n = Number(v);
-  return Number.isFinite(n) ? n : null;
-}
-
-function renderAccordionGroup({ cardClass, detailsClass, summaryClass, title, count, bodyHtml, open=false }) {
-  return `
-    <div class="group-card ${cardClass}">
-      <details class="${detailsClass}"${open ? " open" : ""}>
-        <summary class="${summaryClass}" aria-label="${escapeHtml(title)}">${escapeHtml(title)} ${count}</summary>
-        ${bodyHtml}
-      </details>
-    </div>
-  `;
-}
-
-function renderDocsByWindrichtung(docs){
-  const { groups, keys } = groupBy(docs, { keyFn: _pickDir, emptyKey:"__none__", sort:"numeric", emptyLast:true });
-  if (!keys.length) {
-    return `<div class="muted" style="padding:0.75rem 0;">Keine Zwischenergebnisse vorhanden.</div>`;
-  }
-  const blocks = keys.map((k, idx) => {
-    const list = groups.get(k) || [];
-    const title = (k === "__none__") ? "ohne Richtung" : `Windrichtung ${k}`;
-    const count = `<span class="muted" style="font-weight:400; margin-left:.5rem;">(${list.length})</span>`;
-    // innerhalb jeder Richtung weiter nach Element gruppieren
-    const elemGroupsHtml = renderDocsByElement(list);
-    return renderAccordionGroup({
-      cardClass:"dir-card", detailsClass:"dir-group", summaryClass:"dir-summary",
-      title, count, bodyHtml:`<div class="elem-groups">${elemGroupsHtml}</div>`, open: idx===0
-    });
-  }).join("");
-  return `<div class="doc-groups">${blocks}</div>`;
-}
-
-function renderDocsByElement(docsInDir){
-  const { groups, keys } = groupBy(docsInDir, {
-    keyFn: d => _pickElementKey(d?.context),
-    emptyKey: "__allgemein__",
-    sort: "alnum",
-    emptyLast: true
-  });
-
-  // NEU: Wenn es ausschließlich "allgemein"-Ergebnisse gibt,
-  // dann KEINE "allgemein"-Gruppe anzeigen, sondern direkt
-  // die Achs-Gruppierung unter der Windrichtung rendern.
-  const hasSpecificElements = keys.some(k => k !== "__allgemein__");
-  if (!hasSpecificElements) {
-    const onlyGeneral = groups.get("__allgemein__") || [];
-    // direkt unter der Windrichtung anzeigen (mit Achs-Gruppierung)
-    return `<div class="axis-groups">${renderDocsByAxis(onlyGeneral)}</div>`;
-  }
-
-  // Es gibt mind. ein spezifisches Element → normale Element-Gruppierung
-  return keys.map((k, idx) => {
-    const list = groups.get(k) || [];
-    const title = (k === "__allgemein__") ? "allgemein" : `Element ${k}`;
-    const count = `<span class="muted" style="font-weight:400; margin-left:.5rem;">(${list.length})</span>`;
-    const axisHtml = renderDocsByAxis(list);
-    return renderAccordionGroup({
-      cardClass:"elem-card", detailsClass:"elem-group", summaryClass:"elem-summary",
-      title, count, bodyHtml:`<div class="elem-body"><div class="axis-groups">${axisHtml}</div></div>`, open: idx===0
-    });
-  }).join("");
-}
-
-function renderDocsByAxis(docs){
-  const { groups, keys } = groupBy(docs, {
-    keyFn: d => _pickAxisIndex(d?.context),
-    emptyKey: "__ohne_achse__",
-    sort: "numeric",
-    emptyLast: true
-  });
-
-  const hasAxes = keys.some(k => k !== "__ohne_achse__");
-  if (!hasAxes) {
-    const only = groups.get("__ohne_achse__") || [];
-    return `<ul class="doc-list">${renderDocsListItems(only)}</ul>`;
-  }
-
-  return keys.map((k, idx) => {
-    const list = groups.get(k) || [];
-    const title = (k === "__ohne_achse__") ? "ohne Achse" : `Achse ${k}`;
-    const count = `<span class="muted" style="font-weight:400; margin-left:.5rem;">(${list.length})</span>`;
-    const body = `<ul class="doc-list">${renderDocsListItems(list)}</ul>`;
-    return renderAccordionGroup({
-      cardClass:"axis-card", detailsClass:"axis-group", summaryClass:"axis-summary",
-      title, count, bodyHtml: body, open: idx===0
-    });
-  }).join("");
-}
-
-function renderDocsListItems(docs) {
-  return (docs || []).map(d => {
-    const titleHtml = formatLabelWithSubscripts(d?.title ?? "—");
-    // Zahl ODER Vektor formatiert; Unit separat escapen
-    const isVec = Array.isArray(d?.value) ||
-                  (d?.value && typeof d.value === "object" &&
-                   ["x","y","z"].every(k => k in d.value));
-    const val   = isVec
-      ? formatVectorDE(Array.isArray(d.value) ? d.value : [d.value.x, d.value.y, d.value.z], 4)
-      : formatNumberDE(d?.value, 4);
-    const unitHtml = d?.unit ? ` ${escapeHtml(String(d.unit))}` : "";
-
-    // Für den Tooltip: Rohdaten speichern
-    const formula = d?.formula ? String(d.formula) : "";
-    const formulaSource = d?.formula_source ? String(d?.formula_source) : "";
-    const ctxJson = escapeHtml(JSON.stringify(d?.context || {}));
-    const dataAttr =
-      `data-formula="${escapeHtml(formula)}" ` +
-      `data-formula_source="${escapeHtml(String(formulaSource))}" ` +
-      `data-ctx-json="${ctxJson}"`
-
-    // Rolle (relevant | entscheidungsrelevant | irrelevant) als Klasse
-    const roleRaw = (d?.context?.rolle ?? d?.context?.role ?? "").toString().toLowerCase();
-    const roleClass =
-      roleRaw === "entscheidungsrelevant" ? "role-key" :
-      roleRaw === "relevant"              ? "role-rel" :
-      roleRaw === "irrelevant"            ? "role-irr" : "";
-    const roleAttr = roleRaw ? ` data-rolle="${escapeHtml(roleRaw)}"` : "";
-
-    return `
-      <li class="doc-li ${roleClass}" ${dataAttr}${roleAttr}>
-        <span class="doc-title">${titleHtml}</span>
-        <span class="doc-eq"> = </span>
-        <span class="doc-val">${val}${unitHtml}</span>
-      </li>
-    `;
-  }).join("");
-}
 
 // NEU: holt alle Docs für Norm × (optional) Alternative – ohne Nachweis-Filter
 function getAllDocsForModal({ normKey, altName=null }) {
@@ -629,6 +421,7 @@ function setBallastCell(id, val) {
   if (!el) return;
   // Norm/Nachweis in die Datenattribute schreiben (falls noch nicht passiert)
   try { setDatasetFromId(el, id); } catch {}
+  el.dataset.openable = "ergebnisse";
 
   // Szenario ermitteln & vor der Darstellung auf Fehler prüfen
   const normKey  = el.dataset.normKey || null;
@@ -649,6 +442,7 @@ function setCell(id, val) {
 
   // Norm/Nachweis zuerst setzen, damit wir normKey/szenario kennen
   try { setDatasetFromId(el, id); } catch {}
+  el.dataset.openable = "ergebnisse";
   const normKey  = el.dataset.normKey || null;
   const szenario = getScenarioForCell(el);
 
@@ -761,8 +555,14 @@ function renderAlternativenBlocksVM(vm) {
           row.key === "kipp"    ? "KIPP"    :
           row.key === "gleit"   ? "GLEIT"   :
           row.key === "abhebe"  ? "ABHEB"   : "";
-        if (altName) td.dataset.alt = altName;
-        else delete td.dataset.alt;
+        if (altName) {
+          td.dataset.alt = altName;         // (falls noch woanders genutzt)
+          td.dataset.szenario = altName;    // ← NEU: das liest ergebnisse.js
+        } else {
+          delete td.dataset.alt;
+          delete td.dataset.szenario;
+        }
+        td.dataset.openable = "ergebnisse"; // ← NEU: macht die Zelle klickbar
 
         if (row.isSafety) _setSafetyOnTdAlt(td, v);
         else _setBallastOnTdAlt(td, v);
@@ -805,7 +605,6 @@ function updateFooter(payload) {
   // Alternativen rendern (neu: auf Basis der VM)
   renderAlternativenBlocksVM(ResultsVM);
 
-  wireZwischenergebnisseUIOnce();
   refreshHeaderBadges();
 
   configureMeldungen({
