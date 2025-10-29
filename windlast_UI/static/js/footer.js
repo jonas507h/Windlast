@@ -465,6 +465,19 @@ function mkCountsNode(c, headerText) {
   wrap.appendChild(mk("warn",  "Warnungen", c?.warn  ?? 0));
   wrap.appendChild(mk("hint",  "Hinweise",  c?.hint  ?? 0));
   wrap.appendChild(mk("info",  "Infos",     c?.info  ?? 0));
+
+  // Trennlinie + Hinweis unten
+  const divider = document.createElement("div");
+  divider.style.borderTop = "1px solid #ddd";
+  divider.style.margin = "6px 0 3px 0";
+  wrap.appendChild(divider);
+
+  const clickHint = document.createElement("div");
+  clickHint.style.fontSize = "0.8rem";
+  clickHint.style.color = "#666";
+  clickHint.textContent = "Zum Anzeigen klicken";
+  wrap.appendChild(clickHint);
+
   return wrap;
 }
 
@@ -504,7 +517,6 @@ function getCountsEffective(normKey, szenario = null) {
   return _computeCountsFromMessages(_dedupeByText(msgs));
 }
 
-
 function registerCountsTooltip(selector, { getCounts, getHeaderText, predicate, priority=50, delay=120 } = {}) {
   const TT = window.Tooltip;
   if (!TT) return;
@@ -528,7 +540,8 @@ function registerCountsTooltip(selector, { getCounts, getHeaderText, predicate, 
 // Register normale Berechnung
 registerCountsTooltip('.results-table thead th', {
   predicate: el => !!el.dataset.normKey,
-  getCounts: (el) => getCountsEffective(el.dataset.normKey, null)
+  getCounts: (el) => getCountsEffective(el.dataset.normKey, null),
+  getHeaderText: () => "Hauptberechnung"
 });
 
 // Register Alternativen-Berechnung
@@ -541,3 +554,23 @@ registerCountsTooltip('.results-table .alt-title th[data-szenario]', {
     return `Alternative: ${nice}`;
   }
 });
+
+// Tooltip auf Ergebnis-Zellen: "Für Details klicken"
+(function(){
+  const TT = window.Tooltip;
+  if (!TT) return;
+
+  TT.register('.results-table td.value[data-openable="ergebnisse"]', {
+    predicate: (el) => {
+      // nur wenn sinnvoller Inhalt vorhanden & nicht als Fehler markiert
+      const txt = (el.textContent || "").trim();
+      if (!txt || txt === "—" || txt === "--") return false;
+      if (el.classList.contains("val-bad")) return false;
+      return true;
+    },
+    content: () => "Für Details klicken",
+    className: () => "tt-info",
+    priority: 20,
+    delay: 120
+  });
+})();
