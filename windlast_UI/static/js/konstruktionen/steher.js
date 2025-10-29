@@ -166,7 +166,10 @@ async function submitSteher() {
       firstInvalid?.focus();
       return;
     }
-    
+
+    const ok = await UI_WARN.confirmNichtZertifiziert();
+    if (!ok) return;
+
     // Gummimatte-Wert holen (ja/nein); wir reichen ihn als Boolean weiter
     const gmVal = document.getElementById("gummimatte")?.value ?? "ja";
     const gummimatte_bool = (gmVal === "ja");

@@ -1,4 +1,4 @@
-// config.js  (als erstes Script laden)
+// config.js
 (function () {
   // 1) Flags pro Rolle definieren
   const ROLE_FLAGS = {
