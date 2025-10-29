@@ -1277,8 +1277,11 @@ Tooltip.register('#modal-root .messages-list li', {
 
 // Tooltip für Zwischenergebnis-Einträge im Modal (Node-basiert => HTML möglich)
 Tooltip.register('#modal-root .doc-list li', {
-  predicate: (el) => !!el.closest('li.doc-li'),
+  predicate: (el) => {
+    return !!(APP_STATE?.flags?.show_zwischenergebnisse_tooltip) && !!el.closest('li.doc-li');
+  },
   content: (_ev, el) => {
+    if (!APP_STATE?.flags?.show_zwischenergebnisse_tooltip) return "";
     const li = el.closest('li.doc-li');
     if (!li) return "";
     const formula = li.getAttribute('data-formula') || "";
