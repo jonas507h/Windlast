@@ -470,7 +470,9 @@ function mkCountsNode(c, headerText) {
 }
 
 function registerCountsTooltip(selector, { getCounts, getHeaderText, predicate, priority=50, delay=120 } = {}) {
-  Tooltip.register(selector, {
+  const TT = window.Tooltip;
+  if (!TT) return;
+  TT.register(selector, {
     predicate: predicate || (() => true),
     content: (_ev, el) => {
       if (!ResultsVM) return "Keine Daten";

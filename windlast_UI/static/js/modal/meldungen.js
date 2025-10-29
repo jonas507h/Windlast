@@ -13,11 +13,11 @@ let DEPS = {
   getVM: null, // () => ResultsVM-Objekt
 
   // Optional (mit Fallbacks)
-  getNormDisplayName: (k) => (k || ""),
-  displayAltName: (s) => s,
-  orderContextEntries: (ctx) => Object.entries(ctx || {}),
-  prettyKey: (k) => String(k),
-  prettyValHTML: (_k, v) => String(v),
+  getNormDisplayName,
+  displayAltName,
+  orderContextEntries,
+  prettyKey,
+  prettyValHTML,
   buildModal: null,
   Modal: null,
   Tooltip: null,
@@ -26,20 +26,25 @@ let DEPS = {
 // Aufrufer konfiguriert Dependencies einmalig
 export function configureMeldungen({
   vm,
-  getVM, // alternativ zu vm,
+  getVM,
   buildModal,
   Modal,
   Tooltip,
+  getNormDisplayName: getNormDisplayNameOverride,
+  displayAltName: displayAltNameOverride,
+  orderContextEntries: orderContextEntriesOverride,
+  prettyKey: prettyKeyOverride,
+  prettyValHTML: prettyValHTMLOverride,
 } = {}) {
   DEPS.getVM = getVM || (vm ? () => vm : null);
   if (!DEPS.getVM) {
     console.warn("[meldungen] configureMeldungen: getVM/vm fehlt");
   }
-  if (getNormDisplayName) DEPS.getNormDisplayName = getNormDisplayName;
-  if (displayAltName) DEPS.displayAltName = displayAltName;
-  if (orderContextEntries) DEPS.orderContextEntries = orderContextEntries;
-  if (prettyKey) DEPS.prettyKey = prettyKey;
-  if (prettyValHTML) DEPS.prettyValHTML = prettyValHTML;
+  if (getNormDisplayNameOverride) DEPS.getNormDisplayName = getNormDisplayNameOverride;
+  if (displayAltNameOverride) DEPS.displayAltName = displayAltNameOverride;
+  if (orderContextEntriesOverride) DEPS.orderContextEntries = orderContextEntriesOverride;
+  if (prettyKeyOverride) DEPS.prettyKey = prettyKeyOverride;
+  if (prettyValHTMLOverride) DEPS.prettyValHTML = prettyValHTMLOverride;
   if (buildModal) DEPS.buildModal = buildModal;
   if (Modal) DEPS.Modal = Modal;
   if (Tooltip) DEPS.Tooltip = Tooltip;

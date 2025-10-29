@@ -24,9 +24,6 @@ function filterDocsByNachweis(docs, sel) {
   });
 }
 
-// Rollen-Filterzustand als Set der aktivierten Rollen (Mehrfachauswahl)
-const ROLE_FILTER_CHOICES = ["entscheidungsrelevant", "irrelevant"];
-
 function filterDocsByRole(docs, activeRoles /* Set<string> */) {
   const getRole = d => (d?.context?.rolle ?? d?.context?.role ?? "")
     .toString().toLowerCase();
@@ -111,7 +108,7 @@ function groupBy(docs, { keyFn, emptyKey="__none__", sort="numeric", emptyLast=t
 // Windrichtung (deg)
 function _pickDir(d){
   return d?.context?.windrichtung_deg ?? null;
-}  // :contentReference[oaicite:8]{index=8}
+}
 
 // Element-ID bevorzugt; sonst sinnvolle Fallbacks
 function _pickElementKey(ctx) {
