@@ -88,9 +88,85 @@ function readHeaderValues() {
   };
 }
 
+function isPositiveNumber(v) {
+  return typeof v === 'number' && isFinite(v) && v > 0;
+}
+
+function showFieldError(fieldEl, msgEl, show, msg) {
+  const wrapper = fieldEl?.closest('.field');
+  if (!wrapper) return;
+  wrapper.classList.toggle('is-invalid', !!show);
+  if (msgEl) {
+    if (show) { if (msg) msgEl.textContent = msg; msgEl.hidden = false; }
+    else { msgEl.hidden = true; }
+  }
+  fieldEl.setAttribute('aria-invalid', show ? 'true' : 'false');
+}
+
+function validateSteherForm() {
+  let ok = true;
+
+  // --- Header: Windzone ist Pflicht (Aufstelldauer explizit NICHT) ---
+  const windzoneEl = document.getElementById('windzone'); // kommt aus dem Header
+  const windzoneOK = !!(windzoneEl && windzoneEl.value);
+  if (windzoneEl) {
+    const fakeField = windzoneEl.closest('.field') || windzoneEl.parentElement;
+    if (fakeField) fakeField.classList.toggle('is-invalid', !windzoneOK);
+    windzoneEl.setAttribute('aria-invalid', windzoneOK ? 'false' : 'true');
+  }
+  ok = ok && windzoneOK;
+
+  // --- Pflicht-Zahlenfelder: > 0 ---
+  const hoeheEl = document.getElementById('hoehe_m');
+  const rLaengeEl = document.getElementById('rohr_laenge_m');
+  const rHoeheEl = document.getElementById('rohr_hoehe_m');
+
+  const errH = document.getElementById('err-hoehe');
+  const errL = document.getElementById('err-laenge');
+  const errRH = document.getElementById('err-rhoehe');
+
+  const hOK = isPositiveNumber(parseFloat(hoeheEl?.value));
+  showFieldError(hoeheEl, errH, !hOK, 'Bitte eine gültige Höhe > 0 angeben.');
+  ok = ok && hOK;
+
+  const lOK = isPositiveNumber(parseFloat(rLaengeEl?.value));
+  showFieldError(rLaengeEl, errL, !lOK, 'Bitte eine gültige Länge > 0 angeben.');
+  ok = ok && lOK;
+
+  const rhOK = isPositiveNumber(parseFloat(rHoeheEl?.value));
+  showFieldError(rHoeheEl, errRH, !rhOK, 'Bitte eine gültige Rohrhöhe > 0 angeben.');
+  ok = ok && rhOK;
+
+  // --- Pflicht-Dropdowns (haben meist Defaults, aber sicherheitshalber prüfen) ---
+  const reqSelectIds = [
+    'traverse_name_intern',
+    'rohr_name_intern',
+    'bodenplatte_name_intern',
+    'untergrund_typ',
+    'gummimatte'
+  ];
+  for (const id of reqSelectIds) {
+    const el = document.getElementById(id);
+    if (!el) continue;
+    const hasValue = !!el.value;
+    const wrap = el.closest('.field');
+    if (wrap) wrap.classList.toggle('is-invalid', !hasValue);
+    el.setAttribute('aria-invalid', hasValue ? 'false' : 'true');
+    ok = ok && hasValue;
+  }
+
+  return ok;
+}
+
 async function submitSteher() {
   // Formulardaten sammeln und an API senden
   try {
+    if (!validateSteherForm()) {
+      const firstInvalid = document.querySelector('.field.is-invalid select, .field.is-invalid input');
+      firstInvalid?.focus();
+      return;
+    }
+    
     // Gummimatte-Wert holen (ja/nein); wir reichen ihn als Boolean weiter
     const gmVal = document.getElementById("gummimatte")?.value ?? "ja";
     const gummimatte_bool = (gmVal === "ja");

@@ -103,10 +103,71 @@ function readHeaderValues() {
   };
 }
 
+function isPositiveNumber(v) {
+  return typeof v === 'number' && isFinite(v) && v > 0;
+}
+
+function showFieldError(fieldEl, msgEl, show, msg) {
+  const wrapper = fieldEl?.closest('.field');
+  if (!wrapper) return;
+  wrapper.classList.toggle('is-invalid', !!show);
+  if (msgEl) {
+    if (show) { if (msg) msgEl.textContent = msg; msgEl.hidden = false; }
+    else { msgEl.hidden = true; }
+  }
+  fieldEl.setAttribute('aria-invalid', show ? 'true' : 'false');
+}
+
+function validateTorForm() {
+  let ok = true;
+
+  // --- Header: Windzone ist Pflicht (Aufstelldauer explizit NICHT) ---
+  const windzoneEl = document.getElementById('windzone');      // aus header form
+  const windzoneOK = !!(windzoneEl && windzoneEl.value);
+  // Header hat kein .field-Wrapper/Fehltext – wir markieren nur optisch (kein Text)
+  if (windzoneEl) {
+    const fakeField = windzoneEl.closest('.field') || windzoneEl.parentElement;
+    if (fakeField) fakeField.classList.toggle('is-invalid', !windzoneOK);
+    windzoneEl.setAttribute('aria-invalid', windzoneOK ? 'false' : 'true');
+  }
+  ok = ok && windzoneOK;
+
+  // --- Tor-Eingaben: Höhe/Breite > 0 ---
+  const hoeheEl = document.getElementById('hoehe_m');
+  const breiteEl = document.getElementById('breite_m');
+  const errH = document.getElementById('err-hoehe');
+  const errB = document.getElementById('err-breite');
+
+  const hoehe = parseFloat(hoeheEl?.value);
+  const breite = parseFloat(breiteEl?.value);
+
+  const hOK = isPositiveNumber(hoehe);
+  showFieldError(hoeheEl, errH, !hOK, 'Bitte eine gültige Höhe > 0 angeben.');
+  ok = ok && hOK;
+
+  const bOK = isPositiveNumber(breite);
+  showFieldError(breiteEl, errB, !bOK, 'Bitte eine gültige Breite > 0 angeben.');
+  ok = ok && bOK;
+
+  // --- Tor-Dropdowns: i. d. R. bereits gültig vorbelegt ---
+  // traverse_name_intern, bodenplatte_name_intern, traversen_orientierung,
+  // gummimatte, untergrund_typ: werden durch initTorDropdowns gefüllt,
+  // inkl. Defaults (up/ja/Beton). → kein Fehlerfall zu erwarten. :contentReference[oaicite:4]{index=4}
+
+  return ok;
+}
+
 async function submitTor() {
   // Formulardaten sammeln und an API senden
   try {
     // Gummimatte-Wert holen (ja/nein); wir reichen ihn als Boolean weiter
+    if (!validateTorForm()) {
+      // Fokus auf erstes fehlerhaftes Feld
+      const firstInvalid = document.querySelector('.field.is-invalid select, .field.is-invalid input');
+      firstInvalid?.focus();
+      return;
+    }
+
     const gmVal = document.getElementById("gummimatte")?.value ?? "ja";
     const gummimatte_bool = (gmVal === "ja");
 

@@ -86,9 +86,84 @@ function readHeaderValues() {
   };
 }
 
+function isPositiveNumber(v) {
+  return typeof v === 'number' && isFinite(v) && v > 0;
+}
+
+function showFieldError(fieldEl, msgEl, show, msg) {
+  const wrapper = fieldEl?.closest('.field');
+  if (!wrapper) return;
+  wrapper.classList.toggle('is-invalid', !!show);
+  if (msgEl) {
+    if (show) { if (msg) msgEl.textContent = msg; msgEl.hidden = false; }
+    else { msgEl.hidden = true; }
+  }
+  fieldEl.setAttribute('aria-invalid', show ? 'true' : 'false');
+}
+
+function validateTischForm() {
+  let ok = true;
+
+  // Header: Windzone ist Pflicht (Aufstelldauer explizit NICHT)
+  const windzoneEl = document.getElementById('windzone'); // kommt aus dem Header
+  const windzoneOK = !!(windzoneEl && windzoneEl.value);
+  if (windzoneEl) {
+    const wrap = windzoneEl.closest('.field') || windzoneEl.parentElement;
+    if (wrap) wrap.classList.toggle('is-invalid', !windzoneOK);
+    windzoneEl.setAttribute('aria-invalid', windzoneOK ? 'false' : 'true');
+  }
+  ok = ok && windzoneOK;
+
+  // Zahlenfelder > 0
+  const hoeheEl  = document.getElementById('hoehe_m');
+  const breiteEl = document.getElementById('breite_m');
+  const tiefeEl  = document.getElementById('tiefe_m');
+
+  const errH = document.getElementById('err-hoehe');
+  const errB = document.getElementById('err-breite');
+  const errT = document.getElementById('err-tiefe');
+
+  const hOK = isPositiveNumber(parseFloat(hoeheEl?.value));
+  showFieldError(hoeheEl, errH, !hOK, 'Bitte eine gültige Höhe > 0 angeben.');
+  ok = ok && hOK;
+
+  const bOK = isPositiveNumber(parseFloat(breiteEl?.value));
+  showFieldError(breiteEl, errB, !bOK, 'Bitte eine gültige Breite > 0 angeben.');
+  ok = ok && bOK;
+
+  const tOK = isPositiveNumber(parseFloat(tiefeEl?.value));
+  showFieldError(tiefeEl, errT, !tOK, 'Bitte eine gültige Tiefe > 0 angeben.');
+  ok = ok && tOK;
+
+  // Pflicht-Dropdowns (z. T. mit Defaults aus initTischDropdowns)
+  const reqSelectIds = [
+    'traverse_name_intern',
+    'bodenplatte_name_intern',
+    'untergrund_typ',
+    'gummimatte'
+  ];
+  for (const id of reqSelectIds) {
+    const el = document.getElementById(id);
+    if (!el) continue;
+    const hasValue = !!el.value;
+    const wrap = el.closest('.field');
+    if (wrap) wrap.classList.toggle('is-invalid', !hasValue);
+    el.setAttribute('aria-invalid', hasValue ? 'false' : 'true');
+    ok = ok && hasValue;
+  }
+
+  return ok;
+}
+
 async function submitTisch() {
   // Formulardaten sammeln und an API senden
   try {
+    if (!validateTischForm()) {
+      const firstInvalid = document.querySelector('.field.is-invalid select, .field.is-invalid input');
+      firstInvalid?.focus();
+      return;
+    }
+
     // Gummimatte-Wert holen (ja/nein); wir reichen ihn als Boolean weiter
     const gmVal = document.getElementById("gummimatte")?.value ?? "ja";
     const gummimatte_bool = (gmVal === "ja");

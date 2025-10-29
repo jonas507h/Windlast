@@ -182,3 +182,19 @@ label.required::after {
   color: var(--danger, #c23);
   font-weight: 600;
 }
+
+.field.is-invalid select,
+.field.is-invalid input {
+  border-color: var(--danger, #c23);
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--danger, #c23) 20%, transparent);
+}
+
+.error-text {
+  margin: 4px 0 0;
+  font-size: 0.875rem;
+  line-height: 1.2;
+  color: var(--danger, #c23);
+}
+
+.error-text[hidden] { display: none; }
