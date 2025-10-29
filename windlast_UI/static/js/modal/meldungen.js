@@ -63,13 +63,32 @@ function _fallbackBuildModal(titleText, bodyNodeOrHtml) {
   return wrap;
 }
 
+// Hilfsfunktion: nur erstes Vorkommen je Anzeige-Text behalten
+function dedupeMessagesByText(list) {
+  const seen = new Set();
+  const out = [];
+  for (const m of (list || [])) {
+    const key = String(m?.text ?? "")
+      .replace(/\s+/g, " ")  // Whitespace normalisieren (wie Anzeige)
+      .trim();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(m);
+  }
+  return out;
+}
+
 export function openMeldungenModal(normKey, szenario = null) {
   const VM = DEPS.getVM?.();
   if (!VM) return;
 
-  const msgs = szenario
+  const msgsRaw = szenario
     ? (VM.listMessages ? VM.listMessages(normKey, szenario) : [])
     : (VM.listMessagesMainOnly ? VM.listMessagesMainOnly(normKey) : []);
+
+  // Flag: doppelte Meldungen anzeigen?
+  const showDup = !!(window.APP_STATE?.flags?.show_doppelte_meldungen);
+  const msgs = showDup ? msgsRaw : dedupeMessagesByText(msgsRaw);
 
   const normName = DEPS.getNormDisplayName(normKey);
   const niceScenario = szenario ? DEPS.displayAltName(szenario) : null;

@@ -80,13 +80,13 @@ function updateHeaderBadge(th, counts) {
 function refreshHeaderBadges() {
   // Hauptberechnung pro Norm (thead)
   document.querySelectorAll(".results-table thead th[data-norm-key]").forEach(th => {
-    const c = ResultsVM?.getCountsMainOnly(th.dataset.normKey);
+    const c = getCountsEffective(th.dataset.normKey, null);
     updateHeaderBadge(th, c);
   });
 
   // Alternativen-Zeilen (pro Norm + Szenario)
   document.querySelectorAll(".results-table .alt-title th[data-norm-key][data-szenario]").forEach(th => {
-    const c = ResultsVM?.getCounts(th.dataset.normKey, th.dataset.szenario);
+    const c = getCountsEffective(th.dataset.normKey, th.dataset.szenario);
     updateHeaderBadge(th, c);
   });
 }
@@ -438,7 +438,6 @@ window.addEventListener("message", (ev) => {
   }
 });
 
-// ---- Meldungs-Tooltip ----
 //Helper
 function countsClass(c) {
   if (!c) return "tt-info";
@@ -469,6 +468,43 @@ function mkCountsNode(c, headerText) {
   return wrap;
 }
 
+function _normSev(s) {
+  s = (s || "").toLowerCase();
+  return (s === "error" || s === "warn" || s === "hint" || s === "info") ? s : "info";
+}
+function _computeCountsFromMessages(msgs) {
+  const out = { error: 0, warn: 0, hint: 0, info: 0 };
+  for (const m of (msgs || [])) out[_normSev(m?.severity)]++;
+  return out;
+}
+function _dedupeByText(msgs) {
+  const seen = new Set();
+  const out = [];
+  for (const m of (msgs || [])) {
+    const key = String(m?.text ?? "").replace(/\s+/g, " ").trim();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(m);
+  }
+  return out;
+}
+
+/** Effektive Counts für Header/Tooltip – berücksichtigt show_doppelte_meldungen */
+function getCountsEffective(normKey, szenario = null) {
+  const showDup = !!(window.APP_STATE?.flags?.show_doppelte_meldungen);
+  if (showDup) {
+    return szenario
+      ? ResultsVM?.getCounts(normKey, szenario)
+      : ResultsVM?.getCountsMainOnly(normKey);
+  }
+  // Deduplizieren nach angezeigtem Text (erstes Vorkommen zählt)
+  const msgs = szenario
+    ? (ResultsVM?.listMessages ? ResultsVM.listMessages(normKey, szenario) : [])
+    : (ResultsVM?.listMessagesMainOnly ? ResultsVM.listMessagesMainOnly(normKey) : []);
+  return _computeCountsFromMessages(_dedupeByText(msgs));
+}
+
+
 function registerCountsTooltip(selector, { getCounts, getHeaderText, predicate, priority=50, delay=120 } = {}) {
   const TT = window.Tooltip;
   if (!TT) return;
@@ -492,13 +528,13 @@ function registerCountsTooltip(selector, { getCounts, getHeaderText, predicate, 
 // Register normale Berechnung
 registerCountsTooltip('.results-table thead th', {
   predicate: el => !!el.dataset.normKey,
-  getCounts: (el) => ResultsVM?.getCountsMainOnly(el.dataset.normKey)
+  getCounts: (el) => getCountsEffective(el.dataset.normKey, null)
 });
 
 // Register Alternativen-Berechnung
 registerCountsTooltip('.results-table .alt-title th[data-szenario]', {
   predicate: el => !!el.dataset.normKey && !!el.dataset.szenario,
-  getCounts: (el) => ResultsVM?.getCounts(el.dataset.normKey, el.dataset.szenario),
+  getCounts: (el) => getCountsEffective(el.dataset.normKey, el.dataset.szenario),
   getHeaderText: (el) => {
     const raw = el.dataset.szenario;
     const nice = displayAltName ? displayAltName(raw) : raw;

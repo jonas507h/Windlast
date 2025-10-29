@@ -5,14 +5,17 @@
     user:  Object.freeze({
       show_zwischenergebnisse_tooltip: false,
       show_nichtZertifiziert_warnung: true,
+      show_doppelte_meldungen: false,
     }),
     debug: Object.freeze({
       show_zwischenergebnisse_tooltip: true,
       show_nichtZertifiziert_warnung: true,
+      show_doppelte_meldungen: true,
     }),
     admin: Object.freeze({
       show_zwischenergebnisse_tooltip: true,
       show_nichtZertifiziert_warnung: false,
+      show_doppelte_meldungen: true,
     }),
   };
 
