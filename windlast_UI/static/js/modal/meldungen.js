@@ -1,4 +1,12 @@
 // modal/meldungen.js (ES module)
+import {
+  getNormDisplayName,
+  displayAltName,
+  orderContextEntries,
+  prettyKey,
+  prettyValHTML,
+  sortMessagesBySeverity,
+} from "../utils/formatierung.js";
 
 let DEPS = {
   // Pflicht
@@ -18,12 +26,7 @@ let DEPS = {
 // Aufrufer konfiguriert Dependencies einmalig
 export function configureMeldungen({
   vm,
-  getVM, // alternativ zu vm
-  getNormDisplayName,
-  displayAltName,
-  orderContextEntries,
-  prettyKey,
-  prettyValHTML,
+  getVM, // alternativ zu vm,
   buildModal,
   Modal,
   Tooltip,
@@ -53,15 +56,6 @@ function _fallbackBuildModal(titleText, bodyNodeOrHtml) {
   else if (bodyNodeOrHtml instanceof Node) cont.appendChild(bodyNodeOrHtml);
   wrap.appendChild(cont);
   return wrap;
-}
-
-function sortMessagesBySeverity(msgs) {
-  const ORDER = ["error", "warn", "hint", "info"];
-  return [...(msgs || [])].sort((a, b) => {
-    const ia = ORDER.indexOf((a?.severity || "").toLowerCase());
-    const ib = ORDER.indexOf((b?.severity || "").toLowerCase());
-    return (ia >= 0 ? ia : ORDER.length) - (ib >= 0 ? ib : ORDER.length);
-  });
 }
 
 export function openMeldungenModal(normKey, szenario = null) {

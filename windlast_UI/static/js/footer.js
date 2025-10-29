@@ -1,5 +1,28 @@
 // footer.js  (als ES Module laden)
 import { configureMeldungen, setupMeldungenUI } from "./modal/meldungen.js";
+import {
+  ALT_LABELS,
+  SEVERITY_ORDER,
+  NORM_DISPLAY_NAMES,
+  CONTEXT_ORDER,
+  CONTEXT_ALIASES,
+  CONTEXT_BLACKLIST,
+  CONTEXT_BLACKLIST_PREFIXES,
+
+  displayAltName,
+  getNormDisplayName,
+  escapeHtml,
+  formatNumberDE,
+  formatVectorDE,
+  formatMathWithSubSup,
+  formatVal,
+  prettyVal,
+  prettyValHTML,
+  isBlacklistedKey,
+  orderContextEntries,
+  sortMessagesBySeverity,
+} from "./utils/formatierung.js";
+
 
 const NORM_ID = {
   "EN_13814_2005": "en13814_2005",
@@ -13,188 +36,8 @@ const ROWS = [
   { key: "abhebe",  label: "Abhebesicherheit", isSafety: true  },
   { key: "ballast", label: "erforderlicher Ballast", isSafety: false },
 ];
-// Anzeige-Aliase für Alternativ-Namen
-const ALT_LABELS = {
-  IN_BETRIEB: "mit Schutzmaßnahmen",
-};
-
-// === Reihenfolge für Severity-Sortierung ===
-const SEVERITY_ORDER = ["error", "warn", "hint", "info"];
-
-// ===== Offizielle Anzeigenamen für Normen =====
-const NORM_DISPLAY_NAMES = {
-  EN_13814_2005: "DIN EN 13814:2005-06",
-  EN_17879_2024: "DIN EN 17879:2024-08",
-  EN_1991_1_4_2010: "DIN EN 1991-1-4:2010-12"
-};
-
-// Fallback, falls mal keine Zuordnung existiert
-function getNormDisplayName(normKey) {
-  return NORM_DISPLAY_NAMES[normKey] || normKey.replace(/_/g, " ");
-}
-
-// Wunschreihenfolge für Kontext-Felder (anpassbar)
-const CONTEXT_ORDER = [
-  "anzahl_windrichtungen",
-  "windrichtung", "windrichtung_deg",
-  "szenario", "scenario", "szenario_anzeigename",
-  "windzone",
-  "nachweis",
-  "abschnitt",
-  "phase",
-  "komponente", "element", "bauteil",
-  "einwirkungsart", "stelle",
-  "element_index",
-  "id", "element_id", "element_id_intern",
-  "objekttyp",
-  "objekt_name",
-  "objekt_name_intern",
-  "funktion",
-  "norm", "norm_label",
-  "methode",
-];
-
-// Anzeigenamen/Aliase für Kontext-Keys
-const CONTEXT_ALIASES = {
-  funktion: "Funktion",
-  norm: "Norm",
-  nachweis: "Nachweis",
-  abschnitt: "Abschnitt",
-  komponente: "Komponente",
-  element: "Element",
-  bauteil: "Bauteil",
-  element_id: "Element-ID",
-  element_id_intern: "Element-ID (intern)",
-  bodenplatte_name_intern: "Bodenplatte",
-  szenario: "Szenario",
-  scenario: "Szenario",
-  szenario_anzeigename: "Szenario",
-  einwirkungsart: "Einwirkungsart",
-  stelle: "Stelle",
-  id: "ID",
-  gesamt_hoehe: "Gesamthöhe",
-  gesamthoehe: "Gesamthöhe",
-  h_bau: "Gesamthöhe",
-  h_max: "Max. gültige Höhe",
-  z_max: "Max. erlaubte Höhe",
-  windzone: "Windzone",
-  windrichtung_deg: "Windrichtung",
-  paarung: "Materialpaarung",
-  norm_used: "Verwendete Norm",
-};
-
-// Kontext-Blacklist: diese Keys werden im Tooltip NICHT angezeigt
-const CONTEXT_BLACKLIST = new Set([
-  "szenario",
-  "element_index",
-  "element_id_intern",
-]);
-
-// Optional: per Präfix ausblenden (z.B. alles was mit "debug_" beginnt)
-const CONTEXT_BLACKLIST_PREFIXES = [
-  /^debug_/,
-  /^internal_/,
-];
 
 const CELL_SELECTOR = 'td[data-norm-key][data-nachweis], td.res-kipp, td.res-gleit, td.res-abhebe';
-
-// === Formatierungen ===
-
-function displayAltName(name) {
-  return (name && ALT_LABELS[name]) || name || "";
-}
-
-function escapeHtml(s){
-  return String(s).replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
-}
-
-function formatNumberDE(value, sig = 4) {
-  if (value == null || value === "INF" || value === "-INF" || Number.isNaN(value)) return String(value);
-
-  const num = Number(value);
-  if (!Number.isFinite(num)) return String(value);
-
-  // ➜ Ganzzahlen direkt ohne Nachkommastellen
-  if (Number.isInteger(num)) {
-    return num.toString(); // keine Kommata oder Nachkommastellen
-  }
-
-  // wissenschaftliche Notation auseinandernehmen
-  let [mantissa, exp] = num.toExponential(sig - 1).split("e");
-  exp = Number(exp);
-
-  // Standardfall: keine Exponentialdarstellung, normale Zahl
-  if (exp > -3 && exp < 4) {
-    const rounded = num.toPrecision(sig);
-    // Punkt durch Komma ersetzen
-    return rounded.replace(".", ",");
-  }
-
-  // wissenschaftliche Darstellung →  mantissa ×10^exp
-  const mant = parseFloat(mantissa).toString().replace(".", ",");
-  return `${mant}×10<sup>${exp}</sup>`;
-}
-
-function formatVectorDE(vec, sig = 4) {
-  if (!Array.isArray(vec)) return formatNumberDE(vec, sig);
-  const parts = vec.map(v => formatNumberDE(v, sig));
-  return `(${parts.join("; ")})`;
-}
-
-function formatVal(k, v, { html = false } = {}) {
-  // Nullish → Gedankenstrich
-  if (v === null || v === undefined) return "—";
-
-  // Szenario-Alias
-  if ((k === "szenario" || k === "scenario") && typeof v === "string") {
-    const s = displayAltName(v) || v;
-    return html ? escapeHtml(s) : s;
-  }
-
-  // Booleans → Ja/Nein
-  if (typeof v === "boolean") return v ? "Ja" : "Nein";
-
-  // Arrays → Vektor, falls numerisch; sonst CSV
-  if (Array.isArray(v)) {
-    const numeric = v.every(x => x !== null && x !== undefined && isFinite(Number(x)));
-    if (numeric) return formatVectorDE(v, 4);
-    const items = v.map(x => html ? escapeHtml(String(x)) : String(x));
-    return items.join(", ");
-  }
-
-  // Objekte mit x/y/z → als Vektor behandeln
-  if (v && typeof v === "object" && ["x","y","z"].every(p => p in v)) {
-    return formatVectorDE([v.x, v.y, v.z], 4);
-  }
-
-  // Andere Objekte → kompakt serialisieren (nur Plaintext sinnvoll)
-  if (v && typeof v === "object") {
-    try {
-      const s = JSON.stringify(v);
-      return html ? escapeHtml(s) : s;
-    } catch {
-      const s = String(v);
-      return html ? escapeHtml(s) : s;
-    }
-  }
-
-  // Zahlen / numerische Strings → deutsch + ×10<sup>…</sup> (HTML-tauglich)
-  if (typeof v === "number" || (typeof v === "string" && isFinite(Number(v)))) {
-    return formatNumberDE(v, 4);
-  }
-
-  // Fallback String
-  const s = String(v);
-  return html ? escapeHtml(s) : s;
-}
-
-function prettyVal(k, v) {
-  return formatVal(k, v, { html: false });
-}
-
-function prettyValHTML(k, v) {
-  return formatVal(k, v, { html: true });
-}
 
 // === Zwischenergebnisse UI Handler ===
 
@@ -397,40 +240,6 @@ function formatLabelWithSubscripts(input) {
   });
 }
 
-function formatMathWithSubSup(input) {
-  const s = String(input ?? "");
-  // Wir bauen output sicher auf: zwischen Matches wird ge-escaped,
-  // in den Matches escapen wir Base und Innenleben separat.
-  const pattern = /([A-Za-z\u0370-\u03FF0-9])_(\{[^}]+\}|[^\s^_<>()]+)|([A-Za-z\u0370-\u03FF0-9])\^(\{[^}]+\}|[^\s^_<>()]+)/g;
-  let out = "";
-  let last = 0;
-
-  const esc = (t) => t.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-
-  for (let m; (m = pattern.exec(s)); ) {
-    // Text vor dem Match escapen
-    out += esc(s.slice(last, m.index));
-    last = pattern.lastIndex;
-
-    if (m[1] != null) {
-      // Subscript: base _ sub
-      const base = m[1];
-      const rawSub = m[2];
-      const inner = rawSub.startsWith("{") ? rawSub.slice(1, -1) : rawSub;
-      out += esc(base) + "<sub>" + esc(inner) + "</sub>";
-    } else {
-      // Superscript: base ^ sup
-      const base = m[3];
-      const rawSup = m[4];
-      const inner = rawSup.startsWith("{") ? rawSup.slice(1, -1) : rawSup;
-      out += esc(base) + "<sup>" + esc(inner) + "</sup>";
-    }
-  }
-  // Rest anhängen
-  out += esc(s.slice(last));
-  return out;
-}
-
 // === Gruppierungen ===
 function groupBy(docs, { keyFn, emptyKey="__none__", sort="numeric", emptyLast=true }) {
   const groups = new Map();
@@ -625,46 +434,6 @@ function renderDocsListItems(docs) {
 function getAllDocsForModal({ normKey, altName=null }) {
   const norm = ResultsVM?.payload?.normen?.[normKey] || {};
   return altName ? (norm.alternativen?.[altName]?.docs || []) : (norm.docs || []);
-}
-
-// Helper
-function isBlacklistedKey(k) {
-  if (!k) return false;
-  if (CONTEXT_BLACKLIST.has(k)) return true;
-  return CONTEXT_BLACKLIST_PREFIXES.some(rx => rx.test(k));
-}
-
-// Key → hübscher Labeltext
-function prettyKey(k) {
-  if (!k || typeof k !== "string") return String(k);
-  if (CONTEXT_ALIASES[k]) return CONTEXT_ALIASES[k];
-  // snake_case → "Snake Case" (erstes Zeichen jedes Wortes groß)
-  return k.replace(/_/g, " ").replace(/\b\p{L}/gu, (c) => c.toUpperCase());
-}
-
-// Sortiert Kontext-Einträge: erst laut CONTEXT_ORDER, dann Rest in Quell-Reihenfolge
-function orderContextEntries(ctx, pref = CONTEXT_ORDER) {
-  if (!ctx || typeof ctx !== "object") return [];
-
-  const withIndex = [];
-  let i = 0;
-  for (const k in ctx) {
-    if (!Object.hasOwn(ctx, k)) continue;
-    if (isBlacklistedKey(k)) continue;                    
-    const v = ctx[k];
-    if (v === undefined || v === null || v === "") continue;
-    withIndex.push([k, v, i++]); // [key, value, originalIndex]
-  }
-
-  const rank = new Map(pref.map((k, idx) => [k, idx]));
-  withIndex.sort((a, b) => {
-    const ra = rank.has(a[0]) ? rank.get(a[0]) : Infinity;
-    const rb = rank.has(b[0]) ? rank.get(b[0]) : Infinity;
-    if (ra !== rb) return ra - rb;
-    return a[2] - b[2];
-  });
-
-  return withIndex.map(([k, v]) => [k, v]);
 }
 
 let ResultsVM = null; // hält das von ResultsIndex.build(...) erzeugte ViewModel
@@ -1042,11 +811,6 @@ function updateFooter(payload) {
 
   configureMeldungen({
     vm: VM,
-    getNormDisplayName,
-    displayAltName,
-    orderContextEntries,
-    prettyKey,
-    prettyValHTML,
     buildModal,
     Modal,   // falls bei dir als Objekt vorhanden
     Tooltip, // falls bei dir als Objekt vorhanden
