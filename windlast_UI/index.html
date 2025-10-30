@@ -148,7 +148,10 @@
   <script type="module" src="/static/js/footer.js"></script>
   <script src="/static/js/modal.js"></script>
   <script src="/static/js/warnung.js"></script>
-  <script src="/static/js/preview/svgTrussRenderer.js"></script>
+  <!-- Composable Preview -->
+  <script type="module" src="/static/js/preview/bauelemente/bodenplatte.js"></script>
+  <script type="module" src="/static/js/preview/bauelemente/traversenstrecke.js"></script>
+  <script type="module" src="/static/js/preview/konstruktionen/tor.js"></script>
 
   <!-- Dynamisches Laden der Konstruktionen -->
   <script>
@@ -172,15 +175,12 @@
 
         // Vorschau montieren
         const mountEl = document.getElementById('preview-iso');
-        if (mountEl && window.SvgTrussRenderer) {
-          try { window.__torSvg?.dispose(); } catch {}
-          window.__torSvg = window.SvgTrussRenderer.mount(mountEl);
-        }
 
-        // erste Daten schicken (falls du willst)
-        document.dispatchEvent(new CustomEvent('tor:params', {
-          detail: { breite_m: 8, hoehe_m: 4, nMittelstuetzen: 2 }
-        }));
+        // NEU: unsere modulare Preview statt SvgTrussRenderer
+        if (mountEl && window.PreviewKonstruktionen?.Tor?.mountTorPreview) {
+          try { window.__torPreview?.unmount(); } catch {}
+          window.__torPreview = window.PreviewKonstruktionen.Tor.mountTorPreview(mountEl);
+        }
       }else if (name === "steher") {
         // Dropdowns füllen
         if (typeof window.initSteherDropdowns === "function") {

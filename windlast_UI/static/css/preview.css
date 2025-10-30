@@ -1,0 +1,7 @@
+/* Vorschlag für sichtbare Klassen */
+.baseplate .bp-shape { fill: none; stroke: currentColor; stroke-width: 3; }
+.baseplate .bp-label { font: 12px system-ui, sans-serif; }
+.truss .edge { stroke: currentColor; stroke-width: 3; fill: none; }
+.truss .hidden { stroke-dasharray: 8 6; opacity: .8; }
+.truss .truss-marker { fill: currentColor; opacity: .7; }
+.truss .truss-label { font: 12px system-ui, sans-serif; user-select: none; }
