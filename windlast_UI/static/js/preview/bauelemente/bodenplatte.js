@@ -92,10 +92,13 @@ const g = _S('g', { class: 'baseplate', transform: `rotate(${angleDeg} ${C.X} ${
 
 // Rechteck: center-basiert (SVG kennt das nicht, daher via x/y)
 g.appendChild(_S('rect', {
-x: (C.X - c2), y: (C.Y - c2), width: a, height: a,
-rx: 4, ry: 4, class: 'bp-shape'
+  x: (C.X - c2), y: (C.Y - c2),
+  width: a, height: a,
+  rx: 0.06, ry: 0.06,               // leichte Rundung (in m, nicht px)
+  fill: 'none',
+  stroke: 'currentColor',
+  'stroke-width': 0.04               // ~4 cm in der Vorschau
 }));
-
 
 // Label (optional)
 if (el.label) {

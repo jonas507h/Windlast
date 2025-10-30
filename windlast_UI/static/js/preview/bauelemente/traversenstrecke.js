@@ -67,12 +67,14 @@ const P2 = project({ x:x2, y:y2, z:z2 });
 const g = _S('g', { class: 'truss' });
 
 // Kante (sichtbar/verdeckt: naive Regel über Z-Mittelwert)
-const zMid = (P1.Z + P2.Z) / 2;
-const cls = zMid < 0 ? 'edge hidden' : 'edge';
-g.appendChild(_S('line', { x1: P1.X, y1: P1.Y, x2: P2.X, y2: P2.Y, class: cls }));
+g.appendChild(_S('line', {
+  x1: P1.X, y1: P1.Y, x2: P2.X, y2: P2.Y,
+  stroke: 'currentColor', 'stroke-width': 0.04, fill: 'none'
+}));
 
 
 // Optional: kurzer Marker orthogonal zur Stabachse, zeigt „Spitze“-Richtung
+/*
 if (el.orientierung) {
 const tip = { x: x1 + el.orientierung[0], y: y1 + el.orientierung[1], z: z1 + el.orientierung[2] };
 const T = project(tip);
@@ -92,13 +94,17 @@ class: 'truss-marker'
 });
 g.appendChild(a);
 }
+*/
 
 
 // Label (mittig)
 if (el.label) {
-const mx = (P1.X + P2.X) / 2;
-const my = (P1.Y + P2.Y) / 2;
-g.appendChild(_S('text', { x: mx, y: my - 6, 'text-anchor': 'middle', class: 'truss-label' }, el.label));
+  const mx = (P1.X + P2.X) / 2;
+  const my = (P1.Y + P2.Y) / 2;
+  g.appendChild(_S('text', {
+    x: mx, y: my - 0.08, 'text-anchor': 'middle',
+    class: 'truss-label'
+  }, el.label));
 }
 
 

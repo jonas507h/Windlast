@@ -88,36 +88,44 @@ export function buildTorElements(p){
  * @param {HTMLElement|SVGSVGElement} containerOrSvg
  * @param {Object} params – siehe buildTorElements
  */
-export function renderTor(containerOrSvg, params){
+export function renderTor(containerOrSvg, params) {
   const svg = ensureSvg(containerOrSvg);
   clear(svg);
 
-  // Skala: Pixel pro Meter
-  const SCALE = 100; // 1 m -> 100 px
-  const margin = 20; // px (Screenmaß)
+  // --- Eingaben tolerant normalisieren ---
+  const P = params || {};
+  const B = Number(P.B ?? P.breite_m) || 6;
+  const H = Number(P.H ?? P.hoehe_m)  || 4;
+  const traverseSpec = P.traverseSpec ?? {};
+  const platteSpec   = P.platteSpec   ?? {};
+  const a = Number(P.a ?? platteSpec.kantenlaenge ?? platteSpec.a) || 0.60;
+  const orient = (P.orient ?? P.traversen_orientierung ?? P.orientierung ?? 'UP')
+    .toString()
+    .toUpperCase();
 
-  // Elemente erzeugen
-  const elems = buildTorElements(params || {});
+  // --- Elemente erzeugen (links/rechts/oben + 2 Platten) ---
+  const elems = buildTorElements({ B, H, orient, traverseSpec, platteSpec, a });
 
-  // Szene-Gruppe mit Skalierung
-  const scene = S('g', { transform: `scale(${SCALE})` });
+  // --- Szene aufbauen ---
+  const SCALE  = 150;     // 1 m -> 150 px (sichtbar groß)
+  const MARGIN = 20;      // px Außenrand
+  // Wir zeichnen in "Meter", deshalb: erst translate (px), dann scale (px/m)
+  const scene = S('g', { transform: `translate(${MARGIN},${MARGIN}) scale(${SCALE})` });
   svg.appendChild(scene);
 
-  // Zeichnen
-  for (const el of elems){
-    if (el.type === 'Bodenplatte') drawBodenplatte(scene, el);
-    else if (el.type === 'Traversenstrecke') drawTraversenstrecke(scene, el);
+  // --- Zeichnen ---
+  for (const el of elems) {
+    if (el.type === 'Bodenplatte') {
+      drawBodenplatte(scene, el);
+    } else if (el.type === 'Traversenstrecke') {
+      drawTraversenstrecke(scene, el);
+    }
   }
 
-  // rudimentäre ViewBox-Anpassung (isometrische Approximation):
-  const B = Number(params?.B) || 6;
-  const H = Number(params?.H) || 4;
-  const a = Number(params?.a ?? params?.platteSpec?.kantenlaenge ?? params?.platteSpec?.a) || 0.60;
-  const wMeters = B*CZ + a;            // projizierte Breite ~ x*cz
-  const hMeters = H*SX + a*0.8 + 0.5;  // projizierte Höhe ~ z*sin(ax) + etwas Luft für Labels
-  const vbW = Math.max(1, wMeters * SCALE) + 2*margin;
-  const vbH = Math.max(1, hMeters * SCALE) + 2*margin;
-  svg.setAttribute('viewBox', `${-margin} ${-vbH + margin} ${vbW} ${vbH}`);
+  // --- ViewBox so setzen, dass alles sicher ins Bild passt ---
+  const vbW = (B + a) * SCALE + 2 * MARGIN;  // Breite in px
+  const vbH = (H + a) * SCALE + 2 * MARGIN;  // Höhe in px
+  svg.setAttribute('viewBox', `0 0 ${vbW} ${vbH}`);
 
   return { svg, elements: elems };
 }
