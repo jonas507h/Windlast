@@ -213,17 +213,3 @@ document.addEventListener("DOMContentLoaded", () => {
   if (btn) btn.addEventListener("click", submitTor);
 });
 
-function readPreviewParams() {
-  const breite = parseFloat(document.getElementById("breite_m")?.value) || 8;
-  const hoehe  = parseFloat(document.getElementById("hoehe_m")?.value)  || 4;
-  const nMittel = breite >= 6 ? 2 : (breite >= 4 ? 1 : 0);
-  return { breite_m: breite, hoehe_m: hoehe, nMittelstuetzen: nMittel };
-}
-
-['breite_m','hoehe_m'].forEach(id=>{
-  const el = document.getElementById(id);
-  if (el) el.addEventListener('input', ()=>{
-    const p = readPreviewParams();
-    document.dispatchEvent(new CustomEvent('tor:params', { detail: p }));
-  });
-});
