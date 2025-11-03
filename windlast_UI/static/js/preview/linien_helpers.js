@@ -41,6 +41,5 @@ export function fitCameraToAABB(camera, aabb) {
   camera.position.set(center.x + diag, center.y + diag, center.z + diag * 0.6);
   camera.near = 0.01;
   camera.far = diag * 10 + 10;
-  camera.lookAt(center);
   camera.updateProjectionMatrix();
 }

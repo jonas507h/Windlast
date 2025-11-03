@@ -3,6 +3,7 @@
 //     Traversenstrecke = ein Segment von start → ende
 
 import * as THREE from '/static/vendor/three.module.js';
+import { OrbitControls } from '/static/vendor/OrbitControls.js';
 import { bodenplatte_linien } from './linien_bodenplatte.js';
 import { traversenstrecke_linien } from './linien_traverse.js';
 import { computeAABB, expandAABB, segmentsToThreeLineSegments, fitCameraToAABB } from './linien_helpers.js';
@@ -45,7 +46,47 @@ export function render_konstruktion(konstruktion, opts = {}) {
   const aabb = expandAABB(computeAABB(allSegments), 0.15);
   fitCameraToAABB(camera, aabb);
 
-  // 5) Rendern (einmalig)
-  renderer.render(scene, camera);
-  return { scene, camera, renderer, lines };
+  // Controls
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.08;
+  controls.enablePan = true;
+  controls.screenSpacePanning = true; // bei Z-up angenehm
+  controls.minDistance = 0.1;
+  controls.target.copy(new THREE.Vector3(
+    (aabb.min.x + aabb.max.x) * 0.5,
+    (aabb.min.y + aabb.max.y) * 0.5,
+    (aabb.min.z + aabb.max.z) * 0.5
+  ));
+  controls.update();
+
+  // Resize-Handler (Container-responsiv)
+  function onResize() {
+    const w = Math.max(1, container.clientWidth || width);
+    const h = Math.max(1, container.clientHeight || height);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h);
+  }
+  window.addEventListener('resize', onResize);
+
+  // Render-Loop
+  let disposed = false;
+  function animate() {
+    if (disposed) return;
+    requestAnimationFrame(animate);
+    controls.update();
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  // Rückgabe inkl. Dispose
+  return {
+    scene, camera, renderer, lines, controls,
+    dispose() {
+      disposed = true;
+      window.removeEventListener('resize', onResize);
+      renderer.dispose?.();
+    }
+  };
 }
