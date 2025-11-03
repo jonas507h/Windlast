@@ -21,10 +21,22 @@ class TraverseSpec:
     name_intern: str
     anzeige_name: str
     anzahl_gurtrohre: int
-    hoehe: float
+    hoehe: float #fliegt
     d_gurt: float
-    d_diagonalen: float
+    d_diagonalen: float #fliegt
     gewicht_linear: float
+    # Neue Version der Traversendaten
+    end: bool
+    A_hoehe: float
+    A_d_diagonalen: float
+    A_winkel: float
+    A_abstand: float
+    A_invert: bool
+    B_hoehe: float
+    B_d_diagonalen: float
+    B_winkel: float
+    B_abstand: float
+    B_invert: bool
 
 @dataclass(frozen=True)
 class RohrSpec:
@@ -81,8 +93,10 @@ def _load_traversen_csv(csv_path: Path) -> Dict[str, TraverseSpec]:
     with csv_path.open("r", encoding="utf-8-sig", newline="") as f:
         reader = csv.DictReader(f)
         required = {
-            "name_intern", "anzeige_name", "anzahl_gurtrohre",
-            "hoehe_m", "d_gurt_m", "d_diagonalen_m", "gewicht_linear_kg_m"
+            "name_intern", "anzeige_name", "anzahl_gurtrohre", "gewicht_linear_kg_m",
+            "d_gurt_m", "end_bool", "A_hoehe_m", "A_d_diagonalen_m", "A_winkel_deg",
+            "A_abstand_m", "A_invert_bool", "B_hoehe_m", "B_d_diagonalen_m", "B_winkel_deg",
+            "B_abstand_m", "B_invert_bool"
         }
         missing = required - set(reader.fieldnames or [])
         if missing:
@@ -97,10 +111,22 @@ def _load_traversen_csv(csv_path: Path) -> Dict[str, TraverseSpec]:
                     name_intern=key,
                     anzeige_name=row["anzeige_name"].strip(),
                     anzahl_gurtrohre=int(row["anzahl_gurtrohre"]),
-                    hoehe=float(row["hoehe_m"]),
+                    hoehe=float(row["A_hoehe_m"]), #fliegt
                     d_gurt=float(row["d_gurt_m"]),
-                    d_diagonalen=float(row["d_diagonalen_m"]),
+                    d_diagonalen=float(row["A_d_diagonalen_m"]), #fliegt
                     gewicht_linear=float(row["gewicht_linear_kg_m"]),
+                    # Neue Version der Traversendaten
+                    end=row["end_bool"].strip().lower() == "true",
+                    A_hoehe=float(row["A_hoehe_m"]),
+                    A_d_diagonalen=float(row["A_d_diagonalen_m"]),
+                    A_winkel=float(row["A_winkel_deg"]),
+                    A_abstand=float(row["A_abstand_m"]),
+                    A_invert=row["A_invert_bool"].strip().lower() == "true",
+                    B_hoehe=float(row["B_hoehe_m"]),
+                    B_d_diagonalen=float(row["B_d_diagonalen_m"]),
+                    B_winkel=float(row["B_winkel_deg"]),
+                    B_abstand=float(row["B_abstand_m"]),
+                    B_invert=row["B_invert_bool"].strip().lower() == "true",
                 )
             except Exception as e:
                 raise ValueError(f"Ungültige Werte in Zeile mit name_intern='{key}': {e}") from e

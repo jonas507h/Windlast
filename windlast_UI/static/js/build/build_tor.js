@@ -14,12 +14,6 @@ const ORIENT_MAP = {
   [ORIENTIERUNG.down]: { links: [ 1, 0,  0], oben: [0, 0, -1], rechts: [-1, 0,  0] },
 };
 
-// Platzhalter-Katalog, bis wir den echten aus der API ziehen
-export const placeholderCatalog = {
-  getTraverse: (nameIntern) => ({ hoehe: 0.3, anzeige_name: nameIntern }),
-  getBodenplatte: (nameIntern) => ({ kantenlaenge: 1.0, anzeige_name: nameIntern }),
-};
-
 /**
  * Validiert die UI-Inputs für ein Tor.
  * Wirft bei Fehlern eine aussagekräftige Exception.
@@ -30,6 +24,7 @@ export function validateTorInputs({
   if (!catalog || typeof catalog.getTraverse !== 'function' || typeof catalog.getBodenplatte !== 'function') {
     throw new Error('catalog mit getTraverse/getBodenplatte erforderlich.');
   }
+
   const B = Number(breite_m);
   const H = Number(hoehe_m);
   if (!isFinite(B) || !isFinite(H)) throw new Error('breite_m und hoehe_m müssen Zahlen sein.');
@@ -39,8 +34,27 @@ export function validateTorInputs({
   if (!ORIENT_MAP[orientierung]) throw new Error(`Unbekannte orientierung: ${orientierung}`);
 
   const travSpec = catalog.getTraverse(traverse_name_intern);
-  if (!travSpec || !isFinite(travSpec.hoehe)) throw new Error('Traverse im Katalog ohne gültige "hoehe".');
-  if (H <= travSpec.hoehe) throw new Error('hoehe_m muss größer als Traversenhöhe sein.');
+  if (!travSpec) throw new Error(`Traverse ${traverse_name_intern} nicht im Katalog gefunden.`);
+
+  // Orientierungsgerechte Höhe prüfen
+  const t = (() => {
+    switch (orientierung) {
+      case ORIENTIERUNG.side:
+        return Number(travSpec.B_hoehe_m ?? travSpec.A_hoehe_m ?? travSpec.hoehe);
+      case ORIENTIERUNG.up:
+      case ORIENTIERUNG.down:
+      default:
+        return Number(travSpec.A_hoehe_m ?? travSpec.B_hoehe_m ?? travSpec.hoehe);
+    }
+  })();
+
+  if (!isFinite(t) || t <= 0) {
+    throw new Error(`Traverse im Katalog ohne gültige Höhe (A_hoehe_m/B_hoehe_m).`);
+  }
+
+  if (H <= t) {
+    throw new Error(`hoehe_m (${H}) muss größer als Traversenhöhe (${t}) sein.`);
+  }
 }
 
 /**
@@ -58,7 +72,7 @@ export function validateTorInputs({
  * @param {Object} catalog – siehe oben
  * @returns {Object} konstruktion
  */
-export function buildTor(inputs, catalog = placeholderCatalog) {
+export function buildTor(inputs, catalog) {
   const {
     breite_m, hoehe_m, traverse_name_intern, bodenplatte_name_intern,
     gummimatte = true,
@@ -71,7 +85,26 @@ export function buildTor(inputs, catalog = placeholderCatalog) {
   const B = Number(breite_m);
   const H = Number(hoehe_m);
   const travSpec = catalog.getTraverse(traverse_name_intern);
-  const t = Number(travSpec.hoehe); // Traversenhöhe (Profilmaß)
+
+  // Orientierungsgerechte Traversenhöhe bestimmen
+  let t;
+  switch (orientierung) {
+    case ORIENTIERUNG.side:
+      t = Number(travSpec.B_hoehe_m ?? travSpec.A_hoehe_m ?? travSpec.hoehe);
+      break;
+    case ORIENTIERUNG.up:
+    case ORIENTIERUNG.down:
+    default:
+      t = Number(travSpec.A_hoehe_m ?? travSpec.B_hoehe_m ?? travSpec.hoehe);
+      break;
+  }
+
+  // Fallback: Wenn nichts passt, Fehler werfen
+  if (!isFinite(t) || t <= 0) {
+    throw new Error(
+      `Ungültige Traversenhöhe für ${traverse_name_intern} (Orientierung ${orientierung}).`
+    );
+  }
   const travAnzeige = travSpec.anzeige_name || traverse_name_intern;
 
   const plateSpec = catalog.getBodenplatte(bodenplatte_name_intern) || {};

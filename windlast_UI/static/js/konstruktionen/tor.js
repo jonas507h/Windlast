@@ -59,6 +59,18 @@ async function initTorDropdowns() {
         { value: "nein", label: "Nein" },
       ], { defaultValue: "ja" });
     }
+
+    window.TorCatalog = {
+      traversen,
+      bps,
+      untergruende,
+      getTraverse(nameIntern) {
+        return traversen.find(t => t.value === nameIntern);
+      },
+      getBodenplatte(nameIntern) {
+        return bps.find(b => b.value === nameIntern);
+      }
+    };
   } catch (e) {
     console.error("Tor-Dropdowns konnten nicht geladen werden:", e);
   }

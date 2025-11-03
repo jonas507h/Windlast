@@ -1,4 +1,4 @@
-name_intern,anzeige_name,anzahl_gurtrohre,hoehe_m,d_gurt_m,d_diagonalen_m,gewicht_linear_kg_m
-prolyte_h30v,H30V,4,0.287,0.048,0.016,6.3
-prolyte_h40v,H40V,4,0.387,0.048,0.020,6.9
-prolyte_h30d,H30D,3,0.287,0.048,0.016,5.4
+name_intern,anzeige_name,anzahl_gurtrohre,gewicht_linear_kg_m,d_gurt_m,end_bool,A_hoehe_m,A_d_diagonalen_m,A_winkel_deg,A_abstand_m,A_invert_bool,B_hoehe_m,B_d_diagonalen_m,B_winkel_deg,B_abstand_m,B_invert_bool
+prolyte_h30v,H30V,4,6.3,0.048,true,0.287,0.016,45.0,0.0,true,0.287,0.016,45.0,0.0,true
+prolyte_h40v,H40V,4,6.9,0.048,true,0.387,0.020,45.0,0.0,true,0.387,0.020,45.0,0.0,true
+prolyte_h30d,H30D,3,5.4,0.048,true,0.287,0.016,45.0,0.0,true,0.287,0.016,45.0,0.0,true

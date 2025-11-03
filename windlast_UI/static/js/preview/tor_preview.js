@@ -34,7 +34,8 @@ export function mountTorPreview(mountEl) {
   let handle = null;
 
   function rerender() {
-    const konstruktion = buildTor(readFormForTor());
+    const katalog = window.TorCatalog || null;
+    const konstruktion = buildTor(readFormForTor(), katalog || undefined);
     try { handle?.dispose?.(); } catch {}
     try { mountEl.innerHTML = ''; } catch {}
     handle = render_konstruktion(konstruktion, { container: mountEl });
