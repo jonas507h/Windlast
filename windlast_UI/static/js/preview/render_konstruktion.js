@@ -35,7 +35,7 @@ export function render_konstruktion(konstruktion, opts = {}) {
   camera.up.set(0, 0, 1);
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(width, height);
-  scene.add(new THREE.AxesHelper(1));
+  //scene.add(new THREE.AxesHelper(1));
 
   container.innerHTML = '';
   container.appendChild(renderer.domElement);

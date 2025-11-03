@@ -91,13 +91,13 @@ export function traversenstrecke_linien(strecke) {
     // Seite +side
     if (even) segs.push([ N0.up_sd, N1.dn_sd ]); else segs.push([ N0.dn_sd, N1.up_sd ]);
     // Seite -side
-    if (even) segs.push([ N0.up_sn, N1.dn_sn ]); else segs.push([ N0.dn_sn, N1.up_sn ]);
+    if (!even) segs.push([ N0.up_sn, N1.dn_sn ]); else segs.push([ N0.dn_sn, N1.up_sn ]);
 
     // --- side-Face Diagonalen (je Oben +up und Unten -up), 45°: rechts ↔ links ---
     // Oben (+up)
     if (even) segs.push([ N0.up_sd, N1.up_sn ]); else segs.push([ N0.up_sn, N1.up_sd ]);
-    // Unten (-up)
-    if (even) segs.push([ N0.dn_sd, N1.dn_sn ]); else segs.push([ N0.dn_sn, N1.dn_sd ]);
+    // Unten (-up) – ebenfalls invertiert
+    if (!even) segs.push([ N0.dn_sd, N1.dn_sn ]); else segs.push([ N0.dn_sn, N1.dn_sd ]);
   }
 
   return {

@@ -15,56 +15,86 @@ const v = {
 function makeTextSprite(
   text,
   {
-    size = 0.22,
-    fillStyle = '#0000ff',       // Textfarbe
-    strokeStyle = '#1b3f8b',     // dunkle Outline für Kontrast
-    strokeWidth = 6,             // kräftiger
-    backgroundColor = '#ffffff', // opaker, weißer Hintergrund
-    backgroundMargin = 0.04
+    size = 0.20,                 // Texthöhe in m
+    fillStyle = '#2d6cdf',
+    strokeStyle = '#1b3f8b',
+    strokeWidth = 6,             // Outline (px)
+    backgroundColor = '#ffffff', // Kasten
+    borderColor = '#2d6cdf',
+    borderWidth = 2,             // Rahmen (px)
+    paddingX = 28,               // horizontaler Innenabstand (px)
+    paddingY = 20,               // vertikaler Innenabstand (px)
+    cornerRadius = 12            // (px)
   } = {}
 ) {
-  // --- Text-Canvas vorbereiten ---
-  const canvas = document.createElement('canvas');
-  canvas.width = 1024;
-  canvas.height = 256;
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const dpr = (typeof window !== 'undefined' && window.devicePixelRatio) ? window.devicePixelRatio : 1;
 
-  const px = Math.floor(canvas.height * 0.78);
-  ctx.font = `bold ${px}px Inter, system-ui, Arial`;
+  // 1) Erst in "CSS-Pixeln" messen
+  const measure = document.createElement('canvas').getContext('2d');
+  const fontPx = 200; // groß messen -> später skaliert Sprite das auf "size" in m
+  measure.font = `bold ${fontPx}px Inter, system-ui, Arial`;
+  const textW = measure.measureText(text).width;
+  const boxW_css = Math.ceil(textW + paddingX * 2 + strokeWidth * 2);
+  const boxH_css = Math.ceil(fontPx + paddingY * 2 + strokeWidth * 2);
+
+  // 2) Canvas physisch auf dpr skalieren (scharfe Textur)
+  const canvas = document.createElement('canvas');
+  canvas.width  = Math.ceil(boxW_css * dpr);
+  canvas.height = Math.ceil(boxH_css * dpr);
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  // 3) Styles & Schrift
+  ctx.font = `bold ${fontPx}px Inter, system-ui, Arial`;
   ctx.textBaseline = 'middle';
   ctx.textAlign = 'center';
 
-  // Hintergrund (weiß)
-  ctx.fillStyle = backgroundColor;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // 4) Hintergrund + Rahmen (rundes Rechteck über gesamte Box)
+  const r = Math.min(cornerRadius, boxH_css / 2, boxW_css / 2);
+  const x = 0, y = 0, w = boxW_css, h = boxH_css;
 
-  // Text mit Kontur
-  ctx.fillStyle = fillStyle;
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y,     x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x,     y + h, r);
+  ctx.arcTo(x,     y + h, x,     y,     r);
+  ctx.arcTo(x,     y,     x + w, y,     r);
+  ctx.closePath();
+
+  ctx.fillStyle = backgroundColor;
+  ctx.fill();
+  if (borderWidth > 0) {
+    ctx.lineWidth = borderWidth;
+    ctx.strokeStyle = borderColor;
+    ctx.stroke();
+  }
+
+  // 5) Text mit kräftiger Outline
+  const cx = w / 2;
+  const cy = h / 2;
   if (strokeWidth > 0) {
     ctx.lineWidth = strokeWidth;
     ctx.strokeStyle = strokeStyle;
-    ctx.strokeText(text, canvas.width / 2, canvas.height / 2);
+    ctx.strokeText(text, cx, cy);
   }
-  ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+  ctx.fillStyle = fillStyle;
+  ctx.fillText(text, cx, cy);
 
+  // 6) Sprite bauen (immer im Vordergrund)
   const tex = new THREE.CanvasTexture(canvas);
   tex.needsUpdate = true;
-
   const mat = new THREE.SpriteMaterial({
     map: tex,
-    depthTest: false,     // ← immer im Vordergrund
+    transparent: true,
+    depthTest: false,
     depthWrite: false,
-    transparent: false,   // ← opak (weißer Hintergrund!)
     toneMapped: false
   });
   const spr = new THREE.Sprite(mat);
-  const aspect = canvas.width / canvas.height;
-
-  // weiße Fläche etwas größer als Text
-  spr.scale.set(size * aspect + backgroundMargin, size + backgroundMargin, 1);
-  spr.renderOrder = 10000;    // ← sicher vor Linien/Pfeilen
-  spr.frustumCulled = false;  // nicht versehentlich wegculllen
+  const aspect = boxW_css / boxH_css;
+  spr.scale.set(size * aspect, size, 1); // Höhe = size (≈ 0,20 m)
+  spr.renderOrder = 10000;
+  spr.frustumCulled = false;
   return spr;
 }
 
