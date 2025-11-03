@@ -30,7 +30,7 @@ export function segmentsToThreeLineSegments(segments) {
   }
   const geom = new THREE.BufferGeometry();
   geom.setAttribute('position', new THREE.Float32BufferAttribute(points, 3));
-  const mat = new THREE.LineBasicMaterial({ linewidth: 1 });
+  const mat = new THREE.LineBasicMaterial({ linewidth: 1, color: 0x111111 });
   return new THREE.LineSegments(geom, mat);
 }
 
