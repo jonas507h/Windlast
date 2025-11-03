@@ -11,14 +11,14 @@ export function bodenplatte_linien(plate) {
   const k = Number.isFinite(spec.kantenlaenge) ? Number(spec.kantenlaenge) : 1.0;
   const h = k / 2;
   const cx = plate.mittelpunkt?.[0] ?? 0;
-  const cy = plate.mittelpunkt?.[1] ?? 0; // bleibt 0 in V0
+  const cy = plate.mittelpunkt?.[1] ?? 0;
   const cz = plate.mittelpunkt?.[2] ?? 0;
 
-  // Viereck in XZ-Ebene (y = cy)
-  const p1 = [cx - h, cy, cz - h];
-  const p2 = [cx + h, cy, cz - h];
-  const p3 = [cx + h, cy, cz + h];
-  const p4 = [cx - h, cy, cz + h];
+  // Viereck im XY-Plane (z = cz) => Platte liegt flach
+  const p1 = [cx - h, cy - h, cz];
+  const p2 = [cx + h, cy - h, cz];
+  const p3 = [cx + h, cy + h, cz];
+  const p4 = [cx - h, cy + h, cz];
 
   return {
     segments: [ [p1,p2], [p2,p3], [p3,p4], [p4,p1] ],

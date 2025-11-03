@@ -29,8 +29,10 @@ export function render_konstruktion(konstruktion, opts = {}) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0xffffff);
   const camera = new THREE.PerspectiveCamera(45, width / height, 0.01, 1000);
+  camera.up.set(0, 0, 1);
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(width, height);
+  scene.add(new THREE.AxesHelper(1));
 
   container.innerHTML = '';
   container.appendChild(renderer.domElement);

@@ -38,7 +38,7 @@ export function fitCameraToAABB(camera, aabb) {
   const center = new THREE.Vector3().addVectors(aabb.min, aabb.max).multiplyScalar(0.5);
   const size = new THREE.Vector3().subVectors(aabb.max, aabb.min);
   const diag = Math.max(1e-3, size.length());
-  camera.position.set(center.x + diag, center.y + diag * 0.6, center.z + diag);
+  camera.position.set(center.x + diag, center.y + diag, center.z + diag * 0.6);
   camera.near = 0.01;
   camera.far = diag * 10 + 10;
   camera.lookAt(center);
