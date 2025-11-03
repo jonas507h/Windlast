@@ -84,7 +84,7 @@ class Tor:
         if (not hat_bodenplatten) and self.bodenplatte_name_intern:
             left = Bodenplatte(
                 name_intern=self.bodenplatte_name_intern,
-                mittelpunkt=(0.0, 0.0, 0.0),
+                mittelpunkt=(t/2, 0.0, 0.0),
                 orientierung=(0.0, 0.0, 1.0),
                 drehung=vecs["links"],
                 form=FormTyp.RECHTECK,
@@ -95,7 +95,7 @@ class Tor:
             )
             right = Bodenplatte(
                 name_intern=self.bodenplatte_name_intern,
-                mittelpunkt=(B, 0.0, 0.0),
+                mittelpunkt=(B - t/2, 0.0, 0.0),
                 orientierung=(0.0, 0.0, 1.0),
                 drehung=vecs["rechts"],
                 form=FormTyp.RECHTECK,

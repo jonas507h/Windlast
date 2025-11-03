@@ -117,7 +117,7 @@ export function buildTor(inputs, catalog = placeholderCatalog) {
   const plate_left = {
     typ: 'Bodenplatte',
     name_intern: bodenplatte_name_intern,
-    mittelpunkt: [0, 0, 0],
+    mittelpunkt: [t/2, 0, 0],
     orientierung: [0, 0, 1],
     drehung: vecs.links,
     form: 'RECHTECK',
@@ -132,7 +132,7 @@ export function buildTor(inputs, catalog = placeholderCatalog) {
   const plate_right = {
     typ: 'Bodenplatte',
     name_intern: bodenplatte_name_intern,
-    mittelpunkt: [B, 0, 0],
+    mittelpunkt: [B - t/2, 0, 0],
     orientierung: [0, 0, 1],
     drehung: vecs.rechts,
     form: 'RECHTECK',
