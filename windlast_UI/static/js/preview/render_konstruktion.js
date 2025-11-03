@@ -7,6 +7,8 @@ import { OrbitControls } from '/static/vendor/OrbitControls.js';
 import { bodenplatte_linien } from './linien_bodenplatte.js';
 import { traversenstrecke_linien } from './linien_traverse.js';
 import { computeAABB, expandAABB, segmentsToThreeLineSegments, fitCameraToAABB } from './linien_helpers.js';
+import { render_dimensions } from './render_dimensions.js';
+import { computeDimensionsTor } from './dimensions_tor.js';
 
 export function render_konstruktion(konstruktion, opts = {}) {
   const container = opts.container || document.body;
@@ -45,6 +47,11 @@ export function render_konstruktion(konstruktion, opts = {}) {
   // 4) Kamera auf Bounding Box fitten
   const aabb = expandAABB(computeAABB(allSegments), 0.15);
   fitCameraToAABB(camera, aabb);
+  // Maße (Preview-spezifisch)
+  if (opts.showDimensions !== false && konstruktion?.typ === 'Tor') {
+    const specs = computeDimensionsTor(konstruktion);
+    render_dimensions(specs, { scene });
+  }
 
   // Controls
   const controls = new OrbitControls(camera, renderer.domElement);
