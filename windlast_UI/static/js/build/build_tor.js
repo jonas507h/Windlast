@@ -40,16 +40,16 @@ export function validateTorInputs({
   const t = (() => {
     switch (orientierung) {
       case ORIENTIERUNG.side:
-        return Number(travSpec.B_hoehe_m ?? travSpec.A_hoehe_m ?? travSpec.hoehe);
+        return Number(travSpec.B_hoehe ?? travSpec.A_hoehe ?? travSpec.hoehe);
       case ORIENTIERUNG.up:
       case ORIENTIERUNG.down:
       default:
-        return Number(travSpec.A_hoehe_m ?? travSpec.B_hoehe_m ?? travSpec.hoehe);
+        return Number(travSpec.A_hoehe ?? travSpec.B_hoehe ?? travSpec.hoehe);
     }
   })();
 
   if (!isFinite(t) || t <= 0) {
-    throw new Error(`Traverse im Katalog ohne gültige Höhe (A_hoehe_m/B_hoehe_m).`);
+    throw new Error(`Traverse im Katalog ohne gültige Höhe (A_hoehe/B_hoehe).`);
   }
 
   if (H <= t) {
@@ -90,12 +90,12 @@ export function buildTor(inputs, catalog) {
   let t;
   switch (orientierung) {
     case ORIENTIERUNG.side:
-      t = Number(travSpec.B_hoehe_m ?? travSpec.A_hoehe_m ?? travSpec.hoehe);
+      t = Number(travSpec.B_hoehe ?? travSpec.A_hoehe ?? travSpec.hoehe);
       break;
     case ORIENTIERUNG.up:
     case ORIENTIERUNG.down:
     default:
-      t = Number(travSpec.A_hoehe_m ?? travSpec.B_hoehe_m ?? travSpec.hoehe);
+      t = Number(travSpec.A_hoehe ?? travSpec.B_hoehe ?? travSpec.hoehe);
       break;
   }
 

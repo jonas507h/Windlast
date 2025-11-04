@@ -3,3 +3,4 @@ prolyte_h30v,H30V,4,6.3,0.048,true,0.287,0.016,45.0,0.0,true,0.287,0.016,45.0,0.
 prolyte_h40v,H40V,4,6.9,0.048,true,0.387,0.020,45.0,0.0,true,0.387,0.020,45.0,0.0,true
 prolyte_h30d,H30D,3,5.4,0.048,true,0.287,0.016,45.0,0.0,true,0.287,0.016,45.0,0.0,true
 Test_Traverse,Test Traverse,4,4.5,0.048,false,0.5,0.02,30.0,0.0,false,0.3,0.014,90.0,0.4,true
+Test_Traverse_2,Test Traverse 2,4,5.0,0.05,true,0.4,0.018,60.0,0.2,false,0.25,0.017,90.0,0.9,false

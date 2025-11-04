@@ -8,42 +8,71 @@ function vLen(a){ return Math.sqrt(vDot(a,a)); }
 function vNorm(a){ const L=vLen(a); return L>1e-9?vMul(a,1/L):[0,0,0]; }
 function vCross(a,b){ return [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]]; }
 
-function computePanelStations(L, run, gap) {
-  // L: Streckenlänge, run: Längsanteil pro Diagonale (delta/tan(ang)), gap: Abstand zwischen Diagonalen
-  const EPS = 1e-9;
-  const stations = [];
+const EPS = 1e-9;
 
-  // 90° → run ≈ 0: Diagonal verläuft quer; wir setzen s0==s1 (gleicher Längs-Parameter)
-  if (run < EPS) {
-    if (gap > EPS) {
+function isNinety(rad){ return Math.abs(Math.cos(rad)) < 1e-6; }
+
+// erzeugt Stationen [s0,s1] (0..1). Bei run≈0 ⇒ [t,t]-Paare (rein quer)
+function computePanelStations(L, run, gap){
+  const stations = [];
+  if (run < EPS){ // 90°
+    if (gap > EPS){
       const n = Math.max(1, Math.floor(L / gap));
-      const rest = L - n * gap;
-      let s = rest / 2; // mittig starten
-      for (let i = 0; i < n; i++) {
-        const t = (s) / L;
-        stations.push([t, t]); // s0==s1 => rein quer
-        s += gap;
+      const rest = L - n*gap;
+      let s = rest/2;
+      for (let i=0;i<n;i++, s+=gap){
+        const t = s/L;
+        stations.push([t,t]);
       }
     } else {
-      // Kein Abstand angegeben: genau eine Querdiagonale in der Mitte
-      const t = 0.5;
-      stations.push([t, t]);
+      stations.push([0.5, 0.5]); // eine Querdiagonale mittig
     }
     return stations;
   }
-
-  // allgemeiner Fall: Schrittweite = run + gap
-  const step = Math.max(EPS, run + Math.max(0, gap));
+  const step = Math.max(EPS, run + Math.max(0,gap));
   const n = Math.max(1, Math.floor(L / step));
-  const rest = L - n * step;
-  let s0 = rest / 2;
-
-  for (let i = 0; i < n; i++) {
-    const s_start = (s0 + i * step) / L;
-    const s_end   = (s0 + i * step + run) / L;
-    stations.push([s_start, s_end]);
+  const rest = L - n*step;
+  let s0 = rest/2;
+  for (let i=0;i<n;i++){
+    const a = (s0 + i*step) / L;
+    const b = (s0 + i*step + run) / L;
+    stations.push([a,b]);
   }
   return stations;
+}
+
+// verschiebt [t,t]-Stationen (für 90°) um offset (Längeneinheit); clamp auf [0,1]
+function shiftStations90(stations, offsetLen, L){
+  if (!stations.length || Math.abs(offsetLen) < EPS) return stations;
+  const out = [];
+  for (const [t0,t1] of stations){
+    const s = Math.min(1, Math.max(0, t0 + offsetLen / L));
+    out.push([s,s]);
+  }
+  return out;
+}
+
+// Liefert die beiden Knoten, die ein Face in der gewünschten Ebene (A oder B)
+// und Vorzeichen (+1 / -1) definieren. Das trennt A- und B-Ebene eindeutig.
+function getFaceNodes(n, which, Aaxis, Baxis, sign){
+  // n: { up_sd, up_sn, dn_sd, dn_sn }
+  if (which === 'A'){
+    if (Aaxis === 'up'){
+      // A entlang up, B ist side → Face B=+ oder B=-
+      return sign > 0 ? [ n.up_sd, n.dn_sd ] : [ n.up_sn, n.dn_sn ];
+    } else { // Aaxis === 'side'
+      // A entlang side, B ist up
+      return sign > 0 ? [ n.up_sd, n.up_sn ] : [ n.dn_sd, n.dn_sn ];
+    }
+  } else { // which === 'B'
+    if (Baxis === 'up'){
+      // B entlang up, A ist side → Face A=+ oder A=-
+      return sign > 0 ? [ n.up_sd, n.dn_sd ] : [ n.up_sn, n.dn_sn ];
+    } else { // Baxis === 'side'
+      // B entlang side, A ist up
+      return sign > 0 ? [ n.up_sd, n.up_sn ] : [ n.dn_sd, n.dn_sn ];
+    }
+  }
 }
 
 export function traversenstrecke_linien(strecke){
@@ -111,53 +140,61 @@ export function traversenstrecke_linien(strecke){
     }
   }
 
-  // --- Helper: Face-Knoten je Ebene --------------------------------------
-  // A-Face: Ebene (tangent + Aaxis), an Baxis = ±
-  function faceNodesA(n, signB){ // signB: +1 oder -1
-    if (Baxis === 'side') {
-      return signB>0 ? [ n.up_sd, n.dn_sd ] : [ n.up_sn, n.dn_sn ]; // A variiert entlang up
-    } else { // Baxis === 'up'
-      return signB>0 ? [ n.up_sd, n.up_sn ] : [ n.dn_sd, n.dn_sn ]; // A variiert entlang side
-    }
-  }
-  // B-Face: Ebene (tangent + Baxis), an Aaxis = ±
-  function faceNodesB(n, signA){
-    if (Aaxis === 'side') {
-      return signA>0 ? [ n.up_sd, n.dn_sd ] : [ n.up_sn, n.dn_sn ]; // B variiert entlang up
-    } else { // Aaxis === 'up'
-      return signA>0 ? [ n.up_sd, n.up_sn ] : [ n.dn_sd, n.dn_sn ]; // B variiert entlang side
-    }
-  }
-
   // --- Diagonalen pro Ebene: A -------------------------------------------
   (function drawA(){
     const ang = Number(spec.A_winkel ?? 45) * Math.PI/180;
     const gap = Number(spec.A_abstand ?? 0);
     const inv = !!spec.A_invert;
 
-    const deltaA = 2 * ((Aaxis==='up') ? half_up : half_side);   // Gurtabstand in A-Ebene
+    // Gurtabstand in der A-Ebene
+    const deltaA = 2 * ((Aaxis==='up') ? half_up : half_side);
     const tanA = Math.tan(ang);
-    const run = (Math.abs(tanA) < 1e-9) ? Infinity : (deltaA / tanA); // 0° → tan≈0 => kein sinnvoller Schnitt → Infinity
+    const run = isNinety(ang) ? 0 : (Math.abs(tanA) < EPS ? Infinity : (deltaA / tanA));
 
+    // A-EBENE: 90°
+    if (isNinety(ang)){
+      const base = computePanelStations(L, 0, gap);      // [t,t]-Paare (rein quer)
+      const n = base.length || 1;
+      const offsetLen = inv ? (gap > EPS ? gap/2 : (L/(n+1))/2) : 0;
+
+      const plusStations  = base;                         // Face @ B=+
+      const minusStations = shiftStations90(base, offsetLen, L); // Face @ B=-
+
+      // Face @ B = +
+      for (const [t] of plusStations){
+        const N = nodes(at(t));
+        const [P, Q] = getFaceNodes(N, 'A', Aaxis, Baxis, +1); // A-Ebene, B=+ Face
+        segs.push([P, Q]);  // reine Querlinie im A-Face
+      }
+      // Face @ B = -
+      for (const [t] of minusStations){
+        const N = nodes(at(t));
+        const [P, Q] = getFaceNodes(N, 'A', Aaxis, Baxis, -1); // A-Ebene, B=- Face
+        segs.push([P, Q]);
+      }
+      return;
+    }
+
+    // allgemeiner Fall (≠90°): wie gehabt, aber invert zwischen den Faces
     const stations = computePanelStations(L, isFinite(run) ? run : L+1, gap);
-    // isFinite(run)?run: L+1 sorgt bei 0° dafür, dass genau eine sehr lange Diagonale berechnet würde (praktisch unterbunden durch Endpunkte)
-
     stations.forEach(([s0, s1], i) => {
       const N0 = nodes(at(s0)), N1 = nodes(at(s1));
-      const even = (i % 2) === 0;
-      const flip = inv ? !even : even;
+      const alt = (i % 2) === 0;
 
-      // Zwei Faces: B = + und B = -
-      // Face-Knoten wie zuvor definiert
-      const [Apos_p, Aneg_p] = faceNodesA(N0, +1);
-      const [Apos_q, Aneg_q] = faceNodesA(N1, +1);
-      const [Apos_p2, Aneg_p2] = faceNodesA(N0, -1);
-      const [Apos_q2, Aneg_q2] = faceNodesA(N1, -1);
-
-      // A-Face @ B=+:
-      segs.push(flip ? [Apos_p, Aneg_q] : [Aneg_p, Apos_q]);
-      // A-Face @ B=-:
-      segs.push(flip ? [Apos_p2, Aneg_q2] : [Aneg_p2, Apos_q2]);
+      // B = + Face der A-Ebene
+      {
+        const [P0, Q0] = getFaceNodes(N0, 'A', Aaxis, Baxis, +1);
+        const [P1, Q1] = getFaceNodes(N1, 'A', Aaxis, Baxis, +1);
+        const flipPlus = /* dein alt/fold wie gehabt */ alt;
+        segs.push(flipPlus ? [P0, Q1] : [Q0, P1]);
+      }
+      // B = - Face der A-Ebene (invert spiegelt hier zwischen den Faces)
+      {
+        const [P0, Q0] = getFaceNodes(N0, 'A', Aaxis, Baxis, -1);
+        const [P1, Q1] = getFaceNodes(N1, 'A', Aaxis, Baxis, -1);
+        const flipMinus = inv ? !alt : alt;
+        segs.push(flipMinus ? [P0, Q1] : [Q0, P1]);
+      }
     });
   })();
 
@@ -167,27 +204,53 @@ export function traversenstrecke_linien(strecke){
     const gap = Number(spec.B_abstand ?? 0);
     const inv = !!spec.B_invert;
 
-    const deltaB = 2 * ((Baxis==='up') ? half_up : half_side);   // Gurtabstand in B-Ebene
+    const deltaB = 2 * ((Baxis==='up') ? half_up : half_side);
     const tanB = Math.tan(ang);
-    const run = (Math.abs(tanB) < 1e-9) ? Infinity : (deltaB / tanB);
+    const run = isNinety(ang) ? 0 : (Math.abs(tanB) < EPS ? Infinity : (deltaB / tanB));
+
+    // B-EBENE: 90°
+    if (isNinety(ang)){
+      const base = computePanelStations(L, 0, gap);
+      const n = base.length || 1;
+      const offsetLen = inv ? (gap > EPS ? gap/2 : (L/(n+1))/2) : 0;
+
+      const plusStations  = base;                         // Face @ A=+
+      const minusStations = shiftStations90(base, offsetLen, L); // Face @ A=-
+
+      // Face @ A = +
+      for (const [t] of plusStations){
+        const N = nodes(at(t));
+        const [P, Q] = getFaceNodes(N, 'B', Aaxis, Baxis, +1); // B-Ebene, A=+ Face
+        segs.push([P, Q]);
+      }
+      // Face @ A = -
+      for (const [t] of minusStations){
+        const N = nodes(at(t));
+        const [P, Q] = getFaceNodes(N, 'B', Aaxis, Baxis, -1); // B-Ebene, A=- Face
+        segs.push([P, Q]);
+      }
+      return;
+    }
 
     const stations = computePanelStations(L, isFinite(run) ? run : L+1, gap);
-
     stations.forEach(([s0, s1], i) => {
       const N0 = nodes(at(s0)), N1 = nodes(at(s1));
-      const even = (i % 2) === 0;
-      const flip = inv ? !even : even;
+      const alt = (i % 2) === 0;
 
-      // Zwei Faces: A = + und A = -
-      const [Bpos_p, Bneg_p] = faceNodesB(N0, +1);
-      const [Bpos_q, Bneg_q] = faceNodesB(N1, +1);
-      const [Bpos_p2, Bneg_p2] = faceNodesB(N0, -1);
-      const [Bpos_q2, Bneg_q2] = faceNodesB(N1, -1);
-
-      // B-Face @ A=+:
-      segs.push(flip ? [Bpos_p, Bneg_q] : [Bneg_p, Bpos_q]);
-      // B-Face @ A=-:
-      segs.push(flip ? [Bpos_p2, Bneg_q2] : [Bneg_p2, Bpos_q2]);
+      // A = + Face der B-Ebene
+      {
+        const [P0, Q0] = getFaceNodes(N0, 'B', Aaxis, Baxis, +1);
+        const [P1, Q1] = getFaceNodes(N1, 'B', Aaxis, Baxis, +1);
+        const flipPlus = alt;
+        segs.push(flipPlus ? [P0, Q1] : [Q0, P1]);
+      }
+      // A = - Face der B-Ebene (invert spiegelt hier)
+      {
+        const [P0, Q0] = getFaceNodes(N0, 'B', Aaxis, Baxis, -1);
+        const [P1, Q1] = getFaceNodes(N1, 'B', Aaxis, Baxis, -1);
+        const flipMinus = inv ? !alt : alt;
+        segs.push(flipMinus ? [P0, Q1] : [Q0, P1]);
+      }
     });
   })();
 
