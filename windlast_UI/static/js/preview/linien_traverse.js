@@ -1,5 +1,6 @@
 // linien_traverse.js — 4-Gurt Rechteck + Endrahmen + A/B-Diagonalen (vektorbasiert)
 
+const EPS = 1e-9;
 function vAdd(a,b){ return [a[0]+b[0], a[1]+b[1], a[2]+b[2]]; }
 function vSub(a,b){ return [a[0]-b[0], a[1]-b[1], a[2]-b[2]]; }
 function vMul(a,s){ return [a[0]*s, a[1]*s, a[2]*s]; }
@@ -7,29 +8,20 @@ function vDot(a,b){ return a[0]*b[0]+a[1]*b[1]+a[2]*b[2]; }
 function vLen(a){ return Math.sqrt(vDot(a,a)); }
 function vNorm(a){ const L=vLen(a); return L>1e-9?vMul(a,1/L):[0,0,0]; }
 function vCross(a,b){ return [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]]; }
-
-const EPS = 1e-9;
-
 function isNinety(rad){ return Math.abs(Math.cos(rad)) < 1e-6; }
 
-// erzeugt Stationen [s0,s1] (0..1). Bei run≈0 ⇒ [t,t]-Paare (rein quer)
 function computePanelStations(L, run, gap){
   const stations = [];
-  if (run < EPS){ // 90°
-    if (gap > EPS){
+  if (run < EPS){ // 90°: rein quer
+    if ((gap ?? 0) > EPS){
       const n = Math.max(1, Math.floor(L / gap));
       const rest = L - n*gap;
       let s = rest/2;
-      for (let i=0;i<n;i++, s+=gap){
-        const t = s/L;
-        stations.push([t,t]);
-      }
-    } else {
-      stations.push([0.5, 0.5]); // eine Querdiagonale mittig
-    }
+      for (let i=0;i<n;i++,s+=gap) stations.push([s/L, s/L]);
+    } else stations.push([0.5,0.5]); // eine mittige Querlinie
     return stations;
   }
-  const step = Math.max(EPS, run + Math.max(0,gap));
+  const step = Math.max(EPS, run + Math.max(0,gap||0));
   const n = Math.max(1, Math.floor(L / step));
   const rest = L - n*step;
   let s0 = rest/2;
@@ -41,15 +33,12 @@ function computePanelStations(L, run, gap){
   return stations;
 }
 
-// verschiebt [t,t]-Stationen (für 90°) um offset (Längeneinheit); clamp auf [0,1]
 function shiftStations90(stations, offsetLen, L){
   if (!stations.length || Math.abs(offsetLen) < EPS) return stations;
-  const out = [];
-  for (const [t0,t1] of stations){
-    const s = Math.min(1, Math.max(0, t0 + offsetLen / L));
-    out.push([s,s]);
-  }
-  return out;
+  return stations.map(([t]) => {
+    const s = Math.min(1, Math.max(0, t + offsetLen / L));
+    return [s,s];
+  });
 }
 
 // Liefert die beiden Knoten, die ein Face in der gewünschten Ebene (A oder B)
@@ -75,7 +64,142 @@ function getFaceNodes(n, which, Aaxis, Baxis, sign){
   }
 }
 
-export function traversenstrecke_linien(strecke){
+function traversenstrecke_linien_3punkt(strecke, basis, spec){
+  const { tangent, up, side, L } = basis;
+
+  // A/B-Achsen: Aaxis entlang 'orientierung' (näher zu 'up' oder 'side')
+  const upBase = vNorm(strecke.orientierung ?? [0,0,1]);
+  const dotUp = Math.abs(vDot(upBase, up));
+  const Aaxis = (Math.abs(vDot(upBase, side)) > dotUp) ? 'side' : 'up';
+  const Baxis = (Aaxis === 'up') ? 'side' : 'up';
+  const ea = (Aaxis==='up') ? up : side;
+  const eb = (Baxis==='up') ? up : side;
+
+  // Geometrie aus Katalog: gleichschenklig (Schenkel=A_hoehe, Grundseite=B_hoehe)
+  const A = Number(spec.A_hoehe ?? 0.3);
+  const B = Number(spec.B_hoehe ?? 0.3);
+  const halfB = B/2;
+  const alt = Math.max(0, Math.sqrt(Math.max(0, A*A - halfB*halfB)));  // Höhe des Dreiecks
+  // Schwerpunkt im Ursprung: Apex bei +2/3*alt, Basis bei -1/3*alt
+  const apexOff   = vMul(ea,  +2*alt/3);
+  const baseCOff  = vMul(ea,  -1*alt/3);
+  const baseLOff  = vAdd(baseCOff, vMul(eb, -halfB));
+  const baseROff  = vAdd(baseCOff, vMul(eb, +halfB));
+
+  const a = strecke.start ?? [0,0,0];
+  const b = strecke.ende  ?? [0,0,0];
+  const at = (t) => vAdd(a, vMul(tangent, t * L));
+
+  const segs = [];
+
+  // 3 Gurte (Apex, BaseL, BaseR)
+  for (const off of [apexOff, baseLOff, baseROff]) {
+    segs.push([ vAdd(a, off), vAdd(b, off) ]);
+  }
+
+  // Endrahmen (Dreiecksperimeter) wenn spec.end
+  if (spec.end) {
+    const ends = [a, b];
+    for (const p of ends) {
+      const P = (off)=>vAdd(p, off);
+      segs.push( [P(apexOff), P(baseLOff)], [P(baseLOff), P(baseROff)], [P(baseROff), P(apexOff)] );
+    }
+  }
+
+  // Knoten je Station
+  const nodes = (p) => {
+    return {
+      apex:  vAdd(p, apexOff),
+      baseL: vAdd(p, baseLOff),
+      baseR: vAdd(p, baseROff),
+    };
+  };
+
+  // --- A-Ebene: zwei Faces (apex↔baseL, apex↔baseR) ---
+  (function drawA(){
+    const ang = Number(spec.A_winkel ?? 45) * Math.PI/180;
+    const gap = Number(spec.A_abstand ?? 0);
+    const inv = !!spec.A_invert;
+    // Abstand der Gurte in A-Ebene = Altitude 'alt'
+    const run = isNinety(ang) ? 0 : (alt / Math.tan(ang)); // Längsanteil der Diagonale
+    const stations = computePanelStations(L, run, gap);
+
+    if (isNinety(ang)){
+      const n = stations.length || 1;
+      const offsetLen = inv ? (gap > EPS ? gap/2 : (L/(n+1))/2) : 0;
+      const Splus  = stations;
+      const Sminus = shiftStations90(stations, offsetLen, L);
+
+      // Face 1: apex↔baseL (B=+ analog)
+      for (const [t] of Splus){
+        const N = nodes(at(t));
+        segs.push([ N.apex, N.baseL ]);
+      }
+      // Face 2: apex↔baseR (B=- analog) – ggf. phasenversetzt
+      for (const [t] of Sminus){
+        const N = nodes(at(t));
+        segs.push([ N.apex, N.baseR ]);
+      }
+      return;
+    }
+
+    // ≠90°: alternierend + invert spiegelt zwischen den beiden Faces
+    stations.forEach(([s0,s1], i) => {
+      const P0 = nodes(at(s0)), P1 = nodes(at(s1));
+      const altFlip = (i % 2) === 0;
+
+      // Face 1 (apex↔baseL)
+      segs.push( altFlip ? [ P0.apex,  P1.baseL ] : [ P0.baseL, P1.apex ] );
+      // Face 2 (apex↔baseR) – invert kehrt die Richtung um
+      const flip2 = inv ? !altFlip : altFlip;
+      segs.push( flip2 ? [ P0.apex,  P1.baseR ] : [ P0.baseR, P1.apex ] );
+    });
+  })();
+
+  // --- B-Ebene: ein Face (baseL↔baseR) ---
+  (function drawB(){
+    const ang = Number(spec.B_winkel ?? 45) * Math.PI/180;
+    const gap = Number(spec.B_abstand ?? 0);
+    const inv = !!spec.B_invert;
+
+    // Abstand der Gurte in B-Ebene = Grundseite 'B'
+    const run = isNinety(ang) ? 0 : (B / Math.tan(ang));
+    const stations = computePanelStations(L, run, gap);
+
+    if (isNinety(ang)){
+      const n = stations.length || 1;
+      const offsetLen = inv ? (gap > EPS ? gap/2 : (L/(n+1))/2) : 0;
+      const Splus  = stations;
+      const Sminus = shiftStations90(stations, offsetLen, L);
+
+      // Ein Face: baseL↔baseR – wir zeichnen beide Sets, um invert sichtbar zu machen
+      for (const [t] of Splus){
+        const N = nodes(at(t));
+        segs.push([ N.baseL, N.baseR ]);
+      }
+      for (const [t] of Sminus){
+        const N = nodes(at(t));
+        segs.push([ N.baseL, N.baseR ]);
+      }
+      return;
+    }
+
+    // ≠90°: Alternierung; invert spiegelt Richtung pro Panel
+    stations.forEach(([s0,s1], i) => {
+      const P0 = nodes(at(s0)), P1 = nodes(at(s1));
+      const flip = ((i % 2) === 0);
+      const dir = inv ? !flip : flip;
+      segs.push( dir ? [ P0.baseL, P1.baseR ] : [ P0.baseR, P1.baseL ] );
+    });
+  })();
+
+  return {
+    segments: segs,
+    metadata: { typ:'TRAVERSE', id: strecke.element_id_intern, anzeigename: strecke.anzeigename },
+  };
+}
+
+export function traversenstrecke_linien_4punkt(strecke){
   const a0 = strecke.start ?? [0,0,0];
   const b0 = strecke.ende  ?? [0,0,0];
 
@@ -258,4 +382,32 @@ export function traversenstrecke_linien(strecke){
     segments: segs,
     metadata: { typ:'TRAVERSE', id: strecke.element_id_intern, anzeigename: strecke.anzeigename },
   };
+}
+
+export function traversenstrecke_linien(strecke){
+  const a0 = strecke.start ?? [0,0,0];
+  const b0 = strecke.ende  ?? [0,0,0];
+
+  // lokales KS robust
+  const tangent = vNorm(vSub(b0,a0));
+  let upBase = vNorm(strecke.orientierung ?? [0,0,1]);
+  let side = vCross(tangent, upBase);
+  if (vLen(side) < 1e-6) { upBase = Math.abs(tangent[2]) < 0.9 ? [0,0,1] : [1,0,0]; side = vCross(tangent, upBase); }
+  side = vNorm(side);
+  const up = vNorm(vCross(side, tangent));
+  const L = vLen(vSub(b0,a0));
+  const basis = { tangent, up, side, L };
+
+  const spec = window?.TorCatalog?.getTraverse?.(strecke.traverse_name_intern);
+  if (!spec) {
+    console.warn("Traverse nicht im Katalog:", strecke.traverse_name_intern);
+    return { segments: [], metadata: { typ:'TRAVERSE', id: strecke.element_id_intern, anzeigename: strecke.anzeigename } };
+  }
+
+  if (Number(spec.anzahl_gurtrohre) === 3) {
+    return traversenstrecke_linien_3punkt(strecke, basis, spec);
+  }
+
+  // Fallback auf deine vorhandene 4-Punkt-Implementierung:
+  return traversenstrecke_linien_4punkt(strecke, basis, spec); // <- benenne deine existierende Logik so um
 }
