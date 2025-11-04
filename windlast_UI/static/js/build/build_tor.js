@@ -85,22 +85,39 @@ export function buildTor(inputs, catalog) {
   const B = Number(breite_m);
   const H = Number(hoehe_m);
   const travSpec = catalog.getTraverse(traverse_name_intern);
+  const is3punkt = Number(travSpec.anzahl_gurtrohre) === 3;
 
   // Orientierungsgerechte Traversenhöhe bestimmen
-  let t;
+  let t_part;
   switch (orientierung) {
     case ORIENTIERUNG.side:
-      t = Number(travSpec.B_hoehe ?? travSpec.A_hoehe ?? travSpec.hoehe);
+      if (is3punkt) {
+        t_part = Number(travSpec.B_hoehe ?? travSpec.hoehe) / 2;
+      } else {
+        t_part = Number(travSpec.B_hoehe ?? travSpec.A_hoehe ?? travSpec.hoehe) / 2;
+      }
       break;
     case ORIENTIERUNG.up:
+      if (is3punkt) {
+        t_part = Number(travSpec.A_hoehe ?? travSpec.hoehe) * 2 / 3;
+      } else {
+        t_part = Number(travSpec.A_hoehe ?? travSpec.B_hoehe ?? travSpec.hoehe) / 2;
+      }
+      break;
     case ORIENTIERUNG.down:
+      if (is3punkt) {
+        t_part = Number(travSpec.A_hoehe ?? travSpec.hoehe) / 3;
+      } else {
+        t_part = Number(travSpec.A_hoehe ?? travSpec.B_hoehe ?? travSpec.hoehe) / 2;
+      }
+      break;
     default:
-      t = Number(travSpec.A_hoehe ?? travSpec.B_hoehe ?? travSpec.hoehe);
+      t_part = Number(travSpec.A_hoehe ?? travSpec.B_hoehe ?? travSpec.hoehe);
       break;
   }
 
   // Fallback: Wenn nichts passt, Fehler werfen
-  if (!isFinite(t) || t <= 0) {
+  if (!isFinite(t_part) || t_part <= 0) {
     throw new Error(
       `Ungültige Traversenhöhe für ${traverse_name_intern} (Orientierung ${orientierung}).`
     );
@@ -116,8 +133,8 @@ export function buildTor(inputs, catalog) {
   const trav_left = {
     typ: 'Traversenstrecke',
     traverse_name_intern,
-    start: [ t / 2, 0, 0 ],
-    ende:  [ t / 2, 0, H ],
+    start: [ t_part, 0, 0 ],
+    ende:  [ t_part, 0, H ],
     orientierung: vecs.links,
     objekttyp: 'TRAVERSE',
     element_id_intern: 'Strecke_Links',
@@ -127,8 +144,8 @@ export function buildTor(inputs, catalog) {
   const trav_top = {
     typ: 'Traversenstrecke',
     traverse_name_intern,
-    start: [ 0, 0, H - t / 2 ],
-    ende:  [ B, 0, H - t / 2 ],
+    start: [ 0, 0, H - t_part ],
+    ende:  [ B, 0, H - t_part ],
     orientierung: vecs.oben,
     objekttyp: 'TRAVERSE',
     element_id_intern: 'Strecke_Oben',
@@ -138,8 +155,8 @@ export function buildTor(inputs, catalog) {
   const trav_right = {
     typ: 'Traversenstrecke',
     traverse_name_intern,
-    start: [ B - t / 2, 0, 0 ],
-    ende:  [ B - t / 2, 0, H ],
+    start: [ B - t_part, 0, 0 ],
+    ende:  [ B - t_part, 0, H ],
     orientierung: vecs.rechts,
     objekttyp: 'TRAVERSE',
     element_id_intern: 'Strecke_Rechts',
@@ -150,7 +167,7 @@ export function buildTor(inputs, catalog) {
   const plate_left = {
     typ: 'Bodenplatte',
     name_intern: bodenplatte_name_intern,
-    mittelpunkt: [t/2, 0, 0],
+    mittelpunkt: [t_part, 0, 0],
     orientierung: [0, 0, 1],
     drehung: vecs.links,
     form: 'RECHTECK',
@@ -165,7 +182,7 @@ export function buildTor(inputs, catalog) {
   const plate_right = {
     typ: 'Bodenplatte',
     name_intern: bodenplatte_name_intern,
-    mittelpunkt: [B - t/2, 0, 0],
+    mittelpunkt: [B - t_part, 0, 0],
     orientierung: [0, 0, 1],
     drehung: vecs.rechts,
     form: 'RECHTECK',
