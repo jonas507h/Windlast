@@ -76,10 +76,9 @@ function traversenstrecke_linien_3punkt(strecke, basis, spec){
   const eb = (Baxis==='up') ? up : side;
 
   // Geometrie aus Katalog: gleichschenklig (Schenkel=A_hoehe, Grundseite=B_hoehe)
-  const A = Number(spec.A_hoehe ?? 0.3);
-  const B = Number(spec.B_hoehe ?? 0.3);
-  const halfB = B/2;
-  const alt = Math.max(0, Math.sqrt(Math.max(0, A*A - halfB*halfB)));  // Höhe des Dreiecks
+  const alt   = Number(spec.A_hoehe ?? 0.3);       // ALTITUDE direkt aus CSV
+  const B     = Number(spec.B_hoehe ?? 0.3);
+  const halfB = B / 2;
   // Schwerpunkt im Ursprung: Apex bei +2/3*alt, Basis bei -1/3*alt
   const apexOff   = vMul(ea,  +2*alt/3);
   const baseCOff  = vMul(ea,  -1*alt/3);
@@ -120,8 +119,9 @@ function traversenstrecke_linien_3punkt(strecke, basis, spec){
     const ang = Number(spec.A_winkel ?? 45) * Math.PI/180;
     const gap = Number(spec.A_abstand ?? 0);
     const inv = !!spec.A_invert;
-    // Abstand der Gurte in A-Ebene = Altitude 'alt'
-    const run = isNinety(ang) ? 0 : (alt / Math.tan(ang)); // Längsanteil der Diagonale
+    // Effektiver A-Face-Abstand (apex↔base): Schenkelsehne
+    const deltaA_face = Math.sqrt(alt*alt + halfB*halfB);
+    const run = isNinety(ang) ? 0 : (deltaA_face / Math.tan(ang));
     const stations = computePanelStations(L, run, gap);
 
     if (isNinety(ang)){
@@ -187,7 +187,7 @@ function traversenstrecke_linien_3punkt(strecke, basis, spec){
     // ≠90°: Alternierung; invert spiegelt Richtung pro Panel
     stations.forEach(([s0,s1], i) => {
       const P0 = nodes(at(s0)), P1 = nodes(at(s1));
-      const flip = ((i % 2) === 0);
+      const flip = ((i % 2) !== 0);
       const dir = inv ? !flip : flip;
       segs.push( dir ? [ P0.baseL, P1.baseR ] : [ P0.baseR, P1.baseL ] );
     });
