@@ -201,6 +201,7 @@ export function buildTor(inputs, catalog) {
     name,
     breite_m: B,
     hoehe_m: H,
+    traverse_name_intern: traverse_name_intern,
     traversen_orientierung: orientierung,
     bauelemente: [ trav_left, trav_top, trav_right, plate_left, plate_right ],
   };

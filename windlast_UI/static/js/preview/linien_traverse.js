@@ -199,7 +199,7 @@ function traversenstrecke_linien_3punkt(strecke, basis, spec){
   };
 }
 
-export function traversenstrecke_linien_4punkt(strecke){
+function traversenstrecke_linien_4punkt(strecke){
   const a0 = strecke.start ?? [0,0,0];
   const b0 = strecke.ende  ?? [0,0,0];
 
