@@ -13,8 +13,13 @@ import warnings
 class BodenplatteSpec:
     name_intern: str
     anzeige_name: str
-    kantenlaenge: float
+    kantenlaenge: float #fliegt
     gewicht: float
+    # Neue Daten
+    anzahl_ecken: int
+    breite: float
+    tiefe: float
+    hoehe: float
 
 @dataclass(frozen=True)
 class TraverseSpec:
@@ -64,7 +69,7 @@ def _load_bodenplatten_csv(csv_path: Path) -> Dict[str, BodenplatteSpec]:
     bp_map: Dict[str, BodenplatteSpec] = {}
     with csv_path.open("r", encoding="utf-8-sig", newline="") as f:
         reader = csv.DictReader(f)
-        required = {"name_intern", "anzeige_name", "kantenlaenge_m", "gewicht_kg"}
+        required = {"name_intern", "anzeige_name", "anzahl_ecken", "breite_m", "tiefe_m", "hoehe_m", "gewicht_kg"}
         missing = required - set(reader.fieldnames or [])
         if missing:
             raise ValueError(f"Fehlende Spalten in {csv_path.name}: {sorted(missing)}")
@@ -77,8 +82,13 @@ def _load_bodenplatten_csv(csv_path: Path) -> Dict[str, BodenplatteSpec]:
                 bp = BodenplatteSpec(
                     name_intern=key,
                     anzeige_name=row["anzeige_name"].strip(),
-                    kantenlaenge=float(row["kantenlaenge_m"]),
+                    kantenlaenge=float(row["breite_m"]), # fliegt
                     gewicht=float(row["gewicht_kg"]),
+                    # Neue Daten
+                    anzahl_ecken=int(row["anzahl_ecken"]),
+                    breite=float(row["breite_m"]),
+                    tiefe=float(row["tiefe_m"]),
+                    hoehe=float(row["hoehe_m"]),
                 )
             except Exception as e:
                 raise ValueError(f"Ungültige Werte in Zeile mit name_intern='{key}': {e}") from e

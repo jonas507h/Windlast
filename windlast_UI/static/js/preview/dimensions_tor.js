@@ -44,7 +44,6 @@ export function computeDimensionsTor(konstruktion){
       }
       break;
     default:
-      console.log('computeDimensionsTor: unbekannte Orientierung', orientierung);
       real_offset = eff_offset + (Number(travSpec.A_hoehe ?? travSpec.B_hoehe ?? travSpec.hoehe));
       break;
   }

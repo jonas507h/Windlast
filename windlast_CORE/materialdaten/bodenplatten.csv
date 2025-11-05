@@ -1,3 +1,7 @@
-name_intern,anzeige_name,kantenlaenge_m,gewicht_kg
-bp_stahl_100x100,100x100 Stahlbodenplatte,1.0,75
-bp_ballast_500,500kg Ballastbase,0.8,500
+name_intern,anzeige_name,anzahl_ecken,breite_m,tiefe_m,hoehe_m,gewicht_kg
+bp_stahl_100x100,100x100 Stahlbodenplatte,4,1.0,1.0,0.0,75
+bp_ballast_500,500kg Ballastbase,4,0.8,0.8,0.0,500
+bp_vierpunkt_30x30,30x30 Bodenplatte,4,0.3,0.3,0.0,5
+bp_rechteck, 30x100 Rechteckbodenplatte,4,0.3,1.0,0.0,20
+bp_dreieck_gleichseitig,Gleichseitige Dreiecksplatte,3,1.0,1.0,0.0,30
+bp_dreieck_gleichschenklig,Gleichschenklige Dreiecksplatte,3,1.0,0.6,0.0,25
