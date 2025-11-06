@@ -21,9 +21,10 @@ function createUnlitPlateMesh(THREE, polygon, frame) {
       y: polygon[i][1] - C[1],
       z: polygon[i][2] - C[2],
     };
-    const vx = rel.x * v[0] + rel.y * v[1] + rel.z * v[2];
-    const vy = rel.x * u[0] + rel.y * u[1] + rel.z * u[2];
-    if (i === 0) shape.moveTo(vx, vy); else shape.lineTo(vx, vy);
+    // x = u (Tiefe), y = v (Breite)
+    const xu = rel.x * u[0] + rel.y * u[1] + rel.z * u[2];
+    const yv = rel.x * v[0] + rel.y * v[1] + rel.z * v[2];
+    if (i === 0) shape.moveTo(xu, yv); else shape.lineTo(xu, yv);
   }
   shape.closePath();
 
@@ -40,10 +41,12 @@ function createUnlitPlateMesh(THREE, polygon, frame) {
 
   const mesh = new THREE.Mesh(geom, mat);
 
-  // Z-up (0,0,1) → n ausrichten
-  const up = new THREE.Vector3(0, 0, 1);
+  // Vollständige Orientierung: Basis (x=u, y=v, z=n)
+  const uVec = new THREE.Vector3(u[0], u[1], u[2]).normalize();
+  const vVec = new THREE.Vector3(v[0], v[1], v[2]).normalize();
   const nVec = new THREE.Vector3(n[0], n[1], n[2]).normalize();
-  const q = new THREE.Quaternion().setFromUnitVectors(up, nVec);
+  const basis = new THREE.Matrix4().makeBasis(uVec, vVec, nVec); // right-handed, da u × v = n
+  const q = new THREE.Quaternion().setFromRotationMatrix(basis);
   mesh.quaternion.copy(q);
   mesh.position.set(C[0], C[1], C[2]);
 
