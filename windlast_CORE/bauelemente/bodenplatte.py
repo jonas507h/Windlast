@@ -27,7 +27,6 @@ class Bodenplatte:
     mittelpunkt: Vec3
     orientierung: Vec3
     drehung: Vec3 # Einheitsvektor entlang der langen Kante, senkrecht zur Orientierung
-    form: FormTyp
     material: MaterialTyp
     untergrund: MaterialTyp
     gummimatte: Optional[MaterialTyp] = None
@@ -169,25 +168,50 @@ class Bodenplatte:
             "element_id": self.element_id_intern,
             "objekttyp": self.objekttyp.value,
             "objekt_name": self.anzeigename,
-            "form": self.form.value,
         })
 
-        if self.form == FormTyp.RECHTECK:
-            spec = catalog.get_bodenplatte(self.name_intern)
-            kantenlaenge = spec.kantenlaenge
-            if kantenlaenge is None or kantenlaenge <= 0:
-                protokolliere_msg(
-                    protokoll, severity=Severity.ERROR, code="BOP/KANTENLAENGE_INVALID",
-                    text=f"Bodenplatte '{self.name_intern}' hat keine gültige Kantenlänge.",
-                    kontext=merge_kontext(base_ctx, {"kantenlaenge": kantenlaenge}),
-                )
-                return []
-            halbe_kante = kantenlaenge / 2.0
+        form: FormTyp
+
+        spec = catalog.get_bodenplatte(self.name_intern)
+        breite = spec.breite
+        if breite is None or breite <= 0:
+            protokolliere_msg(
+                protokoll, severity=Severity.ERROR, code="BOP/BREITE_INVALID",
+                text=f"Bodenplatte '{self.name_intern}' hat keine gültige Breite.",
+                kontext=merge_kontext(base_ctx, {"breite": breite}),
+            )
+            return []
+        tiefe = spec.tiefe
+        if tiefe is None or tiefe <= 0:
+            protokolliere_msg(
+                protokoll, severity=Severity.ERROR, code="BOP/TIEFE_INVALID",
+                text=f"Bodenplatte '{self.name_intern}' hat keine gültige Tiefe.",
+                kontext=merge_kontext(base_ctx, {"tiefe": tiefe}),
+            )
+            return []
+        anzahl_ecken = spec.anzahl_ecken
+        if anzahl_ecken is None or anzahl_ecken < 3 or anzahl_ecken > 4:
+            protokolliere_msg(
+                protokoll, severity=Severity.ERROR, code="BOP/ECKENZAHL_INVALID",
+                text=f"Bodenplatte '{self.name_intern}' hat keine gültige Eckenzahl.",
+                kontext=merge_kontext(base_ctx, {"anzahl_ecken": anzahl_ecken}),
+            )
+            return []
+        
+        # Eckpunkte auf FormTyp Mapping
+        if anzahl_ecken == 3:
+            form = FormTyp.DREIECK
+        elif anzahl_ecken == 4:
+            form = FormTyp.RECHTECK
+
+        if form == FormTyp.RECHTECK:
+            halbe_breite = breite / 2.0
+            halbe_tiefe = tiefe / 2.0
 
             richtung1 = vektor_normieren(self.drehung)
-            halbe_kante1 = vektor_multiplizieren(richtung1, halbe_kante)
+            halbe_kante1 = vektor_multiplizieren(richtung1, halbe_tiefe)
             richtung2 = senkrechter_vektor(richtung1, self.orientierung)
-            halbe_kante2 = vektor_multiplizieren(richtung2, halbe_kante)
+            halbe_kante2 = vektor_multiplizieren(richtung2, halbe_breite)
 
             ecke1 = vektoren_addieren([self.mittelpunkt, halbe_kante1, halbe_kante2])
             ecke2 = vektoren_addieren([self.mittelpunkt, halbe_kante1, vektor_invertieren(halbe_kante2)])
@@ -195,10 +219,28 @@ class Bodenplatte:
             ecke4 = vektoren_addieren([self.mittelpunkt, vektor_invertieren(halbe_kante1), halbe_kante2])
 
             return [ecke1, ecke2, ecke3, ecke4]
+        
+        elif form == FormTyp.DREIECK:
+            halbe_breite = breite / 2.0
+            zweidritte_tiefe = tiefe * (2.0 / 3.0)
+            eindrittel_tiefe = tiefe * (1.0 / 3.0)
+
+            richtung1 = vektor_normieren(self.drehung)
+            zweidrittel_hoehe = vektor_multiplizieren(richtung1, zweidritte_tiefe)
+            eindrittel_hoehe = vektor_multiplizieren(richtung1, eindrittel_tiefe)
+            richtung2 = senkrechter_vektor(richtung1, self.orientierung)
+            halbe_grundseite = vektor_multiplizieren(richtung2, halbe_breite)
+
+            ecke1 = vektoren_addieren([self.mittelpunkt, zweidrittel_hoehe])
+            ecke2 = vektoren_addieren([self.mittelpunkt, vektor_invertieren(eindrittel_hoehe), halbe_grundseite])
+            ecke3 = vektoren_addieren([self.mittelpunkt, vektor_invertieren(eindrittel_hoehe), vektor_invertieren(halbe_grundseite)])
+
+            return [ecke1, ecke2, ecke3]
+
         else:
             protokolliere_msg(
                 protokoll, severity=Severity.ERROR, code="BOP/FORM_UNSUPPORTED",
-                text=f"Eckpunkte für Form {self.form.name} noch nicht implementiert.",
+                text=f"Eckpunkte für Form {form.name} noch nicht implementiert.",
                 kontext=base_ctx,
             )
             return []

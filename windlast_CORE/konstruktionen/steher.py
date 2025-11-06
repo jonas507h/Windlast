@@ -68,7 +68,6 @@ class Steher:
                 mittelpunkt=(0.0, 0.0, 0.0),
                 orientierung=(0.0, 0.0, 1.0),
                 drehung=(0.0, 1.0, 0.0),
-                form=FormTyp.RECHTECK,
                 material=MaterialTyp.STAHL,
                 untergrund=MaterialTyp.BETON,
                 gummimatte=gummi,
