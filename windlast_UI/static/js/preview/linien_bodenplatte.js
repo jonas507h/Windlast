@@ -109,8 +109,25 @@ export function bodenplatte_linien(plate){
     );
   }
 
+  const polygon = [];
+  if (nEcken === 4) {
+    const A = vSub(C, vMul(u, tiefe/2));
+    const B = vAdd(C, vMul(u, tiefe/2));
+    const hv = vMul(v, breite/2);
+    const pA = vSub(A, hv), pB = vAdd(A, hv), pC = vAdd(B, hv), pD = vSub(B, hv);
+    polygon.push(pA, pB, pC, pD);
+  } else {
+    const baseCenter = vSub(C, vMul(u, tiefe/3));
+    const apex = vAdd(C, vMul(u, 2*tiefe/3));
+    const halfB = vMul(v, breite/2);
+    const baseL = vSub(baseCenter, halfB), baseR = vAdd(baseCenter, halfB);
+    polygon.push(baseL, baseR, apex);
+  }
+
   return {
     segments,
+    polygon,
+    frame: { u, v, n, C },
     metadata: {
       typ: 'BODENPLATTE',
       id: plate?.element_id_intern,

@@ -10,6 +10,49 @@ import { computeAABB, expandAABB, segmentsToThreeLineSegments, fitCameraToAABB }
 import { render_dimensions } from './render_dimensions.js';
 import { computeDimensionsTor } from './dimensions_tor.js';
 
+function createUnlitPlateMesh(THREE, polygon, frame) {
+  const { u, v, n, C } = frame;
+
+  // 2D-Shape im lokalen Frame (x = v, y = u)
+  const shape = new THREE.Shape();
+  for (let i = 0; i < polygon.length; i++) {
+    const rel = {
+      x: polygon[i][0] - C[0],
+      y: polygon[i][1] - C[1],
+      z: polygon[i][2] - C[2],
+    };
+    const vx = rel.x * v[0] + rel.y * v[1] + rel.z * v[2];
+    const vy = rel.x * u[0] + rel.y * u[1] + rel.z * u[2];
+    if (i === 0) shape.moveTo(vx, vy); else shape.lineTo(vx, vy);
+  }
+  shape.closePath();
+
+  const geom = new THREE.ShapeGeometry(shape);
+  const mat = new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+    side: THREE.DoubleSide,   // ← von oben UND unten sichtbar
+    depthWrite: true,
+    depthTest: true,
+    polygonOffset: true,      // ↓ minimiert Z-Fighting mit deinen Linien
+    polygonOffsetFactor: 1,
+    polygonOffsetUnits: 1
+  });
+
+  const mesh = new THREE.Mesh(geom, mat);
+
+  // Z-up (0,0,1) → n ausrichten
+  const up = new THREE.Vector3(0, 0, 1);
+  const nVec = new THREE.Vector3(n[0], n[1], n[2]).normalize();
+  const q = new THREE.Quaternion().setFromUnitVectors(up, nVec);
+  mesh.quaternion.copy(q);
+  mesh.position.set(C[0], C[1], C[2]);
+
+  // Damit die Linien sicher “oben” liegen:
+  mesh.renderOrder = 0;
+
+  return mesh;
+}
+
 export function render_konstruktion(konstruktion, opts = {}) {
   const container = opts.container || document.body;
   const width = Math.max(1, opts.width || container.clientWidth || 800);
@@ -17,10 +60,17 @@ export function render_konstruktion(konstruktion, opts = {}) {
 
   // 1) Linien sammeln
   const allSegments = [];
+  const plateMeshes = [];
+  let lines = null;
+
   for (const el of konstruktion.bauelemente || []) {
     if (el.typ === 'Bodenplatte') {
-      const { segments } = bodenplatte_linien(el);
-      allSegments.push(...segments);
+      const data = bodenplatte_linien(el);
+      allSegments.push(...(data.segments || []));
+      if (data.polygon && data.frame) {
+        const m = createUnlitPlateMesh(THREE, data.polygon, data.frame);
+        plateMeshes.push(m);
+      }
     } else if (el.typ === 'Traversenstrecke') {
       const { segments } = traversenstrecke_linien(el);
       allSegments.push(...segments);
@@ -41,8 +91,13 @@ export function render_konstruktion(konstruktion, opts = {}) {
   container.appendChild(renderer.domElement);
 
   // 3) Linien-Mesh bauen und Szene hinzufügen
-  const lines = segmentsToThreeLineSegments(allSegments);
-  scene.add(lines);
+  if (allSegments.length) {
+    lines = segmentsToThreeLineSegments(allSegments);
+    lines.renderOrder = 1;
+    scene.add(lines);
+  }
+
+  for (const m of plateMeshes) scene.add(m);
 
   // 4) Kamera auf Bounding Box fitten
   const aabb = expandAABB(computeAABB(allSegments), 0.15);
@@ -90,6 +145,7 @@ export function render_konstruktion(konstruktion, opts = {}) {
   // Rückgabe inkl. Dispose
   return {
     scene, camera, renderer, lines, controls,
+    plateMeshes,
     dispose() {
       disposed = true;
       window.removeEventListener('resize', onResize);
