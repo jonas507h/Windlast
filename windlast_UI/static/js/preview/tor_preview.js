@@ -36,9 +36,22 @@ export function mountTorPreview(mountEl) {
   function rerender() {
     const katalog = window.TorCatalog || null;
     const konstruktion = buildTor(readFormForTor(), katalog || undefined);
-    try { handle?.dispose?.(); } catch {}
+    // erst Container leeren (altes Canvas raus), aber alten Handle noch NICHT dispose'n,
+    // damit wir seine Kamera/Target als prevView verwenden können
     try { mountEl.innerHTML = ''; } catch {}
-    handle = render_konstruktion(konstruktion, { container: mountEl });
+
+    const next = render_konstruktion(
+      mountEl,
+      konstruktion,
+      {
+        preserveView: !!handle,
+        prevView: handle
+      }
+    );
+
+    // alten Renderer jetzt entsorgen
+    try { handle?.dispose?.(); } catch {}
+    handle = next;
   }
 
   // initial
@@ -63,6 +76,7 @@ export function mountTorPreview(mountEl) {
         try { el.removeEventListener(ev, fn); } catch {}
       }
       try { mountEl.innerHTML = ''; } catch {}
+      try { handle?.dispose?.(); } catch {}
       handle = null;
     }
   };

@@ -53,8 +53,20 @@ function createUnlitPlateMesh(THREE, polygon, frame) {
   return mesh;
 }
 
-export function render_konstruktion(konstruktion, opts = {}) {
-  const container = opts.container || document.body;
+export function render_konstruktion(container, konstruktion, opts = {}) {
+  const preserveView = opts.preserveView ?? false;
+  const prevView = opts.prevView ?? null;
+
+  // Falls vom letzten Render vorhanden: Position/Rotation & Controls-Target merken
+  let initialView = null;
+  if (preserveView && prevView?.camera) {
+    initialView = {
+      camPos: prevView.camera.position.clone(),
+      camQuat: prevView.camera.quaternion.clone(),
+      controlsTarget: prevView.controls?.target?.clone?.() || null,
+    };
+  }
+
   const width = Math.max(1, opts.width || container.clientWidth || 800);
   const height = Math.max(1, opts.height || container.clientHeight || 600);
 
@@ -131,6 +143,16 @@ export function render_konstruktion(konstruktion, opts = {}) {
     renderer.setSize(w, h);
   }
   window.addEventListener('resize', onResize);
+
+  // ===== Blick erhalten, falls gewünscht =====
+  if (initialView) {
+    camera.position.copy(initialView.camPos);
+    camera.quaternion.copy(initialView.camQuat);
+    if (controls && initialView.controlsTarget) {
+      controls.target.copy(initialView.controlsTarget);
+      controls.update();
+    }
+  }
 
   // Render-Loop
   let disposed = false;
