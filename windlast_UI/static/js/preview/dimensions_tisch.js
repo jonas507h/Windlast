@@ -19,7 +19,7 @@ export function computeDimensionsTisch(konstruktion){
   const els = konstruktion.bauelemente||[];
 
 
-  const travSpec = window?.TorCatalog?.getTraverse?.(traverse_name_intern);
+  const travSpec = window?.Catalog?.getTraverse?.(traverse_name_intern);
   const is3punkt = Number(travSpec.anzahl_gurtrohre) === 3;
 
   if (is3punkt) {

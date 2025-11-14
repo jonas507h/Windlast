@@ -158,6 +158,7 @@
   <!-- Preview -->
   <script type="module" src="/static/js/preview/tor_preview.js"></script>
   <script type="module" src="/static/js/preview/tisch_preview.js"></script>
+  <script type="module" src="/static/js/preview/steher_preview.js"></script>
 
   <!-- Dynamisches Laden der Konstruktionen -->
   <script>
@@ -193,6 +194,12 @@
         const btn = document.getElementById("btn-berechnen-steher");
         if (btn && typeof window.submitSteher === "function") {
           btn.addEventListener("click", window.submitSteher);
+        }
+        // Vorschau montieren
+        const mountEl = document.getElementById('preview-iso');
+        if (mountEl && window.PreviewKonstruktionen?.Steher?.mountSteherPreview) {
+          try { window.__previewHandle?.unmount(); } catch {}
+          window.__previewHandle = window.PreviewKonstruktionen.Steher.mountSteherPreview(mountEl);
         }
       }else if (name === "tisch") {
         // Dropdowns füllen

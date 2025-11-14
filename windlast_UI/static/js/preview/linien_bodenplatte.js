@@ -8,7 +8,7 @@
  * - drehung: Richtungsvektor in Plattenebene (Tiefe läuft parallel hierzu)
  * - anzeigename, element_id_intern
  *
- * Katalog (window.TorCatalog.getBodenplatte) sollte liefern:
+ * Katalog (window.Catalog.getBodenplatte) sollte liefern:
  * - breite, tiefe (Meter)
  * - anzahl_ecken (3 | 4)
  * Fallback: plate.breite / plate.tiefe falls im Objekt vorhanden.
@@ -32,7 +32,7 @@ function projectToPlane(v, n){
 
 /** Hole Bodenplatten-Spezifikation aus globalem Katalog (wie bei Traversen) */
 function getPlateSpec(name_intern, plate){
-  const cat = window?.TorCatalog?.getBodenplatte?.(name_intern);
+  const cat = window?.Catalog?.getBodenplatte?.(name_intern);
   return {
     breite: Number(cat?.breite ?? plate?.breite ?? 1.0),
     tiefe:  Number(cat?.tiefe  ?? plate?.tiefe  ?? 1.0),

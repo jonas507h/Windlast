@@ -215,7 +215,7 @@ function traversenstrecke_linien_4punkt(strecke){
   const up = vNorm(vCross(side, tangent));
 
   // --- Katalogdaten holen -------------------------------------------------
-  const spec = window?.TorCatalog?.getTraverse?.(strecke.traverse_name_intern);
+  const spec = window?.Catalog?.getTraverse?.(strecke.traverse_name_intern);
   if (!spec) {
     console.warn("Traverse nicht im Katalog:", strecke.traverse_name_intern);
     return { segments: [], metadata: { typ:'TRAVERSE', id: strecke.element_id_intern, anzeigename: strecke.anzeigename } };
@@ -398,7 +398,7 @@ export function traversenstrecke_linien(strecke){
   const L = vLen(vSub(b0,a0));
   const basis = { tangent, up, side, L };
 
-  const spec = window?.TorCatalog?.getTraverse?.(strecke.traverse_name_intern);
+  const spec = window?.Catalog?.getTraverse?.(strecke.traverse_name_intern);
   if (!spec) {
     console.warn("Traverse nicht im Katalog:", strecke.traverse_name_intern);
     return { segments: [], metadata: { typ:'TRAVERSE', id: strecke.element_id_intern, anzeigename: strecke.anzeigename } };

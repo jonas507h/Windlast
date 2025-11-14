@@ -60,7 +60,7 @@ async function initTorDropdowns() {
       ], { defaultValue: "ja" });
     }
 
-    window.TorCatalog = {
+    window.Catalog = {
       traversen,
       bps,
       untergruende,

@@ -1,36 +1,38 @@
-// tisch_preview.js — verbindet Formwerte → build_tisch → render_konstruktion
-// Erwartet: build_tisch.js, linien_* und render_konstruktion.js sind erreichbar (ES-Module)
+  // steher_preview.js — verbindet Formwerte → build_steher → render_konstruktion
+// Erwartet: build_steher.js, linien_* und render_konstruktion.js sind erreichbar (ES-Module)
 
-import { buildTisch} from '../build/build_tisch.js';
+import { buildSteher } from '../build/build_steher.js';
 import { render_konstruktion } from './render_konstruktion.js';
-import { computeDimensionsTisch } from './dimensions_tisch.js';
+import { computeDimensionsSteher } from './dimensions_steher.js';
 
-function readFormForTisch() {
-  const breite = parseFloat(document.getElementById('breite_m')?.value);
+function readFormForSteher() {
   const hoehe  = parseFloat(document.getElementById('hoehe_m')?.value);
-  const tiefe  = parseFloat(document.getElementById('tiefe_m')?.value);
+  const rohr_laenge  = parseFloat(document.getElementById('rohr_laenge_m')?.value);
+  const rohr_hoehe  = parseFloat(document.getElementById('rohr_hoehe_m')?.value);
 
   const traverse_name_intern   = document.getElementById('traverse_name_intern')?.value || 'TRUSS';
   const bodenplatte_name_intern= document.getElementById('bodenplatte_name_intern')?.value || 'BP';
+  const rohr_name_intern       = document.getElementById('rohr_name_intern')?.value || 'ROHR';
   const gmVal = document.getElementById('gummimatte')?.value || 'ja';
   const gummimatte = (gmVal === 'ja');
 
   return {
-    breite_m: isFinite(breite) && breite > 0 ? breite : 6,
     hoehe_m:  isFinite(hoehe)  && hoehe  > 0 ? hoehe  : 3,
-    tiefe_m:  isFinite(tiefe)  && tiefe  > 0 ? tiefe  : 4,
+    rohr_laenge_m: isFinite(rohr_laenge) && rohr_laenge > 0 ? rohr_laenge : 2,
+    rohr_hoehe_m: isFinite(rohr_hoehe) && rohr_hoehe > 0 ? rohr_hoehe : 2.5,
     traverse_name_intern,
     bodenplatte_name_intern,
+    rohr_name_intern,
     gummimatte,
   };
 }
 
-export function mountTischPreview(mountEl) {
+export function mountSteherPreview(mountEl) {
   let handle = null;
 
   function rerender() {
     const katalog = window.Catalog || null;
-    const konstruktion = buildTisch(readFormForTisch(), katalog || undefined);
+    const konstruktion = buildSteher(readFormForSteher(), katalog || undefined);
     // erst Container leeren (altes Canvas raus), aber alten Handle noch NICHT dispose'n,
     // damit wir seine Kamera/Target als prevView verwenden können
     try { mountEl.innerHTML = ''; } catch {}
@@ -42,7 +44,7 @@ export function mountTischPreview(mountEl) {
         preserveView: true,
         prevView: handle,
         showDimensions: true,
-        computeDimensions: computeDimensionsTisch,
+        computeDimensions: computeDimensionsSteher,
       }
     );
 
@@ -55,7 +57,7 @@ export function mountTischPreview(mountEl) {
   rerender();
 
   // simple live update: auf Änderungen der relevanten Inputs reagieren
-  const ids = ['breite_m','hoehe_m','tiefe_m','traverse_name_intern','bodenplatte_name_intern','gummimatte'];
+  const ids = ['hoehe_m','rohr_laenge_m','rohr_hoehe_m','traverse_name_intern','bodenplatte_name_intern','rohr_name_intern','gummimatte'];
   const listeners = [];
   for (const id of ids) {
     const el = document.getElementById(id);
@@ -81,4 +83,4 @@ export function mountTischPreview(mountEl) {
 
 // globale Bridge, damit index.html die Preview montieren kann
 window.PreviewKonstruktionen = window.PreviewKonstruktionen || {};
-window.PreviewKonstruktionen.Tisch = { mountTischPreview };
+window.PreviewKonstruktionen.Steher = { mountSteherPreview };

@@ -17,7 +17,7 @@ export function computeDimensionsTor(konstruktion){
   const orientierung = konstruktion.traversen_orientierung;
   const els = konstruktion.bauelemente||[];
 
-  const travSpec = window?.TorCatalog?.getTraverse?.(traverse_name_intern);
+  const travSpec = window?.Catalog?.getTraverse?.(traverse_name_intern);
   const is3punkt = Number(travSpec.anzahl_gurtrohre) === 3;
 
   switch (orientierung) {

@@ -52,7 +52,7 @@ export function validateTischInputs({
  * @param {string} inputs.traverse_name_intern
  * @param {string} inputs.bodenplatte_name_intern
  * @param {boolean} [inputs.gummimatte=true]
- * @param {string} [inputs.name='Tor']
+ * @param {string} [inputs.name='Tisch']
  * @param {Object} catalog – siehe oben
  * @returns {Object} konstruktion
  */

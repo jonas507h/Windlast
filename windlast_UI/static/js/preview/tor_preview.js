@@ -35,7 +35,7 @@ export function mountTorPreview(mountEl) {
   let handle = null;
 
   function rerender() {
-    const katalog = window.TorCatalog || null;
+    const katalog = window.Catalog || null;
     const konstruktion = buildTor(readFormForTor(), katalog || undefined);
     // erst Container leeren (altes Canvas raus), aber alten Handle noch NICHT dispose'n,
     // damit wir seine Kamera/Target als prevView verwenden können

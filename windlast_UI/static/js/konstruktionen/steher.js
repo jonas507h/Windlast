@@ -51,6 +51,22 @@ async function initSteherDropdowns() {
         { value: "nein", label: "Nein" },
       ], { defaultValue: "ja" });
     }
+
+    window.Catalog = {
+      traversen,
+      rohre,
+      bps,
+      untergruende,
+      getTraverse(nameIntern) {
+        return traversen.find(t => t.value === nameIntern);
+      },
+      getRohr(nameIntern) {
+        return rohre.find(r => r.value === nameIntern);
+      },
+      getBodenplatte(nameIntern) {
+        return bps.find(b => b.value === nameIntern);
+      }
+    };
   } catch (e) {
     console.error("Steher-Dropdowns konnten nicht geladen werden:", e);
   }
