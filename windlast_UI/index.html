@@ -155,8 +155,9 @@
   <script type="module" src="/static/js/footer.js"></script>
   <script src="/static/js/modal.js"></script>
   <script src="/static/js/warnung.js"></script>
-  <!-- Composable Preview -->
+  <!-- Preview -->
   <script type="module" src="/static/js/preview/tor_preview.js"></script>
+  <script type="module" src="/static/js/preview/tisch_preview.js"></script>
 
   <!-- Dynamisches Laden der Konstruktionen -->
   <script>
@@ -177,14 +178,11 @@
         if (btn && typeof window.submitTor === "function") {
           btn.addEventListener("click", window.submitTor);
         }
-
         // Vorschau montieren
         const mountEl = document.getElementById('preview-iso');
-
-        // modulare Preview
         if (mountEl && window.PreviewKonstruktionen?.Tor?.mountTorPreview) {
-          try { window.__torPreview?.unmount(); } catch {}
-          window.__torPreview = window.PreviewKonstruktionen.Tor.mountTorPreview(mountEl);
+          try { window.__previewHandle?.unmount(); } catch {}
+          window.__previewHandle = window.PreviewKonstruktionen.Tor.mountTorPreview(mountEl);
         }
       }else if (name === "steher") {
         // Dropdowns füllen
@@ -205,6 +203,12 @@
         const btn = document.getElementById("btn-berechnen");
         if (btn && typeof window.submitTisch === "function") {
           btn.addEventListener("click", window.submitTisch);
+        }
+        // Vorschau montieren
+        const mountEl = document.getElementById('preview-iso');
+        if (mountEl && window.PreviewKonstruktionen?.Tisch?.mountTischPreview) {
+          try { window.__previewHandle?.unmount(); } catch {}
+          window.__previewHandle = window.PreviewKonstruktionen.Tisch.mountTischPreview(mountEl);
         }
       }
     }
