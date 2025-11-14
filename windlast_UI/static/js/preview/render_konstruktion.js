@@ -6,6 +6,7 @@ import * as THREE from '/static/vendor/three.module.js';
 import { OrbitControls } from '/static/vendor/OrbitControls.js';
 import { bodenplatte_linien } from './linien_bodenplatte.js';
 import { traversenstrecke_linien } from './linien_traverse.js';
+import { rohr_linien } from './linien_rohr.js';
 import { computeAABB, expandAABB, segmentsToThreeLineSegments, fitCameraToAABB } from './linien_helpers.js';
 import { render_dimensions } from './render_dimensions.js';
 
@@ -87,6 +88,9 @@ export function render_konstruktion(container, konstruktion, opts = {}) {
       }
     } else if (el.typ === 'Traversenstrecke') {
       const { segments } = traversenstrecke_linien(el);
+      allSegments.push(...segments);
+    } else if (el.typ === 'Rohr') {
+      const { segments } = rohr_linien(el);
       allSegments.push(...segments);
     }
   }
