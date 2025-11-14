@@ -8,7 +8,6 @@ import { bodenplatte_linien } from './linien_bodenplatte.js';
 import { traversenstrecke_linien } from './linien_traverse.js';
 import { computeAABB, expandAABB, segmentsToThreeLineSegments, fitCameraToAABB } from './linien_helpers.js';
 import { render_dimensions } from './render_dimensions.js';
-import { computeDimensionsTor } from './dimensions_tor.js';
 
 function createUnlitPlateMesh(THREE, polygon, frame) {
   const { u, v, n, C } = frame;
@@ -117,10 +116,22 @@ export function render_konstruktion(container, konstruktion, opts = {}) {
   // 4) Kamera auf Bounding Box fitten
   const aabb = expandAABB(computeAABB(allSegments), 0.15);
   fitCameraToAABB(camera, aabb);
-  // Maße (Preview-spezifisch)
-  if (opts.showDimensions !== false && konstruktion?.typ === 'Tor') {
-    const specs = computeDimensionsTor(konstruktion);
-    render_dimensions(specs, { scene });
+  
+  // === Maße (generisch) ===
+  // Variante 1: fertige Specs werden übergeben
+  // Variante 2: eine Funktion computeDimensions(konstruktion, {scene, aabb})
+  if (opts.showDimensions !== false) {
+    let specs = null;
+
+    if (Array.isArray(opts.dimensionSpecs)) {
+      specs = opts.dimensionSpecs;
+    } else if (typeof opts.computeDimensions === 'function') {
+      specs = opts.computeDimensions(konstruktion, { scene, aabb });
+    }
+
+    if (specs && specs.length) {
+      render_dimensions(specs, { scene });
+    }
   }
 
   // Controls

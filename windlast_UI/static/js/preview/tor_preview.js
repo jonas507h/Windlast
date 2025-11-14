@@ -3,6 +3,7 @@
 
 import { buildTor, ORIENTIERUNG } from '../build/build_tor.js';
 import { render_konstruktion } from './render_konstruktion.js';
+import { computeDimensionsTor } from './dimensions_tor.js';
 
 function readTraversenOrientierungSafe() {
   const el = document.getElementById('traversen_orientierung');
@@ -44,8 +45,10 @@ export function mountTorPreview(mountEl) {
       mountEl,
       konstruktion,
       {
-        preserveView: !!handle,
-        prevView: handle
+        preserveView: true,
+        prevView: handle,
+        showDimensions: true,
+        computeDimensions: computeDimensionsTor,
       }
     );
 
