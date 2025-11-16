@@ -108,7 +108,9 @@ export function render_konstruktion(container, konstruktion, opts = {}) {
   camera.up.set(0, 0, 1);
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(width, height);
-  //scene.add(new THREE.AxesHelper(1));
+  if (window.APP_STATE?.flags?.show_nullpunkt) {
+    scene.add(new THREE.AxesHelper(1));
+  }
 
   container.innerHTML = '';
   container.appendChild(renderer.domElement);

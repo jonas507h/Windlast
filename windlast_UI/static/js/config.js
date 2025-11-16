@@ -8,18 +8,21 @@
       show_nichtZertifiziert_warnung: true,
       show_doppelte_meldungen: false,
       show_meldungen_tooltip: false,
+      show_nullpunkt: false,
     }),
     debug: Object.freeze({
       show_zwischenergebnisse_tooltip: true,
       show_nichtZertifiziert_warnung: true,
       show_doppelte_meldungen: true,
       show_meldungen_tooltip: true,
+      show_nullpunkt: true,
     }),
     admin: Object.freeze({
       show_zwischenergebnisse_tooltip: true,
       show_nichtZertifiziert_warnung: false,
       show_doppelte_meldungen: true,
       show_meldungen_tooltip: true,
+      show_nullpunkt: true,
     }),
   };
 
