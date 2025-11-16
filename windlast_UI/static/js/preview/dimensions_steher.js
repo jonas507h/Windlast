@@ -25,6 +25,29 @@ export function computeDimensionsSteher(konstruktion){
   const travSpec = window?.Catalog?.getTraverse?.(traverse_name_intern);
   const is3punkt = Number(travSpec.anzahl_gurtrohre) === 3;
 
+  let label_hoehe;
+  let label_rohr_laenge;
+  let label_rohr_hoehe;
+
+  const hoehe_input  = parseFloat(document.getElementById('hoehe_m')?.value);
+  if (isFinite(hoehe_input) && hoehe_input > 0) {
+    label_hoehe = `Höhe: ${fmtDE(hoehe_input)} m`;
+  } else {
+    label_hoehe = `Höhe`;
+  }
+  const rohr_laenge_input  = parseFloat(document.getElementById('rohr_laenge_m')?.value);
+  if (isFinite(rohr_laenge_input) && rohr_laenge_input > 0) {
+    label_rohr_laenge = `Länge Rohr: ${fmtDE(rohr_laenge_input)} m`;
+  } else {
+    label_rohr_laenge = `Länge Rohr`;
+  }
+  const rohr_hoehe_input  = parseFloat(document.getElementById('rohr_hoehe_m')?.value);
+  if (isFinite(rohr_hoehe_input) && rohr_hoehe_input > 0) {
+    label_rohr_hoehe = `Höhe Rohr: ${fmtDE(rohr_hoehe_input)} m`;
+  } else {
+    label_rohr_hoehe = `Höhe Rohr`;
+  }
+
   trav_real_offset = trav_eff_offset + (Number(travSpec.B_hoehe ?? travSpec.A_hoehe ?? travSpec.hoehe) / 2);
   rh_real_offset = rh_eff_offset + R_L / 2;
 
@@ -39,7 +62,7 @@ export function computeDimensionsSteher(konstruktion){
   if (trav && trav.start && trav.ende){
     const a = trav.start; const b = trav.ende;
     specs.push({
-      kind:'linear', param_key:'breite_m', label: `Höhe: ${fmtDE(H)} m`,
+      kind:'linear', param_key:'breite_m', label: label_hoehe,
       anchors:{ a, b, dir:[1,0,0], offset: trav_real_offset, textSize:0.28 }
     });
   }
@@ -48,7 +71,7 @@ export function computeDimensionsSteher(konstruktion){
     const a = rohr.start; const b = rohr.ende;
     // Linke Stütze steht bei x≈0 → quer nach -X raus bemaßen
     specs.push({
-      kind:'linear', param_key:'hoehe_m', label:`Länge Rohr: ${fmtDE(R_L)} m`,
+      kind:'linear', param_key:'hoehe_m', label: label_rohr_laenge,
       anchors:{ a, b, dir:[0,0,1], offset: rohr_offset, textSize:0.28 }
     });
   }
@@ -57,7 +80,7 @@ export function computeDimensionsSteher(konstruktion){
     const a = [0,rohr_offset_to_front,0]; const b = [0,rohr_offset_to_front,R_H];
 
     specs.push({
-      kind:'linear', param_key:'hoehe_m', label:`Höhe Rohr: ${fmtDE(R_H)} m`,
+      kind:'linear', param_key:'hoehe_m', label: label_rohr_hoehe,
       anchors:{ a, b, dir:[-1,0,0], offset: rh_real_offset, textSize:0.28 }
     });
   }

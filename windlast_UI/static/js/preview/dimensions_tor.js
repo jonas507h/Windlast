@@ -20,6 +20,22 @@ export function computeDimensionsTor(konstruktion){
   const travSpec = window?.Catalog?.getTraverse?.(traverse_name_intern);
   const is3punkt = Number(travSpec.anzahl_gurtrohre) === 3;
 
+  let label_breite;
+  let label_hoehe;
+
+  const breite_input = parseFloat(document.getElementById('breite_m')?.value);
+  if (isFinite(breite_input) && breite_input > 0) {
+    label_breite = `Breite: ${fmtDE(breite_input)} m`;
+  } else {
+    label_breite = `Breite`;
+  }
+  const hoehe_input  = parseFloat(document.getElementById('hoehe_m')?.value);
+  if (isFinite(hoehe_input) && hoehe_input > 0) {
+    label_hoehe = `Höhe: ${fmtDE(hoehe_input)} m`;
+  } else {
+    label_hoehe = `Höhe`;
+  }
+
   switch (orientierung) {
     case 'side':
       if (is3punkt) {
@@ -54,7 +70,7 @@ export function computeDimensionsTor(konstruktion){
     // Breite entlang der oberen Traverse, Maßlinie leicht darüber (Z-up: +Z)
     const a = top.start; const b = top.ende;
     specs.push({
-      kind:'linear', param_key:'breite_m', label: `Breite: ${fmtDE(B)} m`,
+      kind:'linear', param_key:'breite_m', label: label_breite,
       anchors:{ a, b, dir:[0,0,1], offset: real_offset, textSize:0.28 }
     });
   }
@@ -64,7 +80,7 @@ export function computeDimensionsTor(konstruktion){
     const a = left.start; const b = left.ende;
     // Linke Stütze steht bei x≈0 → quer nach -X raus bemaßen
     specs.push({
-      kind:'linear', param_key:'hoehe_m', label:`Höhe: ${fmtDE(H)} m`,
+      kind:'linear', param_key:'hoehe_m', label: label_hoehe,
       anchors:{ a, b, dir:[-1,0,0], offset: real_offset, textSize:0.28 }
     });
   }

@@ -18,9 +18,31 @@ export function computeDimensionsTisch(konstruktion){
   const traverse_name_intern = konstruktion.traverse_name_intern;
   const els = konstruktion.bauelemente||[];
 
-
   const travSpec = window?.Catalog?.getTraverse?.(traverse_name_intern);
   const is3punkt = Number(travSpec.anzahl_gurtrohre) === 3;
+
+  let label_breite;
+  let label_hoehe;
+  let label_tiefe;
+
+  const breite_input = parseFloat(document.getElementById('breite_m')?.value);
+  if (isFinite(breite_input) && breite_input > 0) {
+    label_breite = `Breite: ${fmtDE(breite_input)} m`;
+  } else {
+    label_breite = `Breite`;
+  }
+  const hoehe_input  = parseFloat(document.getElementById('hoehe_m')?.value);
+  if (isFinite(hoehe_input) && hoehe_input > 0) {
+    label_hoehe = `Höhe: ${fmtDE(hoehe_input)} m`;
+  } else {
+    label_hoehe = `Höhe`;
+  }
+  const tiefe_input  = parseFloat(document.getElementById('tiefe_m')?.value);
+  if (isFinite(tiefe_input) && tiefe_input > 0) {
+    label_tiefe = `Tiefe: ${fmtDE(tiefe_input)} m`;
+  } else {
+    label_tiefe = `Tiefe`;
+  }
 
   if (is3punkt) {
     real_offset_a = eff_offset + (Number(travSpec.A_hoehe ?? travSpec.hoehe) / 3);
@@ -38,7 +60,7 @@ export function computeDimensionsTisch(konstruktion){
     // Breite entlang der oberen Traverse, Maßlinie leicht darüber (Z-up: +Z)
     const a = breite.start; const b = breite.ende;
     specs.push({
-      kind:'linear', param_key:'breite_m', label: `Breite: ${fmtDE(B)} m`,
+      kind:'linear', param_key:'breite_m', label: label_breite,
       anchors:{ a, b, dir:[0,0,1], offset: real_offset_a, textSize:0.28 }
     });
   }
@@ -48,7 +70,7 @@ export function computeDimensionsTisch(konstruktion){
     const a = hoehe.start; const b = hoehe.ende;
     // Linke Stütze steht bei x≈0 → quer nach -X raus bemaßen
     specs.push({
-      kind:'linear', param_key:'hoehe_m', label:`Höhe: ${fmtDE(H)} m`,
+      kind:'linear', param_key:'hoehe_m', label: label_hoehe,
       anchors:{ a, b, dir:[-1,0,0], offset: real_offset_a, textSize:0.28 }
     });
   }
@@ -57,7 +79,7 @@ export function computeDimensionsTisch(konstruktion){
     // Tiefe entlang der oberen linken Traverse, Maßlinie leicht links daneben
     const a = tiefe.start; const b = tiefe.ende;
     specs.push({
-      kind:'linear', param_key:'tiefe_m', label:`Tiefe: ${fmtDE(T)} m`,
+      kind:'linear', param_key:'tiefe_m', label: label_tiefe,
       anchors:{ a, b, dir:[0,0,1], offset: real_offset_a, textSize:0.28 }
     });
   }
