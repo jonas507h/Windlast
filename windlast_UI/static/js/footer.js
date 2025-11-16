@@ -619,7 +619,6 @@ registerCountsTooltip('.results-table .alt-title th[data-szenario] .count-badge'
       // nur wenn sinnvoller Inhalt vorhanden & nicht als Fehler markiert
       const txt = (el.textContent || "").trim();
       if (!txt || txt === "—" || txt === "--") return false;
-      if (el.classList.contains("val-bad")) return false;
       return true;
     },
     content: () => "Für Details klicken",

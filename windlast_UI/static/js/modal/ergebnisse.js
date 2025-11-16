@@ -374,9 +374,6 @@ export function registerErgebnisseContextTooltip() {
   // mehrfach aufrufen erlaubt – wir registrieren nur genau einmal erfolgreich
   if (registerErgebnisseContextTooltip.__done) return;
 
-  const showFlag = !!(window.APP_STATE?.flags?.show_zwischenergebnisse_tooltip); // Fallback ohne UI.guard
-  if (!showFlag) return; // Flag aus → gar nicht registrieren
-
   const Tooltip = DEPS.Tooltip || window.Tooltip;
   if (!Tooltip) {
     // Tooltip-Bibliothek noch nicht da → später nochmal probieren
@@ -389,9 +386,12 @@ export function registerErgebnisseContextTooltip() {
     return;
   }
 
-  // Ab hier können wir registrieren
   Tooltip.register('#modal-root .doc-list li, #modal-root .doc-list li *', {
-    predicate: (el) => !!el.closest('li.doc-li'),
+    predicate: (el) => {
+      const showFlag = !!(window.APP_STATE?.flags?.show_zwischenergebnisse_tooltip);
+      if (!showFlag) return false;
+      return !!el.closest('li.doc-li');
+    },
     content: (_ev, el) => {
       try {
         const li = el.closest('li.doc-li');

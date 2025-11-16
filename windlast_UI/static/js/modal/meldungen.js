@@ -133,7 +133,11 @@ export function registerMeldungenContextTooltip() {
   registerMeldungenContextTooltip.__done = true;
 
   Tooltip.register('#modal-root .messages-list li', {
-    predicate: (el) => !!el.closest('li'),
+    predicate: (el) => {
+      const showFlag = !!(window.APP_STATE?.flags?.show_meldungen_tooltip);
+      if (!showFlag) return false;
+      return !!el.closest('li');
+    },
     content: (_ev, el) => {
       const li = el.closest('li');
       if (!li) return "";

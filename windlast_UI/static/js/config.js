@@ -7,21 +7,24 @@
       show_zwischenergebnisse_tooltip: false,
       show_nichtZertifiziert_warnung: true,
       show_doppelte_meldungen: false,
+      show_meldungen_tooltip: false,
     }),
     debug: Object.freeze({
       show_zwischenergebnisse_tooltip: true,
       show_nichtZertifiziert_warnung: true,
       show_doppelte_meldungen: true,
+      show_meldungen_tooltip: true,
     }),
     admin: Object.freeze({
       show_zwischenergebnisse_tooltip: true,
       show_nichtZertifiziert_warnung: false,
       show_doppelte_meldungen: true,
+      show_meldungen_tooltip: true,
     }),
   };
 
   // 2) Heutige „harte“ Voreinstellung: einfach hier ändern
-  let currentRole = "user"; // "user" | "debug" | "admin"
+  let currentRole = "debug"; // "user" | "debug" | "admin"
 
   // 3) Spätere Runtime-Overrides zulassen (Konsole/Passwort/LocalStorage)
   const LS_KEY = "windlast_ui_role";
