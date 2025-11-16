@@ -37,6 +37,10 @@
     localStorage.setItem('theme', theme);
     applyTheme(theme);
     forward(theme);
+
+    try {
+      window.postMessage({ type: 'theme', value: theme }, '*');
+    } catch {}
     // Parent informieren, damit Geschwister-Frames aktualisiert werden
     if (window.parent && window.parent !== window) {
       try { window.parent.postMessage({ type: 'theme', value: theme }, '*'); } catch {}

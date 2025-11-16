@@ -75,6 +75,9 @@ export function render_konstruktion(container, konstruktion, opts = {}) {
   const width = Math.max(1, opts.width || container.clientWidth || 800);
   const height = Math.max(1, opts.height || container.clientHeight || 600);
 
+  let dimensionSpecs = null;
+  let dimensionGroup = null;
+
   // 1) Linien sammeln
   const allSegments = [];
   const plateMeshes = [];
@@ -127,16 +130,14 @@ export function render_konstruktion(container, konstruktion, opts = {}) {
   // Variante 1: fertige Specs werden übergeben
   // Variante 2: eine Funktion computeDimensions(konstruktion, {scene, aabb})
   if (opts.showDimensions !== false) {
-    let specs = null;
-
     if (Array.isArray(opts.dimensionSpecs)) {
-      specs = opts.dimensionSpecs;
+      dimensionSpecs = opts.dimensionSpecs;
     } else if (typeof opts.computeDimensions === 'function') {
-      specs = opts.computeDimensions(konstruktion, { scene, aabb });
+      dimensionSpecs = opts.computeDimensions(konstruktion, { scene, aabb });
     }
 
-    if (specs && specs.length) {
-      render_dimensions(specs, { scene });
+    if (dimensionSpecs && dimensionSpecs.length) {
+      dimensionGroup = render_dimensions(dimensionSpecs, { scene });
     }
   }
 
@@ -198,13 +199,22 @@ export function render_konstruktion(container, konstruktion, opts = {}) {
         m.material.color.set(t.plateFill);
       }
     }
+
+    // Bemaßung neu rendern
+    if (dimensionSpecs && dimensionSpecs.length) {
+      if (dimensionGroup) {
+        scene.remove(dimensionGroup);
+        // optional: dispose
+      }
+      dimensionGroup = render_dimensions(dimensionSpecs, { scene });
+    }
   }
 
   // direkt initial einmal anwenden (falls z.B. opts.theme gesetzt ist)
   applyThemeToScene(theme);
 
-  const unsubscribeTheme = subscribePreviewTheme(({ theme: t }) => {
-    applyThemeToScene(t);
+  const unsubscribeTheme = subscribePreviewTheme(({ theme }) => {
+    applyThemeToScene(theme);
   });
 
   // Rückgabe inkl. Dispose
