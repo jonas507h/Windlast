@@ -52,25 +52,42 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-document.addEventListener("DOMContentLoaded", () => {
-  const el = document.getElementById("role-label");
-  if (!el) return;
+// Helfer zum Aktualisieren des Rollen-/Build-Labels
+function updateRoleLabel() {
+  const el  = document.getElementById("role-label");
+  const app = window.APP_STATE;
+  if (!el || !app) return;
 
-  const role = window.APP_STATE?.role;
-  if (role && role !== "user") {
-    el.textContent = `Rolle: ${role}`;
-    el.hidden = false;
-  }
-});
+  const role       = app.role;
+  const buildRole  = app.buildRole;              // echter Build (z.B. "user", "debug", "admin", "godmode")
+  const activeBuild = app.activeBuild || buildRole; // simulierter Build (falls vorhanden)
 
-document.addEventListener("ui:role-changed", (e) => {
-  const el = document.getElementById("role-label");
-  if (!el) return;
-  const role = e.detail.role;
-  if (role !== "user") {
-    el.textContent = `Rolle: ${role}`;
+  if (buildRole === "godmode") {
+    // Im echten godmode-Build immer anzeigen, inkl. simuliertem Build
+    el.textContent = `Rolle: ${role} (Build: ${activeBuild})`;
     el.hidden = false;
   } else {
-    el.hidden = true;
+    // In normalen Builds wie bisher: nur anzeigen, wenn Rolle != "user"
+    if (role && role !== "user") {
+      el.textContent = `Rolle: ${role}`;
+      el.hidden = false;
+    } else {
+      el.hidden = true;
+    }
   }
+}
+
+// Initial bei DOM-Ready
+document.addEventListener("DOMContentLoaded", () => {
+  updateRoleLabel();
+});
+
+// Auf Rollenwechsel reagieren
+document.addEventListener("ui:role-changed", () => {
+  updateRoleLabel();
+});
+
+// Auf Build-Wechsel (setBuild) reagieren – nur im godmode-Build vorhanden
+document.addEventListener("ui:build-changed", () => {
+  updateRoleLabel();
 });
