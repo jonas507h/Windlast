@@ -113,8 +113,7 @@ function renderLinear(spec, group){
 
   // Linien sammeln
   const points=[]; // Float32Array data
-  const W = style.lineWidth ?? 2;                 // Liniendicke
-  const color = style.color ?? 0x2d6cdf;   
+  const color = style.color ?? 0xff0000;   
 
   // Hilfslinien (von Anker zu Maßlinie)
   pushLine(points,a,a1); pushLine(points,b,b1);
@@ -135,7 +134,7 @@ function renderLinear(spec, group){
   geom.setAttribute('position', new THREE.Float32BufferAttribute(points,3));
   const mat=new THREE.LineBasicMaterial({
     color,
-    depthTest: true,     // ← normale 3D-Sichtbarkeit
+    depthTest: true,
     depthWrite: true,
     transparent: false
   });
@@ -148,7 +147,7 @@ function renderLinear(spec, group){
   if (txt) {
     const spr=makeTextSprite(txt, {
       size: anchors.textSize ?? 0.20,
-      fillStyle: style.textColor ?? '#0000ff',
+      fillStyle: style.textColor ?? '#ff0000',
       strokeStyle: style.textOutline ?? '#ffffff',
       strokeWidth: style.textOutlineWidth ?? 4
     });
