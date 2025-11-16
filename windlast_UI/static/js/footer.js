@@ -362,12 +362,12 @@ function renderAlternativenBlocksVM(vm) {
           row.key === "abhebe"  ? "ABHEB"   : "";
         if (altName) {
           td.dataset.alt = altName;         // (falls noch woanders genutzt)
-          td.dataset.szenario = altName;    // ← NEU: das liest ergebnisse.js
+          td.dataset.szenario = altName;
         } else {
           delete td.dataset.alt;
           delete td.dataset.szenario;
         }
-        td.dataset.openable = "ergebnisse"; // ← NEU: macht die Zelle klickbar
+        td.dataset.openable = "ergebnisse";
 
         if (row.isSafety) _setSafetyOnTdAlt(td, v);
         else _setBallastOnTdAlt(td, v);
@@ -380,38 +380,35 @@ function renderAlternativenBlocksVM(vm) {
 }
 
 function attachNorminfoHandlers() {
-  const selectorMain = '.results-table thead th[data-norm-key]';
-  const selectorAlt  = '.results-table .alt-title th[data-norm-key]';
+  // Titelzellen: Haupt + Alternativen
+  const selector = `
+    .results-table thead th[data-norm-key],
+    .results-table .alt-title th[data-norm-key]
+  `.trim();
 
-  const onClick = (ev) => {
-    // Klick auf Badge? → durchlassen, damit Meldungs-Logik greifen kann.
-    if (ev.target.closest('.count-badge')) {
-      return;
-    }
+  document.querySelectorAll(selector).forEach((th) => {
+    if (th.dataset.norminfoBound === "1") return;
+    th.dataset.norminfoBound = "1";
 
-    const th = ev.currentTarget;
-    const normKey = th.dataset.normKey;
-    if (!normKey) return;
+    th.addEventListener("click", (ev) => {
+      // Klick auf Badge → melden wir NICHT ab, das ist für Meldungen reserviert
+      if (ev.target.closest(".count-badge")) {
+        return; // Ereignis geht weiter zu den Meldungs-Handlern
+      }
 
-    ev.preventDefault();
-    ev.stopImmediatePropagation(); // verhindert, dass Meldungen-Handler auf dem TH feuern
+      const normKey  = th.dataset.normKey;
+      const szenario = th.dataset.szenario || null;
+      if (!normKey) return;
 
-    const info = getNorminfo(normKey);
-    const content = buildModal(info.title, info.body);
-    Modal.open(content);
-  };
+      const info = getNorminfo(normKey, szenario);
+      const content = buildModal(info.title, info.body);
+      Modal.open(content);
 
-  document.querySelectorAll(selectorMain + ':not([data-norminfo-bound="1"])')
-    .forEach(th => {
-      th.dataset.norminfoBound = "1";
-      th.addEventListener('click', onClick);
+      // Verhindert, dass ggf. noch andere Click-Handler auf dem TH feuern
+      ev.preventDefault();
+      ev.stopImmediatePropagation();
     });
-
-  document.querySelectorAll(selectorAlt + ':not([data-norminfo-bound="1"])')
-    .forEach(th => {
-      th.dataset.norminfoBound = "1";
-      th.addEventListener('click', onClick);
-    });
+  });
 }
 
 // --- NEU: Direktfunktion anbieten (für tor.js Variante 1)
@@ -604,6 +601,19 @@ registerCountsTooltip('.results-table .alt-title th[data-szenario] .count-badge'
   const TT = window.Tooltip;
   if (!TT) return;
 
+  // Tooltip auf Titelzeilen: "Für Info klicken"
+  TT.register(
+    '.results-table thead th[data-norm-key], .results-table .alt-title th[data-norm-key]',
+    {
+      predicate: (el) => true,
+      content: () => "Für Info klicken",
+      className: () => "tt-info",
+      priority: 10,
+      delay: 200
+    }
+  );
+
+  // Tooltip auf Ergebnis-Zellen: "Für Details klicken"
   TT.register('.results-table td.value[data-openable="ergebnisse"]', {
     predicate: (el) => {
       // nur wenn sinnvoller Inhalt vorhanden & nicht als Fehler markiert
