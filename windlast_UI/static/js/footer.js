@@ -1,10 +1,8 @@
 // footer.js  (als ES Module laden)
 import { configureMeldungen, setupMeldungenUI } from "./modal/meldungen.js";
 import { configureErgebnisse, setupErgebnisseUI } from "./modal/ergebnisse.js";
-import {
-  displayAltName,
-} from "./utils/formatierung.js";
-
+import { displayAltName } from "./utils/formatierung.js";
+import { getNorminfo } from "./modal/norminfo.js";
 
 const NORM_ID = {
   "EN_13814_2005": "en13814_2005",
@@ -381,6 +379,41 @@ function renderAlternativenBlocksVM(vm) {
   }
 }
 
+function attachNorminfoHandlers() {
+  const selectorMain = '.results-table thead th[data-norm-key]';
+  const selectorAlt  = '.results-table .alt-title th[data-norm-key]';
+
+  const onClick = (ev) => {
+    // Klick auf Badge? → durchlassen, damit Meldungs-Logik greifen kann.
+    if (ev.target.closest('.count-badge')) {
+      return;
+    }
+
+    const th = ev.currentTarget;
+    const normKey = th.dataset.normKey;
+    if (!normKey) return;
+
+    ev.preventDefault();
+    ev.stopImmediatePropagation(); // verhindert, dass Meldungen-Handler auf dem TH feuern
+
+    const info = getNorminfo(normKey);
+    const content = buildModal(info.title, info.body);
+    Modal.open(content);
+  };
+
+  document.querySelectorAll(selectorMain + ':not([data-norminfo-bound="1"])')
+    .forEach(th => {
+      th.dataset.norminfoBound = "1";
+      th.addEventListener('click', onClick);
+    });
+
+  document.querySelectorAll(selectorAlt + ':not([data-norminfo-bound="1"])')
+    .forEach(th => {
+      th.dataset.norminfoBound = "1";
+      th.addEventListener('click', onClick);
+    });
+}
+
 // --- NEU: Direktfunktion anbieten (für tor.js Variante 1)
 window.updateFooterResults = function(payload){
   updateFooter(payload);
@@ -413,6 +446,8 @@ function updateFooter(payload) {
   renderAlternativenBlocksVM(ResultsVM);
 
   refreshHeaderBadges();
+
+  attachNorminfoHandlers();
 
   configureMeldungen({
     vm: ResultsVM,
@@ -538,18 +573,27 @@ function registerCountsTooltip(selector, { getCounts, getHeaderText, predicate, 
 }
 
 // Register normale Berechnung
-registerCountsTooltip('.results-table thead th', {
-  predicate: el => !!el.dataset.normKey,
-  getCounts: (el) => getCountsEffective(el.dataset.normKey, null),
+registerCountsTooltip('.results-table thead th .count-badge', {
+  predicate: (el) => !!el.closest('th[data-norm-key]'),
+  getCounts: (el) => {
+    const th = el.closest('th[data-norm-key]');
+    if (!th) return null;
+    return getCountsEffective(th.dataset.normKey, null);
+  },
   getHeaderText: () => "Hauptberechnung"
 });
 
 // Register Alternativen-Berechnung
-registerCountsTooltip('.results-table .alt-title th[data-szenario]', {
-  predicate: el => !!el.dataset.normKey && !!el.dataset.szenario,
-  getCounts: (el) => getCountsEffective(el.dataset.normKey, el.dataset.szenario),
+registerCountsTooltip('.results-table .alt-title th[data-szenario] .count-badge', {
+  predicate: (el) => !!el.closest('th[data-norm-key][data-szenario]'),
+  getCounts: (el) => {
+    const th = el.closest('th[data-norm-key][data-szenario]');
+    if (!th) return null;
+    return getCountsEffective(th.dataset.normKey, th.dataset.szenario);
+  },
   getHeaderText: (el) => {
-    const raw = el.dataset.szenario;
+    const th  = el.closest('th[data-szenario]');
+    const raw = th?.dataset.szenario;
     const nice = displayAltName ? displayAltName(raw) : raw;
     return `Alternative: ${nice}`;
   }
