@@ -1,15 +1,16 @@
 /* ================================
- * info.js — HowTo & kleine Helfer
+ * config_info.js — HowTo & kleine Helfer
  * Voraussetzungen:
  *   - config.js liefert window.APP_STATE mit:
- *       - APP_STATE.role   -> "user" | "debug" | "admin"
- *       - APP_STATE.flags  -> { show_debug_tooltip, ... }
+ *       - APP_STATE.role      -> "user" | "debug" | "admin" | "dev"
+ *       - APP_STATE.buildRole -> unveränderbare Build-Rolle
+ *       - APP_STATE.flags     -> { show_zwischenergebnisse_tooltip, ... }
  *       - APP_STATE.setRole(nextRole, { persist=true })
  *       - APP_STATE.onRoleChanged(handler)
  *
  * Einbinden (nach config.js):
- *   <script src="/static/config.js"></script>
- *   <script src="/static/info.js"></script>
+ *   <script src="/static/js/config.js"></script>
+ *   <script src="/static/js/config_info.js"></script>
  * ================================ */
 
 /* --------------------------------
@@ -18,15 +19,16 @@
 (function helpBanner() {
   const lines = [
     "Windlast UI — Quick Help:",
+    `• Build-Rolle:              ${window.APP_STATE?.buildRole}`,
     "• Aktuelle Rolle:           APP_STATE.role",
     "• Aktuelle Flags:           APP_STATE.flags",
-    "• Rolle setzen:             APP_STATE.setRole('debug')   // 'user' | 'debug' | 'admin'",
+    "• Rolle setzen:             APP_STATE.setRole('debug')   // 'user' | 'debug' | 'admin' | 'dev'",
     "• Persistente Rolle setzen: APP_STATE.setRole('admin', { persist: true })",
     "• Persistenz löschen:       localStorage.removeItem('windlast_ui_role')",
     "• Seite neu laden:          location.reload()",
-    "• Passwort-Umschalter:      UI.promptRoleWithPassword()  // Demo",
+    "• Passwort-Umschalter:      UI.promptRoleWithPassword()",
     "• Elemente via Attribute:   data-requires-flag, data-requires-role",
-    "• Elemente via JS:          UI.showIfFlag('#sel','show_debug_tooltip');",
+    "• Elemente via JS:          UI.showIfFlag('#sel','show_zwischenergebnisse_tooltip');",
     "                            UI.showIfRole('#sel',['admin','debug']);",
   ];
   if (typeof console !== "undefined") {
@@ -129,41 +131,7 @@
      * UI.showIfFlag('.debug-panel', 'show_debug_tooltip');
      * UI.showIfRole('#adminButton', ['admin']);
      */
-
-    /* --------------------------------
-     * 3) Einfacher Passwort-Umschalter (Demo)
-     *    — NICHT sicher, nur Komfort!
-     * -------------------------------- */
-    promptRoleWithPassword() {
-      const role = prompt("Rolle setzen (user/debug/admin):");
-      if (!role) return;
-
-      if (role === "admin") {
-        // ⚠️ Demo: statisches Passwort. Für echte Sicherheit: serverseitig prüfen!
-        const pwd = prompt("Admin-Passwort:");
-        const OK = checkPasswordDemo(pwd);
-        if (!OK) return alert("Falsches Passwort.");
-      }
-
-      try {
-        APP_STATE.setRole(role, { persist: true });
-        alert(`Rolle ist jetzt '${APP_STATE.role}'.`);
-      } catch (e) {
-        alert(e.message);
-      }
-    },
   };
-
-  /** Demo-Passwortprüfung:
-   *  - aktuell nur ein fester String
-   *  - du kannst das leicht ersetzen durch:
-   *      - Hashvergleich,
-   *      - oder einen Flask-Endpoint, der ein Token ausstellt.
-   */
-  function checkPasswordDemo(input) {
-    const DEMO_PASSWORD = "MEIN_GEHEIMES_PASSWORT"; // TODO: ersetzen
-    return input === DEMO_PASSWORD;
-  }
 })();
 
 

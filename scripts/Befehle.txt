@@ -21,3 +21,9 @@ Abwärts: cd Ordnername
 Exe starten
 cd dist
 .\windlastUI.exe
+
+Admin Passwort
+// Beispiel: "MeinSicheresPasswort123" XOR 37
+// Das hier ist nur ein Platzhalter, bitte mit deinem eigenen Passwort neu erzeugen.
+// Kurzes Hilfssnippet (in der Browser-Konsole ausführen, NICHT im Produktivcode lassen):
+//   Array.from("MeinSicheresPasswort123").map(c => c.charCodeAt(0) ^ 37)
