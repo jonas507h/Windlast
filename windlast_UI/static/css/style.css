@@ -260,3 +260,21 @@ label.required::after {
     max-width: 100%;
   }
 }
+
+/* Vorschau-Container (linke Hälfte) */
+#preview-iso {
+  width: 100%;
+  height: 320px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;         /* ← schneidet den Canvas an den Ecken ab */
+  background: var(--panel); /* oder var(--bg), wie du magst */
+  position: relative;
+}
+
+/* Canvas drin schön bündig */
+#preview-iso canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
