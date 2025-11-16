@@ -58,6 +58,7 @@ form { display: grid; gap: 12px; }
 .row-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .row-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .row-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.row-1 { grid-template-columns: 1fr; }
 .field { display: flex; flex-direction: column; gap: 4px; }
 label { font-size: 12px; color: var(--muted); }
 input[type="number"], select, input[type="text"]{
@@ -233,4 +234,29 @@ label.required::after {
   color: #666;
   margin-top: 4px;
   text-align: center;
+}
+
+.konstruktion-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem; /* insgesamt 1.5rem Abstand */
+}
+
+/* beide Spalten: 50% minus halber Gap */
+.preview-pane,
+.form-pane {
+  flex: 0 0 calc(50% - 0.75rem);
+  max-width: calc(50% - 0.75rem);
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .konstruktion-layout {
+    flex-direction: column;
+  }
+  .preview-pane,
+  .form-pane {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
 }

@@ -86,15 +86,16 @@
               onclick="switch_konstruktion('tisch')">Tisch</button>
     </nav>
 
-    <!-- Zentrales Vorschau-Panel (gilt für alle Konstruktionen) -->
-    <section class="panel">
-      <h3>Vorschau</h3>
-      <div id="preview-iso"
-          style="width:100%;height:320px;border:1px solid var(--border);border-radius:10px;"></div>
-    </section>
+    <section class="panel konstruktion-layout">
+      <!-- Linke Spalte: Preview -->
+      <div class="preview-pane">
+        <div id="preview-iso"
+            style="width:100%;height:320px;border:1px solid var(--border);border-radius:10px;"></div>
+      </div>
 
-    <!-- Hier wird dynamisch der Inhalt von tor.html / steher.html eingefügt -->
-    <div id="konstruktions_container"></div>
+      <!-- Rechte Spalte: Formular (dynamisch)-->
+      <div id="konstruktions_container" class="form-pane"></div>
+    </section>    
   </main>
 
   <!-- ========== FOOTER ========== -->
