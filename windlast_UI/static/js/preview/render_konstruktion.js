@@ -8,7 +8,7 @@ import { bodenplatte_linien } from './linien_bodenplatte.js';
 import { traversenstrecke_linien } from './linien_traverse.js';
 import { rohr_linien } from './linien_rohr.js';
 import { computeAABB, expandAABB, segmentsToThreeLineSegments, fitCameraToAABB } from './linien_helpers.js';
-import { render_dimensions } from './render_dimensions.js';
+import { render_dimensions, update_dimension_arrows } from './render_dimensions.js';
 import { getPreviewTheme, subscribePreviewTheme } from './preview_farben.js';
 
 function createUnlitPlateMesh(THREE, polygon, frame, color) {
@@ -127,8 +127,6 @@ export function render_konstruktion(container, konstruktion, opts = {}) {
   fitCameraToAABB(camera, aabb);
   
   // === Maße (generisch) ===
-  // Variante 1: fertige Specs werden übergeben
-  // Variante 2: eine Funktion computeDimensions(konstruktion, {scene, aabb})
   if (opts.showDimensions !== false) {
     if (Array.isArray(opts.dimensionSpecs)) {
       dimensionSpecs = opts.dimensionSpecs;
@@ -181,6 +179,10 @@ export function render_konstruktion(container, konstruktion, opts = {}) {
     if (disposed) return;
     requestAnimationFrame(animate);
     controls.update();
+    // 🔥 Pfeilspitzen in Blickrichtung um die Bemaßungsachse drehen
+    if (dimensionGroup) {
+      update_dimension_arrows(dimensionGroup, camera);
+    }
     renderer.render(scene, camera);
   }
   animate();

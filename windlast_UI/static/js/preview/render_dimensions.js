@@ -99,6 +99,13 @@ function makeTextSprite(
   return spr;
 }
 
+// Registry für Pfeilspitzen an einer Dimensions-Gruppe
+function ensureArrowRegistry(group) {
+  if (!group.userData) group.userData = {};
+  if (!group.userData.dimensionArrows) group.userData.dimensionArrows = [];
+  return group.userData.dimensionArrows;
+}
+
 function pushLine(lines, a, b){
   lines.push(a[0],a[1],a[2], b[0],b[1],b[2]);
 }
@@ -216,4 +223,75 @@ function addFilledArrow(group, tip, dirOut, n, ah, aw, color){
   });
   const edge = new THREE.LineSegments(edgeGeom, edgeMat);
   group.add(edge);
+
+  // 🔥 Pfeil registrieren, für Drehung zur Kamera
+  const reg = ensureArrowRegistry(group);
+  reg.push({
+    tip:      [...tip],   // Kopie, damit wir safe sind
+    dirOut:   [...d],     // Bemaßungsachse (Richtungsvektor)
+    n:        [...n],     // ursprüngliche Normalenrichtung (Fallback)
+    ah,
+    aw,
+    meshGeom: g,
+    edgeGeom: edgeGeom,
+  });
+}
+
+export function update_dimension_arrows(group, camera) {
+  if (!group || !camera || !group.userData || !group.userData.dimensionArrows) return;
+  const reg = group.userData.dimensionArrows;
+  if (!reg.length) return;
+
+  const camPos = camera.position;
+  const cam = [camPos.x, camPos.y, camPos.z];
+
+  for (const a of reg) {
+    const { tip, dirOut, n, ah, aw, meshGeom, edgeGeom } = a;
+
+    const d = v.norm(dirOut); // Bemaßungsachse
+
+    // Vektor von Spitze zur Kamera
+    let camVec = v.sub(cam, tip);
+    camVec = v.norm(camVec);
+
+    // Komponente der Kamerarichtung, die senkrecht zur Achse ist
+    let camProj = v.sub(camVec, v.mul(d, v.dot(camVec, d)));
+    const camProjLen = v.len(camProj);
+
+    let perp;
+    if (camProjLen > 1e-4) {
+      // gewünschte Pfeil-Ebenen-Normale = projizierte Kamerarichtung
+      const N = v.norm(camProj);
+      // Pfeil liegt in Ebene aufgespannt von Achse d und perp:
+      // Normale dieser Ebene = N
+      perp = v.norm(v.cross(N, d));
+    } else {
+      // Kamera fast parallel zur Achse → auf ursprüngliche Orientierung zurückfallen
+      perp = v.norm(v.cross(d, n));
+    }
+
+    const baseC = v.add(tip, v.mul(d, ah));
+    const p1 = tip;
+    const p2 = v.add(baseC, v.mul(perp, +aw));
+    const p3 = v.add(baseC, v.mul(perp, -aw));
+
+    // --- gefülltes Dreieck updaten
+    const pos = meshGeom.attributes.position.array;
+    pos[0] = p1[0]; pos[1] = p1[1]; pos[2] = p1[2];
+    pos[3] = p2[0]; pos[4] = p2[1]; pos[5] = p2[2];
+    pos[6] = p3[0]; pos[7] = p3[1]; pos[8] = p3[2];
+    meshGeom.attributes.position.needsUpdate = true;
+    meshGeom.computeVertexNormals();
+
+    // --- Kontur updaten: [p1,p2, p2,p3, p3,p1]
+    const epos = edgeGeom.attributes.position.array;
+    const pts = [p1, p2,  p2, p3,  p3, p1];
+    let i = 0;
+    for (const p of pts) {
+      epos[i++] = p[0];
+      epos[i++] = p[1];
+      epos[i++] = p[2];
+    }
+    edgeGeom.attributes.position.needsUpdate = true;
+  }
 }
