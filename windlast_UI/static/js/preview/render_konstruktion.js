@@ -9,8 +9,9 @@ import { traversenstrecke_linien } from './linien_traverse.js';
 import { rohr_linien } from './linien_rohr.js';
 import { computeAABB, expandAABB, segmentsToThreeLineSegments, fitCameraToAABB } from './linien_helpers.js';
 import { render_dimensions } from './render_dimensions.js';
+import { getPreviewTheme, subscribePreviewTheme } from './preview_farben.js';
 
-function createUnlitPlateMesh(THREE, polygon, frame) {
+function createUnlitPlateMesh(THREE, polygon, frame, color) {
   const { u, v, n, C } = frame;
 
   // 2D-Shape im lokalen Frame (x = v, y = u)
@@ -30,11 +31,11 @@ function createUnlitPlateMesh(THREE, polygon, frame) {
 
   const geom = new THREE.ShapeGeometry(shape);
   const mat = new THREE.MeshBasicMaterial({
-    color: 0xffffff,
+    color: color ?? 0xffffff,
     side: THREE.DoubleSide,   // ← von oben UND unten sichtbar
     depthWrite: true,
     depthTest: true,
-    polygonOffset: true,      // ↓ minimiert Z-Fighting mit deinen Linien
+    polygonOffset: true,
     polygonOffsetFactor: 1,
     polygonOffsetUnits: 1
   });
@@ -59,6 +60,7 @@ function createUnlitPlateMesh(THREE, polygon, frame) {
 export function render_konstruktion(container, konstruktion, opts = {}) {
   const preserveView = opts.preserveView ?? false;
   const prevView = opts.prevView ?? null;
+  const theme = getPreviewTheme(opts.theme);
 
   // Falls vom letzten Render vorhanden: Position/Rotation & Controls-Target merken
   let initialView = null;
@@ -83,7 +85,7 @@ export function render_konstruktion(container, konstruktion, opts = {}) {
       const data = bodenplatte_linien(el);
       allSegments.push(...(data.segments || []));
       if (data.polygon && data.frame) {
-        const m = createUnlitPlateMesh(THREE, data.polygon, data.frame);
+        const m = createUnlitPlateMesh(THREE, data.polygon, data.frame, theme.plateFill);
         plateMeshes.push(m);
       }
     } else if (el.typ === 'Traversenstrecke') {
@@ -98,7 +100,7 @@ export function render_konstruktion(container, konstruktion, opts = {}) {
 
   // 2) Three.js Grundsetup
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xffffff);
+  scene.background = new THREE.Color(theme.background);
   const camera = new THREE.PerspectiveCamera(45, width / height, 0.01, 1000);
   camera.up.set(0, 0, 1);
   const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -110,7 +112,7 @@ export function render_konstruktion(container, konstruktion, opts = {}) {
 
   // 3) Linien-Mesh bauen und Szene hinzufügen
   if (allSegments.length) {
-    lines = segmentsToThreeLineSegments(allSegments);
+    lines = segmentsToThreeLineSegments(allSegments, theme.lineColor);
     lines.renderOrder = 1;
     scene.add(lines);
   }
@@ -182,6 +184,29 @@ export function render_konstruktion(container, konstruktion, opts = {}) {
   }
   animate();
 
+  // ===== Theme-Live-Update (Dark/Light Umschalter) =====
+  function applyThemeToScene(t) {
+    if (!t) return;
+    scene.background.set(t.background);
+
+    if (lines && lines.material && lines.material.color) {
+      lines.material.color.set(t.lineColor);
+    }
+
+    for (const m of plateMeshes) {
+      if (m.material && m.material.color) {
+        m.material.color.set(t.plateFill);
+      }
+    }
+  }
+
+  // direkt initial einmal anwenden (falls z.B. opts.theme gesetzt ist)
+  applyThemeToScene(theme);
+
+  const unsubscribeTheme = subscribePreviewTheme(({ theme: t }) => {
+    applyThemeToScene(t);
+  });
+
   // Rückgabe inkl. Dispose
   return {
     scene, camera, renderer, lines, controls,
@@ -189,6 +214,7 @@ export function render_konstruktion(container, konstruktion, opts = {}) {
     dispose() {
       disposed = true;
       window.removeEventListener('resize', onResize);
+      unsubscribeTheme && unsubscribeTheme();
       renderer.dispose?.();
     }
   };

@@ -23,14 +23,14 @@ export function expandAABB(aabb, pad = 0.1) {
   };
 }
 
-export function segmentsToThreeLineSegments(segments) {
+export function segmentsToThreeLineSegments(segments, color = 0x111111) {
   const points = [];
   for (const [a, b] of segments) {
     points.push(a[0], a[1], a[2], b[0], b[1], b[2]);
   }
   const geom = new THREE.BufferGeometry();
   geom.setAttribute('position', new THREE.Float32BufferAttribute(points, 3));
-  const mat = new THREE.LineBasicMaterial({ linewidth: 1, color: 0x111111 });
+  const mat = new THREE.LineBasicMaterial({ linewidth: 1, color});
   return new THREE.LineSegments(geom, mat);
 }
 

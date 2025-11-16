@@ -1,5 +1,6 @@
 // render_dimensions.js — generischer Renderer für Maßpfeile (V0: linear)
 import * as THREE from '/static/vendor/three.module.js';
+import { getPreviewTheme } from './preview_farben.js';
 
 // --- kleine Vektor-Utils (Array<3> kompatibel) ---
 const v = {
@@ -113,7 +114,12 @@ function renderLinear(spec, group){
 
   // Linien sammeln
   const points=[]; // Float32Array data
-  const color = style.color ?? 0xff0000;   
+
+  // Theme holen (Light/Dark)
+  const theme = getPreviewTheme();
+  const dimTheme = theme.dimensions || {};
+
+  const color = style.color ?? dimTheme.lineColor ?? 0xff0000;
 
   // Hilfslinien (von Anker zu Maßlinie)
   pushLine(points,a,a1); pushLine(points,b,b1);
@@ -145,11 +151,14 @@ function renderLinear(spec, group){
   const mid = v.add(a1, v.mul(d, v.len(v.sub(b1,a1))/2));
   const txt = typeof label==='function' ? label({a,b,a1,b1}) : (label ?? '');
   if (txt) {
-    const spr=makeTextSprite(txt, {
-      size: anchors.textSize ?? 0.20,
-      fillStyle: style.textColor ?? '#ff0000',
-      strokeStyle: style.textOutline ?? '#ffffff',
-      strokeWidth: style.textOutlineWidth ?? 4
+    const spr = makeTextSprite(txt, {
+      size: anchors.textSize ?? dimTheme.textSize ?? 0.20,
+      fillStyle: style.textColor ?? dimTheme.textFill ?? '#ff0000',
+      strokeStyle: style.textOutline ?? dimTheme.textOutline ?? '#ffffff',
+      strokeWidth: style.textOutlineWidth ?? dimTheme.textOutlineWidth ?? 4,
+      backgroundColor: style.textBackground ?? dimTheme.textBackground ?? '#ffffff',
+      borderColor: style.textBorder ?? dimTheme.textBorder ?? color,
+      borderWidth: style.textBorderWidth ?? dimTheme.textBorderWidth ?? 2,
     });
     spr.position.set(mid[0],mid[1],mid[2]);
     group.add(spr);
