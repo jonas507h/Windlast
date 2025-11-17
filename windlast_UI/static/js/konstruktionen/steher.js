@@ -1,3 +1,5 @@
+import { buildSteher } from '../build/build_steher.js';
+
 async function fetchOptions(url) {
   // Holt Dropdown-Inhalte von der API
   const res = await fetch(url, { headers: { "Accept": "application/json" } });
@@ -174,8 +176,57 @@ function validateSteherForm() {
   return ok;
 }
 
+// async function submitSteher() {
+//   // Formulardaten sammeln und an API senden
+//   try {
+//     if (!validateSteherForm()) {
+//       const firstInvalid = document.querySelector('.field.is-invalid select, .field.is-invalid input');
+//       firstInvalid?.focus();
+//       return;
+//     }
+
+//     const ok = await UI_WARN.confirmNichtZertifiziert();
+//     if (!ok) return;
+
+//     // Gummimatte-Wert holen (ja/nein); wir reichen ihn als Boolean weiter
+//     const gmVal = document.getElementById("gummimatte")?.value ?? "ja";
+//     const gummimatte_bool = (gmVal === "ja");
+
+//     // Sammeln der Eingabewerte und verpacken
+//     const payload = {
+//       hoehe_m:  parseFloat(document.getElementById("hoehe_m").value),
+//       rohr_laenge_m: parseFloat(document.getElementById("rohr_laenge_m").value),
+//       rohr_hoehe_m: parseFloat(document.getElementById("rohr_hoehe_m").value),
+//       traverse_name_intern: document.getElementById("traverse_name_intern").value,
+//       rohr_name_intern: document.getElementById("rohr_name_intern").value,
+//       bodenplatte_name_intern: document.getElementById("bodenplatte_name_intern").value,
+//       untergrund_typ: document.getElementById("untergrund_typ").value, // z.B. "beton"
+//       gummimatte: gummimatte_bool,
+//       ...readHeaderValues(),
+//     };
+
+//     const data = await fetchJSON("/api/v1/steher/berechnen", {
+//       method: "POST",
+//       body: JSON.stringify(payload),
+//     });
+
+//     // 1) bevorzugt: direkte Funktion (falls Footer sie anbietet)
+//     if (typeof window.updateFooterResults === "function") {
+//       window.updateFooterResults(data);
+//     } else {
+//       // 2) Fallback: CustomEvent im selben Dokument
+//       document.dispatchEvent(new CustomEvent("results:update", { detail: data }));
+//     }
+//   } catch (e) {
+//     console.error("Steher-Berechnung fehlgeschlagen:", e);
+//     // optional: ein schlichtes Toast-Event, falls du es nutzen willst
+//     document.dispatchEvent(new CustomEvent("toast", {
+//       detail: { level: "error", text: String(e?.message || e) }
+//     }));
+//   }
+// }
+
 async function submitSteher() {
-  // Formulardaten sammeln und an API senden
   try {
     if (!validateSteherForm()) {
       const firstInvalid = document.querySelector('.field.is-invalid select, .field.is-invalid input');
@@ -183,41 +234,46 @@ async function submitSteher() {
       return;
     }
 
-    const ok = await UI_WARN.confirmNichtZertifiziert();
-    if (!ok) return;
+    const okConfirm = await window.UI_WARN?.confirmNichtZertifiziert?.();
+    if (okConfirm === false) return;
 
-    // Gummimatte-Wert holen (ja/nein); wir reichen ihn als Boolean weiter
     const gmVal = document.getElementById("gummimatte")?.value ?? "ja";
     const gummimatte_bool = (gmVal === "ja");
 
-    // Sammeln der Eingabewerte und verpacken
-    const payload = {
-      hoehe_m:  parseFloat(document.getElementById("hoehe_m").value),
-      rohr_laenge_m: parseFloat(document.getElementById("rohr_laenge_m").value),
-      rohr_hoehe_m: parseFloat(document.getElementById("rohr_hoehe_m").value),
-      traverse_name_intern: document.getElementById("traverse_name_intern").value,
-      rohr_name_intern: document.getElementById("rohr_name_intern").value,
-      bodenplatte_name_intern: document.getElementById("bodenplatte_name_intern").value,
-      untergrund_typ: document.getElementById("untergrund_typ").value, // z.B. "beton"
+    const inputs = {
+      hoehe_m:        parseFloat(document.getElementById("hoehe_m").value),
+      rohr_laenge_m:  parseFloat(document.getElementById("rohr_laenge_m").value),
+      rohr_hoehe_m:   parseFloat(document.getElementById("rohr_hoehe_m").value),
+      traverse_name_intern:   document.getElementById("traverse_name_intern").value,
+      bodenplatte_name_intern:document.getElementById("bodenplatte_name_intern").value,
+      rohr_name_intern:       document.getElementById("rohr_name_intern").value,
       gummimatte: gummimatte_bool,
+      name: "Steher",
+      // untergrund_typ könntest du optional auch schon in den Build kippen,
+      // aktuell ist er noch in den Bodenplatten hardcodiert.
+    };
+
+    // 1) UI-Build erzeugen (komplett generische Struktur)
+    const konstruktion = buildSteher(inputs, window.Catalog);
+
+    // 2) Header dazu und an GENERIC-Endpoint schicken
+    const payload = {
+      konstruktion,
       ...readHeaderValues(),
     };
 
-    const data = await fetchJSON("/api/v1/steher/berechnen", {
+    const data = await fetchJSON("/api/v1/konstruktion/berechnen", {
       method: "POST",
       body: JSON.stringify(payload),
     });
 
-    // 1) bevorzugt: direkte Funktion (falls Footer sie anbietet)
     if (typeof window.updateFooterResults === "function") {
       window.updateFooterResults(data);
     } else {
-      // 2) Fallback: CustomEvent im selben Dokument
       document.dispatchEvent(new CustomEvent("results:update", { detail: data }));
     }
   } catch (e) {
     console.error("Steher-Berechnung fehlgeschlagen:", e);
-    // optional: ein schlichtes Toast-Event, falls du es nutzen willst
     document.dispatchEvent(new CustomEvent("toast", {
       detail: { level: "error", text: String(e?.message || e) }
     }));
@@ -229,3 +285,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById("btn-berechnen");
   if (btn) btn.addEventListener("click", submitSteher);
 });
+
+// --- Globale Hooks für index.html ---
+window.initSteherDropdowns = initSteherDropdowns;
+window.submitSteher = submitSteher;

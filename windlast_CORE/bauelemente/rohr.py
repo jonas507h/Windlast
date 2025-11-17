@@ -30,6 +30,7 @@ class Rohr:
     ende:  Vec3
     objekttyp: ObjektTyp = ObjektTyp.ROHR
     element_id_intern: Optional[str] = None
+    anzeigename: Optional[str] = None
 
     def gesamthoehe(self) -> float:
         return max(self.start[2], self.ende[2])
