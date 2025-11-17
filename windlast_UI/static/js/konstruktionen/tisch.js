@@ -1,3 +1,5 @@
+import { buildTisch } from '../build/build_tisch.js';
+
 async function fetchOptions(url) {
   // Holt Dropdown-Inhalte von der API
   const res = await fetch(url, { headers: { "Accept": "application/json" } });
@@ -167,9 +169,58 @@ function validateTischForm() {
   return ok;
 }
 
+// async function submitTisch() {
+//   // Formulardaten sammeln und an API senden
+//   try {
+//     if (!validateTischForm()) {
+//       const firstInvalid = document.querySelector('.field.is-invalid select, .field.is-invalid input');
+//       firstInvalid?.focus();
+//       return;
+//     }
+
+//     const ok = await UI_WARN.confirmNichtZertifiziert();
+//     if (!ok) return;
+
+//     // Gummimatte-Wert holen (ja/nein); wir reichen ihn als Boolean weiter
+//     const gmVal = document.getElementById("gummimatte")?.value ?? "ja";
+//     const gummimatte_bool = (gmVal === "ja");
+
+//     // Sammeln der Eingabewerte und verpacken
+//     const payload = {
+//       breite_m: parseFloat(document.getElementById("breite_m").value),
+//       tiefe_m:  parseFloat(document.getElementById("tiefe_m").value),
+//       hoehe_m:  parseFloat(document.getElementById("hoehe_m").value),
+//       traverse_name_intern: document.getElementById("traverse_name_intern").value,
+//       bodenplatte_name_intern: document.getElementById("bodenplatte_name_intern").value,
+//       untergrund_typ: document.getElementById("untergrund_typ").value, // z.B. "beton"
+//       gummimatte: gummimatte_bool,
+//       ...readHeaderValues(),
+//     };
+
+//     const data = await fetchJSON("/api/v1/tisch/berechnen", {
+//       method: "POST",
+//       body: JSON.stringify(payload),
+//     });
+
+//     // 1) bevorzugt: direkte Funktion (falls Footer sie anbietet)
+//     if (typeof window.updateFooterResults === "function") {
+//       window.updateFooterResults(data);
+//     } else {
+//       // 2) Fallback: CustomEvent im selben Dokument
+//       document.dispatchEvent(new CustomEvent("results:update", { detail: data }));
+//     }
+//   } catch (e) {
+//     console.error("Tisch-Berechnung fehlgeschlagen:", e);
+//     // optional: ein schlichtes Toast-Event, falls du es nutzen willst
+//     document.dispatchEvent(new CustomEvent("toast", {
+//       detail: { level: "error", text: String(e?.message || e) }
+//     }));
+//   }
+// }
+
 async function submitTisch() {
-  // Formulardaten sammeln und an API senden
   try {
+    // 1) Validierung wie bisher
     if (!validateTischForm()) {
       const firstInvalid = document.querySelector('.field.is-invalid select, .field.is-invalid input');
       firstInvalid?.focus();
@@ -179,37 +230,46 @@ async function submitTisch() {
     const ok = await UI_WARN.confirmNichtZertifiziert();
     if (!ok) return;
 
-    // Gummimatte-Wert holen (ja/nein); wir reichen ihn als Boolean weiter
+    // 2) Gummimatte (ja/nein) -> Boolean
     const gmVal = document.getElementById("gummimatte")?.value ?? "ja";
     const gummimatte_bool = (gmVal === "ja");
 
-    // Sammeln der Eingabewerte und verpacken
-    const payload = {
+    // 3) UI-Inputs einsammeln
+    const inputs = {
       breite_m: parseFloat(document.getElementById("breite_m").value),
       tiefe_m:  parseFloat(document.getElementById("tiefe_m").value),
       hoehe_m:  parseFloat(document.getElementById("hoehe_m").value),
-      traverse_name_intern: document.getElementById("traverse_name_intern").value,
+      traverse_name_intern:    document.getElementById("traverse_name_intern").value,
       bodenplatte_name_intern: document.getElementById("bodenplatte_name_intern").value,
-      untergrund_typ: document.getElementById("untergrund_typ").value, // z.B. "beton"
       gummimatte: gummimatte_bool,
-      ...readHeaderValues(),
+      name: "Tisch",
     };
 
-    const data = await fetchJSON("/api/v1/tisch/berechnen", {
+    // 4) Generische KONSTRUKTION über UI-Build erzeugen
+    const konstruktion = buildTisch(inputs, window.Catalog);
+
+    // 5) Headerwerte (windzone + aufstelldauer) dazu
+    const header = readHeaderValues(); // { aufstelldauer, windzone }
+
+    const payload = {
+      konstruktion,
+      ...header,
+    };
+
+    // 6) Generischen Endpoint aufrufen
+    const data = await fetchJSON("/api/v1/konstruktion/berechnen", {
       method: "POST",
       body: JSON.stringify(payload),
     });
 
-    // 1) bevorzugt: direkte Funktion (falls Footer sie anbietet)
+    // 7) Ergebnis wie gehabt in den Footer
     if (typeof window.updateFooterResults === "function") {
       window.updateFooterResults(data);
     } else {
-      // 2) Fallback: CustomEvent im selben Dokument
       document.dispatchEvent(new CustomEvent("results:update", { detail: data }));
     }
   } catch (e) {
     console.error("Tisch-Berechnung fehlgeschlagen:", e);
-    // optional: ein schlichtes Toast-Event, falls du es nutzen willst
     document.dispatchEvent(new CustomEvent("toast", {
       detail: { level: "error", text: String(e?.message || e) }
     }));
@@ -221,3 +281,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById("btn-berechnen");
   if (btn) btn.addEventListener("click", submitTisch);
 });
+
+// --- Globale Hooks für index.html ---
+window.initTischDropdowns = initTischDropdowns;
+window.submitTisch = submitTisch;
