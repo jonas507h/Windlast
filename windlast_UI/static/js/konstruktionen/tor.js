@@ -1,3 +1,5 @@
+import { buildTor } from '../build/build_tor.js';
+
 async function fetchOptions(url) {
   // Holt Dropdown-Inhalte von der API
   const res = await fetch(url, { headers: { "Accept": "application/json" } });
@@ -169,12 +171,60 @@ function validateTorForm() {
   return ok;
 }
 
+// async function submitTor() {
+//   // Formulardaten sammeln und an API senden
+//   try {
+//     // Gummimatte-Wert holen (ja/nein); wir reichen ihn als Boolean weiter
+//     if (!validateTorForm()) {
+//       // Fokus auf erstes fehlerhaftes Feld
+//       const firstInvalid = document.querySelector('.field.is-invalid select, .field.is-invalid input');
+//       firstInvalid?.focus();
+//       return;
+//     }
+
+//     const ok = await UI_WARN.confirmNichtZertifiziert();
+//     if (!ok) return;
+
+//     const gmVal = document.getElementById("gummimatte")?.value ?? "ja";
+//     const gummimatte_bool = (gmVal === "ja");
+
+//     // Sammeln der Eingabewerte und verpacken
+//     const payload = {
+//       breite_m: parseFloat(document.getElementById("breite_m").value),
+//       hoehe_m:  parseFloat(document.getElementById("hoehe_m").value),
+//       traverse_name_intern: document.getElementById("traverse_name_intern").value,
+//       bodenplatte_name_intern: document.getElementById("bodenplatte_name_intern").value,
+//       untergrund_typ: document.getElementById("untergrund_typ").value, // z.B. "beton"
+//       gummimatte: gummimatte_bool,
+//       orientierung: readTraversenOrientierung(), // z.B. "up"
+//       ...readHeaderValues(),
+//     };
+
+//     const data = await fetchJSON("/api/v1/tor/berechnen", {
+//       method: "POST",
+//       body: JSON.stringify(payload),
+//     });
+
+//     // 1) bevorzugt: direkte Funktion (falls Footer sie anbietet)
+//     if (typeof window.updateFooterResults === "function") {
+//       window.updateFooterResults(data);
+//     } else {
+//       // 2) Fallback: CustomEvent im selben Dokument
+//       document.dispatchEvent(new CustomEvent("results:update", { detail: data }));
+//     }
+//   } catch (e) {
+//     console.error("Tor-Berechnung fehlgeschlagen:", e);
+//     // optional: ein schlichtes Toast-Event, falls du es nutzen willst
+//     document.dispatchEvent(new CustomEvent("toast", {
+//       detail: { level: "error", text: String(e?.message || e) }
+//     }));
+//   }
+// }
+
 async function submitTor() {
-  // Formulardaten sammeln und an API senden
+  // Formulardaten sammeln, UI-Build ausführen und an generische API senden
   try {
-    // Gummimatte-Wert holen (ja/nein); wir reichen ihn als Boolean weiter
     if (!validateTorForm()) {
-      // Fokus auf erstes fehlerhaftes Feld
       const firstInvalid = document.querySelector('.field.is-invalid select, .field.is-invalid input');
       firstInvalid?.focus();
       return;
@@ -186,33 +236,45 @@ async function submitTor() {
     const gmVal = document.getElementById("gummimatte")?.value ?? "ja";
     const gummimatte_bool = (gmVal === "ja");
 
-    // Sammeln der Eingabewerte und verpacken
-    const payload = {
-      breite_m: parseFloat(document.getElementById("breite_m").value),
-      hoehe_m:  parseFloat(document.getElementById("hoehe_m").value),
-      traverse_name_intern: document.getElementById("traverse_name_intern").value,
-      bodenplatte_name_intern: document.getElementById("bodenplatte_name_intern").value,
-      untergrund_typ: document.getElementById("untergrund_typ").value, // z.B. "beton"
+    const breite_m = parseFloat(document.getElementById("breite_m").value);
+    const hoehe_m  = parseFloat(document.getElementById("hoehe_m").value);
+    const traverse_name_intern    = document.getElementById("traverse_name_intern").value;
+    const bodenplatte_name_intern = document.getElementById("bodenplatte_name_intern").value;
+    const orientierung            = readTraversenOrientierung();
+
+    // 1) UI-Build → generische KONSTRUKTION
+    const konstruktion = buildTor({
+      breite_m,
+      hoehe_m,
+      traverse_name_intern,
+      bodenplatte_name_intern,
       gummimatte: gummimatte_bool,
-      orientierung: readTraversenOrientierung(), // z.B. "up"
-      ...readHeaderValues(),
+      orientierung,
+      name: 'Tor',
+    }, window.Catalog);
+
+    // 2) Headerwerte (windzone + aufstelldauer) dazu packen
+    const header = readHeaderValues();   // { aufstelldauer, windzone }
+
+    const payload = {
+      konstruktion,
+      ...header,
     };
 
-    const data = await fetchJSON("/api/v1/tor/berechnen", {
+    // 3) Generischen Endpoint aufrufen
+    const data = await fetchJSON("/api/v1/konstruktion/berechnen", {
       method: "POST",
       body: JSON.stringify(payload),
     });
 
-    // 1) bevorzugt: direkte Funktion (falls Footer sie anbietet)
+    // 4) Ergebnis wie gewohnt in den Footer schicken
     if (typeof window.updateFooterResults === "function") {
       window.updateFooterResults(data);
     } else {
-      // 2) Fallback: CustomEvent im selben Dokument
       document.dispatchEvent(new CustomEvent("results:update", { detail: data }));
     }
   } catch (e) {
     console.error("Tor-Berechnung fehlgeschlagen:", e);
-    // optional: ein schlichtes Toast-Event, falls du es nutzen willst
     document.dispatchEvent(new CustomEvent("toast", {
       detail: { level: "error", text: String(e?.message || e) }
     }));
@@ -225,3 +287,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (btn) btn.addEventListener("click", submitTor);
 });
 
+// --- Globale Hooks für index.html ---
+window.initTorDropdowns = initTorDropdowns;
+window.submitTor = submitTor;

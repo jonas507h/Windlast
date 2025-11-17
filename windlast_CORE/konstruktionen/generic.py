@@ -19,6 +19,31 @@ from windlast_CORE.datenstruktur.enums import (
 )
 from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_kontext
 
+def _parse_material(value, default: "MaterialTyp | None" = None):
+    """
+    Akzeptiert sowohl Enum-Namen ("STAHL") als auch Values ("Stahl") und gibt einen MaterialTyp zurück.
+    """
+    from windlast_CORE.datenstruktur.enums import MaterialTyp  # oder dein tatsächlicher Pfad
+
+    if value is None:
+        return default
+    if isinstance(value, MaterialTyp):
+        return value
+
+    # zuerst als Enum-Name probieren: MaterialTyp["STAHL"]
+    try:
+        return MaterialTyp[value]
+    except Exception:
+        pass
+
+    # dann als Value probieren: MaterialTyp("Stahl")
+    try:
+        return MaterialTyp(value)
+    except Exception:
+        if default is not None:
+            return default
+        raise
+
 def _build_bauelement(el: Dict[str, Any]) -> object:
     typ = el.get("typ")
 
@@ -33,9 +58,9 @@ def _build_bauelement(el: Dict[str, Any]) -> object:
         )
 
     if typ == "Bodenplatte":
-        material = MaterialTyp(el["material"])
-        untergrund = MaterialTyp(el["untergrund"])
-        gummimatte = MaterialTyp(el["gummimatte"]) if el.get("gummimatte") else None
+        material = _parse_material(el.get("material"), default=MaterialTyp.STAHL)
+        untergrund = _parse_material(el.get("untergrund"), default=MaterialTyp.BETON)
+        gummimatte = _parse_material(el.get("gummimatte")) if el.get("gummimatte") else None
 
         return Bodenplatte(
             name_intern=el["name_intern"],
