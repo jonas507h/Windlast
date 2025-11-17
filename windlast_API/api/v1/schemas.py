@@ -40,6 +40,11 @@ class TischInput(BaseModel):
     aufstelldauer: DauerInput | None = None
     windzone: str  # Windzone Enum-Name (z.B. "III_Binnenland")
 
+class KonstruktionInput(BaseModel):
+    konstruktion: Dict[str, Any]  # Platzhalter für beliebige Konstruktion-Daten aus UI-Build
+    aufstelldauer: DauerInput | None = None
+    windzone: str  # Windzone Enum-Name (z.B. "III_Binnenland")
+
 # =========================
 # Output-Modelle
 # =========================
