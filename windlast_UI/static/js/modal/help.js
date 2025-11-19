@@ -65,23 +65,16 @@ function getRenderedPage(id) {
 }
 
 // --- Modal-Rendering ---
-function buildHelpModal(title, bodyHtml, stand) {
+function buildHelpContent(title, bodyHtml, stand) {
   const wrap = document.createElement("div");
-  wrap.style.position = "relative";
-
-  const h = document.createElement("h3");
-  h.className = "modal-title";
-  h.textContent = title || "Hilfe";
-  wrap.appendChild(h);
 
   const body = document.createElement("div");
   body.innerHTML = bodyHtml || "<p>Kein Inhalt.</p>";
   wrap.appendChild(body);
 
-  // --- Bearbeitungsstand-Footer unten rechts ---
   if (stand) {
     const meta = document.createElement("div");
-    meta.textContent = `Stand: ${stand}`;
+    meta.textContent = "Stand: " + stand;
     meta.style.marginTop = "12px";
     meta.style.textAlign = "right";
     meta.style.fontSize = "0.75rem";
@@ -90,21 +83,25 @@ function buildHelpModal(title, bodyHtml, stand) {
     meta.style.paddingTop = "4px";
     wrap.appendChild(meta);
   }
-  
+
   return wrap;
 }
 
 export function openHelp(id) {
-  const page = getPage(id);
-  const { title, body } = getRenderedPage(id);
+  const page = getPage(id);                 // wie vorher
+  const { title, body } = getRenderedPage(id); // mit [[...]]-Linkauflösung
 
-  const content = buildHelpModal(
+  const contentNode = buildHelpContent(
     title,
     body,
     page?.stand || null
   );
 
-  window.Modal?.open(content);
+  // NEU: ins Wiki-Modal schieben
+  window.WikiModal?.open({
+    title,
+    contentNode
+  });
 }
 
 // Norm-spezifische Convenience
@@ -128,12 +125,14 @@ export function getNorminfo(normKey, szenario = null) {
 
 function handleDocumentClick(ev) {
   const a = ev.target.closest('a[data-help-id], a[href^="#help:"]');
-  if (!a) return;
+  const btn = ev.target.closest('button[data-help-id]');
+  if (!a && !btn) return;
 
   ev.preventDefault();
 
-  const idFromData = a.getAttribute("data-help-id");
-  const href = a.getAttribute("href") || "";
+  const el = a || btn;
+  const idFromData = el.getAttribute("data-help-id");
+  const href = el.getAttribute("href") || "";
   const idFromHref = href.startsWith("#help:") ? href.slice("#help:".length) : null;
   const id = idFromData || idFromHref;
   if (!id) return;
@@ -141,7 +140,6 @@ function handleDocumentClick(ev) {
   openHelp(id);
 }
 
-// global einmal registrieren
 document.addEventListener("click", handleDocumentClick);
 
 // --- Globales API für z.B. den Hilfe-Button ---

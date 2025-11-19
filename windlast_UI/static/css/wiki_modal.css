@@ -1,0 +1,109 @@
+/* Root für das Wiki-Modal */
+#wiki-modal-root {
+  position: fixed;
+  inset: 0;
+  pointer-events: none; /* Nur das Panel selbst fängt Events */
+  z-index: 1200; /* über normalem Content, unter evtl. Systemmodals falls gewünscht */
+}
+
+/* Das Panel selbst */
+.wiki-modal {
+  position: fixed;
+  top: 15%;
+  right: 3%;
+  width: 420px;
+  max-width: calc(100% - 32px);
+  max-height: 70%;
+  background: var(--bg, #fff);
+  color: var(--text, #000);
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+  overflow: hidden;
+  outline: none;
+}
+
+/* Header – später Drag-Handle */
+.wiki-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  background: rgba(0,0,0,0.04);
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  cursor: default; /* wird bei Drag&Drop noch angepasst */
+}
+
+.wiki-modal-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-right: 8px;
+}
+
+.wiki-modal-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.wiki-nav-btn,
+.wiki-close-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.wiki-nav-btn[disabled] {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.wiki-nav-btn:hover:not([disabled]),
+.wiki-close-btn:hover {
+  background: rgba(0,0,0,0.06);
+}
+
+/* Inhalt */
+.wiki-modal-body {
+  padding: 8px 10px 10px;
+  overflow: auto;
+  font-size: 0.9rem;
+}
+
+/* Standard-Links im Wiki */
+.wiki-modal-body a {
+  color: var(--link, #0066cc);
+  text-decoration: underline;
+}
+.wiki-modal-body a:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* FAQ-Toggles usw. können wir später hier erweitern */
+
+/* Universeller kleiner Hilfe-Button (Fragezeichen) */
+.help-icon-btn {
+  border: 1px solid rgba(0,0,0,0.18);
+  border-radius: 999px;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: rgba(0,0,0,0.03);
+}
+
+.help-icon-btn:hover {
+  background: rgba(0,0,0,0.08);
+}
