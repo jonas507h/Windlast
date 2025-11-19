@@ -58,7 +58,7 @@ export function computeDimensionsTisch(konstruktion){
 
   if (breite && breite.start && breite.ende){
     // Breite entlang der oberen Traverse, Maßlinie leicht darüber (Z-up: +Z)
-    const a = breite.start; const b = breite.ende;
+    const a = [0,0,H]; const b = [B,0,H];
     specs.push({
       kind:'linear', param_key:'breite_m', label: label_breite,
       anchors:{ a, b, dir:[0,0,1], offset: real_offset_a, textSize:0.28 }
@@ -67,7 +67,7 @@ export function computeDimensionsTisch(konstruktion){
 
   if (hoehe && hoehe.start && hoehe.ende){
     // Höhe entlang der linken Stütze, Maßlinie leicht links daneben
-    const a = hoehe.start; const b = hoehe.ende;
+    const a = [0,0,0]; const b = [0,0,H];
     // Linke Stütze steht bei x≈0 → quer nach -X raus bemaßen
     specs.push({
       kind:'linear', param_key:'hoehe_m', label: label_hoehe,
@@ -77,7 +77,7 @@ export function computeDimensionsTisch(konstruktion){
 
   if (tiefe && tiefe.start && tiefe.ende){
     // Tiefe entlang der oberen linken Traverse, Maßlinie leicht links daneben
-    const a = tiefe.start; const b = tiefe.ende;
+    const a = [0,0,H]; const b = [0,T,H];
     specs.push({
       kind:'linear', param_key:'tiefe_m', label: label_tiefe,
       anchors:{ a, b, dir:[0,0,1], offset: real_offset_a, textSize:0.28 }

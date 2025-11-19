@@ -8,7 +8,8 @@ const fmtDE = (x) => x.toLocaleString('de-DE', { minimumFractionDigits: 2, maxim
 
 const trav_eff_offset = 0.2; // Versatz der Maßlinie von der Konstruktion in m
 let trav_real_offset = trav_eff_offset;
-const rohr_offset = 0.1;
+let rohr_eff_offset = 0.2;
+let rohr_offset = rohr_eff_offset;
 const rh_eff_offset = 0.2;
 let rh_real_offset = rh_eff_offset;
 let rohr_offset_to_front = 0.0;
@@ -50,6 +51,7 @@ export function computeDimensionsSteher(konstruktion){
 
   trav_real_offset = trav_eff_offset + (Number(travSpec.B_hoehe ?? travSpec.A_hoehe ?? travSpec.hoehe) / 2);
   rh_real_offset = rh_eff_offset + R_L / 2;
+  rohr_offset = rohr_eff_offset + H - R_H;
 
   if (is3punkt) {
     rohr_offset_to_front = -1 * (Number(travSpec.A_hoehe ?? travSpec.hoehe) / 3);
@@ -60,7 +62,10 @@ export function computeDimensionsSteher(konstruktion){
   const rohr = findEl(els,'Rohr_Steher');
 
   if (trav && trav.start && trav.ende){
-    const a = trav.start; const b = trav.ende;
+    const [a1,a2,a3] = trav.start;
+    const [b1,b2,b3] = trav.ende;
+    const a = [a1,a2 + rohr_offset_to_front ,a3];
+    const b = [b1,b2 + rohr_offset_to_front ,b3];
     specs.push({
       kind:'linear', param_key:'breite_m', label: label_hoehe,
       anchors:{ a, b, dir:[1,0,0], offset: trav_real_offset, textSize:0.28 }
