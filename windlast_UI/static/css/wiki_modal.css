@@ -9,7 +9,7 @@
 /* Das Panel selbst */
 .wiki-modal {
   position: fixed;
-  width: 420px;
+  width: 800px;
   max-width: calc(100% - 32px);
   max-height: 70%;
   background: var(--bg, #fff);

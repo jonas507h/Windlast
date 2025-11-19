@@ -19,6 +19,17 @@ function registerPages(list) {
 registerPages(NORM_HELP_PAGES);
 registerPages(GENERAL_HELP_PAGES);
 
+// --- History-Stack für Vor / Zurück ---------------------------------------
+const history = [];
+let historyIndex = -1;
+
+function updateWikiNavState() {
+  if (!window.WikiModal || typeof window.WikiModal.setNavState !== "function") return;
+  const canBack    = historyIndex > 0;
+  const canForward = historyIndex >= 0 && historyIndex < history.length - 1;
+  window.WikiModal.setNavState({ canBack, canForward });
+}
+
 // --- Utility: ID-Mapping für Normen ---
 // Konvention:
 //   Hauptseite:     "norm:" + normKey
@@ -64,6 +75,33 @@ function getRenderedPage(id) {
   };
 }
 
+function navigateTo(id, { push = true } = {}) {
+  const page = getPage(id);
+  const { title, body } = getRenderedPage(id);
+  const contentNode = buildHelpContent(
+    title,
+    body,
+    page?.stand || null
+  );
+
+  // ins Wiki-Modal rendern
+  window.WikiModal?.open({
+    title,
+    contentNode
+  });
+
+  if (push) {
+    // Forward-History abschneiden, falls wir mitten in der History sind
+    if (historyIndex < history.length - 1) {
+      history.splice(historyIndex + 1);
+    }
+    history.push(id);
+    historyIndex = history.length - 1;
+  }
+
+  updateWikiNavState();
+}
+
 // --- Modal-Rendering ---
 function buildHelpContent(title, bodyHtml, stand) {
   const wrap = document.createElement("div");
@@ -88,20 +126,7 @@ function buildHelpContent(title, bodyHtml, stand) {
 }
 
 export function openHelp(id) {
-  const page = getPage(id);                 // wie vorher
-  const { title, body } = getRenderedPage(id); // mit [[...]]-Linkauflösung
-
-  const contentNode = buildHelpContent(
-    title,
-    body,
-    page?.stand || null
-  );
-
-  // NEU: ins Wiki-Modal schieben
-  window.WikiModal?.open({
-    title,
-    contentNode
-  });
+  navigateTo(id, { push: true });
 }
 
 // Norm-spezifische Convenience
@@ -148,3 +173,23 @@ window.HELP = {
   openNorm: openNormHelp,
   getNorminfo,
 };
+
+if (window.WikiModal) {
+  // Zurück-Button
+  window.WikiModal.back = function () {
+    if (historyIndex > 0) {
+      historyIndex--;
+      const id = history[historyIndex];
+      navigateTo(id, { push: false });
+    }
+  };
+
+  // Vorwärts-Button
+  window.WikiModal.forward = function () {
+    if (historyIndex >= 0 && historyIndex < history.length - 1) {
+      historyIndex++;
+      const id = history[historyIndex];
+      navigateTo(id, { push: false });
+    }
+  };
+}
