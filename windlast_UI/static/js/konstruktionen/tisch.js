@@ -1,4 +1,5 @@
 import { buildTisch } from '../build/build_tisch.js';
+import { showFieldError } from '../utils/error.js';
 
 async function fetchOptions(url) {
   // Holt Dropdown-Inhalte von der API
@@ -102,17 +103,6 @@ function readHeaderValues() {
 
 function isPositiveNumber(v) {
   return typeof v === 'number' && isFinite(v) && v > 0;
-}
-
-function showFieldError(fieldEl, msgEl, show, msg) {
-  const wrapper = fieldEl?.closest('.field');
-  if (!wrapper) return;
-  wrapper.classList.toggle('is-invalid', !!show);
-  if (msgEl) {
-    if (show) { if (msg) msgEl.textContent = msg; msgEl.hidden = false; }
-    else { msgEl.hidden = true; }
-  }
-  fieldEl.setAttribute('aria-invalid', show ? 'true' : 'false');
 }
 
 function validateTischForm() {

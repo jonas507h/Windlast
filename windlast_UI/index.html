@@ -222,6 +222,10 @@
 
     async function switch_konstruktion(view) {
       await loadKonstruktion(view);
+      // >>> Footer zurücksetzen
+      if (typeof window.updateFooterResults === "function") {
+        window.updateFooterResults({});
+      }
       document.querySelectorAll(".tab").forEach(btn =>
         btn.setAttribute("aria-current", btn.dataset.view === view ? "page" : "")
       );

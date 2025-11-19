@@ -1,4 +1,5 @@
 import { buildSteher } from '../build/build_steher.js';
+import { showFieldError } from '../utils/error.js';
 
 async function fetchOptions(url) {
   // Holt Dropdown-Inhalte von der API
@@ -110,17 +111,6 @@ function isPositiveNumber(v) {
   return typeof v === 'number' && isFinite(v) && v > 0;
 }
 
-function showFieldError(fieldEl, msgEl, show, msg) {
-  const wrapper = fieldEl?.closest('.field');
-  if (!wrapper) return;
-  wrapper.classList.toggle('is-invalid', !!show);
-  if (msgEl) {
-    if (show) { if (msg) msgEl.textContent = msg; msgEl.hidden = false; }
-    else { msgEl.hidden = true; }
-  }
-  fieldEl.setAttribute('aria-invalid', show ? 'true' : 'false');
-}
-
 function validateSteherForm() {
   let ok = true;
 
@@ -154,6 +144,9 @@ function validateSteherForm() {
   const rhOK = isPositiveNumber(parseFloat(rHoeheEl?.value));
   showFieldError(rHoeheEl, errRH, !rhOK, 'Bitte eine gültige Rohrhöhe > 0 angeben.');
   ok = ok && rhOK;
+  const maxRH = (parseFloat(rHoeheEl?.value)) <= (parseFloat(hoeheEl?.value));
+  showFieldError(rHoeheEl, errRH, !maxRH, 'Die Rohrhöhe darf die Gesamthöhe nicht überschreiten.');
+  ok = ok && maxRH;
 
   // --- Pflicht-Dropdowns (haben meist Defaults, aber sicherheitshalber prüfen) ---
   const reqSelectIds = [
@@ -249,8 +242,7 @@ async function submitSteher() {
       rohr_name_intern:       document.getElementById("rohr_name_intern").value,
       gummimatte: gummimatte_bool,
       name: "Steher",
-      // untergrund_typ könntest du optional auch schon in den Build kippen,
-      // aktuell ist er noch in den Bodenplatten hardcodiert.
+      // untergrund_typ evtl kippen
     };
 
     // 1) UI-Build erzeugen (komplett generische Struktur)
