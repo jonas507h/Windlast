@@ -100,6 +100,29 @@ export function openMeldungenModal(normKey, szenario = null) {
   const wrap = buildModal(title, document.createElement("div"));
   const contentRoot = wrap.lastElementChild;
 
+  // --- Fragezeichen-Button ---
+  const titleEl = wrap.querySelector(".modal-title");
+  if (titleEl) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "help-icon-btn";
+    btn.style.marginLeft = "8px";
+    btn.textContent = "?";
+
+    const helpId = `meldungen:allgemein`;
+
+    btn.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      ev.preventDefault();
+      if (window.HELP?.open) {
+        window.HELP.open(helpId);
+      }
+    });
+
+    // Button in den Titel hängen
+    titleEl.appendChild(btn);
+  }
+
   if (!msgs || msgs.length === 0) {
     const p = document.createElement("p");
     p.textContent = "Keine Meldungen vorhanden.";

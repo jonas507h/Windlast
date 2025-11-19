@@ -2,6 +2,7 @@
 
 import { NORM_HELP_PAGES } from "../help_content/norminfo.js";
 import { GENERAL_HELP_PAGES } from "../help_content/allgemein.js";
+import { MELDUNGEN_HELP_PAGES } from "../help_content/meldungen.js";
 
 // Später: weitere Content-Module hier zusammenführen:
 // import { GENERAL_HELP_PAGES } from "../help_content/allgemein.js";
@@ -18,6 +19,7 @@ function registerPages(list) {
 
 registerPages(NORM_HELP_PAGES);
 registerPages(GENERAL_HELP_PAGES);
+registerPages(MELDUNGEN_HELP_PAGES);
 
 // --- History-Stack für Vor / Zurück ---------------------------------------
 const history = [];
