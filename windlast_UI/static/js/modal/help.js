@@ -108,6 +108,7 @@ function buildHelpContent(title, bodyHtml, stand) {
 
   const body = document.createElement("div");
   body.innerHTML = bodyHtml || "<p>Kein Inhalt.</p>";
+  transformFAQ(body);
   wrap.appendChild(body);
 
   if (stand) {
@@ -144,6 +145,46 @@ export function getNorminfo(normKey, szenario = null) {
     title: page.title,
     body: page.body
   };
+}
+
+function transformFAQ(root) {
+  const faqNodes = root.querySelectorAll("faq[question]");
+
+  faqNodes.forEach(faq => {
+    const question = faq.getAttribute("question") || "Frage";
+    const answerHTML = faq.innerHTML;
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "wiki-faq-item";
+
+    const q = document.createElement("div");
+    q.className = "wiki-faq-question";
+
+    const arrow = document.createElement("span");
+    arrow.className = "wiki-faq-arrow";
+    arrow.textContent = "▶";
+
+    const text = document.createElement("span");
+    text.textContent = question;
+
+    q.appendChild(arrow);
+    q.appendChild(text);
+
+    const ans = document.createElement("div");
+    ans.className = "wiki-faq-answer";
+    ans.innerHTML = answerHTML;
+
+    wrapper.appendChild(q);
+    wrapper.appendChild(ans);
+
+    // Ersetzt das <faq> Element durch das neue FAQ-Widget
+    faq.replaceWith(wrapper);
+
+    // Toggle-Logik
+    q.addEventListener("click", () => {
+      wrapper.classList.toggle("open");
+    });
+  });
 }
 
 // --- Klick-Handling für Links aus Content und anderen Stellen ---

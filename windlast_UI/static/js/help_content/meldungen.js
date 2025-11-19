@@ -1,6 +1,6 @@
-// static/js/help_content/allgemein.js
+// static/js/help_content/meldungen.js
 
-export const GENERAL_HELP_PAGES = [
+export const MELDUNGEN_HELP_PAGES = [
   {
     id: "app:start",
     title: "Hilfe – Übersicht",
@@ -39,16 +39,8 @@ export const GENERAL_HELP_PAGES = [
     id: "app:faq",
     title: "FAQ – Häufige Fragen",
     body: `
-      <p>Hier findest du häufige Fragen:</p>
-
-      <faq question="Wie lese ich die Tabelle im Footer?">
-        Die Spalten repräsentieren verschiedene Normen. Klicke auf die Spaltenüberschrift für Details.
-      </faq>
-
-      <faq question="Was bedeutet die rote Markierung?">
-        Es bedeutet, dass die Sicherheit < 1.00 ist.<br>
-        Details findest du unter [[norm:EN_1991_1_4_2010]].
-      </faq>
+      <p>Hier beantworten wir die typischen Fragen.</p>
+      <p>Für Details zu Normen siehe [[app:start]].</p>
     `
   }
 ];

@@ -109,3 +109,51 @@
 .help-icon-btn:hover {
   background: rgba(0,0,0,0.08);
 }
+
+/* FAQ Elemente */
+.wiki-faq-item {
+  border: 1px solid rgba(0,0,0,0.15);
+  border-radius: 6px;
+  margin: 8px 0;
+  overflow: hidden;
+  background: rgba(0,0,0,0.02);
+}
+
+.wiki-faq-question {
+  padding: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  user-select: none;
+}
+
+.wiki-faq-question:hover {
+  background: rgba(0,0,0,0.05);
+}
+
+.wiki-faq-arrow {
+  margin-right: 6px;
+  transition: transform 0.2s ease;
+  font-size: 0.8rem;
+}
+
+.wiki-faq-item.open .wiki-faq-arrow {
+  transform: rotate(90deg);
+}
+
+.wiki-faq-answer {
+  padding: 8px;
+  padding-top: 0;
+  display: none;
+  animation: faq-slide 0.2s ease-out;
+}
+
+.wiki-faq-item.open .wiki-faq-answer {
+  display: block;
+}
+
+@keyframes faq-slide {
+  from { opacity: 0; transform: translateY(-3px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

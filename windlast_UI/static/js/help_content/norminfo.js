@@ -1,5 +1,4 @@
 // static/js/help_content/norminfo.js
-// Nur Content, keine Logik
 
 export const NORM_HELP_PAGES = [
   {
