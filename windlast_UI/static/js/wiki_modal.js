@@ -24,12 +24,12 @@
     return el;
   })();
 
-  const dialog   = root.querySelector(".wiki-modal");
-  const titleEl  = root.querySelector(".wiki-modal-title");
-  const bodyEl   = root.querySelector(".wiki-modal-body");
-  const btnClose = root.querySelector(".wiki-close-btn");
-  const btnBack  = root.querySelector(".wiki-nav-back");
-  const btnFwd   = root.querySelector(".wiki-nav-forward");
+  const dialog     = root.querySelector(".wiki-modal");
+  const titleEl    = root.querySelector(".wiki-modal-title");
+  const bodyEl     = root.querySelector(".wiki-modal-body");
+  const btnClose   = root.querySelector(".wiki-close-btn");
+  const btnBack    = root.querySelector(".wiki-nav-back");
+  const btnForward = root.querySelector(".wiki-nav-forward");
   const dragHandle = root.querySelector("[data-drag-handle]");
 
   let _isOpen = false;
@@ -39,26 +39,37 @@
     _isOpen = !!v;
     if (v) {
       dialog.hidden = false;
+      dialog.style.display = "flex";
       dialog.setAttribute("aria-hidden", "false");
 
-      // Falls noch keine explizite Position gesetzt ist: Grund-Startposition
-      if (!dialog.style.left && !dialog.style.top) {
+      // Startposition setzen, falls noch nichts da ist
+      if (!dialog.dataset.positioned) {
+        // kurz sichtbar machen, damit offsetWidth/Height richtig sind
+        dialog.style.visibility = "hidden";
+        dialog.style.display = "flex";
+
         const vw = window.innerWidth || document.documentElement.clientWidth;
         const vh = window.innerHeight || document.documentElement.clientHeight;
 
-        const width  = Math.min(dialog.offsetWidth || 420, vw - 32);
-        const height = Math.min(dialog.offsetHeight || 300, vh - 32);
+        // echte gemessene Größe
+        const rect = dialog.getBoundingClientRect();
+        const width  = Math.min(rect.width  || 420, vw - 32);
+        const height = Math.min(rect.height || 300, vh - 32);
 
-        const left = vw - width - 24; // leicht rechts
-        const top  = Math.max(16, vh * 0.15);
+        const left = Math.max(16, (vw - width) / 2);
+        const top  = Math.max(16, (vh - height) / 3);
 
         dialog.style.left = `${left}px`;
         dialog.style.top  = `${top}px`;
-        dialog.style.right = "";  // sicherheitshalber entfernen
+        dialog.style.right = "";
         dialog.style.bottom = "";
+
+        dialog.style.visibility = "";
+        dialog.dataset.positioned = "1"; // markiert als initial platziert
       }
     } else {
       dialog.hidden = true;
+      dialog.style.display = "none";
       dialog.setAttribute("aria-hidden", "true");
     }
   }
@@ -92,13 +103,27 @@
   }
 
   // --- Buttons -------------------------------------------------------------
-  btnClose.addEventListener("click", close);
-
-  btnBack.addEventListener("click", () => {
-    if (typeof WikiModal.back === "function") WikiModal.back();
+  btnClose.addEventListener("click", (ev) => {
+    ev.preventDefault();
+    ev.stopPropagation();
+    close();
   });
-  btnFwd.addEventListener("click", () => {
-    if (typeof WikiModal.forward === "function") WikiModal.forward();
+
+  // Back/Forward werden von help.js mit Logik gefüllt
+  btnBack.addEventListener("click", (ev) => {
+    ev.preventDefault();
+    ev.stopPropagation();
+    if (typeof WikiModal.back === "function") {
+      WikiModal.back();
+    }
+  });
+
+  btnForward.addEventListener("click", (ev) => {
+    ev.preventDefault();
+    ev.stopPropagation();
+    if (typeof WikiModal.forward === "function") {
+      WikiModal.forward();
+    }
   });
 
   // --- Drag & Drop ---------------------------------------------------------
@@ -109,25 +134,20 @@
   let startTop = 0;
 
   function onDragStart(ev) {
-    // Nur linke Maustaste
-    if (ev.button !== 0) return;
-
+    if (ev.button !== 0) return; // nur linke Maustaste
     isDragging = true;
     dragStartX = ev.clientX;
     dragStartY = ev.clientY;
 
-    // aktuelle Position lesen
     const rect = dialog.getBoundingClientRect();
     startLeft = rect.left;
     startTop  = rect.top;
 
-    // sicherstellen, dass wir in absoluten Koordinaten sind
     dialog.style.left = `${startLeft}px`;
     dialog.style.top  = `${startTop}px`;
     dialog.style.right = "";
     dialog.style.bottom = "";
 
-    // während Drag Textauswahl verhindern
     document.body.style.userSelect = "none";
 
     document.addEventListener("mousemove", onDragMove);
@@ -143,13 +163,11 @@
     let newLeft = startLeft + dx;
     let newTop  = startTop + dy;
 
-    // Optional: im Viewport halten
     const vw = window.innerWidth || document.documentElement.clientWidth;
     const vh = window.innerHeight || document.documentElement.clientHeight;
     const rect = dialog.getBoundingClientRect();
     const width  = rect.width;
     const height = rect.height;
-
     const margin = 8;
 
     newLeft = Math.min(Math.max(newLeft, margin - width * 0.8), vw - margin);
@@ -162,7 +180,6 @@
   function onDragEnd() {
     if (!isDragging) return;
     isDragging = false;
-
     document.body.style.userSelect = "";
     document.removeEventListener("mousemove", onDragMove);
     document.removeEventListener("mouseup", onDragEnd);
@@ -177,12 +194,14 @@
     open,
     close,
     isOpen: () => _isOpen,
-    _elements: { root, dialog, titleEl, bodyEl, btnBack, btnFwd, btnClose },
+    _elements: { root, dialog, titleEl, bodyEl, btnBack, btnForward, btnClose },
     setNavState({ canBack, canForward } = {}) {
-      btnBack.disabled = !canBack;
-      btnFwd.disabled  = !canForward;
-    }
-    // back/forward werden später in help.js bzw. History-Step ergänzt
+      btnBack.disabled    = !canBack;
+      btnForward.disabled = !canForward;
+    },
+    // werden in help.js befüllt:
+    back: null,
+    forward: null,
   };
 
   global.WikiModal = WikiModal;

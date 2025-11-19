@@ -391,20 +391,18 @@ function attachNorminfoHandlers() {
     th.dataset.norminfoBound = "1";
 
     th.addEventListener("click", (ev) => {
-      // Klick auf Badge → melden wir NICHT ab, das ist für Meldungen reserviert
-      if (ev.target.closest(".count-badge")) {
-        return; // Ereignis geht weiter zu den Meldungs-Handlern
-      }
+      // Badge-Klick weiterhin ignorieren
+      if (ev.target.closest(".count-badge")) return;
 
       const normKey  = th.dataset.normKey;
       const szenario = th.dataset.szenario || null;
       if (!normKey) return;
 
-      const info = getNorminfo(normKey, szenario);
-      const content = buildModal(info.title, info.body);
-      Modal.open(content);
+      // NEU: direkt das Wiki aufrufen
+      if (window.HELP && typeof window.HELP.openNorm === "function") {
+        window.HELP.openNorm(normKey, szenario);
+      }
 
-      // Verhindert, dass ggf. noch andere Click-Handler auf dem TH feuern
       ev.preventDefault();
       ev.stopImmediatePropagation();
     });
