@@ -167,18 +167,49 @@
   display: block;
 }
 
-.wiki-modal-body .wiki-page-title {
-  font-size: 1.05rem;
-  font-weight: 700;
-  margin: 0 0 6px;
-}
-
 .wiki-modal-body .wiki-page-title + p {
   margin-top: 4px;
 }
 
 .wiki-include-block {
-  margin: 6px 0;
+  margin: 12px 0;
+  padding: 6px 0 0;
+  border-top: 1px solid rgba(0,0,0,0.08);
+}
+
+/* Grundstil für alle Seitentitel im Wiki */
+.wiki-modal-body .wiki-page-title {
+  font-weight: 700;
+  margin: 0 0 6px;
+  line-height: 1.3;
+}
+
+/* Level 0 = Hauptseite + Includes ohne auto-level → größter Titel */
+.wiki-modal-body .wiki-title-level-0 {
+  font-size: 1.05rem;
+  margin-top: 0;
+}
+
+/* Level 1 = erste Ebene untergeordnet (auto-level, depth=0) */
+.wiki-modal-body .wiki-title-level-1 {
+  font-size: 0.95rem;
+  margin-top: 14px;
+}
+
+/* Level 2 = tiefere Includes */
+.wiki-modal-body .wiki-title-level-2 {
+  font-size: 0.9rem;
+  margin-top: 12px;
+}
+
+/* Level 3+ = noch untergeordneter, aber immer noch klar erkennbar */
+.wiki-modal-body .wiki-title-level-3,
+.wiki-modal-body .wiki-title-level-4,
+.wiki-modal-body .wiki-title-level-5,
+.wiki-modal-body .wiki-title-level-6 {
+  font-size: 0.88rem;
+  margin-top: 10px;
+  opacity: 0.9;
 }
 
 @keyframes faq-slide {

@@ -110,7 +110,7 @@ function buildHelpContent(title, bodyHtml, stand) {
 
   // Seitentitel als große Überschrift im Inhalt
   const pageTitleEl = document.createElement("h2");
-  pageTitleEl.className = "wiki-page-title";
+  pageTitleEl.className = "wiki-page-title wiki-title-level-0";
   pageTitleEl.textContent = title || "Hilfe";
   wrap.appendChild(pageTitleEl);
 
@@ -202,7 +202,7 @@ function transformFAQ(root) {
   });
 }
 
-function transformIncludes(root, visited = new Set()) {
+function transformIncludes(root, visited = new Set(), depth = 0) {
   const nodes = root.querySelectorAll("help-include[page]");
 
   nodes.forEach(node => {
@@ -212,7 +212,19 @@ function transformIncludes(root, visited = new Set()) {
       return;
     }
 
-    // einfache Zyklenvermeidung
+    // optionale Attribute
+    const showTitleAttr = node.getAttribute("show-title");
+    const showTitle = showTitleAttr == null
+      ? true
+      : !/^(false|0)$/i.test(showTitleAttr.trim());
+
+    const overrideTitle = node.getAttribute("title");
+    const autoLevelAttr = node.getAttribute("auto-level");
+    const autoLevel = autoLevelAttr != null
+      ? !/^(false|0)$/i.test(autoLevelAttr.trim())
+      : false;
+
+    // Zyklen vermeiden
     if (visited.has(pageId)) {
       const warn = document.createElement("div");
       warn.textContent = `(Zirkuläre Hilfe-Einbindung: ${pageId})`;
@@ -234,16 +246,45 @@ function transformIncludes(root, visited = new Set()) {
 
     visited.add(pageId);
 
-    const { body } = getRenderedPage(pageId);
+    const { title, body } = getRenderedPage(pageId);
     const container = document.createElement("div");
     container.className = "wiki-include-block";
-    container.innerHTML = body || "";
 
-    // rekursive Includes auch im eingebetteten Block auflösen
-    transformIncludes(container, visited);
+    // --- Überschrift im Include ---
+    if (showTitle) {
+      // Level bestimmen
+      let level;
+      if (autoLevel) {
+        // Haupt h2 = Level 0 → Includes starten bei 1
+        level = Math.min(depth + 1, 6);
+      } else {
+        // ohne auto-level: exakt wie Haupttitel
+        level = 0;
+      }
 
-    // FAQ wird später global auf bodyDiv angewendet,
-    // also hier noch nicht transformFAQ aufrufen.
+      // Tag wählen (für Semantik, Optik kommt über Level-Klassen)
+      const tagName = level <= 0 ? "h2"
+                     : level === 1 ? "h3"
+                     : level === 2 ? "h4"
+                     : "h5";
+
+      const h = document.createElement(tagName);
+      h.className = `wiki-page-title wiki-title-level-${level}`;
+      h.textContent = overrideTitle || title || pageId;
+      container.appendChild(h);
+    }
+
+    // Body der eingebetteten Seite
+    const inner = document.createElement("div");
+    inner.innerHTML = body || "";
+
+    // rekursive Includes im Inneren (Tiefe +1)
+    transformIncludes(inner, visited, depth + 1);
+
+    // FAQ im Include transformieren
+    transformFAQ(inner);
+
+    container.appendChild(inner);
 
     node.replaceWith(container);
     visited.delete(pageId);

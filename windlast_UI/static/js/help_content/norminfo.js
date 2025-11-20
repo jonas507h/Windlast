@@ -70,6 +70,7 @@ export const NORM_HELP_PAGES = [
         <li>Anwendungsbereich: Temporäre Bauwerke im Eventbereich</li>
         <li>Hinweis: In Verbindung mit nationalen Anhängen / Richtlinien zu verwenden.</li>
       </ul>
+      <h3>Anwendbarkeit</h3>
       <help-include page="norm:DIN_EN_1991_1_4_2010"></help-include>
     `
   },
