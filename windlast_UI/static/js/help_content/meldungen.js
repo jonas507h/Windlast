@@ -6,7 +6,7 @@ export const MELDUNGEN_HELP_PAGES = [
     title: "Meldungen",
     body: `
       <p>
-        Im Meldungs-Fenster werden alle Infos, Hinweise, Warnungen und Fehlermeldungen aus der Berechnung angezeigt. Nachdem eine Berechnung durchgeführt wurde, erscheint in der Ergebnis-Tabelle rechts neben dem Titel der Norm eine farblicht hinterlegte Zahl.
+        Im Meldungs-Fenster werden alle Infos, Hinweise, Warnungen und Fehlermeldungen aus der Berechnung angezeigt. Nachdem eine Berechnung durchgeführt wurde, erscheint in der Ergebnis-Tabelle rechts neben dem Titel der Norm eine farblich hinterlegte Zahl.
         Diese gibt die Anzahl der vorliegenden Meldungen an. Ein Klick auf diese Zahl öffnet das zugehörige Meldungs-Fenster.
       </p>
       <p>

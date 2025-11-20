@@ -60,14 +60,17 @@ export const NORM_HELP_PAGES = [
     title: "DIN EN 17879:2024-08 – Event-Strukturen – Sicherheit",
     body: `
       <p>
-        Norm für temporäre Konstruktionen im Veranstaltungsbereich,
-        z.&nbsp;B. Bühnen, Traversenkonstruktionen, Sonderbauten.
+        Diese Norm regelt unter anderem die Windlastberechnung für Event-Strukturen, unabhängig von der baurechtlichen Einordnung der Strukturen.
+        Dabei gibt sie Staudrücke und ein Verfahren zum Standsicherheitsnachweis vor, verweist zur Berechnung der Windkräfte jedoch auf die DIN EN 1991-1-4.
+        Sie ist in Deutschland allerdings <b>nicht baurechtlich eingeführt</b> für die Berechnung von fliegenden Bauten.
+        Staudrücke werden für Konstruktionen mit einer Höhe bis zu 30m vereinfacht in einer Tabelle vorgegeben. Daher ist die Norm nur unter bestimmten Voraussetzungen anwendbar:
       </p>
       <ul>
         <li>Ausgabejahr: 2024</li>
         <li>Anwendungsbereich: Temporäre Bauwerke im Eventbereich</li>
         <li>Hinweis: In Verbindung mit nationalen Anhängen / Richtlinien zu verwenden.</li>
       </ul>
+      <help-include page="norm:DIN_EN_1991_1_4_2010"></help-include>
     `
   },
   {

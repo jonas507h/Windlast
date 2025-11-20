@@ -108,11 +108,24 @@ function navigateTo(id, { push = true } = {}) {
 function buildHelpContent(title, bodyHtml, stand) {
   const wrap = document.createElement("div");
 
+  // Seitentitel als große Überschrift im Inhalt
+  const pageTitleEl = document.createElement("h2");
+  pageTitleEl.className = "wiki-page-title";
+  pageTitleEl.textContent = title || "Hilfe";
+  wrap.appendChild(pageTitleEl);
+
+  // Body-Inhalt
   const body = document.createElement("div");
   body.innerHTML = bodyHtml || "<p>Kein Inhalt.</p>";
+
+  // 1. Includes auflösen (help-include)
+  transformIncludes(body);
+  // 2. FAQ-Elemente in klickbare Blöcke umwandeln
   transformFAQ(body);
+
   wrap.appendChild(body);
 
+  // Bearbeitungsstand unten rechts
   if (stand) {
     const meta = document.createElement("div");
     meta.textContent = "Stand: " + stand;
@@ -186,6 +199,54 @@ function transformFAQ(root) {
     q.addEventListener("click", () => {
       wrapper.classList.toggle("open");
     });
+  });
+}
+
+function transformIncludes(root, visited = new Set()) {
+  const nodes = root.querySelectorAll("help-include[page]");
+
+  nodes.forEach(node => {
+    const pageId = node.getAttribute("page");
+    if (!pageId) {
+      node.remove();
+      return;
+    }
+
+    // einfache Zyklenvermeidung
+    if (visited.has(pageId)) {
+      const warn = document.createElement("div");
+      warn.textContent = `(Zirkuläre Hilfe-Einbindung: ${pageId})`;
+      warn.style.fontStyle = "italic";
+      warn.style.fontSize = "0.8rem";
+      node.replaceWith(warn);
+      return;
+    }
+
+    const page = getPage(pageId);
+    if (!page) {
+      const missing = document.createElement("div");
+      missing.textContent = `Hinweis-Seite "${pageId}" nicht gefunden.`;
+      missing.style.fontStyle = "italic";
+      missing.style.fontSize = "0.8rem";
+      node.replaceWith(missing);
+      return;
+    }
+
+    visited.add(pageId);
+
+    const { body } = getRenderedPage(pageId);
+    const container = document.createElement("div");
+    container.className = "wiki-include-block";
+    container.innerHTML = body || "";
+
+    // rekursive Includes auch im eingebetteten Block auflösen
+    transformIncludes(container, visited);
+
+    // FAQ wird später global auf bodyDiv angewendet,
+    // also hier noch nicht transformFAQ aufrufen.
+
+    node.replaceWith(container);
+    visited.delete(pageId);
   });
 }
 

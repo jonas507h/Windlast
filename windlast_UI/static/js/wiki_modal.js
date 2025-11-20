@@ -9,10 +9,14 @@
       el.innerHTML = `
         <div class="wiki-modal" role="dialog" aria-modal="false" aria-label="Hilfe/Wiki" tabindex="-1" hidden>
           <div class="wiki-modal-header" data-drag-handle="1">
-            <div class="wiki-modal-title"></div>
-            <div class="wiki-modal-header-actions">
+            <div class="wiki-modal-header-left">
               <button type="button" class="wiki-nav-btn wiki-nav-back" aria-label="Zurück" disabled>←</button>
               <button type="button" class="wiki-nav-btn wiki-nav-forward" aria-label="Vor" disabled>→</button>
+            </div>
+            <div class="wiki-modal-header-center">
+              Windlastrechner – Hilfe
+            </div>
+            <div class="wiki-modal-header-actions">
               <button type="button" class="wiki-close-btn" aria-label="Schließen">×</button>
             </div>
           </div>
@@ -25,7 +29,6 @@
   })();
 
   const dialog     = root.querySelector(".wiki-modal");
-  const titleEl    = root.querySelector(".wiki-modal-title");
   const bodyEl     = root.querySelector(".wiki-modal-body");
   const btnClose   = root.querySelector(".wiki-close-btn");
   const btnBack    = root.querySelector(".wiki-nav-back");
@@ -75,7 +78,6 @@
   }
 
   function setContent({ title, node }) {
-    titleEl.textContent = title || "Hilfe";
     bodyEl.textContent = "";
     bodyEl.replaceChildren();
     if (node instanceof Node) {
@@ -194,7 +196,7 @@
     open,
     close,
     isOpen: () => _isOpen,
-    _elements: { root, dialog, titleEl, bodyEl, btnBack, btnForward, btnClose },
+    _elements: { root, dialog, bodyEl, btnBack, btnForward, btnClose },
     setNavState({ canBack, canForward } = {}) {
       btnBack.disabled    = !canBack;
       btnForward.disabled = !canForward;
