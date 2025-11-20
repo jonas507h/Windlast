@@ -27,14 +27,30 @@ export const MELDUNGEN_HELP_PAGES = [
   {
     id: "meldungen:haeufige_meldungen",
     title: "Häufige Meldungen",
+    stand: "20.11.2025",
     body: `
       <h4>Fehler</h4>
+        <faq question="Gesamthöhe ...m überschreitet die höchste definierte Obergrenze ...m ">
+          Die Konstruktion kann nicht berechnet werden, weil sie zu hoch ist. Die Staudrücke nach den vereinfachten Verfahren sind nur bis zu einer bestimmten Höhe anwendbar
+          ([[norm:DIN_EN_13814_2005|DIN EN 13814:2005-06]] bis 50m, [[norm:DIN_EN_17879_2024|DIN EN 17879:2024-08]] bis 30m,
+          [[norm:DIN_EN_1991_1_4_2010|DIN EN 1991-1-4:2010-12]] bis 25m).
+        </faq>
       <h4>Warnungen</h4>
+        <faq question="Abminderungen der Windlasten sind bei fliegenden Bauten nicht zulässig. Der Abminderungsfaktor wird hier nur auf ausdrücklichen Wunsch angewendet.">
+          Im nationalen Anhang der [[norm:DIN_EN_1991_1_4_2010|DIN EN 1991-1-4:2010-12]] ist festgelegt, dass bei kurzen Aufstelldauern eine Abminderung des Staudrucks möglich ist.
+          Fliegende Bauten bzw. allgemein Bauten, die jederzeit errichtet und demontiert werden können, sind von dieser Regelung jedoch explizit ausgenommen.
+          Die Software wendet die Abminderung dennoch an. Soll dies nicht geschehen, könnt ihr das Feld [[header:aufstelldauer|Aufstelldauer]] einfach leer lassen.
+        </faq>
       <h4>Hinweise</h4>
+        <faq question="Für Paarung ...–... wurde auf DIN EN ... zurückgegriffen.">
+          Nicht alle drei Normen enthalten Reibwerte für alle Materialpaarungen.
+          In diesem Fall wird auf eine andere Norm zurückgegriffen, die einen Reibwert für die gewählte Paarung enthält.
+        </faq>
       <h4>Informationen</h4>
-      <faq question="Maßgebend ist die Paarung Stahl–Gummi mit μ=0.600.">
-        Gibt den Reibwert μ an, der für der Berechnung verwendet wurde und von welcher Materialpaarung dieser stammt. Ausschlaggebend ist immer der niedrigste Reibwert über alle Bodenplatten und Materialpaarungen.
-      </faq>
+        <faq question="Maßgebend ist die Paarung ...–... mit μ=...">
+          Gibt den Reibwert μ an, der für der Berechnung verwendet wurde und von welcher Materialpaarung dieser stammt.
+          Ausschlaggebend ist immer der niedrigste Reibwert über alle Bodenplatten und Materialpaarungen.
+        </faq>
     `
   }
 ];

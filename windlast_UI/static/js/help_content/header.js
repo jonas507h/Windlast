@@ -9,6 +9,9 @@ export const HEADER_HELP_PAGES = [
         Hier kann die geplante Aufstelldauer der Konstruktion angegeben werden. Die Aufstelldauer hat bei der Berechnung nach [[norm:DIN_EN_1991_1_4_2010|DIN EN 1991-1-4]]
         Einfluss auf eine Mögliche Abminderung der Staudrücke. Kürzere Aufstelldauern führen zu höheren Abminderungen.
       </p>
+      <p>
+        <b>Diese Abminderung ist aber für fliegende Bauten bzw. allgemein Bauten, die jederzeit errichtet und demontiert werden können, explizit nicht zulässig.</b>
+      </p>
     `
   },
 

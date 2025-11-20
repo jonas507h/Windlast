@@ -23,7 +23,7 @@ export const PREVIEW_THEMES = {
       // Textkasten
       textBackground: '#ffffff',
       textBorder: '#ff0000',
-      textBorderWidth: 2,
+      textBorderWidth: 20,
     },
   },
 
@@ -34,7 +34,7 @@ export const PREVIEW_THEMES = {
     background: 0x111111,
 
     // Konstruktion
-    lineColor: 0xffffff,
+    lineColor: 0xaaaaaa,
     plateFill: 0x222222,
 
     // Maße (leicht leuchtendes Rot mit dunkler Outline)
@@ -47,7 +47,7 @@ export const PREVIEW_THEMES = {
 
       textBackground: '#000000',
       textBorder: '#ff6b6b',
-      textBorderWidth: 2,
+      textBorderWidth: 20,
     },
   },
 };
