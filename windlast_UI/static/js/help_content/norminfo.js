@@ -23,7 +23,7 @@ export const NORM_HELP_PAGES = [
         <b>Diese Software liefert einen solchen Nachweis auch bei der Berechnung nach DIN EN 1991-1-4 nicht. Wendet euch hier an einen Statiker.</b>
       </p>
       <p>
-        Es besteht die Möglichkeit, die angenommenen Staudrücke abzumindern, wenn bestimmte Schutzmaßnahmen möglich sind. Bei der vorliegenden Berechung wurden diese Abminderungen nicht berücksichtigt.
+        Es besteht die Möglichkeit, die angenommenen Staudrücke abzumindern, wenn bestimmte Schutzmaßnahmen möglich sind. Bei der Hauptberechnung werden diese Abminderungen nicht berücksichtigt.
         Bei nicht gewährleisteter Standsicherheit werden die Abminderungen automatisch in einer zweiten Berechnung berücksichtigt. Details hierzu findet ihr [[norm:DIN_EN_13814_2005:IN_BETRIEB|hier]].
       </p>
     `
@@ -57,21 +57,53 @@ export const NORM_HELP_PAGES = [
   {
     id: "norm:DIN_EN_17879_2024",
     normKey: "EN_17879_2024",
+    szenario: "IN_BETRIEB",
     title: "DIN EN 17879:2024-08 – Event-Strukturen – Sicherheit",
+    stand: "19.11.2025",
     body: `
       <p>
         Diese Norm regelt unter anderem die Windlastberechnung für Event-Strukturen, unabhängig von der baurechtlichen Einordnung der Strukturen.
         Dabei gibt sie Staudrücke und ein Verfahren zum Standsicherheitsnachweis vor, verweist zur Berechnung der Windkräfte jedoch auf die DIN EN 1991-1-4.
-        Sie ist in Deutschland allerdings <b>nicht baurechtlich eingeführt</b> für die Berechnung von fliegenden Bauten.
-        Staudrücke werden für Konstruktionen mit einer Höhe bis zu 30m vereinfacht in einer Tabelle vorgegeben. Daher ist die Norm nur unter bestimmten Voraussetzungen anwendbar:
+        Sie ist in Deutschland allerdings <b>nicht baurechtlich eingeführt.</b>
+        Staudrücke werden entweder nach [[norm:DIN_EN_1991_1_4_2010|DIN EN 1991-1-4]] unter Berücksichtigung eines Wahrscheinlichkeitsfaktors von 0,85 oder vereinfacht mithilfe einer Tabelle ermittelt.
+        Diese Software verwendet die tabellarische Methode, weshalb die Maximalhöhe der Konstruktionen auf 30m begrenzt ist.
+      </p>
+      <p>
+        Für komplexere Bauwerke oder exponierte Standorte sind gesonderte Nachweise nach [[norm:DIN_EN_1991_1_4_2010|DIN EN 1991-1-4]] erforderlich.
+      </p>
+      <p>
+        <b>Diese Software liefert einen solchen Nachweis auch bei der Berechnung nach DIN EN 1991-1-4 nicht. Wendet euch hier an einen Statiker.</b>
+      </p>
+      <p>
+        Es besteht die Möglichkeit, die angenommenen Staudrücke abzumindern, wenn bestimmte Schutzmaßnahmen möglich sind. Bei der Hauptberechnung werden diese Abminderungen nicht berücksichtigt.
+        Bei nicht gewährleisteter Standsicherheit werden die Abminderungen automatisch in einer zweiten Berechnung berücksichtigt. Details hierzu findet ihr [[norm:DIN_EN_17879_2024:IN_BETRIEB|hier]].
+      </p>
+    `
+  },
+  {
+    id: "norm:DIN_EN_17879_2024:IN_BETRIEB",
+    normKey: "EN_17879_2024",
+    szenario: "IN_BETRIEB",
+    title: "DIN EN 17879:2024-08 – Berücksichtigung von möglichen Schutzmaßnahmen",
+    stand: "19.11.2025",
+    body: `
+      <p>
+        Bei der Berechnung nach DIN EN 17879:2024-08 können Abminderungen der Staudrücke berücksichtigt werden, wenn bestimmte Schutzmaßnahmen möglich sind. Bei der Berechnung &bdquo;mit Schutzmaßnahmen&ldquo; wurden diese Abminderungen berücksichtigt.
+        Sollen die hier aufgelisteten Werte verwendet werden, müssen vor Überschreiten der Windgeschwindigkeit von 20 m/s gemessen in 10m Höhe Schutzmaßnahmen getroffen werden.
+        In unseren Bereich sind zum Beispiel folgende Schutzmaßnahmen möglich:
       </p>
       <ul>
-        <li>Ausgabejahr: 2024</li>
-        <li>Anwendungsbereich: Temporäre Bauwerke im Eventbereich</li>
-        <li>Hinweis: In Verbindung mit nationalen Anhängen / Richtlinien zu verwenden.</li>
+        <li>Abnehmen von Planen oder anderen großen Windangriffsflächen</li>
+        <li>Evakuierung der Konstruktion und der umliegenden Bereiche</li>
       </ul>
-      <h3>Anwendbarkeit</h3>
-      <help-include page="norm:DIN_EN_1991_1_4_2010"></help-include>
+      <p>
+        Die Schutzmaßnahmen müssen vorher definiert werden und wir müssen sicherstellen, dass diese Maßnahmen auch tatsächlich umgesetzt werden.
+        <b>Andernfalls dürfen die abgeminderten Staudrücke nicht verwendet werden.</b>
+      </p>
+      <p>
+        Wird als Schutzmaßnahme die Konstruktion verändert (z.&nbsp;B. Abnehmen von Planen), muss für die Konstruktion in diesem Zustand ebenfalls ein Standsicherheitsnachweis geführt werden.
+        <b>Dieser Nachweis wird von dieser Software nicht automatisch geführt.</b>
+      </p>
     `
   },
   {

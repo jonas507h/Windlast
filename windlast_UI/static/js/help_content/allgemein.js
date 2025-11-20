@@ -50,5 +50,42 @@ export const GENERAL_HELP_PAGES = [
         Details findest du unter [[norm:EN_1991_1_4_2010]].
       </faq>
     `
+  },
+
+  {
+    id: "app:vorschau",
+    title: "Vorschaufenster",
+    body: `
+      <p>
+        Links neben den Eingabefeldern befindet sich ein Vorschaufenster, das die aktuellen Eingaben grafisch darstellt. Es aktualisiert sich automatisch bei jeder Änderung der Eingaben.
+        Visualisiert werden die Geometrie aller Bauteile (wobei Rohre als Linien dargestellt werden), deren Lage und Ausrichtung im Raum, die realen Abmessungen sowie die rechts eingegebenen Maße.
+      </p>
+      <p>
+      Die Vorschau ist dreidimensional und unterstützt die Interaktion mit der Maus:
+      </p>
+      <ul>
+        <li><b>Mausrad:</b> Zoom</li>
+        <li><b>Linke Maustaste + Ziehen:</b> Rotation</li>
+        <li><b>Rechte Maustaste + Ziehen:</b> Verschiebung</li>
+      </ul>
+      <p>
+        Die Vorschau spiegelt 1:1 die geometrischen Ausgangsdaten der Berechnung wieder. Entspricht die Vorschau nicht der Realität, entspricht auch die Berechnung nicht der Realität.
+      </p>
+    `
+  },
+
+  {
+    id: "app:konstruktionen",
+    title: "Konstruktionen",
+    body: `
+      <p>
+        Der Windlasterechner unterstützt verschiedene, einfache Konstruktionstyten. Aktuell werden folgende Konstruktionen unterstützt:
+      </p>
+      <ul>
+        <li>[[tor:allgemein|Traversentor]]</li>
+        <li>[[steher:allgemein|Traversensteher mit Querpipe]]</li>
+        <li>[[tisch:allgemein|Traversentisch]]</li>
+      </ul>
+    `
   }
 ];
