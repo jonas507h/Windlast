@@ -9,14 +9,14 @@
 }
 
 #tt-root .tt-bubble {
-  background: var(--panel, #fff);
-  color: var(--text, #111);
-  border: 1px solid var(--border, #ddd);
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--border);
   border-radius: 8px;
   padding: 8px 10px;
   font-size: 12px;
   line-height: 1.25;
-  box-shadow: 0 8px 24px rgba(0,0,0,.18);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
   max-width: 360px;
   white-space: pre; /* respektiert \n und verhindert Auto-Wrap */
 }
@@ -29,10 +29,10 @@
 
 /* Modifier-Klassen, die du per Options setzen kannst */
 #tt-root.is-visible { display: block; }
-#tt-root.tt-error  .tt-bubble { border-color: #ff6b6b; }
-#tt-root.tt-warn    .tt-bubble { border-color: #f0ad4e; }
-#tt-root.tt-hint    .tt-bubble { border-color: #2d6cdf; }
-#tt-root.tt-info    .tt-bubble { border-color: #555; }
+#tt-root.tt-error  .tt-bubble { border-color: var(--badge-error-border); }
+#tt-root.tt-warn   .tt-bubble { border-color: var(--badge-warn-border); }
+#tt-root.tt-hint   .tt-bubble { border-color: var(--badge-hint-border); }
+#tt-root.tt-info   .tt-bubble { border-color: var(--badge-info-border); }
 
 /* ===== Meldungstypen innerhalb des Tooltips ===== */
 #tt-root .tt-line {
@@ -41,35 +41,35 @@
   border-radius: 4px;
 }
 
-/* Fehler (rot) */
+/* Fehler */
 #tt-root .tt-line.error {
-  background-color: rgba(255, 107, 107, 0.15);
-  color: #ff4c4c;
+  background-color: var(--msg-error-bg);
+  color: var(--msg-error-fg);
   font-weight: 600;
 }
 
-/* Warnung (gelb/orange) */
+/* Warnung */
 #tt-root .tt-line.warn {
-  background-color: rgba(240, 173, 78, 0.15);
-  color: #d99000;
+  background-color: var(--msg-warn-bg);
+  color: var(--msg-warn-fg);
   font-weight: 600;
 }
 
-/* Hinweis (blau) */
+/* Hinweis */
 #tt-root .tt-line.hint {
-  background-color: rgba(45, 108, 223, 0.12);
-  color: #2d6cdf;
+  background-color: var(--msg-hint-bg);
+  color: var(--msg-hint-fg);
 }
 
-/* Info (grau/blau) */
+/* Info */
 #tt-root .tt-line.info {
-  background-color: rgba(100, 100, 100, 0.08);
-  color: var(--text, #555);
+  background-color: var(--msg-info-bg);
+  color: var(--msg-info-fg);
 }
 
 /* Divider zwischen Formel/Quelle und Kontext im Tooltip */
 .ctx-tooltip .tt-divider,
-#modal-root .ctx-tooltip .tt-divider {   /* falls du Modal-Scoped Styles nutzt */
+#modal-root .ctx-tooltip .tt-divider {
   height: 1px;
   width: 100%;
   background: var(--border);

@@ -1,6 +1,8 @@
-/* Modal */
-.modal-root { 
-  position: fixed; inset: 0; z-index: 1000; 
+/* ===== MODAL GRUNDLAYOUT ===== */
+.modal-root {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
   display: none;
   place-items: center;
 }
@@ -8,7 +10,8 @@
 .modal-open { overflow: hidden; }
 
 .modal-backdrop {
-  position: absolute; inset: 0;
+  position: absolute;
+  inset: 0;
   background: rgba(0,0,0,0.45);
 }
 
@@ -16,19 +19,24 @@
   position: relative;
   max-width: min(720px, 90vw);
   max-height: min(80vh, 1000px);
-  overflow: hidden;
-  background: var(--panel, #fff);
-  color: var(--text, #111);
+  overflow: hidden; /* Scrollbar bleibt innerhalb der Rundung */
+  background: var(--panel);
+  color: var(--text);
   border-radius: 16px;
   box-shadow: 0 12px 40px rgba(0,0,0,0.35);
   padding: 20px 24px 24px;
 }
 
 .modal-close {
-  position: absolute; top: 8px; right: 12px;
-  font-size: 22px; line-height: 1;
-  background: transparent; border: none; cursor: pointer;
-  color: var(--muted, #555);
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-size: 22px;
+  line-height: 1;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
   outline: none;
 }
 .modal-close:focus,
@@ -36,18 +44,16 @@
   outline: none;
   box-shadow: none;
 }
-.modal-close::-moz-focus-inner { /* Firefox */
-  border: 0;
-}
+.modal-close::-moz-focus-inner { border: 0; }
 
-.modal-content { 
-  margin-top: 8px; 
-  font-size: 14px; 
-  line-height: 1.5; 
-  max-height: 70vh;        /* begrenzt den sichtbaren Bereich */
-  overflow-y: auto;        /* hier wird gescrollt */
-  border-radius: inherit;  /* behält runde Ecken */
-  padding-right: 12px;     /* kleiner Innenabstand, damit Scrollbar Text nicht überlappt */
+.modal-content {
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 1.5;
+  max-height: 70vh;
+  overflow-y: auto;
+  border-radius: inherit;
+  padding-right: 12px;
   box-sizing: border-box;
 }
 
@@ -58,94 +64,49 @@
   border-radius: 4px;
 }
 
-/* Fehler (rot) */
+/* Fehler */
 #modal-root .tt-line.error {
-  background-color: rgba(255, 107, 107, 0.15);
-  color: #ff4c4c;
+  background-color: var(--msg-error-bg);
+  color: var(--msg-error-fg);
   font-weight: 600;
 }
 
-/* Warnung (gelb/orange) */
+/* Warnung */
 #modal-root .tt-line.warn {
-  background-color: rgba(240, 173, 78, 0.15);
-  color: #d99000;
+  background-color: var(--msg-warn-bg);
+  color: var(--msg-warn-fg);
   font-weight: 600;
 }
 
-/* Hinweis (blau) */
+/* Hinweis */
 #modal-root .tt-line.hint {
-  background-color: rgba(45, 108, 223, 0.12);
-  color: #2d6cdf;
+  background-color: var(--msg-hint-bg);
+  color: var(--msg-hint-fg);
 }
 
-/* Info (grau/blau) */
+/* Info */
 #modal-root .tt-line.info {
-  background-color: rgba(100, 100, 100, 0.08);
-  color: var(--text, #555);
+  background-color: var(--msg-info-bg);
+  color: var(--msg-info-fg);
 }
 
 /* ===========================================
    ZWISCHENERGEBNIS-MODAL – KOMPAKTE VERSION
    =========================================== */
 
-/* Header (Windrichtung / Element / Achse) */
-.dir-summary,
-.elem-summary,
-.axis-summary {
-  padding: 4px 10px;      /* kompakter als vorher 8px 12px */
-  line-height: 1.2;
-  font-size: 13px;
-  padding-left: 1em;      /* Platz für Pfeil leicht reduziert */
-  cursor: pointer;
-  user-select: none;
-}
-
-/* Pfeil kleiner und dichter am Text */
-.dir-summary::before,
-.elem-summary::before,
-.axis-summary::before {
-  font-size: .85em;
-  left: .2em;
-  opacity: .75;
-}
-
-/* Body-Bereiche kompakter */
-.dir-card   .elem-groups { padding: 4px 10px 6px; }
-.elem-card  .axis-groups { padding: 4px 10px 6px; }
-
-/* Zähler (z. B. (13)) dezenter */
-.muted {
-  font-size: .9em;
-  margin-left: .4rem;
-}
-
-/* Offene Gruppen – dezenter Trenner */
-.dir-group[open]  > .dir-summary,
-.elem-group[open] > .elem-summary,
-.axis-group[open] > .axis-summary {
-  border-bottom: 1px solid var(--border);
-}
-
-/* Kleines Finetuning für dunkle Themes (nutzt vorhandene CSS-Variablen) */
-@media (prefers-color-scheme: dark) {
-  #modal-root .dir-summary,
-  #modal-root .elem-summary,
-  #modal-root .axis-summary { background: var(--panel); }
-}
-
-/* === Card-Wrapper je Ebene: Rahmen/Rundung sitzen außerhalb des Inhalts === */
-#modal-root .group-card{
+/* Card-Wrapper je Ebene */
+#modal-root .group-card {
   border: 1px solid var(--border);
   border-radius: 10px;
   background: var(--panel);
-  overflow: hidden;          /* Inhalt an Rundung clippen */
+  overflow: hidden;
   margin: 4px 0;
 }
-#modal-root .axis-card { border-radius: 8px; }   /* wie vorher für Achs-Ebene */
+#modal-root .axis-card { border-radius: 8px; }
 #modal-root .elem-card { border-style: solid; }
-#modal-root .axis-card { border-style: solid;  }
+#modal-root .axis-card { border-style: solid; }
 
-/* Details selbst bekommen keinen eigenen Border/Hintergrund mehr */
+/* Details selbst ohne eigenen Border/Hintergrund */
 #modal-root .dir-group,
 #modal-root .elem-group,
 #modal-root .axis-group {
@@ -154,18 +115,6 @@
   border-radius: 0;
 }
 
-/* Trenner beim Aufklappen: sauber innerhalb der Card */
-#modal-root .dir-group[open]  > .dir-summary,
-#modal-root .elem-group[open] > .elem-summary,
-#modal-root .axis-group[open] > .axis-summary {
-  border-bottom: 1px solid var(--border);
-}
-
-/* Kleine Paddings für die neuen Bodies (nur Elem hat einen .elem-body) */
-#modal-root .elem-body { padding: 2px 0; }
-
-/* ======= Paddings & Abstände innerhalb der Cards wiederherstellen ======= */
-
 /* Summary-Titel (Windrichtung / Element / Achse) */
 #modal-root .dir-summary,
 #modal-root .elem-summary,
@@ -173,8 +122,19 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 12px;          /* <-- vorher klebte am Rand */
+  padding: 8px 12px;
   font-weight: 600;
+  position: relative;
+  padding-left: 1.2em; /* Platz für den Pfeil */
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Zähler (z. B. (13)) */
+#modal-root .muted {
+  font-size: .9em;
+  margin-left: .4rem;
+  color: var(--muted);
 }
 
 /* Unterelemente in der Card leicht eingerückt */
@@ -182,45 +142,24 @@
 #modal-root .elem-card  .axis-groups   { padding: 4px 12px 4px 12px; }
 #modal-root .axis-card  .doc-list      { padding: 4px 12px 4px 12px; }
 
-/* Die eigentlichen Listeneinträge */
-#modal-root .doc-list {
-  list-style: none;
-  margin: 4px 0 8px 0;
-  padding: 0;
-}
-#modal-root .doc-list .doc-li {
-  display: grid;
-  grid-template-columns: auto auto 1fr;
-  align-items: baseline;
-  column-gap: .4rem;
-  padding: 2px 4px;
-  line-height: 1.3;
+/* Offene Gruppen – Trenner */
+#modal-root .dir-group[open]  > .dir-summary,
+#modal-root .elem-group[open] > .elem-summary,
+#modal-root .axis-group[open] > .axis-summary {
+  border-bottom: 1px solid var(--border);
 }
 
-/* 1. Kind = Label, 2. Kind = "=", 3. Kind = Wert */
-#modal-root .doc-list .doc-li > :nth-child(1) { justify-self: start; white-space: nowrap; }
-#modal-root .doc-list .doc-li > :nth-child(2) { justify-self: start; opacity: .85; white-space: nowrap; }
-#modal-root .doc-list .doc-li > :nth-child(3) { justify-self: end;   white-space: nowrap; }
-
-/* Optional: kleine optische Trennung unten zwischen Gruppen */
+/* kleine optische Trennung zwischen Cards */
 #modal-root .group-card:not(:last-child) {
   margin-bottom: 2px;
 }
 
-/* --- kleines Aus/Einklapp-Dreieck vor den Summary-Titeln --- */
+/* --- Aus/Einklapp-Dreieck --- */
 
-/* native Marker ausblenden, damit wir vollen Stil haben */
+/* native Marker ausblenden */
 #modal-root .dir-summary::-webkit-details-marker,
 #modal-root .elem-summary::-webkit-details-marker,
 #modal-root .axis-summary::-webkit-details-marker { display: none; }
-
-/* Summary normal lassen – kein flex, kein zentrieren */
-#modal-root .dir-summary,
-#modal-root .elem-summary,
-#modal-root .axis-summary {
-  position: relative;
-  padding-left: 1.2em;    /* Platz für den Pfeil schaffen */
-}
 
 /* Pfeil absolut davor platzieren */
 #modal-root .dir-summary::before,
@@ -242,16 +181,37 @@
   content: "▾";
 }
 
-#modal-root .nachweis-filter {
-  display: flex; gap: .5rem; margin: .5rem 0 .75rem;
+/* === Listeneinträge innerhalb der Achsen === */
+#modal-root .doc-list {
+  list-style: none;
+  margin: 4px 0 8px 0;
+  padding: 0;
 }
-#modal-root .nf-chip {
-  border: 1px solid var(--border); border-radius: 999px; padding: .25rem .6rem;
-  background: var(--panel); cursor: pointer; font-size: .9rem;
-}
-#modal-root .nf-chip.active { background: var(--tab-bg); border-color: var(--tab-active-border); }
 
-/* Nachweis-Filter: Farben immer aus dem Theme holen */
+#modal-root .doc-list .doc-li {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: baseline;
+  column-gap: .4rem;
+  padding: 2px 4px;
+  line-height: 1.3;
+  position: relative;
+  border-radius: 4px;
+  margin-bottom: 1px;
+}
+
+/* 1. Kind = Label, 2. Kind = "=", 3. Kind = Wert */
+#modal-root .doc-list .doc-li > :nth-child(1) { justify-self: start; white-space: nowrap; }
+#modal-root .doc-list .doc-li > :nth-child(2) { justify-self: start; opacity: .85; white-space: nowrap; }
+#modal-root .doc-list .doc-li > :nth-child(3) { justify-self: end;   white-space: nowrap; }
+
+/* ===== Nachweis-Filter / Chips ===== */
+#modal-root .nachweis-filter {
+  display: flex;
+  gap: .5rem;
+  margin: .5rem 0 .75rem;
+}
+
 #modal-root .nachweis-filter .nf-chip {
   color: var(--text);
   background: var(--panel);
@@ -261,8 +221,6 @@
   font-size: .9rem;
   line-height: 1;
   cursor: pointer;
-
-  /* Buttons verhalten sich überall gleich */
   appearance: none;
   -webkit-appearance: none;
   outline: none;
@@ -279,57 +237,15 @@
 #modal-root .nachweis-filter .nf-chip.active {
   background: var(--tab-bg);
   border-color: var(--tab-active-border);
-  color: var(--text); /* wichtig: nicht invertieren */
+  color: var(--text);
 }
 
-/* Optional: Badge-Zahlen dezenter */
+/* Badge im Chip */
 #modal-root .nachweis-filter .nf-chip .muted {
   color: var(--muted);
 }
 
 /* ===== Rollen-Highlighting für Zwischenergebnisse ===== */
-/* Grundidee: leichter Hintergrund + linker Akzentbalken, wie bei Meldungen */
-
-#modal-root .doc-list .doc-li {
-  position: relative;
-  border-radius: 4px;                  /* sanfte Ecken wie .tt-line */
-  margin-bottom: 1px;
-}
-
-/* Default = Light */
-:root {
-  --role-key-bg: rgba(45, 108, 223, 0.12);
-  --role-key-fg:  #2d6cdf;
-
-  --role-rel-bg: rgba(46, 204, 93, 0.322);
-  --role-rel-fg:  #2e8b57;
-
-  --role-irr-bg: rgba(100, 100, 100, 0.08);
-  --role-irr-fg:  var(--text, #555);
-}
-
-/* System-Dark Fallback (falls kein explizites Theme gesetzt ist) */
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]):not(.light) {
-    --role-key-bg: rgba(45, 108, 223, 0.12);
-    --role-key-fg:  #2d6cdf;
-    --role-rel-bg: rgba(46, 204, 93, 0.322);
-    --role-rel-fg:  #76d39a;
-    --role-irr-bg: rgba(100, 100, 100, 0.08);
-    --role-irr-fg:  var(--text, #555);
-  }
-}
-
-/* App-Toggle Dark (passe deinen Selector an: data-theme oder .dark o.ä.) */
-:root[data-theme="dark"], .dark {
-  --role-key-bg: rgba(45, 108, 223, 0.12);
-  --role-key-fg:  #2d6cdf;
-  --role-rel-bg: rgba(46, 204, 93, 0.322);
-  --role-rel-fg:  #76d39a;
-  --role-irr-bg: rgba(100, 100, 100, 0.08);
-  --role-irr-fg:  var(--text, #555);
-}
-
 #modal-root .doc-list .doc-li.role-key {
   background-color: var(--role-key-bg);
   color: var(--role-key-fg);
