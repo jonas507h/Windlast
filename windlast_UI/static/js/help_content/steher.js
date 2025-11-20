@@ -1,0 +1,122 @@
+// static/js/help_content/steher.js
+
+export const STEHER_HELP_PAGES = [
+  {
+    id: "steher:allgemein",
+    title: "Traversensteher mit Querpipe",
+    body: `
+      <p>
+        Ist die Konstruktion &bdquo;Steher&ldquo; ausgewählt, kann ein Traversensteher mit Querpipe berechnet werden.
+        Berechnet wird nur die reine Traversenkonstruktion inkl. Pipe. <b>Angebaute Technik (z. B. Lautsprecher, Scheinwerfer o. Ä.), Deko, Planen usw. können aktuell nicht berechnet werden.</b>
+      </p>
+      <p>
+        Im [[app:vorschau|Vorschaufenster]] links werden die aktuellen Eingaben grafisch dargestellt. Rechts können folgende Eingaben gemacht werden:
+      </p>
+
+      <help-include page="steher:traverse" auto-level="true"></help-include>
+      <help-include page="steher:rohr" auto-level="true"></help-include>
+      <help-include page="steher:bodenplatte" auto-level="true"></help-include>
+      <help-include page="steher:gummimatte" auto-level="true"></help-include>
+      <help-include page="steher:untergrund" auto-level="true"></help-include>
+      <help-include page="steher:hoehe" auto-level="true"></help-include>
+      <help-include page="steher:laenge_rohr" auto-level="true"></help-include>
+      <help-include page="steher:hoehe_rohr" auto-level="true"></help-include>
+    `
+  },
+
+  {
+    id: "steher:traverse",
+    title: "Traverse (Pflichtfeld)",
+    body: `
+      <p>
+        Wählt hier aus unseren Pool-Traversen die entsprechende Traverse aus. Die Auswahl beeinflusst die senkrechte Traverse.
+        Bei der Berechnung werden sowohl das Eigengewicht als auch die Windangriffsflächen der Traverse berücksichtigt.
+      </p>
+    `
+  },
+
+  {
+    id: "steher:rohr",
+    title: "Rohr (Pflichtfeld)",
+    body: `
+      <p>
+        Wählt hier aus unseren Pool-Rohren das entsprechende Rohr aus. Die Auswahl beeinflusst das Querrohr.
+        Bei der Berechnung werden sowohl das Eigengewicht als auch die Windangriffsflächen des Rohrs berücksichtigt.
+      </p>
+    `
+  },
+
+  {
+    id: "steher:bodenplatte",
+    title: "Bodenplatte (Pflichtfeld)",
+    body: `
+      <p>
+        Wählt hier aus unseren Pool-Bodenplatten die entsprechende Bodenplatte aus.
+        Bei der Berechnung werden Größe und Geometrie, Gewicht und Material der Bodenplatten berücksichtigt.
+      </p>
+    `
+  },
+
+  {
+    id: "steher:gummimatte",
+    title: "Gummimatte (Pflichtfeld)",
+    body: `
+      <p>
+        Wählt hier aus, ob ihr Gummimatten unter der Bodenplatte verwendet. Gummimatten erhöhen in der Regel den Reibwert zwischen Bodenplatte und Untergrund
+        und können sich positiv auf die Gleitsicherheit der Konstruktion auswirken.
+      </p>
+      <p>
+        <b>Achtung:</b> Da in den zugrunde gelegten Normen (DIN EN 13814:2005-06 und DIN EN 17879:2024-08) nur Reibwerte für Gummi in Kombination mit Holz, Stahl oder Beton angegeben sind,
+        führt eine andere Auswahl im [[steher:untergrund|Untergrund-Feld]] zu einem Fehler in der Berechnung.
+      </p>
+    `
+  },
+
+  {
+    id: "steher:untergrund",
+    title: "Untergrund (Pflichtfeld)",
+    body: `
+      <p>
+        Wählt hier den Untergrund aus, auf dem die Konstruktion steht. Der Untergrund beeinflusst den Reibwert zwischen Bodenplatte und Untergrund. Dieser wird anhand der
+        DIN EN 13814:2005-06 bzw. DIN EN 17879:2024-08 automatisch bestimmt.
+      </p>
+      <p>
+        <b>Achtung:</b> Bei Verwendung von Gummimatten unter den Bodenplatten (siehe [[steher:gummimatte|Gummimatte-Feld]]) sind nur die Untergründe Holz, Stahl oder Beton zulässig.
+        Ansonsten führt dies zu einem Fehler in der Berechnung.
+      </p>
+    `
+  },
+
+  {
+    id: "steher:hoehe",
+    title: "Höhe (Pflichtfeld)",
+    body: `
+      <p>
+        Gebt hier die Höhe des Stehers ein. Die Höhe ist definiert als Abstand zwischen dem Boden und der Oberkante der Traverse.
+      </p>
+    `
+  },
+
+  {
+    id: "steher:laenge_rohr",
+    title: "Länge Rohr (Pflichtfeld)",
+    body: `
+      <p>
+        Gebt hier die Länge des Querrohrs ein.
+      </p>
+    `
+  },
+
+  {
+    id: "steher:hoehe_rohr",
+    title: "Höhe Rohr (Pflichtfeld)",
+    body: `
+      <p>
+        Gebt hier die Höhe des Querrohrs über dem Boden ein. Referenz ist die Mittelachse des Rohrs.
+      </p>
+      <p>
+        <b>Achtung:</b> Die Höhe des Rohrs muss kleiner als die Gesamthöhe des Stehers sein.
+      </p>
+    `
+  }
+];

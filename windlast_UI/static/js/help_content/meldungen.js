@@ -28,10 +28,10 @@ export const MELDUNGEN_HELP_PAGES = [
     id: "meldungen:haeufige_meldungen",
     title: "Häufige Meldungen",
     body: `
-      <h3>Fehler</h3>
-      <h3>Warnungen</h3>
-      <h3>Hinweise</h3>
-      <h3>Informationen</h3>
+      <h4>Fehler</h4>
+      <h4>Warnungen</h4>
+      <h4>Hinweise</h4>
+      <h4>Informationen</h4>
       <faq question="Maßgebend ist die Paarung Stahl–Gummi mit μ=0.600.">
         Gibt den Reibwert μ an, der für der Berechnung verwendet wurde und von welcher Materialpaarung dieser stammt. Ausschlaggebend ist immer der niedrigste Reibwert über alle Bodenplatten und Materialpaarungen.
       </faq>

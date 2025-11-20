@@ -79,13 +79,16 @@ export const GENERAL_HELP_PAGES = [
     title: "Konstruktionen",
     body: `
       <p>
-        Der Windlasterechner unterstützt verschiedene, einfache Konstruktionstyten. Aktuell werden folgende Konstruktionen unterstützt:
+        Der Windlasterechner unterstützt verschiedene, einfache Konstruktionstypen. Aktuell werden folgende Konstruktionen unterstützt:
       </p>
       <ul>
         <li>[[tor:allgemein|Traversentor]]</li>
         <li>[[steher:allgemein|Traversensteher mit Querpipe]]</li>
         <li>[[tisch:allgemein|Traversentisch]]</li>
       </ul>
+      <p>
+        Auf der linken Seite zeigt das [[app:vorschau|Vorschaufenster]] die Konstruktion und rechts können die entsprechenden Eingaben gemacht werden.
+      </p>
     `
   }
 ];

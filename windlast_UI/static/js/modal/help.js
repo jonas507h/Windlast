@@ -5,6 +5,7 @@ import { GENERAL_HELP_PAGES } from "../help_content/allgemein.js";
 import { MELDUNGEN_HELP_PAGES } from "../help_content/meldungen.js";
 import { HEADER_HELP_PAGES } from "../help_content/header.js";
 import { TOR_HELP_PAGES } from "../help_content/tor.js";
+import { STEHER_HELP_PAGES } from "../help_content/steher.js";
 
 // Später: weitere Content-Module hier zusammenführen:
 // import { GENERAL_HELP_PAGES } from "../help_content/allgemein.js";
@@ -24,6 +25,7 @@ registerPages(GENERAL_HELP_PAGES);
 registerPages(MELDUNGEN_HELP_PAGES);
 registerPages(HEADER_HELP_PAGES);
 registerPages(TOR_HELP_PAGES);
+registerPages(STEHER_HELP_PAGES);
 
 // --- History-Stack für Vor / Zurück ---------------------------------------
 const history = [];

@@ -19,7 +19,7 @@ export const TOR_HELP_PAGES = [
       <help-include page="tor:bodenplatte" auto-level="true"></help-include>
       <help-include page="tor:gummimatte" auto-level="true"></help-include>
       <help-include page="tor:untergrund" auto-level="true"></help-include>
-      <help-include page="tor:höhe" auto-level="true"></help-include>
+      <help-include page="tor:hoehe" auto-level="true"></help-include>
       <help-include page="tor:breite" auto-level="true"></help-include>
     `
   },
@@ -93,7 +93,7 @@ export const TOR_HELP_PAGES = [
   },
 
   {
-    id: "tor:höhe",
+    id: "tor:hoehe",
     title: "Höhe (Pflichtfeld)",
     body: `
       <p>
