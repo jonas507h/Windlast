@@ -120,7 +120,7 @@ function formatBallast(val_kg) {
   if (!isFinite(n)) return "—";
   if (n <= 0) return "0 kg";
 
-  // > 1000 kg -> in kg, Mindestschritt 10 kg, immer aufrunden
+  // < 1000 kg -> in kg, Mindestschritt 10 kg, immer aufrunden
   if (n < 1000) {
     const rounded = Math.ceil(n / 10 ) * 10;
     return `${rounded.toLocaleString("de-DE")} kg`;

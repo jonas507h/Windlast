@@ -2,6 +2,37 @@
 
 export const NORM_HELP_PAGES = [
   {
+    id: "norm:allgemein",
+    title: "Unterstützte Normen",
+    body: `
+      <p>
+       Die Software unterstützt die Berechnung nach folgenden Normen:
+      </p>
+      <p>
+        [[norm:DIN_EN_13814_2005|DIN EN 13814:2005-06 – Fliegende Bauten und Anlagen für Veranstaltungsplätze und Vergnügungsparks – Sicherheit]]
+      </p>
+      <ul>
+        <li>Baurechtlich eingeführt für fliegende Bauten</li>
+        <li>Liefert Staudrücke und Verfahren für Standsicherheitsnachweis</li>
+        <li>Greift bei der Windkraftberechnung auf DIN EN 1991-1-4 zurück</li>
+      </ul>
+      <p>
+        [[norm:DIN_EN_17879_2024|DIN EN 17879:2024-08 – Event-Strukturen – Sicherheit]]
+      </p>
+      <ul>
+        <li>Nicht baurechtlich eingeführt</li>
+        <li>Liefert Staudrücke und Verfahren für Standsicherheitsnachweis</li>
+        <li>Greift bei der Windkraftberechnung auf DIN EN 1991-1-4 zurück</li>
+      </ul>
+      <p>
+        [[norm:DIN_EN_1991_1_4_2010|DIN EN 1991-1-4:2010 – Eurocode 1, Windlasten]]
+      </p>
+      <ul>
+        <li>TODO</li>
+      </ul>
+    `
+  },
+  {
     id: "norm:DIN_EN_13814_2005",
     normKey: "EN_13814_2005",
     title: "DIN EN 13814:2005-06 – Fliegende Bauten und Anlagen für Veranstaltungsplätze und Vergnügungsparks – Sicherheit",
@@ -112,13 +143,8 @@ export const NORM_HELP_PAGES = [
     title: "DIN EN 1991-1-4:2010 – Eurocode 1, Windlasten",
     body: `
       <p>
-        Eurocode 1, Teil 1-4: Allgemeine Einwirkungen – Windlasten.
+        TODO: Beschreibung der Norm DIN EN 1991-1-4
       </p>
-      <ul>
-        <li>Ausgabejahr: 2010</li>
-        <li>Inhalt: Ermittlung charakteristischer Windlasten auf Bauwerke</li>
-        <li>Hinweis: Nationale Anhänge (NA) sind zwingend zu berücksichtigen.</li>
-      </ul>
     `
   }
 ];

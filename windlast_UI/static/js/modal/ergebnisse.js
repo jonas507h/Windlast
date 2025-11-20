@@ -302,6 +302,29 @@ export function openErgebnisseModal(normKey, szenario = null, { initialNachweis 
   const wrap = buildModal(title, document.createElement("div"));
   const root = wrap.lastElementChild;
 
+  // --- Fragezeichen-Button ---
+  const titleEl = wrap.querySelector(".modal-title");
+  if (titleEl) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "help-icon-btn";
+    btn.style.marginLeft = "8px";
+    btn.textContent = "?";
+
+    const helpId = `zwischenergebnis:allgemein`;
+
+    btn.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      ev.preventDefault();
+      if (window.HELP?.open) {
+        window.HELP.open(helpId);
+      }
+    });
+
+    // Button in den Titel hängen
+    titleEl.appendChild(btn);
+  }
+
   if (!items.length) {
     const p = document.createElement("p");
     p.textContent = "Keine Ergebnisse vorhanden.";

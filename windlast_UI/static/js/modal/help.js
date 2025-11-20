@@ -6,6 +6,9 @@ import { MELDUNGEN_HELP_PAGES } from "../help_content/meldungen.js";
 import { HEADER_HELP_PAGES } from "../help_content/header.js";
 import { TOR_HELP_PAGES } from "../help_content/tor.js";
 import { STEHER_HELP_PAGES } from "../help_content/steher.js";
+import { TISCH_HELP_PAGES } from "../help_content/tisch.js";
+import { ERGEBNISSE_HELP_PAGES } from "../help_content/ergebnisse.js";
+import { ZWISCHENERGEBNISSE_HELP_PAGES } from "../help_content/zwischenergebnisse.js";
 
 // Später: weitere Content-Module hier zusammenführen:
 // import { GENERAL_HELP_PAGES } from "../help_content/allgemein.js";
@@ -26,6 +29,9 @@ registerPages(MELDUNGEN_HELP_PAGES);
 registerPages(HEADER_HELP_PAGES);
 registerPages(TOR_HELP_PAGES);
 registerPages(STEHER_HELP_PAGES);
+registerPages(TISCH_HELP_PAGES);
+registerPages(ERGEBNISSE_HELP_PAGES);
+registerPages(ZWISCHENERGEBNISSE_HELP_PAGES);
 
 // --- History-Stack für Vor / Zurück ---------------------------------------
 const history = [];

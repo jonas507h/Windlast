@@ -12,7 +12,15 @@
       <!-- Reihe 1: Dropdowns -->
       <div class="row row-1">
         <div class="field">
-          <label for="traverse" class="required">Traverse</label>
+          <div class="label-row">
+            <label for="traverse" class="required">Traverse</label>
+            <button
+              type="button"
+              class="help-icon-btn"
+              data-help-id="tisch:traverse"
+              aria-label="Hilfe zu diesem Bereich"
+            >?</button>
+          </div>
           <select id="traverse_name_intern">
             <option value="">Bitte wählen …</option>
           </select>
@@ -21,21 +29,45 @@
 
       <div class="row row-3">
         <div class="field">
-          <label for="bodenplatte" class="required">Bodenplatte</label>
+          <div class="label-row">
+            <label for="bodenplatte" class="required">Bodenplatte</label>
+            <button
+              type="button"
+              class="help-icon-btn"
+              data-help-id="tisch:bodenplatte"
+              aria-label="Hilfe zu diesem Bereich"
+            >?</button>
+          </div>
           <select id="bodenplatte_name_intern">
             <option value="">Bitte wählen …</option>
           </select>
         </div>
 
         <div class="field">
-          <label for="gummimatte" class="required">Gummimatte</label>
+          <div class="label-row">
+            <label for="gummimatte" class="required">Gummimatte</label>
+            <button
+              type="button"
+              class="help-icon-btn"
+              data-help-id="tisch:gummimatte"
+              aria-label="Hilfe zu diesem Bereich"
+            >?</button>
+          </div>
           <select id="gummimatte">
             <option value="">Bitte wählen …</option>
           </select>
         </div>
 
         <div class="field">
-          <label for="untergrund" class="required">Untergrund</label>
+          <div class="label-row">
+            <label for="untergrund" class="required">Untergrund</label>
+            <button
+              type="button"
+              class="help-icon-btn"
+              data-help-id="tisch:untergrund"
+              aria-label="Hilfe zu diesem Bereich"
+            >?</button>
+          </div>
           <select id="untergrund_typ">
             <option value="">Bitte wählen …</option>
           </select>
@@ -45,19 +77,43 @@
       <!-- Reihe 2: Inputs -->
       <div class="row row-3">
         <div class="field">
-          <label for="hoehe" class="required">Höhe [m]</label>
+          <div class="label-row">
+            <label for="hoehe" class="required">Höhe [m]</label>
+            <button
+              type="button"
+              class="help-icon-btn"
+              data-help-id="tisch:hoehe"
+              aria-label="Hilfe zu diesem Bereich"
+            >?</button>
+          </div>
           <input id="hoehe_m" name="hoehe_m" type="number" step="0.01" min="0" placeholder="z. B. 8.00" />
           <p class="error-text" id="err-hoehe" hidden>Bitte eine gültige Höhe &gt; 0 angeben.</p>
         </div>
 
         <div class="field">
-          <label for="breite" class="required">Breite [m]</label>
+          <div class="label-row">
+            <label for="breite" class="required">Breite [m]</label>
+            <button
+              type="button"
+              class="help-icon-btn"
+              data-help-id="tisch:breite"
+              aria-label="Hilfe zu diesem Bereich"
+            >?</button>
+          </div>
           <input id="breite_m" name="breite_m" type="number" step="0.01" min="0" placeholder="z. B. 4.00" />
           <p class="error-text" id="err-breite" hidden>Bitte eine gültige Breite &gt; 0 angeben.</p>
         </div>
 
         <div class="field">
-          <label for="tiefe" class="required">Tiefe [m]</label>
+          <div class="label-row">
+            <label for="tiefe" class="required">Tiefe [m]</label>
+            <button
+              type="button"
+              class="help-icon-btn"
+              data-help-id="tisch:tiefe"
+              aria-label="Hilfe zu diesem Bereich"
+            >?</button>
+          </div>
           <input id="tiefe_m" name="tiefe_m" type="number" step="0.01" min="0" placeholder="z. B. 2.00" />
           <p class="error-text" id="err-tiefe" hidden>Bitte eine gültige Tiefe &gt; 0 angeben.</p>
       </div>

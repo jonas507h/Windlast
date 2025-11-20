@@ -7,16 +7,16 @@ export const GENERAL_HELP_PAGES = [
     body: `
       <p>Willkommen in der Hilfe des Windlastrechners.</p>
 
-      <h4>Häufige Themen</h4>
+      <h4>Wichtige Seiten</h4>
       <ul>
-        <li><a href="#help:norm:DIN_EN_13814_2005">DIN EN 13814:2005-06 – Fliegende Bauten</a></li>
-        <li><a href="#help:norm:DIN_EN_17879_2024">DIN EN 17879:2024-08 – Event-Strukturen</a></li>
-        <li><a href="#help:norm:DIN_EN_1991_1_4_2010">DIN EN 1991-1-4:2010-12 – Eurocode 1</a></li>
+        <li>[[norm:allgemein|Normen]]</li>
+        <li>[[app:bedienung|Bedienung des Programms]]</li>
+        <li>[[ergebnisse:allgemein|Ergebnisse]]</li>
       </ul>
 
-      <h4>Weitere Themen</h4>
+      <h4>Sonstige nützliche Seiten</h4>
       <ul>
-        <li>[[app:bedienung|Bedienung des Programms]]</li>
+        <li>[[meldungen:haeufige_meldungen|Häufige Meldungen]]</li>
         <li>[[app:faq|FAQ]]</li>
       </ul>
     `
@@ -27,10 +27,24 @@ export const GENERAL_HELP_PAGES = [
     title: "Bedienung des Windlastrechners",
     body: `
       <p>
-        Dieser Abschnitt erklärt die grundlegende Bedienung des Programms.
+        In der Kopfzeile werden allgemeine Daten wie die [[header:aufstelldauer|Aufstelldauer]] und die [[header:windzone|Windzone]] eingegeben.
+        Außerdem kann hier zwischen dunklem und hellem Design gewechselt und das hilfe Menü aufgerufen werden.
       </p>
       <p>
-        Weitere Normen findest du z. B. unter [[norm:EN_13814_2005]].
+        In der Mitte wird die zu berechnende [[app:konstruktionen|Konstruktion]] ausgewählt und die entsprechenden Eingaben gemacht.
+        Links wird die Konstruktion im [[app:vorschau|Vorschaufenster]] grafisch dargestellt. Rechts befinden sich die Eingabefelder für die Konstruktion und
+        der Button zur Berechnung der Windlasten.
+      </p>
+      <p>
+        Unten werden die [[ergebnisse:allgemein|Ergebnisse]] der Berechnung angezeigt. Hier können auch die Fenster für die [[meldungen:allgemein|Meldungen]]
+        und die [[zwischenergebnis:allgemein|Zwischenergebnisse]] geöffnet werden.
+      </p>
+      <p>
+        Überall im Programm sind kleine Fragezeichen-Buttons zu finden. Ein Klick darauf öffnet die zugehörige Hilfe-Seite.
+      </p>
+      <p>
+        Das Programm rechnet parallel nach drei verschiedenen [[norm:allgemein|Normen]] mit verschiedenen Einsatzgebieten. Informiert euch vor der Nutzung,
+        welche Norm für euren Anwendungsfall die richtige ist.
       </p>
     `
   },
@@ -39,16 +53,7 @@ export const GENERAL_HELP_PAGES = [
     id: "app:faq",
     title: "FAQ – Häufige Fragen",
     body: `
-      <p>Hier findest du häufige Fragen:</p>
-
-      <faq question="Wie lese ich die Tabelle im Footer?">
-        Die Spalten repräsentieren verschiedene Normen. Klicke auf die Spaltenüberschrift für Details.
-      </faq>
-
-      <faq question="Was bedeutet die rote Markierung?">
-        Es bedeutet, dass die Sicherheit < 1.00 ist.<br>
-        Details findest du unter [[norm:EN_1991_1_4_2010]].
-      </faq>
+      <p>TODO: FAQ</p>
     `
   },
 
