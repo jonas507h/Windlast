@@ -157,7 +157,7 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
             if traversentyp == TraversenTyp.ZWEI_PUNKT:
                 x = [0.2, 0.35, 0.55]
                 y = [0.7, 0.6, 0.5]
-                if not (x[0] - _EPS <= voelligkeitsgrad <= x[-1] + _EPS):
+                if not (0.2 - _EPS <= voelligkeitsgrad <= 0.6 + _EPS):
                     protokolliere_msg(
                         protokoll, severity=Severity.WARN, code="GRUNDKRAFT/EXTRAPOLATION_V",
                         text=f"Völligkeitsgrad {voelligkeitsgrad:.3f} außerhalb [{x[0]}, {x[-1]}] – Interpolation extrapoliert.",
@@ -180,7 +180,7 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
             elif traversentyp == TraversenTyp.VIER_PUNKT:
                 x = [0.25, 0.5]
                 y = [2.0, 1.9]
-                if not (x[0] - _EPS <= voelligkeitsgrad <= x[-1] + _EPS):
+                if not (0.2 - _EPS <= voelligkeitsgrad <= 0.6 + _EPS):
                     protokolliere_msg(
                         protokoll, severity=Severity.WARN, code="GRUNDKRAFT/EXTRAPOLATION_V",
                         text=f"Völligkeitsgrad {voelligkeitsgrad:.3f} außerhalb [{x[0]}, {x[-1]}] – Interpolation extrapoliert.",
@@ -190,7 +190,7 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
 
                 x = [0.2, 0.35, 0.55]
                 y = [1.85, 1.6, 1.4]
-                if not (x[0] - _EPS <= voelligkeitsgrad <= x[-1] + _EPS):
+                if not (0.2 - _EPS <= voelligkeitsgrad <= 0.6 + _EPS):
                     protokolliere_msg(
                         protokoll, severity=Severity.WARN, code="GRUNDKRAFT/EXTRAPOLATION_V",
                         text=f"Völligkeitsgrad {voelligkeitsgrad:.3f} außerhalb [{x[0]}, {x[-1]}] – Interpolation extrapoliert.",

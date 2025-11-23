@@ -370,6 +370,7 @@ def _geschwindigkeitsdruck_DinEn1991_1_4_2010_12(
     q_eff = q_basis
     if aufstelldauer is not None:
         dauer_monate = convert_dauer(aufstelldauer.wert, aufstelldauer.einheit, Zeitfaktor.MONAT)
+        dauer_tage = convert_dauer(aufstelldauer.wert, aufstelldauer.einheit, Zeitfaktor.TAG)
 
         # Obergrenzen (Monate) sortieren und erste passende "bis zu …" Kategorie wählen
         grenzen_sorted = sorted(
@@ -380,7 +381,7 @@ def _geschwindigkeitsdruck_DinEn1991_1_4_2010_12(
         faktor = None
         for grenze in grenzen_sorted:
             grenze_monate = convert_dauer(grenze.wert, grenze.einheit, Zeitfaktor.MONAT)
-            if dauer_monate <= grenze_monate + 1e-9:
+            if dauer_monate <= grenze_monate + _EPS:
                 faktor = FAKTOREN_VORUEBERGENDER_ZUSTAND[grenze][zustand]
                 break
 
@@ -388,10 +389,15 @@ def _geschwindigkeitsdruck_DinEn1991_1_4_2010_12(
             # Nur wenn innerhalb der Tabellenobergrenzen → Faktor anwenden und warnen
             protokolliere_msg(
                 protokoll, severity=Severity.WARN, code="STAUD/ABMINDERUNG_AN",
-                text=("Abminderungen der Windlasten sind bei fliegenden Bauten nicht zulässig. "
-                      "Der Abminderungsfaktor wird hier nur auf ausdrücklichen Wunsch angewendet."),
+                text=("Abminderungen der Windlasten nach DIN EN 1991-1-4:2010-12/NA sind bei Bauten, die jederzeit errichtet und demontiert werden können (z.B. fliegende Bauten), nicht zulässig."),
                 kontext=merge_kontext(base_ctx, {"aufstelldauer_monate": dauer_monate, "faktor": faktor}),
             )
+            if dauer_tage > 3.0 + _EPS and dauer_monate < 3.0 - _EPS:
+                protokolliere_msg(
+                    protokoll, severity=Severity.WARN, code="STAUD/ABMINDERUNG_JAHRESZEIT",
+                    text=("Die verwendete Aufstelldauer zwischen 3 Tagen und 3 Monaten führt zu einer Abminderung des Staudrucks, die nur für den Zeitraum von Mai bis August zulässig ist."),
+                    kontext=merge_kontext(base_ctx, {"aufstelldauer_monate": dauer_monate, "faktor": faktor}),
+                )
             q_eff = q_basis * faktor
         # else: Dauer oberhalb der höchsten Obergrenze → faktor=1.0 implizit, keine Warnung
 

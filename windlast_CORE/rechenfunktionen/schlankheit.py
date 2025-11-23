@@ -84,14 +84,14 @@ def _schlankheit_DinEn1991_1_4_2010_12(
         rechenwert = faktor * (laenge / hoehe)
         wert = min(rechenwert, 70.0)
 
-        if wert < rechenwert:
-            protokolliere_msg(
-                protokoll,
-                severity=Severity.INFO,
-                code="SCHLANKHEIT/CLAMP_70",
-                text=f"Schlankheit auf 70 gekappt (Rechenwert {rechenwert:.3f}).",
-                kontext=merge_kontext(kontext, {"phase": "Zwischenwerte", "rechenwert": rechenwert}),
-            )
+        # if wert < rechenwert:
+        #     protokolliere_msg(
+        #         protokoll,
+        #         severity=Severity.INFO,
+        #         code="SCHLANKHEIT/CLAMP_70",
+        #         text=f"Schlankheit auf 70 gekappt (Rechenwert {rechenwert:.3f}).",
+        #         kontext=merge_kontext(kontext, {"phase": "Zwischenwerte", "rechenwert": rechenwert}),
+        #     )
 
         protokolliere_doc(
             protokoll,
@@ -140,14 +140,14 @@ def _schlankheit_DinEn1991_1_4_2010_12(
         rechenwert = faktor * (laenge / d_aussen)
         wert = min(rechenwert, 70.0)
 
-        if wert < rechenwert:
-            protokolliere_msg(
-                protokoll,
-                severity=Severity.INFO,
-                code="SCHLANKHEIT/CLAMP_70",
-                text=f"Schlankheit auf 70 gekappt (Rechenwert {rechenwert:.3f}).",
-                kontext=merge_kontext(kontext, {"phase": "Zwischenwerte", "rechenwert": rechenwert}),
-            )
+        # if wert < rechenwert:
+        #     protokolliere_msg(
+        #         protokoll,
+        #         severity=Severity.INFO,
+        #         code="SCHLANKHEIT/CLAMP_70",
+        #         text=f"Schlankheit auf 70 gekappt (Rechenwert {rechenwert:.3f}).",
+        #         kontext=merge_kontext(kontext, {"phase": "Zwischenwerte", "rechenwert": rechenwert}),
+        #     )
 
         protokolliere_doc(
             protokoll,

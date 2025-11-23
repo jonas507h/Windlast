@@ -10,9 +10,9 @@ import json
 from windlast_CORE.datenstruktur.enums import (
     Norm, Windzone, Betriebszustand, Schutzmassnahmen,
     RechenmethodeKippen, RechenmethodeGleiten, RechenmethodeAbheben,
-    VereinfachungKonstruktion, Nachweis, Severity, ValueSource, NormStatus,
+    VereinfachungKonstruktion, Nachweis, Severity, ValueSource, NormStatus, Zeitfaktor
 )
-from windlast_CORE.datenstruktur.zeit import Dauer
+from windlast_CORE.datenstruktur.zeit import Dauer, convert_dauer
 from windlast_CORE.datenstruktur.standsicherheit_ergebnis import (
     StandsicherheitErgebnis, NormErgebnis, SafetyValue, Message, Meta, NormStatus, NormDetails, AlternativeErgebnis
 )
@@ -248,6 +248,7 @@ def standsicherheit(
         szenarien: List[StaudruckSzenario],
         *,
         normtitel: str,
+        allow_alternativen: bool = True,
     ) -> NormErgebnis:
         # Primär-Szenario ist szenarien[0]; alle weiteren werden als alternativen[...] abgelegt
         reasons_all: List[Message] = []
@@ -286,7 +287,7 @@ def standsicherheit(
         # Fallback nur versuchen, wenn eine Sicherheit < 1 oder wenn man sie immer anbieten will
         need_fallback = any(v is not None and v < 1.0 for v in (v_kipp, v_gleit, v_abhebe))
 
-        if need_fallback and len(szenarien) > 1:
+        if need_fallback and len(szenarien) > 1 and allow_alternativen:
             for s in szenarien[1:]:
                 z_b, q_b, reasons_b = _ermittle_staudruecke(konstruktion, s, aufstelldauer=aufstelldauer, protokoll=prot, kontext={})
                 reasons_all.extend(reasons_b)
@@ -325,6 +326,9 @@ def standsicherheit(
         details.docs = docs
 
         return NormErgebnis(status=status, reasons=reasons_all, werte=werte, alternativen=alternativen, details=details)
+    
+    aufstelldauer_monate = convert_dauer(aufstelldauer.wert, aufstelldauer.einheit, Zeitfaktor.MONAT) if aufstelldauer else None
+    allow_alternativen_1991 = (aufstelldauer_monate is not None and aufstelldauer_monate <= 24.0)
 
     # --------------------------
     # DIN EN 13814:2005-06
@@ -337,6 +341,7 @@ def standsicherheit(
                             betriebszustand=Betriebszustand.IN_BETRIEB, windzone=windzone),
         ],
         normtitel="DIN EN 13814:2005-06",
+        allow_alternativen=True,
     )
 
     # --------------------------
@@ -350,6 +355,7 @@ def standsicherheit(
                             betriebszustand=Betriebszustand.IN_BETRIEB, windzone=windzone),
         ],
         normtitel="DIN EN 17879:2024-08",
+        allow_alternativen=True,
     )
 
     # --------------------------
@@ -359,12 +365,13 @@ def standsicherheit(
         [
             StaudruckSzenario("STANDARD", "Standard", Norm.DIN_EN_1991_1_4_2010_12, modus="schutz",
                             schutz=Schutzmassnahmen.KEINE, windzone=windzone),
-            StaudruckSzenario("SCHUETZEND", "mit schützenden Sicherungsmaßnahmen", Norm.DIN_EN_1991_1_4_2010_12, modus="schutz",
-                            schutz=Schutzmassnahmen.SCHUETZEND, windzone=windzone),
             StaudruckSzenario("VERSTAERKEND", "mit verstärkenden Sicherungsmaßnahmen", Norm.DIN_EN_1991_1_4_2010_12, modus="schutz",
                             schutz=Schutzmassnahmen.VERSTAERKEND, windzone=windzone),
+            StaudruckSzenario("SCHUETZEND", "mit schützenden Sicherungsmaßnahmen", Norm.DIN_EN_1991_1_4_2010_12, modus="schutz",
+                            schutz=Schutzmassnahmen.SCHUETZEND, windzone=windzone),
         ],
         normtitel="DIN EN 1991-1-4:2010-12",
+        allow_alternativen=allow_alternativen_1991,
     )
 
     # Ergebnis speichern (Debug)
