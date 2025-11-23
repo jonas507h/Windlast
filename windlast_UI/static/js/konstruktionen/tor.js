@@ -42,7 +42,7 @@ async function initTorDropdowns() {
     // Dropdowns füllen
     fillSelect(document.getElementById("traverse_name_intern"), traversen);
     fillSelect(document.getElementById("bodenplatte_name_intern"), bps);
-    fillSelect(document.getElementById("untergrund_typ"), untergruende, { defaultValue: "Beton" });
+    fillSelect(document.getElementById("untergrund_typ"), untergruende, { defaultValue: "BETON" });
 
     // Statisches Dropdown: Traversen-Orientierung (Default: Spitze nach oben)
     const trOri = document.getElementById("traversen_orientierung");
@@ -225,6 +225,7 @@ async function submitTor() {
 
     const gmVal = document.getElementById("gummimatte")?.value ?? "ja";
     const gummimatte_bool = (gmVal === "ja");
+    const untergrund = document.getElementById("untergrund_typ").value;
 
     const breite_m = parseFloat(document.getElementById("breite_m").value);
     const hoehe_m  = parseFloat(document.getElementById("hoehe_m").value);
@@ -239,6 +240,7 @@ async function submitTor() {
       traverse_name_intern,
       bodenplatte_name_intern,
       gummimatte: gummimatte_bool,
+      untergrund,
       orientierung,
       name: 'Tor',
     }, window.Catalog);

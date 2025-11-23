@@ -42,7 +42,7 @@ async function initTischDropdowns() {
     // Dropdowns füllen
     fillSelect(document.getElementById("traverse_name_intern"), traversen);
     fillSelect(document.getElementById("bodenplatte_name_intern"), bps);
-    fillSelect(document.getElementById("untergrund_typ"), untergruende, { defaultValue: "Beton" });
+    fillSelect(document.getElementById("untergrund_typ"), untergruende, { defaultValue: "BETON" });
 
     // Statisches Dropdown: Gummimatte (Ja/Nein), Default = Ja
     const gm = document.getElementById("gummimatte");
@@ -223,6 +223,7 @@ async function submitTisch() {
     // 2) Gummimatte (ja/nein) -> Boolean
     const gmVal = document.getElementById("gummimatte")?.value ?? "ja";
     const gummimatte_bool = (gmVal === "ja");
+    const untergrund = document.getElementById("untergrund_typ")?.value ?? "Beton";
 
     // 3) UI-Inputs einsammeln
     const inputs = {
@@ -232,6 +233,7 @@ async function submitTisch() {
       traverse_name_intern:    document.getElementById("traverse_name_intern").value,
       bodenplatte_name_intern: document.getElementById("bodenplatte_name_intern").value,
       gummimatte: gummimatte_bool,
+      untergrund: untergrund,
       name: "Tisch",
     };
 

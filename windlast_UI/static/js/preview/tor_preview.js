@@ -19,6 +19,7 @@ function readFormForTor() {
   const bodenplatte_name_intern= document.getElementById('bodenplatte_name_intern')?.value || 'BP';
   const gmVal = document.getElementById('gummimatte')?.value || 'ja';
   const gummimatte = (gmVal === 'ja');
+  const untergrund = document.getElementById('untergrund_typ')?.value || 'BETON';
   const orientierung = readTraversenOrientierungSafe();
 
   return {
@@ -27,6 +28,7 @@ function readFormForTor() {
     traverse_name_intern,
     bodenplatte_name_intern,
     gummimatte,
+    untergrund,
     orientierung,
   };
 }
@@ -61,7 +63,7 @@ export function mountTorPreview(mountEl) {
   rerender();
 
   // simple live update: auf Änderungen der relevanten Inputs reagieren
-  const ids = ['breite_m','hoehe_m','traverse_name_intern','bodenplatte_name_intern','gummimatte','traversen_orientierung'];
+  const ids = ['breite_m','hoehe_m','traverse_name_intern','bodenplatte_name_intern','gummimatte','untergrund_typ','traversen_orientierung'];
   const listeners = [];
   for (const id of ids) {
     const el = document.getElementById(id);

@@ -15,6 +15,7 @@ function readFormForSteher() {
   const rohr_name_intern       = document.getElementById('rohr_name_intern')?.value || 'ROHR';
   const gmVal = document.getElementById('gummimatte')?.value || 'ja';
   const gummimatte = (gmVal === 'ja');
+  const untergrund = document.getElementById('untergrund_typ')?.value || 'BETON';
 
   return {
     hoehe_m:  isFinite(hoehe)  && hoehe  > 0 ? hoehe  : 3,
@@ -24,6 +25,7 @@ function readFormForSteher() {
     bodenplatte_name_intern,
     rohr_name_intern,
     gummimatte,
+    untergrund,
   };
 }
 
@@ -57,7 +59,7 @@ export function mountSteherPreview(mountEl) {
   rerender();
 
   // simple live update: auf Änderungen der relevanten Inputs reagieren
-  const ids = ['hoehe_m','rohr_laenge_m','rohr_hoehe_m','traverse_name_intern','bodenplatte_name_intern','rohr_name_intern','gummimatte'];
+  const ids = ['hoehe_m','rohr_laenge_m','rohr_hoehe_m','traverse_name_intern','bodenplatte_name_intern','rohr_name_intern','gummimatte','untergrund_typ'];
   const listeners = [];
   for (const id of ids) {
     const el = document.getElementById(id);

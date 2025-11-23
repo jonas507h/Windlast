@@ -44,7 +44,7 @@ async function initSteherDropdowns() {
     fillSelect(document.getElementById("traverse_name_intern"), traversen);
     fillSelect(document.getElementById("rohr_name_intern"), rohre);
     fillSelect(document.getElementById("bodenplatte_name_intern"), bps);
-    fillSelect(document.getElementById("untergrund_typ"), untergruende, { defaultValue: "Beton" });
+    fillSelect(document.getElementById("untergrund_typ"), untergruende, { defaultValue: "BETON" });
 
     // Statisches Dropdown: Gummimatte (Ja/Nein), Default = Ja
     const gm = document.getElementById("gummimatte");
@@ -241,6 +241,7 @@ async function submitSteher() {
       bodenplatte_name_intern:document.getElementById("bodenplatte_name_intern").value,
       rohr_name_intern:       document.getElementById("rohr_name_intern").value,
       gummimatte: gummimatte_bool,
+      untergrund: document.getElementById("untergrund_typ").value,
       name: "Steher",
       // untergrund_typ evtl kippen
     };

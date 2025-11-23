@@ -19,7 +19,7 @@ const ORIENT_MAP = {
  * Wirft bei Fehlern eine aussagekräftige Exception.
  */
 export function validateTorInputs({
-  breite_m, hoehe_m, traverse_name_intern, bodenplatte_name_intern, orientierung = ORIENTIERUNG.up,
+  breite_m, hoehe_m, traverse_name_intern, bodenplatte_name_intern, untergrund, orientierung = ORIENTIERUNG.up,
 }, catalog) {
   if (!catalog || typeof catalog.getTraverse !== 'function' || typeof catalog.getBodenplatte !== 'function') {
     throw new Error('catalog mit getTraverse/getBodenplatte erforderlich.');
@@ -31,6 +31,7 @@ export function validateTorInputs({
   if (B <= 0 || H <= 0) throw new Error('Breite und Höhe müssen > 0 sein.');
   if (!traverse_name_intern) throw new Error('traverse_name_intern fehlt.');
   if (!bodenplatte_name_intern) throw new Error('bodenplatte_name_intern fehlt.');
+  if (!untergrund) throw new Error('untergrund fehlt.');
   if (!ORIENT_MAP[orientierung]) throw new Error(`Unbekannte orientierung: ${orientierung}`);
 
   const travSpec = catalog.getTraverse(traverse_name_intern);
@@ -67,6 +68,7 @@ export function validateTorInputs({
  * @param {string} inputs.traverse_name_intern
  * @param {string} inputs.bodenplatte_name_intern
  * @param {boolean} [inputs.gummimatte=true]
+ * @param {string} inputs.untergrund
  * @param {'up'|'side'|'down'} [inputs.orientierung='up']
  * @param {string} [inputs.name='Tor']
  * @param {Object} catalog – siehe oben
@@ -76,11 +78,12 @@ export function buildTor(inputs, catalog) {
   const {
     breite_m, hoehe_m, traverse_name_intern, bodenplatte_name_intern,
     gummimatte = true,
+    untergrund,
     orientierung = ORIENTIERUNG.up,
     name = 'Tor',
   } = inputs;
 
-  validateTorInputs({ breite_m, hoehe_m, traverse_name_intern, bodenplatte_name_intern, orientierung }, catalog);
+  validateTorInputs({ breite_m, hoehe_m, traverse_name_intern, bodenplatte_name_intern, untergrund, orientierung }, catalog);
 
   const B = Number(breite_m);
   const H = Number(hoehe_m);
@@ -171,7 +174,7 @@ export function buildTor(inputs, catalog) {
     orientierung: [0, 0, 1],
     drehung: vecs.links,
     material: 'STAHL',
-    untergrund: 'BETON',
+    untergrund: untergrund,
     gummimatte: gummimatte ? 'GUMMI' : null,
     objekttyp: 'BODENPLATTE',
     element_id_intern: 'Bodenplatte_Links',
@@ -185,7 +188,7 @@ export function buildTor(inputs, catalog) {
     orientierung: [0, 0, 1],
     drehung: vecs.rechts,
     material: 'STAHL',
-    untergrund: 'BETON',
+    untergrund: untergrund,
     gummimatte: gummimatte ? 'GUMMI' : null,
     objekttyp: 'BODENPLATTE',
     element_id_intern: 'Bodenplatte_Rechts',

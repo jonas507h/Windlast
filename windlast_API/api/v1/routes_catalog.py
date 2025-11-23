@@ -36,6 +36,6 @@ def get_rohre():
 @bp_v1.get("/catalog/untergruende")
 def get_untergruende():
     # Enum-Werte sind bereits als Anzeigetext gedacht → value=label=Enum.value
-    opts = [{"value": m.value, "label": m.value} for m in MaterialTyp]
+    opts = [{"value": m.name, "label": m.value} for m in MaterialTyp]
     opts.sort(key=lambda x: x["label"])
     return jsonify({"options": opts})

@@ -11,7 +11,7 @@ const vec = {
  * Wirft bei Fehlern eine aussagekräftige Exception.
  */
 export function validateSteherInputs({
-  hoehe_m, rohr_laenge_m, rohr_hoehe_m, traverse_name_intern, bodenplatte_name_intern, rohr_name_intern,
+  hoehe_m, rohr_laenge_m, rohr_hoehe_m, traverse_name_intern, bodenplatte_name_intern, rohr_name_intern, untergrund,
 }, catalog) {
   if (!catalog || typeof catalog.getTraverse !== 'function' || typeof catalog.getBodenplatte !== 'function' || typeof catalog.getRohr !== 'function') {
     throw new Error('catalog mit getTraverse/getBodenplatte/getRohr erforderlich.');
@@ -25,6 +25,7 @@ export function validateSteherInputs({
   if (!traverse_name_intern) throw new Error('traverse_name_intern fehlt.');
   if (!bodenplatte_name_intern) throw new Error('bodenplatte_name_intern fehlt.');
   if (!rohr_name_intern) throw new Error('rohr_name_intern fehlt.');
+  if (!untergrund) throw new Error('untergrund fehlt.');
 
   const travSpec = catalog.getTraverse(traverse_name_intern);
   if (!travSpec) throw new Error(`Traverse ${traverse_name_intern} nicht im Katalog gefunden.`);
@@ -52,6 +53,7 @@ export function validateSteherInputs({
  * @param {string} inputs.bodenplatte_name_intern
  * @param {boolean} [inputs.gummimatte=true]
  * @param {string} inputs.rohr_name_intern
+ * @param {string} inputs.untergrund
  * @param {string} [inputs.name='Steher']
  * @param {Object} catalog – siehe oben
  * @returns {Object} konstruktion
@@ -60,11 +62,11 @@ export function buildSteher(inputs, catalog) {
   const {
     hoehe_m, rohr_laenge_m, rohr_hoehe_m, traverse_name_intern, bodenplatte_name_intern, rohr_name_intern,
     gummimatte = true,
+    untergrund,
     name = 'Steher',
   } = inputs;
 
-  validateSteherInputs({hoehe_m, rohr_laenge_m, rohr_hoehe_m, traverse_name_intern, bodenplatte_name_intern, rohr_name_intern }, catalog);
-
+  validateSteherInputs({hoehe_m, rohr_laenge_m, rohr_hoehe_m, traverse_name_intern, bodenplatte_name_intern, rohr_name_intern, untergrund }, catalog);
   const H = Number(hoehe_m);
   const R_L = Number(rohr_laenge_m);
   const R_H = Number(rohr_hoehe_m);
@@ -113,7 +115,7 @@ export function buildSteher(inputs, catalog) {
     anzeigename: rohr_name_intern,
   };
 
-  // --- Bodenplatten ---
+  // --- Bodenplatte ---
   const plate = {
     typ: 'Bodenplatte',
     name_intern: bodenplatte_name_intern,
@@ -121,7 +123,7 @@ export function buildSteher(inputs, catalog) {
     orientierung: [0, 0, 1],
     drehung: [0, 1, 0],
     material: 'STAHL',
-    untergrund: 'BETON',
+    untergrund: untergrund,
     gummimatte: gummimatte ? 'GUMMI' : null,
     objekttyp: 'BODENPLATTE',
     element_id_intern: 'Bodenplatte_Steher',

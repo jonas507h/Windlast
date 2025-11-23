@@ -11,7 +11,7 @@ const vec = {
  * Wirft bei Fehlern eine aussagekräftige Exception.
  */
 export function validateTischInputs({
-  breite_m, hoehe_m, tiefe_m, traverse_name_intern, bodenplatte_name_intern,
+  breite_m, hoehe_m, tiefe_m, traverse_name_intern, bodenplatte_name_intern, untergrund,
 }, catalog) {
   if (!catalog || typeof catalog.getTraverse !== 'function' || typeof catalog.getBodenplatte !== 'function') {
     throw new Error('catalog mit getTraverse/getBodenplatte erforderlich.');
@@ -24,6 +24,7 @@ export function validateTischInputs({
   if (B <= 0 || H <= 0 || T <= 0) throw new Error('Breite, Höhe und Tiefe müssen > 0 sein.');
   if (!traverse_name_intern) throw new Error('traverse_name_intern fehlt.');
   if (!bodenplatte_name_intern) throw new Error('bodenplatte_name_intern fehlt.');
+  if (!untergrund) throw new Error('untergrund fehlt.');
 
   const travSpec = catalog.getTraverse(traverse_name_intern);
   if (!travSpec) throw new Error(`Traverse ${traverse_name_intern} nicht im Katalog gefunden.`);
@@ -52,6 +53,7 @@ export function validateTischInputs({
  * @param {string} inputs.traverse_name_intern
  * @param {string} inputs.bodenplatte_name_intern
  * @param {boolean} [inputs.gummimatte=true]
+ * @param {string} inputs.untergrund
  * @param {string} [inputs.name='Tisch']
  * @param {Object} catalog – siehe oben
  * @returns {Object} konstruktion
@@ -60,10 +62,11 @@ export function buildTisch(inputs, catalog) {
   const {
     breite_m, hoehe_m, tiefe_m, traverse_name_intern, bodenplatte_name_intern,
     gummimatte = true,
+    untergrund,
     name = 'Tisch',
   } = inputs;
 
-  validateTischInputs({ breite_m, hoehe_m, tiefe_m, traverse_name_intern, bodenplatte_name_intern }, catalog);
+  validateTischInputs({ breite_m, hoehe_m, tiefe_m, traverse_name_intern, bodenplatte_name_intern, untergrund }, catalog);
 
   const B = Number(breite_m);
   const H = Number(hoehe_m);
@@ -183,7 +186,7 @@ export function buildTisch(inputs, catalog) {
     orientierung: [0, 0, 1],
     drehung: [0, 1, 0],
     material: 'STAHL',
-    untergrund: 'BETON',
+    untergrund: untergrund,
     gummimatte: gummimatte ? 'GUMMI' : null,
     objekttyp: 'BODENPLATTE',
     element_id_intern: 'Bodenplatte_Vorne_Links',
@@ -196,7 +199,7 @@ export function buildTisch(inputs, catalog) {
     orientierung: [0, 0, 1],
     drehung: [0, 1, 0],
     material: 'STAHL',
-    untergrund: 'BETON',
+    untergrund: untergrund,
     gummimatte: gummimatte ? 'GUMMI' : null,
     objekttyp: 'BODENPLATTE',
     element_id_intern: 'Bodenplatte_Vorne_Rechts',
@@ -209,7 +212,7 @@ export function buildTisch(inputs, catalog) {
     orientierung: [0, 0, 1],
     drehung: [0, -1, 0],
     material: 'STAHL',
-    untergrund: 'BETON',
+    untergrund: untergrund,
     gummimatte: gummimatte ? 'GUMMI' : null,
     objekttyp: 'BODENPLATTE',
     element_id_intern: 'Bodenplatte_Hinten_Links',
@@ -222,7 +225,7 @@ export function buildTisch(inputs, catalog) {
     orientierung: [0, 0, 1],
     drehung: [0, -1, 0],
     material: 'STAHL',
-    untergrund: 'BETON',
+    untergrund: untergrund,
     gummimatte: gummimatte ? 'GUMMI' : null,
     objekttyp: 'BODENPLATTE',
     element_id_intern: 'Bodenplatte_Hinten_Rechts',

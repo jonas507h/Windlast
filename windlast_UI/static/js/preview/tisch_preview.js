@@ -14,6 +14,7 @@ function readFormForTisch() {
   const bodenplatte_name_intern= document.getElementById('bodenplatte_name_intern')?.value || 'BP';
   const gmVal = document.getElementById('gummimatte')?.value || 'ja';
   const gummimatte = (gmVal === 'ja');
+  const untergrund = document.getElementById('untergrund_typ')?.value || 'BETON';
 
   return {
     breite_m: isFinite(breite) && breite > 0 ? breite : 6,
@@ -22,6 +23,7 @@ function readFormForTisch() {
     traverse_name_intern,
     bodenplatte_name_intern,
     gummimatte,
+    untergrund,
   };
 }
 
@@ -55,7 +57,7 @@ export function mountTischPreview(mountEl) {
   rerender();
 
   // simple live update: auf Änderungen der relevanten Inputs reagieren
-  const ids = ['breite_m','hoehe_m','tiefe_m','traverse_name_intern','bodenplatte_name_intern','gummimatte'];
+  const ids = ['breite_m','hoehe_m','tiefe_m','traverse_name_intern','bodenplatte_name_intern','gummimatte','untergrund_typ'];
   const listeners = [];
   for (const id of ids) {
     const el = document.getElementById(id);
