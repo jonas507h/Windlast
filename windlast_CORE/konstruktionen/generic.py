@@ -58,7 +58,6 @@ def _build_bauelement(el: Dict[str, Any]) -> object:
         )
 
     if typ == "Bodenplatte":
-        material = _parse_material(el.get("material"), default=MaterialTyp.STAHL)
         untergrund = _parse_material(el.get("untergrund"), default=MaterialTyp.BETON)
         gummimatte = _parse_material(el.get("gummimatte")) if el.get("gummimatte") else None
 
@@ -67,7 +66,6 @@ def _build_bauelement(el: Dict[str, Any]) -> object:
             mittelpunkt=tuple(el["mittelpunkt"]),
             orientierung=tuple(el["orientierung"]),
             drehung=tuple(el["drehung"]),
-            material=material,
             untergrund=untergrund,
             gummimatte=gummimatte,
             element_id_intern=el.get("element_id_intern"),

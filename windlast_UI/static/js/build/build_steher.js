@@ -122,7 +122,6 @@ export function buildSteher(inputs, catalog) {
     mittelpunkt: [0, 0, 0],
     orientierung: [0, 0, 1],
     drehung: [0, 1, 0],
-    material: 'STAHL',
     untergrund: untergrund,
     gummimatte: gummimatte ? 'GUMMI' : null,
     objekttyp: 'BODENPLATTE',

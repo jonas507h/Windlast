@@ -27,7 +27,7 @@ class Bodenplatte:
     mittelpunkt: Vec3
     orientierung: Vec3
     drehung: Vec3 # Einheitsvektor entlang der langen Kante, senkrecht zur Orientierung
-    material: MaterialTyp
+    # material: MaterialTyp (alt, jetzt in Katalog)
     untergrund: MaterialTyp
     gummimatte: Optional[MaterialTyp] = None
     objekttyp: ObjektTyp = ObjektTyp.BODENPLATTE
@@ -97,7 +97,8 @@ class Bodenplatte:
             "element_id": self.element_id_intern,
             "objekt_name": self.anzeigename,
         })
-        materialfolge = [self.material, self.gummimatte, self.untergrund]
+        material = catalog.get_bodenplatte(self.name_intern).material
+        materialfolge = [material, self.gummimatte, self.untergrund]
         return reibwert_fn(
             norm, materialfolge, protokoll=protokoll, kontext=base_ctx
         ).wert
@@ -114,7 +115,8 @@ class Bodenplatte:
             "belastung": belastung,
         })
         # Reibwert ermitteln
-        _materialfolge = [self.material, self.gummimatte, self.untergrund]
+        material = catalog.get_bodenplatte(self.name_intern).material
+        _materialfolge = [material, self.gummimatte, self.untergrund]
         _reibwert = reibwert_fn(
             norm, _materialfolge, protokoll=protokoll, kontext=base_ctx
         ).wert
