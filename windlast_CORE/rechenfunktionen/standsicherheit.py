@@ -80,7 +80,7 @@ def _ermittle_staudruecke(
         if s.modus == "betrieb":
             zl1, zl2 = staudruecke(
                 s.norm, konstruktion, s.betriebszustand,
-                aufstelldauer=aufstelldauer, windzone=None,
+                aufstelldauer=aufstelldauer, windzone=s.windzone,
                 protokoll=protokoll, kontext=loads_ctx
             )
         else:  # "schutz"
@@ -96,11 +96,6 @@ def _ermittle_staudruecke(
             return any((isinstance(v, float) and v != v) for v in xs)  # NaN-Test
 
         if _has_nan(z) or _has_nan(q):
-            reasons.append(Message(
-                code="STAUD/NAN_IN_DATA", severity=Severity.ERROR,
-                text=f"Staudrücke/Obergrenzen enthalten ungültige Werte (NaN) für {s.norm.value}, {s.label}.",
-                context={}
-            ))
             return None, None, reasons
 
         return z, q, reasons
@@ -334,9 +329,9 @@ def standsicherheit(
     normen[Norm.DIN_EN_13814_2005_06] = _rechne_norm(
         [
             StaudruckSzenario("AUSSER_BETRIEB", "Außer Betrieb", Norm.DIN_EN_13814_2005_06, modus="betrieb",
-                            betriebszustand=Betriebszustand.AUSSER_BETRIEB),
+                            betriebszustand=Betriebszustand.AUSSER_BETRIEB, windzone=windzone),
             StaudruckSzenario("IN_BETRIEB",     "In Betrieb", Norm.DIN_EN_13814_2005_06, modus="betrieb",
-                            betriebszustand=Betriebszustand.IN_BETRIEB),
+                            betriebszustand=Betriebszustand.IN_BETRIEB, windzone=windzone),
         ],
         normtitel="DIN EN 13814:2005-06",
     )
@@ -347,9 +342,9 @@ def standsicherheit(
     normen[Norm.DIN_EN_17879_2024_08] = _rechne_norm(
         [
             StaudruckSzenario("AUSSER_BETRIEB", "Außer Betrieb", Norm.DIN_EN_17879_2024_08, modus="betrieb",
-                            betriebszustand=Betriebszustand.AUSSER_BETRIEB),
+                            betriebszustand=Betriebszustand.AUSSER_BETRIEB, windzone=windzone),
             StaudruckSzenario("IN_BETRIEB",     "In Betrieb", Norm.DIN_EN_17879_2024_08, modus="betrieb",
-                            betriebszustand=Betriebszustand.IN_BETRIEB),
+                            betriebszustand=Betriebszustand.IN_BETRIEB, windzone=windzone),
         ],
         normtitel="DIN EN 17879:2024-08",
     )
@@ -361,9 +356,10 @@ def standsicherheit(
         [
             StaudruckSzenario("STANDARD", "Standard", Norm.DIN_EN_1991_1_4_2010_12, modus="schutz",
                             schutz=Schutzmassnahmen.KEINE, windzone=windzone),
-            # weitere Fallback-Verfahren hier einfach anhängen:
-            # StaudruckSzenario("ALTVERFAHREN_XYZ", Norm.DIN_EN_1991_1_4_2010_12, modus="schutz",
-            #                   schutz=Schutzmassnahmen.KEINE, windzone=windzone),
+            StaudruckSzenario("SCHUETZEND", "Schützend", Norm.DIN_EN_1991_1_4_2010_12, modus="schutz",
+                            schutz=Schutzmassnahmen.SCHUETZEND, windzone=windzone),
+            StaudruckSzenario("VERSTAERKEND", "Verstärkend", Norm.DIN_EN_1991_1_4_2010_12, modus="schutz",
+                            schutz=Schutzmassnahmen.VERSTAERKEND, windzone=windzone),
         ],
         normtitel="DIN EN 1991-1-4:2010-12",
     )

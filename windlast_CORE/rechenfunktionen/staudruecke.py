@@ -196,15 +196,15 @@ def _winddruck_DinEn13814_2005_06(
         )
         nan = Zwischenergebnis_Liste(wert=[float("nan")])
         return nan, nan
-
-    # 3) Aufstelldauer in Monate umrechnen; Warnung wenn > 3 Monate (rechnet weiter)
-    if aufstelldauer is not None:
-        dauer_monate = convert_dauer(aufstelldauer.wert, aufstelldauer.einheit, Zeitfaktor.MONAT)
-        if dauer_monate > 3.0 + _EPS:
+    
+    # 3) Windzone prüfen (Warnung bei kritischen Zonen)
+    if windzone is not None:
+        windzone_kritisch = (windzone in (Windzone.IV_BINNENLAND, Windzone.IV_KUESTE, Windzone.IV_INSELN))
+        if windzone_kritisch:
             protokolliere_msg(
-                protokoll, severity=Severity.WARN, code="STAUD/DAUER_GT_3M",
-                text=f"Aufstelldauer {dauer_monate:.3f} Monate > 3 Monate; Berechnung nach DIN EN 13814:2005-06 wird dennoch fortgesetzt.",
-                kontext=merge_kontext(base_ctx, {"aufstelldauer_monate": dauer_monate}),
+                protokoll, severity=Severity.WARN, code="STAUD/WINDZONE_CRITICAL",
+                text=f"Die Staudrücke in Windzone '{windzone.value}' überschreiten die für die Anwendung der DIN EN 13814:2005-06 zulässigen Werte.",
+                kontext=merge_kontext(base_ctx, {"windzone": windzone.value}),
             )
 
     # 4) Zwei Zwischenergebnisse bauen: (a) Obergrenzen, (b) Staudrücke
@@ -358,7 +358,7 @@ def _geschwindigkeitsdruck_DinEn1991_1_4_2010_12(
         max_og = obergrenzen_sorted[-1]
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="STAUD/HEIGHT_EXCEEDS_MAX",
-            text=f"Gesamthöhe {h:.3f} m überschreitet die höchste definierte Obergrenze {max_og:.3f} m (DIN EN 1991-1-4:2010-12, Zone: {windzone.value}).",
+            text=f"Gesamthöhe {h:.3f} m überschreitet die höchste definierte Obergrenze {max_og:.3f} m (DIN EN 1991-1-4:2010-12, Windzone: {windzone.value}).",
             kontext=merge_kontext(base_ctx, {"gesamthoehe": f"{h}m", "z_max": f"{max_og}m"}),
         )
         nan = Zwischenergebnis_Liste(wert=[float("nan")])
