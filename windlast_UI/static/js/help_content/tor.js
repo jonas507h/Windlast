@@ -4,6 +4,7 @@ export const TOR_HELP_PAGES = [
   {
     id: "tor:allgemein",
     title: "Traversentor",
+    pfad: ["app:konstruktionen"],
     body: `
       <p>
         Ist die Konstruktion &bdquo;Tor&ldquo; ausgewählt, kann ein Traversentor bestehend aus zwei Stehern und einer Quertraverse berechnet werden.
@@ -27,6 +28,8 @@ export const TOR_HELP_PAGES = [
   {
     id: "tor:traverse",
     title: "Traverse (Pflichtfeld)",
+    shortTitle: "Traverse",
+    pfad: ["app:konstruktionen", "tor:allgemein"],
     body: `
       <p>
         Wählt hier aus unseren Pool-Traversen die entsprechende Traverse aus. Die Auswahl beeinflusst alle in der Konstruktion verwendeten Traversen.
@@ -38,6 +41,8 @@ export const TOR_HELP_PAGES = [
   {
     id: "tor:traversen-orientierung",
     title: "Traversen-Orientierung (Pflichtfeld)",
+    shortTitle: "Traversen-Orientierung",
+    pfad: ["app:konstruktionen", "tor:allgemein"],
     body: `
       <p>
         Dreht alle Traversen in 90°-Schritten um ihre Längsachse. Je nach Ausrichtung der Traverse ändert sich die Windangriffsfläche und damit die Windlasten auf die Konstruktion.
@@ -54,6 +59,8 @@ export const TOR_HELP_PAGES = [
   {
     id: "tor:bodenplatte",
     title: "Bodenplatte (Pflichtfeld)",
+    shortTitle: "Bodenplatte",
+    pfad: ["app:konstruktionen", "tor:allgemein"],
     body: `
       <p>
         Wählt hier aus unseren Pool-Bodenplatten die entsprechende Bodenplatte aus. Die Auswahl beeinflusst alle in der Konstruktion verwendeten Bodenplatten.
@@ -65,6 +72,8 @@ export const TOR_HELP_PAGES = [
   {
     id: "tor:gummimatte",
     title: "Gummimatte (Pflichtfeld)",
+    shortTitle: "Gummimatte",
+    pfad: ["app:konstruktionen", "tor:allgemein"],
     body: `
       <p>
         Wählt hier aus, ob ihr Gummimatten unter den Bodenplatten verwendet. Gummimatten erhöhen in der Regel den Reibwert zwischen Bodenplatte und Untergrund
@@ -80,6 +89,8 @@ export const TOR_HELP_PAGES = [
   {
     id: "tor:untergrund",
     title: "Untergrund (Pflichtfeld)",
+    shortTitle: "Untergrund",
+    pfad: ["app:konstruktionen", "tor:allgemein"],
     body: `
       <p>
         Wählt hier den Untergrund aus, auf dem die Konstruktion steht. Der Untergrund beeinflusst den Reibwert zwischen Bodenplatte und Untergrund. Dieser wird anhand der
@@ -95,6 +106,8 @@ export const TOR_HELP_PAGES = [
   {
     id: "tor:hoehe",
     title: "Höhe (Pflichtfeld)",
+    shortTitle: "Höhe",
+    pfad: ["app:konstruktionen", "tor:allgemein"],
     body: `
       <p>
         Gebt hier die Höhe des Tors ein. Die Höhe ist definiert als Abstand zwischen dem Boden und der Oberkante der Quertraverse.
@@ -105,6 +118,8 @@ export const TOR_HELP_PAGES = [
   {
     id: "tor:breite",
     title: "Breite (Pflichtfeld)",
+    shortTitle: "Breite",
+    pfad: ["app:konstruktionen", "tor:allgemein"],
     body: `
       <p>
         Gebt hier die Breite des Tors ein. Die Breite ist definiert von Außenkante zu Außenkante der Traversencorner in den oberen Ecken.

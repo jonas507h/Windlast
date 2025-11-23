@@ -217,6 +217,42 @@
   opacity: 0.9;
 }
 
+.wiki-breadcrumb {
+  font-size: 0.8rem;
+  margin: 0 0 4px;
+  color: var(--text, #000);
+}
+
+.wiki-breadcrumb ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.wiki-breadcrumb li {
+  display: flex;
+  align-items: center;
+}
+
+.wiki-breadcrumb li + li::before {
+  content: "/";
+  margin: 0 3px;
+  opacity: 0.6;
+}
+
+.wiki-breadcrumb a {
+  color: var(--link, #0066cc);
+  text-decoration: underline;
+}
+
+.wiki-breadcrumb a:hover {
+  text-decoration-thickness: 2px;
+}
+
+
 @keyframes faq-slide {
   from { opacity: 0; transform: translateY(-3px); }
   to   { opacity: 1; transform: translateY(0); }

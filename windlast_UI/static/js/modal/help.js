@@ -15,6 +15,9 @@ import { ZWISCHENERGEBNISSE_HELP_PAGES } from "../help_content/zwischenergebniss
 
 const PAGES_BY_ID = Object.create(null);
 
+// Welche Seite soll der globale "Hilfe"-Startpunkt sein?
+export const HELP_ROOT_ID = "app:start"; 
+
 // --- Content registrieren ---
 function registerPages(list) {
   for (const p of list || []) {
@@ -93,6 +96,7 @@ function navigateTo(id, { push = true } = {}) {
   const page = getPage(id);
   const { title, body } = getRenderedPage(id);
   const contentNode = buildHelpContent(
+    id,
     title,
     body,
     page?.stand || null
@@ -117,16 +121,20 @@ function navigateTo(id, { push = true } = {}) {
 }
 
 // --- Modal-Rendering ---
-function buildHelpContent(title, bodyHtml, stand) {
+function buildHelpContent(id, title, bodyHtml, stand) {
   const wrap = document.createElement("div");
 
-  // Seitentitel als große Überschrift im Inhalt
+  // --- Breadcrumb oben ---
+  const breadcrumb = buildBreadcrumb(id);
+  wrap.appendChild(breadcrumb);
+
+  // --- Seitentitel im Inhalt ---
   const pageTitleEl = document.createElement("h2");
   pageTitleEl.className = "wiki-page-title wiki-title-level-0";
   pageTitleEl.textContent = title || "Hilfe";
   wrap.appendChild(pageTitleEl);
 
-  // Body-Inhalt
+  // --- Hauptinhalt ---
   const body = document.createElement("div");
   body.innerHTML = bodyHtml || "<p>Kein Inhalt.</p>";
 
@@ -137,7 +145,7 @@ function buildHelpContent(title, bodyHtml, stand) {
 
   wrap.appendChild(body);
 
-  // Bearbeitungsstand unten rechts
+  // --- Stand unten rechts ---
   if (stand) {
     const meta = document.createElement("div");
     meta.textContent = "Stand: " + stand;
@@ -301,6 +309,53 @@ function transformIncludes(root, visited = new Set(), depth = 0) {
     node.replaceWith(container);
     visited.delete(pageId);
   });
+}
+
+function buildBreadcrumb(id) {
+  const page = getPage(id);
+
+  const nav = document.createElement("nav");
+  nav.className = "wiki-breadcrumb";
+  nav.setAttribute("aria-label", "Hilfe-Navigation");
+
+  const ol = document.createElement("ol");
+  nav.appendChild(ol);
+
+  function addCrumb(label, targetId, isLast) {
+    const li = document.createElement("li");
+
+    if (targetId && !isLast) {
+      const a = document.createElement("a");
+      a.href = "#help:" + targetId;
+      a.setAttribute("data-help-id", targetId);
+      a.textContent = label;
+      li.appendChild(a);
+    } else {
+      const span = document.createElement("span");
+      span.textContent = label;
+      li.appendChild(span);
+    }
+
+    ol.appendChild(li);
+  }
+
+  // Root: "Hilfe"
+  addCrumb("Hilfe", HELP_ROOT_ID, false);
+
+  const pathIds = Array.isArray(page?.pfad) ? page.pfad : [];
+
+  // Zwischenstationen aus pfad[]
+  for (const pid of pathIds) {
+    const pPage  = getPage(pid);
+    const label  = pPage?.shortTitle || pPage?.title || pid;
+    addCrumb(label, pid, false);
+  }
+
+  // Aktuelle Seite als letzter Eintrag (kein Link)
+  const currentLabel = page?.shortTitle || page?.title || id;
+  addCrumb(currentLabel, null, true);
+
+  return nav;
 }
 
 // --- Klick-Handling für Links aus Content und anderen Stellen ---

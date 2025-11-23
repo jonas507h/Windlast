@@ -3,7 +3,7 @@
 export const NORM_HELP_PAGES = [
   {
     id: "norm:allgemein",
-    title: "Unterstützte Normen",
+    title: "Normen",
     body: `
       <p>
        Die Software unterstützt die Berechnung nach folgenden Normen:
@@ -36,7 +36,9 @@ export const NORM_HELP_PAGES = [
     id: "norm:DIN_EN_13814_2005",
     normKey: "EN_13814_2005",
     title: "DIN EN 13814:2005-06 – Fliegende Bauten und Anlagen für Veranstaltungsplätze und Vergnügungsparks – Sicherheit",
+    shortTitle: "DIN EN 13814:2005-06",
     stand: "19.11.2025",
+    pfad: ["norm:allgemein"],
     body: `
       <p>
         Diese Norm regelt unter anderem die Windlastberechnung für fliegende Bauten. Dabei gibt sie Staudrücke und ein Verfahren zum Standsicherheitsnachweis vor, verweist zur Berechnung der Windkräfte jedoch auf die DIN EN 1991-1-4.
@@ -64,10 +66,12 @@ export const NORM_HELP_PAGES = [
     normKey: "EN_13814_2005",
     szenario: "IN_BETRIEB",
     title: "DIN EN 13814:2005-06 – Berücksichtigung von möglichen Schutzmaßnahmen",
+    shortTitle: "Schutzmaßnahmen",
     stand: "19.11.2025",
+    pfad: ["norm:allgemein","norm:DIN_EN_13814_2005"],
     body: `
       <p>
-        Bei der Berechnung nach DIN EN 13814:2005-06 können Abminderungen der Staudrücke berücksichtigt werden, wenn bestimmte Schutzmaßnahmen möglich sind. Bei der Berechnung &bdquo;mit Schutzmaßnahmen&ldquo; wurden diese Abminderungen berücksichtigt.
+        Bei der Berechnung nach [[norm:DIN_EN_13814_2005|DIN EN 13814:2005-06]] können Abminderungen der Staudrücke berücksichtigt werden, wenn bestimmte Schutzmaßnahmen möglich sind. Bei der Berechnung &bdquo;mit Schutzmaßnahmen&ldquo; wurden diese Abminderungen berücksichtigt.
         Sollen die hier aufgelisteten Werte verwendet werden, müssen ab einer Windgeschwindigkeit von 15 m/s Schutzmaßnahmen getroffen werden.
         In unseren Bereich sind zum Beispiel folgende Schutzmaßnahmen möglich:
       </p>
@@ -90,7 +94,9 @@ export const NORM_HELP_PAGES = [
     normKey: "EN_17879_2024",
     szenario: "IN_BETRIEB",
     title: "DIN EN 17879:2024-08 – Event-Strukturen – Sicherheit",
+    shortTitle: "DIN EN 17879:2024-08",
     stand: "19.11.2025",
+    pfad: ["norm:allgemein"],
     body: `
       <p>
         Diese Norm regelt unter anderem die Windlastberechnung für Event-Strukturen, unabhängig von der baurechtlichen Einordnung der Strukturen.
@@ -116,10 +122,12 @@ export const NORM_HELP_PAGES = [
     normKey: "EN_17879_2024",
     szenario: "IN_BETRIEB",
     title: "DIN EN 17879:2024-08 – Berücksichtigung von möglichen Schutzmaßnahmen",
+    shortTitle: "Schutzmaßnahmen",
     stand: "19.11.2025",
+    pfad: ["norm:allgemein","norm:DIN_EN_17879_2024"],
     body: `
       <p>
-        Bei der Berechnung nach DIN EN 17879:2024-08 können Abminderungen der Staudrücke berücksichtigt werden, wenn bestimmte Schutzmaßnahmen möglich sind. Bei der Berechnung &bdquo;mit Schutzmaßnahmen&ldquo; wurden diese Abminderungen berücksichtigt.
+        Bei der Berechnung nach [[norm:DIN_EN_17879_2024|DIN EN 17879:2024-08]] können Abminderungen der Staudrücke berücksichtigt werden, wenn bestimmte Schutzmaßnahmen möglich sind. Bei der Berechnung &bdquo;mit Schutzmaßnahmen&ldquo; wurden diese Abminderungen berücksichtigt.
         Sollen die hier aufgelisteten Werte verwendet werden, müssen vor Überschreiten der Windgeschwindigkeit von 20 m/s gemessen in 10m Höhe Schutzmaßnahmen getroffen werden.
         In unseren Bereich sind zum Beispiel folgende Schutzmaßnahmen möglich:
       </p>
@@ -141,6 +149,8 @@ export const NORM_HELP_PAGES = [
     id: "norm:DIN_EN_1991_1_4_2010",
     normKey: "EN_1991_1_4_2010",
     title: "DIN EN 1991-1-4:2010 – Eurocode 1, Windlasten",
+    shortTitle: "DIN EN 1991-1-4:2010",
+    pfad: ["norm:allgemein"],
     body: `
       <p>
         TODO: Beschreibung der Norm DIN EN 1991-1-4

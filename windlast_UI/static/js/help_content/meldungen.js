@@ -20,13 +20,14 @@ export const MELDUNGEN_HELP_PAGES = [
         <li><b>Informationen (grau):</b> Allgemeine Informationen zur Berechnung oder zum Programmablauf.</li>
       </ul>
 
-      <p>Einige häufig auftretenden Meldungen sind [[meldungen:haeufige_meldungen|hier]] erklärt</p>
+      <help-include page="meldungen:haeufige_meldungen" auto-level="true"></help-include>
     `
   },
 
   {
     id: "meldungen:haeufige_meldungen",
     title: "Häufige Meldungen",
+    pfad: ["meldungen:allgemein"],
     stand: "20.11.2025",
     body: `
       <h4>Fehler</h4>

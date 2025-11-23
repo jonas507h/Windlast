@@ -4,6 +4,7 @@ export const TISCH_HELP_PAGES = [
   {
     id: "tisch:allgemein",
     title: "Traversentisch",
+    pfad: ["app:konstruktionen"],
     body: `
       <p>
         Ist die Konstruktion &bdquo;Tisch&ldquo; ausgewählt, kann ein einfacher Traversentisch mit vier Füßen berechnet werden.
@@ -26,6 +27,8 @@ export const TISCH_HELP_PAGES = [
   {
     id: "tisch:traverse",
     title: "Traverse (Pflichtfeld)",
+    shortTitle: "Traverse",
+    pfad: ["app:konstruktionen", "tisch:allgemein"],
     body: `
       <p>
         Wählt hier aus unseren Pool-Traversen die entsprechende Traverse aus. Die Auswahl beeinflusst alle in der Konstruktion verwendeten Traversen.
@@ -37,6 +40,8 @@ export const TISCH_HELP_PAGES = [
   {
     id: "tisch:bodenplatte",
     title: "Bodenplatte (Pflichtfeld)",
+    shortTitle: "Bodenplatte",
+    pfad: ["app:konstruktionen", "tisch:allgemein"],
     body: `
       <p>
         Wählt hier aus unseren Pool-Bodenplatten die entsprechende Bodenplatte aus. Die Auswahl beeinflusst alle in der Konstruktion verwendeten Bodenplatten.
@@ -48,6 +53,8 @@ export const TISCH_HELP_PAGES = [
   {
     id: "tisch:gummimatte",
     title: "Gummimatte (Pflichtfeld)",
+    shortTitle: "Gummimatte",
+    pfad: ["app:konstruktionen", "tisch:allgemein"],
     body: `
       <p>
         Wählt hier aus, ob ihr Gummimatten unter den Bodenplatten verwendet. Gummimatten erhöhen in der Regel den Reibwert zwischen Bodenplatte und Untergrund
@@ -63,6 +70,8 @@ export const TISCH_HELP_PAGES = [
   {
     id: "tisch:untergrund",
     title: "Untergrund (Pflichtfeld)",
+    shortTitle: "Untergrund",
+    pfad: ["app:konstruktionen", "tisch:allgemein"],
     body: `
       <p>
         Wählt hier den Untergrund aus, auf dem die Konstruktion steht. Der Untergrund beeinflusst den Reibwert zwischen Bodenplatte und Untergrund. Dieser wird anhand der
@@ -78,6 +87,8 @@ export const TISCH_HELP_PAGES = [
   {
     id: "tisch:hoehe",
     title: "Höhe (Pflichtfeld)",
+    shortTitle: "Höhe",
+    pfad: ["app:konstruktionen", "tisch:allgemein"],
     body: `
       <p>
         Gebt hier die Höhe des Tisches ein. Die Höhe ist definiert als Abstand zwischen dem Boden und der Oberkante der Quertraversen.
@@ -88,6 +99,8 @@ export const TISCH_HELP_PAGES = [
   {
     id: "tisch:breite",
     title: "Breite (Pflichtfeld)",
+    shortTitle: "Breite",
+    pfad: ["app:konstruktionen", "tisch:allgemein"],
     body: `
       <p>
         Gebt hier die Breite des Tisches ein. Die Breite ist definiert von Außenkante zu Außenkante der Traversencorner in den oberen Ecken.
@@ -98,6 +111,8 @@ export const TISCH_HELP_PAGES = [
   {
     id: "tisch:tiefe",
     title: "Tiefe (Pflichtfeld)",
+    shortTitle: "Tiefe",
+    pfad: ["app:konstruktionen", "tisch:allgemein"],
     body: `
       <p>
         Gebt hier die Tiefe des Tisches ein. Die Tiefe ist definiert von Außenkante zu Außenkante der Traversencorner in den oberen Ecken.

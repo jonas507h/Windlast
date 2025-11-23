@@ -4,6 +4,8 @@ export const STEHER_HELP_PAGES = [
   {
     id: "steher:allgemein",
     title: "Traversensteher mit Querpipe",
+    shortTitle: "Traversensteher",
+    pfad: ["app:konstruktionen"],
     body: `
       <p>
         Ist die Konstruktion &bdquo;Steher&ldquo; ausgewählt, kann ein Traversensteher mit Querpipe berechnet werden.
@@ -27,6 +29,8 @@ export const STEHER_HELP_PAGES = [
   {
     id: "steher:traverse",
     title: "Traverse (Pflichtfeld)",
+    shortTitle: "Traverse",
+    pfad: ["app:konstruktionen", "steher:allgemein"],
     body: `
       <p>
         Wählt hier aus unseren Pool-Traversen die entsprechende Traverse aus. Die Auswahl beeinflusst die senkrechte Traverse.
@@ -38,6 +42,8 @@ export const STEHER_HELP_PAGES = [
   {
     id: "steher:rohr",
     title: "Rohr (Pflichtfeld)",
+    shortTitle: "Rohr",
+    pfad: ["app:konstruktionen", "steher:allgemein"],
     body: `
       <p>
         Wählt hier aus unseren Pool-Rohren das entsprechende Rohr aus. Die Auswahl beeinflusst das Querrohr.
@@ -49,6 +55,8 @@ export const STEHER_HELP_PAGES = [
   {
     id: "steher:bodenplatte",
     title: "Bodenplatte (Pflichtfeld)",
+    shortTitle: "Bodenplatte",
+    pfad: ["app:konstruktionen", "steher:allgemein"],
     body: `
       <p>
         Wählt hier aus unseren Pool-Bodenplatten die entsprechende Bodenplatte aus.
@@ -60,6 +68,8 @@ export const STEHER_HELP_PAGES = [
   {
     id: "steher:gummimatte",
     title: "Gummimatte (Pflichtfeld)",
+    shortTitle: "Gummimatte",
+    pfad: ["app:konstruktionen", "steher:allgemein"],
     body: `
       <p>
         Wählt hier aus, ob ihr Gummimatten unter der Bodenplatte verwendet. Gummimatten erhöhen in der Regel den Reibwert zwischen Bodenplatte und Untergrund
@@ -75,6 +85,8 @@ export const STEHER_HELP_PAGES = [
   {
     id: "steher:untergrund",
     title: "Untergrund (Pflichtfeld)",
+    shortTitle: "Untergrund",
+    pfad: ["app:konstruktionen", "steher:allgemein"],
     body: `
       <p>
         Wählt hier den Untergrund aus, auf dem die Konstruktion steht. Der Untergrund beeinflusst den Reibwert zwischen Bodenplatte und Untergrund. Dieser wird anhand der
@@ -90,6 +102,8 @@ export const STEHER_HELP_PAGES = [
   {
     id: "steher:hoehe",
     title: "Höhe (Pflichtfeld)",
+    shortTitle: "Höhe",
+    pfad: ["app:konstruktionen", "steher:allgemein"],
     body: `
       <p>
         Gebt hier die Höhe des Stehers ein. Die Höhe ist definiert als Abstand zwischen dem Boden und der Oberkante der Traverse.
@@ -100,6 +114,8 @@ export const STEHER_HELP_PAGES = [
   {
     id: "steher:laenge_rohr",
     title: "Länge Rohr (Pflichtfeld)",
+    shortTitle: "Länge Rohr",
+    pfad: ["app:konstruktionen", "steher:allgemein"],
     body: `
       <p>
         Gebt hier die Länge des Querrohrs ein.
@@ -110,6 +126,8 @@ export const STEHER_HELP_PAGES = [
   {
     id: "steher:hoehe_rohr",
     title: "Höhe Rohr (Pflichtfeld)",
+    shortTitle: "Höhe Rohr",
+    pfad: ["app:konstruktionen", "steher:allgemein"],
     body: `
       <p>
         Gebt hier die Höhe des Querrohrs über dem Boden ein. Referenz ist die Mittelachse des Rohrs.

@@ -45,6 +45,7 @@ export const ERGEBNISSE_HELP_PAGES = [
   {
     id: "ergebnisse:sicherheit",
     title: "Sicherheitswerte",
+    pfad: ["ergebnisse:allgemein"],
     body: `
       <p>
         Im Rahmen des Standsicherheitsnachweises nach [[norm:DIN_EN_13814_2005|DIN EN 13814:2005-06]] oder [[norm:DIN_EN_17879_2024|DIN EN 17879:2024-08]]
@@ -66,6 +67,8 @@ export const ERGEBNISSE_HELP_PAGES = [
   {
     id: "ergebnisse:ballast",
     title: "Erforderlicher Ballast",
+    shortTitle: "Ballast",
+    pfad: ["ergebnisse:allgemein"],
     body: `
       <p>
         Sind nicht alle [[ergebnisse:sicherheit|Sicherheitswerte]] ≥ 1,00, so wird automatisch der erforderliche Ballast berechnet, mit dem alle Sicherheitswerte ≥ 1,00 sind.
@@ -94,6 +97,7 @@ export const ERGEBNISSE_HELP_PAGES = [
   {
     id: "ergebnisse:unendliche_sicherheit",
     title: "Unendliche Sicherheit",
+    pfad: ["ergebnisse:allgemein", "ergebnisse:sicherheit"],
     body: `
       <p>
         Es kann (insbesondere bei der Abhebesicherheit) vorkommen, dass der berechnete Sicherheitswert unendlich groß ist.

@@ -4,6 +4,7 @@ export const GENERAL_HELP_PAGES = [
   {
     id: "app:start",
     title: "Hilfe – Übersicht",
+    shortTitle: "Übersicht",
     body: `
       <p>Willkommen in der Hilfe des Windlastrechners.</p>
 
@@ -25,6 +26,7 @@ export const GENERAL_HELP_PAGES = [
   {
     id: "app:bedienung",
     title: "Bedienung des Windlastrechners",
+    shortTitle: "Bedienung",
     body: `
       <p>
         In der Kopfzeile werden allgemeine Daten wie die [[header:aufstelldauer|Aufstelldauer]] und die [[header:windzone|Windzone]] eingegeben.
@@ -52,6 +54,7 @@ export const GENERAL_HELP_PAGES = [
   {
     id: "app:faq",
     title: "FAQ – Häufige Fragen",
+    shortTitle: "FAQ",
     body: `
       <p>TODO: FAQ</p>
     `
