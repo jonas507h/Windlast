@@ -14,7 +14,7 @@ from windlast_CORE.datenstruktur.enums import (
 )
 from windlast_CORE.datenstruktur.zeit import Dauer
 from windlast_CORE.datenstruktur.standsicherheit_ergebnis import (
-    StandsicherheitErgebnis, NormErgebnis, SafetyValue, Message, Meta, NormStatus, NormDetails
+    StandsicherheitErgebnis, NormErgebnis, SafetyValue, Message, Meta, NormStatus, NormDetails, AlternativeErgebnis
 )
 from windlast_CORE.rechenfunktionen.staudruecke import staudruecke  # type: ignore
 from windlast_CORE.datenstruktur.zwischenergebnis import make_protokoll, collect_messages, merge_kontext, Protokoll, collect_docs
@@ -282,7 +282,7 @@ def standsicherheit(
             protokoll=prot, kontext={"szenario_anzeigename": s_primary.anzeigename, "szenario": s_primary.label,},
         )
 
-        alternativen: Dict[str, Dict[Nachweis, SafetyValue]] = {}
+        alternativen: Dict[str, AlternativeErgebnis] = {}
         # Fallback nur versuchen, wenn eine Sicherheit < 1 oder wenn man sie immer anbieten will
         need_fallback = any(v is not None and v < 1.0 for v in (v_kipp, v_gleit, v_abhebe))
 
@@ -300,7 +300,10 @@ def standsicherheit(
                     reasons=reasons_all, norm_label=f"{s.norm.name} ({s.label})",
                     protokoll=prot, kontext={"szenario_anzeigename": s.anzeigename, "szenario": s.label,},
                 )
-                alternativen[s.label] = vals_b
+                alternativen[s.label] = AlternativeErgebnis(
+                    anzeigename=s.anzeigename,
+                    werte=vals_b,
+                )
 
         try:
             reasons_all.extend(collect_messages(prot))
@@ -330,7 +333,7 @@ def standsicherheit(
         [
             StaudruckSzenario("AUSSER_BETRIEB", "Außer Betrieb", Norm.DIN_EN_13814_2005_06, modus="betrieb",
                             betriebszustand=Betriebszustand.AUSSER_BETRIEB, windzone=windzone),
-            StaudruckSzenario("IN_BETRIEB",     "In Betrieb", Norm.DIN_EN_13814_2005_06, modus="betrieb",
+            StaudruckSzenario("IN_BETRIEB",     "mit Schutzmaßnahmen", Norm.DIN_EN_13814_2005_06, modus="betrieb",
                             betriebszustand=Betriebszustand.IN_BETRIEB, windzone=windzone),
         ],
         normtitel="DIN EN 13814:2005-06",
@@ -343,7 +346,7 @@ def standsicherheit(
         [
             StaudruckSzenario("AUSSER_BETRIEB", "Außer Betrieb", Norm.DIN_EN_17879_2024_08, modus="betrieb",
                             betriebszustand=Betriebszustand.AUSSER_BETRIEB, windzone=windzone),
-            StaudruckSzenario("IN_BETRIEB",     "In Betrieb", Norm.DIN_EN_17879_2024_08, modus="betrieb",
+            StaudruckSzenario("IN_BETRIEB",     "mit Schutzmaßnahmen", Norm.DIN_EN_17879_2024_08, modus="betrieb",
                             betriebszustand=Betriebszustand.IN_BETRIEB, windzone=windzone),
         ],
         normtitel="DIN EN 17879:2024-08",
@@ -356,9 +359,9 @@ def standsicherheit(
         [
             StaudruckSzenario("STANDARD", "Standard", Norm.DIN_EN_1991_1_4_2010_12, modus="schutz",
                             schutz=Schutzmassnahmen.KEINE, windzone=windzone),
-            StaudruckSzenario("SCHUETZEND", "Schützend", Norm.DIN_EN_1991_1_4_2010_12, modus="schutz",
+            StaudruckSzenario("SCHUETZEND", "mit schützenden Sicherungsmaßnahmen", Norm.DIN_EN_1991_1_4_2010_12, modus="schutz",
                             schutz=Schutzmassnahmen.SCHUETZEND, windzone=windzone),
-            StaudruckSzenario("VERSTAERKEND", "Verstärkend", Norm.DIN_EN_1991_1_4_2010_12, modus="schutz",
+            StaudruckSzenario("VERSTAERKEND", "mit verstärkenden Sicherungsmaßnahmen", Norm.DIN_EN_1991_1_4_2010_12, modus="schutz",
                             schutz=Schutzmassnahmen.VERSTAERKEND, windzone=windzone),
         ],
         normtitel="DIN EN 1991-1-4:2010-12",

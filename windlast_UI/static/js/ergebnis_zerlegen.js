@@ -26,6 +26,9 @@
       // --- Counts wie gehabt (jetzt inkl. Alternativen) ---
       idx.counts = {}; // counts[normKey][scenario] => {error,warn,hint,info}
 
+      // --- Anzeigename für Alternativen ---
+      idx.altLabelsByNorm = {};
+
       for (const [normKey, norm] of Object.entries(idx.payload.normen || {})) {
         // 1) Haupt-Docs/-Messages in den Index legen
         const mainDocs = Array.isArray(norm?.docs) ? norm.docs : [];
@@ -36,6 +39,7 @@
         // 2) Alternativen-Container initialisieren
         idx.docsByAlt[normKey] = {};
         idx.msgsByAlt[normKey] = {};
+        idx.altLabelsByNorm[normKey] = {};
 
         // 3) Counts-Map für diese Norm vorbereiten
         const c = {};
@@ -61,6 +65,10 @@
 
           idx.docsByAlt[normKey][altName] = altDocs;
           idx.msgsByAlt[normKey][altName] = altMsgs;
+
+          // NEU: Anzeigename aus Payload (Fallback = altName)
+          const label = (altVal && altVal.anzeigename) ? String(altVal.anzeigename) : String(altName);
+          idx.altLabelsByNorm[normKey][altName] = label;
 
           // Counts: für Alternativen unter eigenem Szenario (Alt-Name) zählen;
           // falls Messages bereits context.szenario tragen, nehmen wir das, sonst fallback = altName
@@ -98,6 +106,10 @@
       getAltValue(normKey, altName, key) {
         const v = this.payload?.normen?.[normKey]?.alternativen?.[altName]?.[key];
         return v === undefined ? null : v;
+      },
+      getAltLabel(normKey, altName) {
+        const byNorm = this.altLabelsByNorm?.[normKey] || {};
+        return byNorm[altName] || altName;
       },
 
       // ==================== MESSAGES ====================

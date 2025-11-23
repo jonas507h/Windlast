@@ -241,8 +241,12 @@ def build_api_output(ergebnis, input_payload: Dict[str, Any]) -> Dict[str, Any]:
 
         # --- alternatives (same handling for numbers) ---
         alts: Dict[str, Dict[str, float | str | None]] = {}
-        for alt_name, vals in (nres.alternativen or {}).items():
+        for alt_name, alt_res in (nres.alternativen or {}).items():
+            vals = getattr(alt_res, "werte", {}) or {}
+
             alts[alt_name] = {
+                "anzeigename": getattr(alt_res, "anzeigename", alt_name),
+
                 "kipp":    _jsonify_number(vals.get(Nachweis.KIPP).wert)    if Nachweis.KIPP    in vals else None,
                 "gleit":   _jsonify_number(vals.get(Nachweis.GLEIT).wert)   if Nachweis.GLEIT   in vals else None,
                 "abhebe":  _jsonify_number(vals.get(Nachweis.ABHEBE).wert)  if Nachweis.ABHEBE  in vals else None,
@@ -272,9 +276,13 @@ def build_api_output(ergebnis, input_payload: Dict[str, Any]) -> Dict[str, Any]:
                 messages += msgs
 
         # 3) messages attached to alternatives' values
-        for alt_name, vals in (nres.alternativen or {}).items():
+        for alt_name, alt_res in (nres.alternativen or {}).items():
+            vals = getattr(alt_res, "werte", {}) or {}
             for nachweis, sv in vals.items():
-                msgs = _collect_messages_from_list(getattr(sv, "messages", None), fallback_szenario=alt_name)
+                msgs = _collect_messages_from_list(
+                    getattr(sv, "messages", None),
+                    fallback_szenario=alt_name
+                )
                 for m in msgs:
                     m["context"] = dict(m["context"] or {})
                     m["context"].setdefault("nachweis", _enum_to_str(nachweis))

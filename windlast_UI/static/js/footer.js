@@ -329,7 +329,7 @@ function renderAlternativenBlocksVM(vm) {
       th.scope = "col";
       th.className = "colhead-alt";
       const rawName = (altLists[normKey] && altLists[normKey][i]) ? altLists[normKey][i] : "";
-      th.textContent = displayAltName(rawName);
+      th.textContent = vm.getAltLabel(normKey, rawName);
       // optional: dem Alt-Titel das Norm-Key + Szenario mitgeben (kannst du später für Tooltips nutzen)
       if (rawName) { th.dataset.normKey = normKey; th.dataset.szenario = rawName; }
       trTitle.appendChild(th);
@@ -589,7 +589,7 @@ registerCountsTooltip('.results-table .alt-title th[data-szenario] .count-badge'
   getHeaderText: (el) => {
     const th  = el.closest('th[data-szenario]');
     const raw = th?.dataset.szenario;
-    const nice = displayAltName ? displayAltName(raw) : raw;
+    const nice = ResultsVM.getAltLabel(th.dataset.normKey, raw);
     return `Alternative: ${nice}`;
   }
 });

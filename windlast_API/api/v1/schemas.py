@@ -71,6 +71,7 @@ class ResultMessage(BaseModel):
     context: Dict[str, Any] = Field(default_factory=dict)
 
 class ResultNormAltVals(BaseModel):
+    anzeigename: Optional[str] = None
     kipp:    NumberLike
     gleit:   NumberLike
     abhebe:  NumberLike

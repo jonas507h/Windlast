@@ -80,6 +80,17 @@ class NormDetails:
 # ---------- Norm-Ergebnis / Gesamtergebnis ----------
 
 @dataclass
+class AlternativeErgebnis:
+    """
+    Ergebnis für ein alternatives Staudruck-Szenario.
+    - key: technischer Szenario-Key (z.B. "AUSSER_BETRIEB")
+    - anzeigename: UI-Label (z.B. "Außer Betrieb")
+    - werte: Nachweis-Werte für dieses Szenario
+    """
+    anzeigename: str
+    werte: Dict[Nachweis, SafetyValue] = field(default_factory=dict)
+
+@dataclass
 class NormErgebnis:
     """
     Ergebnis für eine einzelne Norm.
@@ -92,7 +103,7 @@ class NormErgebnis:
     status: NormStatus
     reasons: List[Message] = field(default_factory=list)
     werte: Dict[Nachweis, SafetyValue] = field(default_factory=dict)
-    alternativen: Dict[str, Dict[Nachweis, Optional[float]]] = field(default_factory=dict)
+    alternativen: Dict[str, AlternativeErgebnis] = field(default_factory=dict)
     details: Optional[NormDetails] = None
 
 
