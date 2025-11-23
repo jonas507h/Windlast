@@ -84,9 +84,9 @@ class Schutzmassnahmen(str, Enum):
     VERSTAERKEND = "verstärkend"
 
 class Zeitfaktor(str, Enum):
-    TAG = "Tag"
-    MONAT = "Monat"
-    JAHR = "Jahr"
+    TAG = "Tage"
+    MONAT = "Monate"
+    JAHR = "Jahre"
 
 # --- Ergänzungen für Standsicherheits-Strukturen ---
 
