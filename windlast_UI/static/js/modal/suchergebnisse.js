@@ -414,6 +414,8 @@ function registerHelpSearchDebugTooltip() {
         order: "Reihenfolgeabweichung",
         missingFullTerm: "Begriff nicht komplett gefunden",
         synonyms: "Synonyme verwendet",
+        fuzzy: "Schreibfehler / Fuzzy-Match",
+        notFound: "In diesem Feld nichts gefunden",
       };
 
       const root = document.createElement("div");

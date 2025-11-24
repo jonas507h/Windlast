@@ -8,8 +8,12 @@
 const FIELD_PENALTY_TITLE = 0;
 const FIELD_PENALTY_BODY  = 2;
 
-// Fuzzy-Matching: bis zu 3 Zeichen Abweichung sind "kostenlos"
-const MAX_FREE_EDIT_DISTANCE = 3;
+// Fuzzy-Matching: 1 Punkt pro angefangenen 10 % falscher Zeichen
+const PENALTY_FUZZY_PER_10_PERCENT = 1;
+
+// ab welcher Fehlerquote ein Fuzzy-Match überhaupt noch zugelassen wird
+// (z.B. 0.5 = max. 50 % der Zeichen dürfen „falsch“ sein)
+const FUZZY_MAX_WRONG_FRACTION = 0.5;
 
 // Begriffzerlegung (Query → mehrere Teile)
 const PENALTY_DECOMPOSITION      = 1;  // wenn wir statt Volltreffer auf Teilbegriffe gehen
@@ -26,8 +30,11 @@ const PENALTY_MISSING_FULL_TERM  = 1;
 const PENALTY_PER_SYNONYM        = 1;
 
 // Obergrenze: Treffer mit Score > MAX_TOTAL_SCORE fliegen raus
-// (Wert kannst du später feinjustieren)
 const MAX_TOTAL_SCORE            = 12;
+
+// Strafe für "in diesem Feld gar nichts gefunden".
+// Liegt bewusst über MAX_TOTAL_SCORE, damit solche Felder nie den Best-Score liefern.
+const PENALTY_NOT_FOUND          = MAX_TOTAL_SCORE + 1;
 
 // -----------------------------------------------------------------------------
 // Synonyme
@@ -225,7 +232,9 @@ function checkFullPhraseMatch(normText, normQuery) {
       gap: 0,
       order: 0,
       missingFullTerm: 0,
-      synonyms: 0
+      synonyms: 0,
+      fuzzy: 0,
+      notFound: 0
     },
     usedParts: [] // für Volltreffer brauchen wir keine Einzelteile
   };
@@ -235,42 +244,89 @@ function checkFullPhraseMatch(normText, normQuery) {
 function matchDecomposed(normText, tokens, normQuery, fieldName) {
   if (!tokens.length) return null;
 
+  const isSinglePart = tokens.length === 1;
   const textTokens = tokenizeWithPositions(normText);
 
-  // Map: partIndex -> bestMatch
   const partMatches = [];
   let totalSynonymsUsed = 0;
+  let totalFuzzyPenalty = 0;
 
   for (let partIndex = 0; partIndex < tokens.length; partIndex++) {
-    const part = tokens[partIndex];
-    const partSyns = SYNONYMS[part] || [];
+    const part = tokens[partIndex]; // bereits normalisiert
+    const rawSyns = SYNONYMS[part] || [];
+    const syns = rawSyns.map(normalizeString);
 
     let best = null;
 
-    // Kandidaten: der Begriff selbst + Synonyme
-    const candidates = [{ token: part, isSynonym: false }];
-    for (const syn of partSyns) {
-      candidates.push({ token: syn, isSynonym: true });
-    }
+    for (let i = 0; i < textTokens.length; i++) {
+      const t = textTokens[i];
+      const tt = t.token;
 
-    for (const cand of candidates) {
-      const candToken = cand.token;
-      for (let i = 0; i < textTokens.length; i++) {
-        const t = textTokens[i];
-        const dist = levenshtein(candToken, t.token);
-        if (dist <= MAX_FREE_EDIT_DISTANCE) {
-          if (!best || dist < best.dist) {
-            best = {
-              partIndex,
-              textTokenIndex: i,
-              start: t.start,
-              end: t.end,
-              dist,
-              isSynonym: cand.isSynonym,
-              matchedText: t.token
-            };
-          }
-        }
+      // 1) exakter Treffer auf den Suchbegriff
+      if (tt === part) {
+        const cand = {
+          partIndex,
+          textTokenIndex: i,
+          start: t.start,
+          end: t.end,
+          dist: 0,
+          isSynonym: false,
+          matchKind: "exact",
+          fuzzyPenalty: 0,
+          matchedText: tt
+        };
+        best = cand;
+        break; // exakter Treffer gewinnt immer
+      }
+
+      // 2) exakter Treffer auf ein Synonym
+      if (syns.length && syns.includes(tt)) {
+        const cand = {
+          partIndex,
+          textTokenIndex: i,
+          start: t.start,
+          end: t.end,
+          dist: 0,
+          isSynonym: true,
+          matchKind: "synonym",
+          fuzzyPenalty: 0,
+          matchedText: tt
+        };
+        best = cand;
+        break; // Synonym-Volltreffer genügt
+      }
+
+      // 3) Fuzzy-Match NUR für das ursprüngliche Wort (nicht für Synonyme)
+      //    und NICHT für sehr kurze Wörter (<=4 Zeichen), um Zufallstreffer zu vermeiden
+      const maxLen = Math.max(part.length, tt.length);
+      if (maxLen <= 4) continue;
+
+      const dist = levenshtein(part, tt);
+      if (dist === 0) continue; // hätten wir oben schon als exact erwischt
+
+      const wrongFraction = dist / maxLen;
+      if (wrongFraction > FUZZY_MAX_WRONG_FRACTION) {
+        // zu unähnlich → kein Match
+        continue;
+      }
+
+      // 1 Punkt pro angefangenen 10 % falscher Zeichen
+      const fuzzyPenalty = Math.ceil(wrongFraction * 10) * PENALTY_FUZZY_PER_10_PERCENT;
+
+      const cand = {
+        partIndex,
+        textTokenIndex: i,
+        start: t.start,
+        end: t.end,
+        dist,
+        isSynonym: false,
+        matchKind: "fuzzy",
+        fuzzyPenalty,
+        matchedText: tt
+      };
+
+      if (!best || fuzzyPenalty < best.fuzzyPenalty) {
+        best = cand;
       }
     }
 
@@ -278,9 +334,11 @@ function matchDecomposed(normText, tokens, normQuery, fieldName) {
       if (best.isSynonym) {
         totalSynonymsUsed += 1;
       }
+      if (best.matchKind === "fuzzy") {
+        totalFuzzyPenalty += best.fuzzyPenalty;
+      }
       partMatches.push(best);
     } else {
-      // Kein Match für diesen Part → merken wir uns als "fehlend"
       partMatches.push({
         partIndex,
         textTokenIndex: null,
@@ -288,27 +346,26 @@ function matchDecomposed(normText, tokens, normQuery, fieldName) {
         end: null,
         dist: null,
         isSynonym: false,
+        matchKind: null,
+        fuzzyPenalty: 0,
         matchedText: null,
         missing: true
       });
     }
   }
 
-  // Wenn wir *gar kein* Teilstück matchen konnten, geben wir null zurück
   const anyMatched = partMatches.some(m => !m.missing);
   if (!anyMatched) {
+    // in diesem Feld nichts Sinnvolles gefunden
     return null;
   }
 
-  // Gap- und Reihenfolge-Berechnung nur für tatsächlich gefundene Stücke
   const matched = partMatches.filter(m => !m.missing);
   matched.sort((a, b) => a.textTokenIndex - b.textTokenIndex);
 
-  // Reihenfolge: Sequenz der ursprünglichen partIndex in Text-Reihenfolge
   const orderSeq = matched.map(m => m.partIndex);
   const swaps = countInversions(orderSeq);
 
-  // Gap: Zeichenabstand zwischen aufeinanderfolgenden Stücken
   let totalGapChars = 0;
   for (let i = 0; i < matched.length - 1; i++) {
     const curr = matched[i];
@@ -321,19 +378,27 @@ function matchDecomposed(normText, tokens, normQuery, fieldName) {
   const orderPenalty = swaps * PENALTY_PER_SWAP;
   const synonymsPenalty = totalSynonymsUsed * PENALTY_PER_SYNONYM;
 
-  // Voller Begriff im Text?
-  const hasFullPhrase = normText.indexOf(normQuery) !== -1;
-  const missingFullTermPenalty = hasFullPhrase ? 0 : PENALTY_MISSING_FULL_TERM;
+  // Single-Word-Query: keine Zerlegungs-/„nicht komplett“-Strafe
+  let decompositionPenalty = 0;
+  let missingFullTermPenalty = 0;
+
+  if (!isSinglePart) {
+    decompositionPenalty = PENALTY_DECOMPOSITION;
+    const hasFullPhrase = normText.indexOf(normQuery) !== -1;
+    missingFullTermPenalty = hasFullPhrase ? 0 : PENALTY_MISSING_FULL_TERM;
+  }
 
   return {
     matchType: "decomposed",
     usedParts: partMatches,
     penalties: {
-      decomposition: PENALTY_DECOMPOSITION,
+      decomposition: decompositionPenalty,
       gap: gapPenalty,
       order: orderPenalty,
       missingFullTerm: missingFullTermPenalty,
-      synonyms: synonymsPenalty
+      synonyms: synonymsPenalty,
+      fuzzy: totalFuzzyPenalty,
+      notFound: 0
     }
   };
 }
@@ -350,10 +415,10 @@ function scoreFieldForQuery(page, fieldName, normQuery, queryParts) {
 
   const normText = normalizeString(searchable);
 
-  // 1. Versuch: Volltreffer
+    // 1. Versuch: Volltreffer
   const fullMatch = checkFullPhraseMatch(normText, normQuery);
   if (fullMatch) {
-    const totalScore = basePenalty; // keine zusätzlichen Strafpunkte
+    const totalScore = basePenalty;
     return {
       field: fieldName,
       score: totalScore,
@@ -376,9 +441,32 @@ function scoreFieldForQuery(page, fieldName, normQuery, queryParts) {
 
   // 2. Versuch: Zerlegung
   const decomp = matchDecomposed(normText, queryParts, normQuery, fieldName);
+
   if (!decomp) {
-    // Feld trägt nichts Sinnvolles bei
-    return null;
+    // In diesem Feld wurde kein einziger Begriff / kein Synonym gefunden.
+    // Wir liefern eine "not found"-Strafe > MAX_TOTAL_SCORE,
+    // damit dieses Feld nie Best-Score sein kann.
+    const nf = PENALTY_NOT_FOUND;
+    return {
+      field: fieldName,
+      score: basePenalty + nf,
+      debug: {
+        field: fieldName,
+        basePenalty,
+        matchType: "none",
+        penalties: {
+          decomposition: 0,
+          gap: 0,
+          order: 0,
+          missingFullTerm: 0,
+          synonyms: 0,
+          notFound: nf
+        },
+        usedParts: []
+      },
+      hits: [],
+      text: searchable
+    };
   }
 
   const p = decomp.penalties;
@@ -388,9 +476,9 @@ function scoreFieldForQuery(page, fieldName, normQuery, queryParts) {
     p.gap +
     p.order +
     p.missingFullTerm +
-    p.synonyms;
+    p.synonyms +
+    p.fuzzy;
 
-  // Hits für spätere Markierung
   const hits = [];
   for (const partMatch of decomp.usedParts) {
     if (partMatch.missing || partMatch.start == null || partMatch.end == null) {
@@ -400,7 +488,7 @@ function scoreFieldForQuery(page, fieldName, normQuery, queryParts) {
       field: fieldName,
       start: partMatch.start,
       end: partMatch.end,
-      type: partMatch.isSynonym ? "synonym" : (partMatch.dist > 0 ? "fuzzy" : "exact"),
+      type: partMatch.matchKind || (partMatch.isSynonym ? "synonym" : (partMatch.dist > 0 ? "fuzzy" : "exact")),
       partIndex: partMatch.partIndex,
       matchedText: partMatch.matchedText
     });
@@ -420,6 +508,7 @@ function scoreFieldForQuery(page, fieldName, normQuery, queryParts) {
     text: searchable
   };
 }
+
 
 // -----------------------------------------------------------------------------
 // Öffentliches API
