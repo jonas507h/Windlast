@@ -104,6 +104,10 @@
 
   --wiki-search-muted-pill-bg: rgba(0, 0, 0, 0.03);
   --wiki-search-muted-pill-fg: var(--muted);
+
+  --wiki-search-breadcrumb: var(--muted);
+  --wiki-search-breadcrumb-size: 0.72rem;
+  --wiki-search-hit-fg: var(--text);
 }
 
 /* ---------- 2. EXPLIZIT: Light-Theme (Angleich an :root) ---------- */
@@ -204,6 +208,10 @@
 
   --wiki-search-muted-pill-bg: rgba(0, 0, 0, 0.03);
   --wiki-search-muted-pill-fg: var(--muted);
+
+  --wiki-search-breadcrumb: var(--muted);
+  --wiki-search-breadcrumb-size: 0.72rem;
+  --wiki-search-hit-fg: var(--text);
 }
 
 /* ---------- 3. EXPLIZIT: Dark-Theme ---------- */
@@ -304,6 +312,10 @@
 
   --wiki-search-muted-pill-bg: rgba(255, 255, 255, 0.03);
   --wiki-search-muted-pill-fg: var(--muted);
+
+  --wiki-search-breadcrumb: var(--muted);
+  --wiki-search-breadcrumb-size: 0.72rem;
+  --wiki-search-hit-fg: var(--text);
 }
 
 /* ====== Base ====== */

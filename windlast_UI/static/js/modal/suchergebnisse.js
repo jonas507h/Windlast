@@ -1,6 +1,37 @@
 // static/js/modal/suchergebnisse.js
 import { runHelpSearch } from "../utils/help_suche.js";
 
+// Help-Content, um Breadcrumb & Body-Text zu kennen
+import { NORM_HELP_PAGES } from "../help_content/norminfo.js";
+import { GENERAL_HELP_PAGES } from "../help_content/allgemein.js";
+import { MELDUNGEN_HELP_PAGES } from "../help_content/meldungen.js";
+import { HEADER_HELP_PAGES } from "../help_content/header.js";
+import { TOR_HELP_PAGES } from "../help_content/tor.js";
+import { STEHER_HELP_PAGES } from "../help_content/steher.js";
+import { TISCH_HELP_PAGES } from "../help_content/tisch.js";
+import { ERGEBNISSE_HELP_PAGES } from "../help_content/ergebnisse.js";
+import { ZWISCHENERGEBNISSE_HELP_PAGES } from "../help_content/zwischenergebnisse.js";
+
+// interne Registry, analog zu help.js
+const PAGES_BY_ID = Object.create(null);
+
+function registerPages(list) {
+  for (const p of list || []) {
+    if (!p || !p.id) continue;
+    PAGES_BY_ID[p.id] = p;
+  }
+}
+
+registerPages(NORM_HELP_PAGES);
+registerPages(GENERAL_HELP_PAGES);
+registerPages(MELDUNGEN_HELP_PAGES);
+registerPages(HEADER_HELP_PAGES);
+registerPages(TOR_HELP_PAGES);
+registerPages(STEHER_HELP_PAGES);
+registerPages(TISCH_HELP_PAGES);
+registerPages(ERGEBNISSE_HELP_PAGES);
+registerPages(ZWISCHENERGEBNISSE_HELP_PAGES);
+
 /**
  * Kleiner interner State
  */
@@ -128,6 +159,81 @@ function escapeHtml(str) {
     .replace(/>/g, "&gt;");
 }
 
+// Vereinfachtes Text-Extract aus HTML, wie in help_suche.js
+function extractSearchableText(rawHtml) {
+  if (!rawHtml) return "";
+
+  let text = String(rawHtml);
+
+  // FAQ-Fragen in sichtbaren Text umwandeln
+  text = text.replace(/<faq[^>]*question="([^"]+)"[^>]*>/gi, " $1 ");
+  text = text.replace(/<\/faq>/gi, " ");
+
+  // Wiki-Links [[id|Label]] → Label; [[id]] → id
+  text = text.replace(/\[\[([^\]|]+)(\|([^\]]+))?\]\]/g, (_m, id, _rest, label) => {
+    return " " + (label || id) + " ";
+  });
+
+  // HTML-Tags entfernen
+  text = text.replace(/<[^>]+>/g, " ");
+
+  // Whitespace normalisieren
+  text = text.replace(/\s+/g, " ").trim();
+
+  return text;
+}
+
+// Für Titel: komplett, ohne Abschneiden, nur highlighten
+function buildHighlightedInline(text, query) {
+  if (!text) return "";
+  const terms = splitQueryTerms(query);
+  if (!terms.length) return escapeHtml(text);
+
+  const escapedTerms = terms.map(escapeRegex);
+  const re = new RegExp("(" + escapedTerms.join("|") + ")", "gi");
+
+  return escapeHtml(text).replace(re, (m) => {
+    return `<mark class="help-search-hit">${m}</mark>`;
+  });
+}
+
+// Für den Fall "Treffer im Titel": Anfang des Inhalts zeigen
+function buildHighlightedSnippetFromStart(text, query) {
+  if (!text) return "";
+  const maxLen = 180;
+  const slice = text.slice(0, maxLen);
+  const terms = splitQueryTerms(query);
+  if (!terms.length) {
+    return escapeHtml(slice) + (text.length > maxLen ? "…" : "");
+  }
+
+  const escapedTerms = terms.map(escapeRegex);
+  const re = new RegExp("(" + escapedTerms.join("|") + ")", "gi");
+
+  const html = escapeHtml(slice).replace(re, (m) => {
+    return `<mark class="help-search-hit">${m}</mark>`;
+  });
+
+  return html + (text.length > maxLen ? "…" : "");
+}
+
+// Breadcrumb für eine Seite als Array von Labels
+function getBreadcrumbLabels(pageId) {
+  const page = PAGES_BY_ID[pageId];
+  const labels = ["Hilfe"];
+
+  const pathIds = Array.isArray(page?.pfad) ? page.pfad : [];
+  for (const pid of pathIds) {
+    const pPage = PAGES_BY_ID[pid];
+    labels.push(pPage?.shortTitle || pPage?.title || pid);
+  }
+
+  const currentLabel = page?.shortTitle || page?.title || pageId;
+  labels.push(currentLabel);
+
+  return labels;
+}
+
 /**
  * Ergebnisse im Panel rendern
  */
@@ -166,22 +272,47 @@ function renderResults(query, searchResult) {
     btn.className = "help-search-result-button";
     btn.setAttribute("data-help-id", r.id);
 
-    // Titel
+    const page = PAGES_BY_ID[r.id] || null;
+    const titleText = (page && page.title) || r.title || r.id || "Ohne Titel";
+    const bodyTextRaw = page ? extractSearchableText(page.body || "") : "";
+    const breadcrumbLabels = getBreadcrumbLabels(r.id);
+
+    // --- Breadcrumb-Zeile (ohne Links) ---
+    const breadcrumbEl = document.createElement("div");
+    breadcrumbEl.className = "help-search-result-breadcrumb";
+    breadcrumbEl.textContent = breadcrumbLabels.join(" / ");
+
+    // --- Titel-Zeile ---
     const titleEl = document.createElement("div");
     titleEl.className = "help-search-result-title";
-    titleEl.textContent = r.title || r.id || "Ohne Titel";
 
-    // Snippet
+    // --- Snippet-Zeile ---
     const snippetEl = document.createElement("div");
     snippetEl.className = "help-search-result-snippet";
-    snippetEl.innerHTML = buildHighlightedSnippet(r.text || "", query);
 
-    btn.appendChild(titleEl);
-    btn.appendChild(snippetEl);
+    if (r.field === "title") {
+      // Treffer im Titel:
+      //  - Titel selbst markieren
+      //  - Anfang vom Inhalt zeigen
+      titleEl.innerHTML = buildHighlightedInline(titleText, query);
+      snippetEl.innerHTML = buildHighlightedSnippetFromStart(bodyTextRaw, query);
+    } else {
+      // Treffer im Inhalt:
+      //  - Titel normal anzeigen
+      //  - Stelle im Inhalt mit Treffer zeigen
+      titleEl.textContent = titleText;
+      const snippetSource = bodyTextRaw || r.text || "";
+      snippetEl.innerHTML = buildHighlightedSnippet(snippetSource, query);
+    }
 
+    // Beim Klick Panel schließen (Navigation macht help.js über document-click)
     btn.addEventListener("click", () => {
       closeHelpSearchResults();
     });
+
+    btn.appendChild(breadcrumbEl);
+    btn.appendChild(titleEl);
+    btn.appendChild(snippetEl);
 
     li.appendChild(btn);
     listEl.appendChild(li);

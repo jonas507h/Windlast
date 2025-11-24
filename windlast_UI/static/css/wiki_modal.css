@@ -377,11 +377,7 @@
 }
 
 .help-search-result-button:hover {
-  background: rgba(0, 0, 0, 0.04);
-}
-
-[data-theme="dark"] .help-search-result-button:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--wiki-header-hover-bg);
 }
 
 /* Titel */
@@ -399,23 +395,31 @@
   line-height: 1.35;
 }
 
-/* Markierte Treffer im Snippet */
-.help-search-result-snippet mark.help-search-hit {
+/* Markierte Treffer (Titel + Snippet) */
+mark.help-search-hit {
+  color: var(--wiki-search-hit-fg) !important;
   background-color: var(--wiki-search-hit-bg);
   border-radius: 2px;
-  padding: 0 1px;
+  padding: 0 2px;
   border: 1px solid var(--wiki-search-hit-border);
 }
 
 /* kleine Trennlinie zwischen Ergebnissen */
 .help-search-result-item + .help-search-result-item {
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  border-top: 1px solid var(--wiki-search-border);
   margin-top: 4px;
   padding-top: 4px;
 }
 
-[data-theme="dark"] .help-search-result-item + .help-search-result-item {
-  border-top-color: rgba(255, 255, 255, 0.08);
+/* Breadcrumb-Zeile im Suchergebnis */
+.help-search-result-breadcrumb {
+  font-size: var(--wiki-search-breadcrumb-size);
+  color: var(--wiki-search-breadcrumb);
+  margin-bottom: 3px;
+  opacity: 0.9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 @keyframes faq-slide {

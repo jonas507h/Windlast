@@ -35,10 +35,9 @@ const MAX_TOTAL_SCORE            = 12;
 // Alles wird intern eh noch normalisiert, aber hier kannst du später bequem erweitern.
 // -----------------------------------------------------------------------------
 const SYNONYMS = {
-  // Beispiele, kannst du anpassen / löschen / erweitern:
-  // "windlast": ["windlasten", "wind"],
-  // "tor": ["traversentor"],
-  // "tisch": ["traversentisch"],
+  "winddruck": ["staudruck"],
+  "geschwindigkeitsdruck": ["staudruck"],
+  "pipe": ["rohr"],
 };
 
 // -----------------------------------------------------------------------------
