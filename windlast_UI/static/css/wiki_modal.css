@@ -53,7 +53,12 @@
   font-size: 0.8rem;
   font-weight: 600;
   opacity: 0.8;
-  pointer-events: none;
+  pointer-events: auto;
+}
+
+.wiki-modal-header-center .help-search-input {
+  cursor: text;
+  user-select: text;
 }
 
 .wiki-modal-header-actions {

@@ -10,13 +10,19 @@ import { TISCH_HELP_PAGES } from "../help_content/tisch.js";
 import { ERGEBNISSE_HELP_PAGES } from "../help_content/ergebnisse.js";
 import { ZWISCHENERGEBNISSE_HELP_PAGES } from "../help_content/zwischenergebnisse.js";
 
+// Welche Seite soll der globale "Hilfe"-Startpunkt sein?
+export const HELP_ROOT_ID = "app:start"; 
+
 // Später: weitere Content-Module hier zusammenführen:
 // import { GENERAL_HELP_PAGES } from "../help_content/allgemein.js";
 
-const PAGES_BY_ID = Object.create(null);
+import { initHelpSearch } from "../utils/help_suche.js";
+import {
+  openHelpSearchResults,
+  closeHelpSearchResults
+} from "./suchergebnisse.js";
 
-// Welche Seite soll der globale "Hilfe"-Startpunkt sein?
-export const HELP_ROOT_ID = "app:start"; 
+const PAGES_BY_ID = Object.create(null);
 
 // --- Content registrieren ---
 function registerPages(list) {
@@ -92,6 +98,73 @@ function getRenderedPage(id) {
   };
 }
 
+function ensureHelpSearchInput() {
+  // Root des Wiki-Modals, wie in wiki_modal.js angelegt
+  const root = document.getElementById("wiki-modal-root");
+  if (!root) return;
+
+  const headerCenter = root.querySelector(".wiki-modal-header-center");
+  if (!headerCenter) return;
+
+  // Schon vorhanden? → nur zurückgeben
+  let input = headerCenter.querySelector("input.help-search-input");
+  if (input) {
+    return input;
+  }
+
+  // Bisherigen Titeltext entfernen ("Windlastrechner – Hilfe")
+  headerCenter.textContent = "";
+
+  // Neues Suchfeld anlegen
+  input = document.createElement("input");
+  input.type = "search";
+  input.className = "help-search-input";
+  input.placeholder = "Hilfe durchsuchen …";
+  input.autocomplete = "off";
+  input.spellcheck = false;
+
+  // Baseline-Styles (kannst du später komplett per CSS überschreiben)
+  input.style.width = "100%";
+  input.style.maxWidth = "360px";
+  input.style.padding = "4px 8px";
+  input.style.borderRadius = "4px";
+  input.style.border = "1px solid rgba(0,0,0,0.2)";
+  input.style.fontSize = "0.9rem";
+
+  headerCenter.appendChild(input);
+
+  // Hook für spätere Suchlogik
+  initHelpSearch(input);
+
+  // Input-Event: Platzhalter-Ergebnis-Modal öffnen/schließen
+  input.addEventListener("input", () => {
+    const value = input.value.trim();
+    if (!value) {
+      closeHelpSearchResults();
+      return;
+    }
+    openHelpSearchResults(input, value);
+  });
+
+  input.addEventListener("mousedown", (ev) => {
+    ev.stopPropagation();
+  });
+
+  // Optional: ESC schließt nur das Ergebnis-Modal
+  input.addEventListener("keydown", (ev) => {
+    if (ev.key === "Escape") {
+      if (input.value) {
+        input.value = "";
+        closeHelpSearchResults();
+        ev.stopPropagation();
+        ev.preventDefault();
+      }
+    }
+  });
+
+  return input;
+}
+
 function navigateTo(id, { push = true } = {}) {
   const page = getPage(id);
   const { title, body } = getRenderedPage(id);
@@ -107,6 +180,8 @@ function navigateTo(id, { push = true } = {}) {
     title,
     contentNode
   });
+
+  ensureHelpSearchInput();
 
   if (push) {
     // Forward-History abschneiden, falls wir mitten in der History sind
