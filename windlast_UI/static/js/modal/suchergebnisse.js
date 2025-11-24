@@ -71,6 +71,9 @@ function ensurePanel() {
     if (currentAnchor && currentAnchor.contains && currentAnchor.contains(ev.target)) return;
     closeHelpSearchResults();
   });
+
+  // Debug-Tooltip für Suchergebnisse registrieren (nur einmal)
+  registerHelpSearchDebugTooltip();
 }
 
 /**
@@ -272,6 +275,15 @@ function renderResults(query, searchResult) {
     btn.className = "help-search-result-button";
     btn.setAttribute("data-help-id", r.id);
 
+    // Debug-Daten für Tooltip anheften
+    try {
+      if (r.debug) {
+        btn.setAttribute("data-search-debug", JSON.stringify(r.debug));
+      }
+    } catch {}
+    btn.setAttribute("data-search-score", String(r.score ?? ""));
+    btn.setAttribute("data-search-field", r.field || "");
+
     const page = PAGES_BY_ID[r.id] || null;
     const titleText = (page && page.title) || r.title || r.id || "Ohne Titel";
     const bodyTextRaw = page ? extractSearchableText(page.body || "") : "";
@@ -358,3 +370,86 @@ window.HelpSearchResults = {
 };
 window.openHelpSearchResults = openHelpSearchResults;
 window.closeHelpSearchResults = closeHelpSearchResults;
+
+/**
+ * Debug-Tooltip für Suchergebnisse registrieren.
+ * Nutzt window.Tooltip und das Flag window.APP_STATE.flags.show_suche_tooltip.
+ */
+function registerHelpSearchDebugTooltip() {
+  const Tooltip = window.Tooltip;
+  if (!Tooltip || registerHelpSearchDebugTooltip.__done) return;
+  registerHelpSearchDebugTooltip.__done = true;
+
+  Tooltip.register(".help-search-results-list .help-search-result-button", {
+    predicate: (el) => {
+      const showFlag = !!(window.APP_STATE?.flags?.show_suche_tooltip);
+      if (!showFlag) return false;
+      return !!el.closest(".help-search-result-button");
+    },
+    content: (_ev, el) => {
+      const btn = el.closest(".help-search-result-button");
+      if (!btn) return "";
+
+      // Flag erneut prüfen – wenn zur Laufzeit deaktiviert wird, kein Tooltip anzeigen
+      const showFlag = !!(window.APP_STATE?.flags?.show_suche_tooltip);
+      if (!showFlag) return "";
+
+      let debug = {};
+      try {
+        debug = JSON.parse(btn.getAttribute("data-search-debug") || "{}");
+      } catch {}
+
+      const score = Number(btn.getAttribute("data-search-score") || "0");
+      const field = debug.field || btn.getAttribute("data-search-field") || "body";
+      const penalties = debug.penalties || {};
+      const base = typeof debug.basePenalty === "number"
+        ? debug.basePenalty
+        : (field === "title" ? 0 : 2); // Fallback auf deine Defaults
+
+      const matchType = debug.matchType || "decomposed";
+
+      const labels = {
+        decomposition: "Begriffszerlegung",
+        gap: "Abstand zwischen Begriffsteilen",
+        order: "Reihenfolgeabweichung",
+        missingFullTerm: "Begriff nicht komplett gefunden",
+        synonyms: "Synonyme verwendet",
+      };
+
+      const root = document.createElement("div");
+      root.className = "ctx-tooltip"; // nutzt bestehendes Tooltip-CSS
+
+      function addRow(keyLabel, valueText) {
+        const row = document.createElement("div");
+        row.className = "ctx-row";
+        const kEl = document.createElement("span");
+        kEl.className = "ctx-k";
+        kEl.textContent = keyLabel + ": ";
+        const vEl = document.createElement("span");
+        vEl.className = "ctx-v";
+        vEl.textContent = valueText;
+        row.appendChild(kEl);
+        row.appendChild(vEl);
+        root.appendChild(row);
+      }
+
+      // Kopf
+      addRow("Gesamt-Score", String(score));
+      addRow("Feld", field === "title" ? "Titel" : "Inhalt");
+      addRow("Match-Typ", matchType === "full" ? "Volltreffer (Phrase)" : "Zerlegte Teile");
+
+      // Basis-Strafe für das Feld
+      addRow("Basis (Feld)", "+" + base);
+
+      // Einzelne Mechanismen nur anzeigen, wenn sie > 0 sind
+      for (const key of Object.keys(labels)) {
+        const val = penalties[key] || 0;
+        if (!val) continue;
+        addRow(labels[key], "+" + val);
+      }
+
+      return root;
+    },
+    delay: 80,
+  });
+}

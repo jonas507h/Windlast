@@ -13,6 +13,7 @@
       show_doppelte_meldungen: false,
       show_meldungen_tooltip: false,
       show_nullpunkt: false,
+      show_suche_tooltip: false,
     }),
     debug: Object.freeze({
       show_zwischenergebnisse_tooltip: true,
@@ -20,6 +21,7 @@
       show_doppelte_meldungen: true,
       show_meldungen_tooltip: true,
       show_nullpunkt: true,
+      show_suche_tooltip: true,
     }),
     admin: Object.freeze({
       show_zwischenergebnisse_tooltip: true,
@@ -27,6 +29,7 @@
       show_doppelte_meldungen: true,
       show_meldungen_tooltip: true,
       show_nullpunkt: true,
+      show_suche_tooltip: true,
     }),
     godmode: Object.freeze({
       show_zwischenergebnisse_tooltip: true,
@@ -34,6 +37,7 @@
       show_doppelte_meldungen: true,
       show_meldungen_tooltip: true,
       show_nullpunkt: true,
+      show_suche_tooltip: true,
     }),
   };
 
