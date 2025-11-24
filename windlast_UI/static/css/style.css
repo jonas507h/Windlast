@@ -90,6 +90,20 @@
   --help-icon-border: rgba(0,0,0,0.18);
   --help-icon-bg: rgba(0,0,0,0.03);
   --help-icon-hover-bg: rgba(0,0,0,0.08);
+
+  /* --- Wiki Suche --- */
+  --wiki-search-bg: var(--panel);
+  --wiki-search-border: var(--border);
+  --wiki-search-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+
+  --wiki-search-title: var(--text);
+  --wiki-search-snippet: var(--muted);
+
+  --wiki-search-hit-bg: rgba(255, 215, 0, 0.35);
+  --wiki-search-hit-border: rgba(180, 140, 0, 0.8);
+
+  --wiki-search-muted-pill-bg: rgba(0, 0, 0, 0.03);
+  --wiki-search-muted-pill-fg: var(--muted);
 }
 
 /* ---------- 2. EXPLIZIT: Light-Theme (Angleich an :root) ---------- */
@@ -176,6 +190,20 @@
   --help-icon-border: rgba(0,0,0,0.18);
   --help-icon-bg: rgba(0,0,0,0.03);
   --help-icon-hover-bg: rgba(0,0,0,0.08);
+
+  /* --- Wiki Suche --- */
+  --wiki-search-bg: var(--panel);
+  --wiki-search-border: var(--border);
+  --wiki-search-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+
+  --wiki-search-title: var(--text);
+  --wiki-search-snippet: var(--muted);
+
+  --wiki-search-hit-bg: rgba(255, 215, 0, 0.35);
+  --wiki-search-hit-border: rgba(180, 140, 0, 0.8);
+
+  --wiki-search-muted-pill-bg: rgba(0, 0, 0, 0.03);
+  --wiki-search-muted-pill-fg: var(--muted);
 }
 
 /* ---------- 3. EXPLIZIT: Dark-Theme ---------- */
@@ -262,6 +290,20 @@
   --help-icon-border: rgba(255,255,255,0.24);
   --help-icon-bg: rgba(255,255,255,0.06);
   --help-icon-hover-bg: rgba(255,255,255,0.12);
+
+  /* --- Wiki Suche --- */
+  --wiki-search-bg: var(--panel);
+  --wiki-search-border: var(--border);
+  --wiki-search-shadow: 0 10px 28px rgba(0, 0, 0, 0.6);
+
+  --wiki-search-title: var(--text);
+  --wiki-search-snippet: var(--muted);
+
+  --wiki-search-hit-bg: rgba(255, 220, 130, 0.28);
+  --wiki-search-hit-border: rgba(255, 220, 130, 0.85);
+
+  --wiki-search-muted-pill-bg: rgba(255, 255, 255, 0.03);
+  --wiki-search-muted-pill-fg: var(--muted);
 }
 
 /* ====== Base ====== */

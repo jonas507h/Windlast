@@ -257,6 +257,166 @@
   text-decoration-thickness: 2px;
 }
 
+/* === Suche im Hilfe-Modal ============================================== */
+
+/* Container für Suchfeld + ggf. Result-Trigger im Header */
+.wiki-search-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto; /* wichtig, damit man tippen kann */
+}
+
+/* Suchfeld im Header */
+.wiki-search-input {
+  width: 100%;
+  max-width: 260px;
+  font-size: 0.8rem;
+  padding: 3px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--wiki-header-border);
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--text);
+  outline: none;
+}
+
+[data-theme="dark"] .wiki-search-input {
+  background: rgba(15, 23, 42, 0.95);
+}
+
+.wiki-search-input::placeholder {
+  opacity: 0.7;
+}
+
+.wiki-search-input:focus-visible {
+  border-color: var(--tab-active-border);
+  box-shadow: 0 0 0 2px var(--tab-active-border);
+}
+
+/* === Suchergebnis-Panel ================================================ */
+
+.help-search-results-panel {
+  position: fixed; /* wird per JS unter das Suchfeld gesetzt */
+  min-width: 260px;
+  max-width: 520px;
+  max-height: 60vh;
+  background: var(--wiki-search-bg);
+  color: var(--text);
+  border-radius: 8px;
+  border: 1px solid var(--wiki-search-border);
+  box-shadow: var(--wiki-search-shadow);
+  padding: 6px 8px;
+  overflow-y: auto;
+  z-index: 1300; /* über dem Hilfe-Modal */
+  font-size: 0.85rem;
+}
+
+.help-search-results-panel[hidden] {
+  display: none !important;
+}
+
+/* Headerzeile / Meta im Panel */
+.help-search-results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.help-search-results-title {
+  font-weight: 600;
+  font-size: 0.8rem;
+  opacity: 0.85;
+}
+
+.help-search-results-meta {
+  font-size: 0.75rem;
+  color: var(--wiki-search-snippet);
+  white-space: nowrap;
+}
+
+/* "Chip" für Info wie "3 Treffer" */
+.help-search-results-pill {
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: var(--wiki-search-muted-pill-bg);
+  color: var(--wiki-search-muted-pill-fg);
+}
+
+/* Leerer Zustand */
+.help-search-empty {
+  font-size: 0.8rem;
+  color: var(--wiki-search-snippet);
+  padding: 4px 2px 2px;
+}
+
+/* Liste der Treffer */
+.help-search-results-list {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+}
+
+/* Einzelnes Suchergebnis */
+.help-search-result-item {
+  margin: 0;
+  padding: 0;
+}
+
+.help-search-result-button {
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 6px 4px 6px;
+  border-radius: 6px;
+  display: block;
+}
+
+.help-search-result-button:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="dark"] .help-search-result-button:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Titel */
+.help-search-result-title {
+  font-weight: 600;
+  font-size: 0.86rem;
+  color: var(--wiki-search-title);
+  margin-bottom: 2px;
+}
+
+/* Snippet */
+.help-search-result-snippet {
+  font-size: 0.8rem;
+  color: var(--wiki-search-snippet);
+  line-height: 1.35;
+}
+
+/* Markierte Treffer im Snippet */
+.help-search-result-snippet mark.help-search-hit {
+  background-color: var(--wiki-search-hit-bg);
+  border-radius: 2px;
+  padding: 0 1px;
+  border: 1px solid var(--wiki-search-hit-border);
+}
+
+/* kleine Trennlinie zwischen Ergebnissen */
+.help-search-result-item + .help-search-result-item {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  margin-top: 4px;
+  padding-top: 4px;
+}
+
+[data-theme="dark"] .help-search-result-item + .help-search-result-item {
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
 
 @keyframes faq-slide {
   from { opacity: 0; transform: translateY(-3px); }
