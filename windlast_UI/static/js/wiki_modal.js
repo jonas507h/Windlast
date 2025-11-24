@@ -102,6 +102,14 @@
 
   function close() {
     setVisible(false);
+
+    if (typeof global.closeHelpSearchResults === "function") {
+      try {
+        global.closeHelpSearchResults();
+      } catch (e) {
+        console.error("Fehler beim Schließen der Hilfe-Suchergebnisse:", e);
+      }
+    }
   }
 
   // --- Buttons -------------------------------------------------------------

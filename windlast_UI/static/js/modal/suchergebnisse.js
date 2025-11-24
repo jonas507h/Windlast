@@ -178,6 +178,11 @@ function renderResults(query, searchResult) {
 
     btn.appendChild(titleEl);
     btn.appendChild(snippetEl);
+
+    btn.addEventListener("click", () => {
+      closeHelpSearchResults();
+    });
+
     li.appendChild(btn);
     listEl.appendChild(li);
   }

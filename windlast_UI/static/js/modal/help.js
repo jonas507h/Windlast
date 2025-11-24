@@ -133,7 +133,7 @@ function ensureHelpSearchInput() {
 
   headerCenter.appendChild(input);
 
-  // Hook für spätere Suchlogik
+  // Hook für Suchlogik
   initHelpSearch(input);
 
   // Input-Event: Platzhalter-Ergebnis-Modal öffnen/schließen
@@ -144,6 +144,14 @@ function ensureHelpSearchInput() {
       return;
     }
     openHelpSearchResults(input, value);
+  });
+
+  // Wenn bereits Text im Feld steht und es fokussiert wird → Panel anzeigen
+  input.addEventListener("focus", () => {
+    const value = input.value.trim();
+    if (value) {
+      openHelpSearchResults(input, value);
+    }
   });
 
   input.addEventListener("mousedown", (ev) => {
