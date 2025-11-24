@@ -77,23 +77,53 @@ function ensurePanel() {
 }
 
 /**
- * Panel an ein Anker-Element (z.B. Input) positionieren
+ * Panel horizontal zur Wiki-Modal zentrieren,
+ * vertikal direkt unter dem Suchfeld positionieren.
  */
 function positionPanel(anchor) {
-  if (!panelEl || !anchor) return;
-  const rect = anchor.getBoundingClientRect();
+  if (!panelEl) return;
 
+  // Hilfe-Fenster
+  const dialog = document.querySelector("#wiki-modal-root .wiki-modal");
+  if (!dialog) return;
+
+  // Anker: Suchfeld im Header (oder übergebenes anchor)
+  const anchorEl =
+    anchor ||
+    currentAnchor ||
+    document.querySelector("#wiki-modal-root .help-search-input");
+  if (!anchorEl) return;
+
+  const dialogRect = dialog.getBoundingClientRect();
+  const anchorRect = anchorEl.getBoundingClientRect();
+
+  // Panel kurz sichtbar machen, damit wir die Breite messen können
+  const wasHidden = panelEl.hidden;
+  if (wasHidden) {
+    panelEl.style.visibility = "hidden";
+    panelEl.hidden = false;
+  }
+
+  const panelRect  = panelEl.getBoundingClientRect();
+  const panelWidth = panelRect.width || anchorRect.width;
+
+  // Horizontale Mitte des Hilfe-Fensters
+  const centerX = dialogRect.left + dialogRect.width / 2;
+  const left    = centerX - panelWidth / 2;
+
+  // Vertikal: immer direkt unter dem Suchfeld
   const marginTop = 4;
-  const top  = rect.bottom + marginTop + window.scrollY;
-  const left = rect.left + window.scrollX;
+  const top       = anchorRect.bottom + marginTop;
 
-  panelEl.style.top  = `${top}px`;
-  panelEl.style.left = `${left}px`;
-  panelEl.style.right = "auto";
+  panelEl.style.left   = `${left}px`;
+  panelEl.style.top    = `${top}px`;
+  panelEl.style.right  = "auto";
+  panelEl.style.minWidth = `${anchorRect.width}px`;
 
-  // Breite: mindestens Breite des Inputs
-  const minWidth = rect.width;
-  panelEl.style.minWidth = `${minWidth}px`;
+  if (wasHidden) {
+    panelEl.hidden = true;
+    panelEl.style.visibility = "";
+  }
 }
 
 /**
@@ -116,7 +146,13 @@ function buildHighlightedSnippet(text, query) {
 
   const lower = text.toLowerCase();
   const terms = splitQueryTerms(query);
-  if (!terms.length) return escapeHtml(text);
+  const desiredLen = 180;
+
+  if (!terms.length) {
+    const slice = text.slice(0, desiredLen);
+    const suffix = text.length > desiredLen ? "…" : "";
+    return escapeHtml(slice) + suffix;
+  }
 
   // Beste Fundstelle suchen
   let bestIdx = -1;
@@ -130,17 +166,19 @@ function buildHighlightedSnippet(text, query) {
   let start = 0;
   let end = text.length;
 
-  const desiredLen = 180;
   if (bestIdx !== -1 && text.length > desiredLen) {
     start = Math.max(0, bestIdx - 60);
     end   = Math.min(text.length, start + desiredLen);
+  } else if (bestIdx === -1 && text.length > desiredLen) {
+    // KEIN Treffer im Inhalt → nur Anfang anzeigen
+    start = 0;
+    end = desiredLen;
   }
 
   let snippet = text.slice(start, end);
   let prefix = start > 0 ? "…" : "";
   let suffix = end < text.length ? "…" : "";
 
-  // Highlight via Regex
   const escapedTerms = terms.map(escapeRegex);
   const re = new RegExp("(" + escapedTerms.join("|") + ")", "gi");
 
@@ -162,25 +200,29 @@ function escapeHtml(str) {
     .replace(/>/g, "&gt;");
 }
 
-// Vereinfachtes Text-Extract aus HTML, wie in help_suche.js
+function decodeHtmlEntities(str) {
+  if (!str) return "";
+  const div = document.createElement("div");
+  div.innerHTML = str;
+  return div.textContent || div.innerText || "";
+}
+
 function extractSearchableText(rawHtml) {
   if (!rawHtml) return "";
 
   let text = String(rawHtml);
 
-  // FAQ-Fragen in sichtbaren Text umwandeln
   text = text.replace(/<faq[^>]*question="([^"]+)"[^>]*>/gi, " $1 ");
   text = text.replace(/<\/faq>/gi, " ");
 
-  // Wiki-Links [[id|Label]] → Label; [[id]] → id
   text = text.replace(/\[\[([^\]|]+)(\|([^\]]+))?\]\]/g, (_m, id, _rest, label) => {
     return " " + (label || id) + " ";
   });
 
-  // HTML-Tags entfernen
   text = text.replace(/<[^>]+>/g, " ");
 
-  // Whitespace normalisieren
+  text = decodeHtmlEntities(text);
+
   text = text.replace(/\s+/g, " ").trim();
 
   return text;
@@ -206,8 +248,10 @@ function buildHighlightedSnippetFromStart(text, query) {
   const maxLen = 180;
   const slice = text.slice(0, maxLen);
   const terms = splitQueryTerms(query);
+  const suffix = text.length > maxLen ? "…" : "";
+
   if (!terms.length) {
-    return escapeHtml(slice) + (text.length > maxLen ? "…" : "");
+    return escapeHtml(slice) + suffix;
   }
 
   const escapedTerms = terms.map(escapeRegex);
@@ -217,8 +261,9 @@ function buildHighlightedSnippetFromStart(text, query) {
     return `<mark class="help-search-hit">${m}</mark>`;
   });
 
-  return html + (text.length > maxLen ? "…" : "");
+  return html + suffix;
 }
+
 
 // Breadcrumb für eine Seite als Array von Labels
 function getBreadcrumbLabels(pageId) {
@@ -346,8 +391,13 @@ export function openHelpSearchResults(anchorEl, query) {
 
   const searchResult = runHelpSearch(q || "");
 
-  positionPanel(currentAnchor);
   renderResults(q, searchResult);
+
+  if (panelEl) {
+    panelEl.scrollTop = 0; // immer zum ersten Ergebnis springen
+  }
+
+  positionPanel(currentAnchor);
 
   panelEl.hidden = false;
 }

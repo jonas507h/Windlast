@@ -93,6 +93,13 @@ function normalizeString(str) {
     .toLowerCase();
 }
 
+function decodeHtmlEntities(str) {
+  if (!str) return "";
+  const div = document.createElement("div");
+  div.innerHTML = str;
+  return div.textContent || div.innerText || "";
+}
+
 // HTML-Tags raus, FAQ-Question-Texte behalten, Wiki-Links in sichtbaren Text umwandeln
 function extractSearchableText(rawHtml) {
   if (!rawHtml) return "";
@@ -101,8 +108,6 @@ function extractSearchableText(rawHtml) {
 
   // FAQ-Fragen sichtbar machen: <faq question="...">
   text = text.replace(/<faq[^>]*question="([^"]+)"[^>]*>/gi, " $1 ");
-
-  // Closing FAQ-Tags entfernen
   text = text.replace(/<\/faq>/gi, " ");
 
   // Wiki-Links [[id|Label]] → Label; [[id]] → id
@@ -112,6 +117,9 @@ function extractSearchableText(rawHtml) {
 
   // HTML-Tags entfernen
   text = text.replace(/<[^>]+>/g, " ");
+
+  // Entities decodieren (&bdquo; → „)
+  text = decodeHtmlEntities(text);
 
   // Whitespace normalisieren
   text = text.replace(/\s+/g, " ").trim();
