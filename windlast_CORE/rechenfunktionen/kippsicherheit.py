@@ -19,53 +19,6 @@ from windlast_CORE.rechenfunktionen.standsicherheit_utils import (
     kipp_envelope_pro_bauelement,
 )
 
-def _emit_kipp_docs_two_stage(
-    *,
-    dst_protokoll,
-    docs,
-    base_ctx: dict,
-    is_global_winner: bool,
-    best_achse_idx: int | None,
-):
-    """
-    Gewinner-Richtung:
-      - relevant:
-          * alle Docs OHNE achse_index (richtungsweite Zwischenwerte: Windkräfte etc.)
-          * alle Docs der besten Achse (achse_index == best_achse_idx)
-          * alle Richtungs-Docs (doc_type startet mit 'dir_')
-      - entscheidungsrelevant:
-          * 'axis_sicherheit' der NICHT besten Achsen
-      - irrelevant:
-          * übrige Docs der NICHT besten Achsen
-
-    Verlierer-Richtung:
-      - entscheidungsrelevant: nur 'dir_min_sicherheit'
-      - irrelevant:            alles andere
-    """
-    for bundle, ctx in docs:
-        ktx = merge_kontext(base_ctx, ctx or {})
-        doc_type    = (ktx.get("doc_type") or "")
-        achse_index = ktx.get("achse_index")
-
-        if is_global_winner:
-            if (
-                achse_index is None                              # ⟵ NEU: alle nicht-achsbezogenen Werte grün
-                or (isinstance(doc_type, str) and doc_type.startswith("dir_"))
-                or (best_achse_idx is not None and achse_index == best_achse_idx)
-            ):
-                ktx["rolle"] = "relevant"
-            else:
-                # andere Achsen in der Gewinner-Richtung
-                if doc_type in ("axis_sicherheit", "axis_ballast"):
-                    ktx["rolle"] = "entscheidungsrelevant"
-                else:
-                    ktx["rolle"] = "irrelevant"
-        else:
-            # Verlierer-Richtungen: nur Richtungs-Sicherheit ist blau
-            ktx["rolle"] = "entscheidungsrelevant" if doc_type in ("dir_min_sicherheit", "dir_ballast") else "irrelevant"
-
-        protokolliere_doc(dst_protokoll, bundle=bundle, kontext=ktx)
-
 def _validate_inputs(
     konstruktion,
     *,
@@ -374,16 +327,6 @@ def _kippsicherheit_DinEn13814_2005_06(
             else:
                 merge_protokoll(sub_prot, protokoll, only_errors=True)
 
-        # 3) Docs (neu): mit Rollen ins Hauptprotokoll heben
-        for i, rec in enumerate(dir_records):
-            _emit_kipp_docs_two_stage(
-                dst_protokoll=protokoll,
-                docs=rec["docs"],
-                base_ctx=merge_kontext(base_ctx, {"nachweis": "KIPP", "windrichtung_deg": rec["windrichtung_deg"]}),
-                is_global_winner=(i == winner_idx),
-                best_achse_idx=rec.get("best_achse_idx"),
-            )
-
         # 4) Globale Ergebnis-Docs (beste Richtung) kennzeichnen
         sicherheit_min_global = winner["dir_min_sicherheit"]
         ballast_erforderlich_max = winner["dir_ballast_max"]
@@ -688,16 +631,6 @@ def _kippsicherheit_DinEn17879_2024_08(
                 merge_protokoll(sub_prot, protokoll, only_errors=False)
             else:
                 merge_protokoll(sub_prot, protokoll, only_errors=True)
-
-        # 3) Docs (neu): mit Rollen ins Hauptprotokoll heben
-        for i, rec in enumerate(dir_records):
-            _emit_kipp_docs_two_stage(
-                dst_protokoll=protokoll,
-                docs=rec["docs"],
-                base_ctx=merge_kontext(base_ctx, {"nachweis": "KIPP", "windrichtung_deg": rec["windrichtung_deg"]}),
-                is_global_winner=(i == winner_idx),
-                best_achse_idx=rec.get("best_achse_idx"),
-            )
 
         # 4) Globale Ergebnis-Docs (beste Richtung) kennzeichnen
         sicherheit_min_global = winner["dir_min_sicherheit"]

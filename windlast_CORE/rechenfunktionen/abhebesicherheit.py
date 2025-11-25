@@ -17,25 +17,6 @@ from windlast_CORE.rechenfunktionen.standsicherheit_utils import (
     abhebe_envelope_pro_bauelement,
 )
 
-def _emit_docs_with_role(*, dst_protokoll, docs, base_ctx: dict, role: str, extra_ctx: dict | None = None):
-    """
-    Schreibt eine Menge (bundle, ctx)-Docs ins Zielprotokoll und setzt/merged Rolle + Kontext.
-    Nur Top-Level-Vergleichswerte dürfen 'entscheidungsrelevant' bleiben.
-    """
-    TOPLEVEL = {"dir_sicherheit", "dir_min_sicherheit", "dir_ballast"}
-    for bundle, ctx in docs:
-        ktx = merge_kontext(base_ctx, ctx or {})
-        doc_type = (ktx.get("doc_type") or (ctx or {}).get("doc_type"))
-
-        eff_role = role
-        if role == "entscheidungsrelevant" and doc_type not in TOPLEVEL:
-            eff_role = "irrelevant"
-
-        ktx["rolle"] = eff_role
-        if extra_ctx:
-            ktx.update(extra_ctx)
-        protokolliere_doc(dst_protokoll, bundle=bundle, kontext=ktx)
-
 def _validate_inputs(
     konstruktion,
     *,
@@ -241,16 +222,6 @@ def _abhebesicherheit_DinEn13814_2005_06(
         for i, rec in enumerate(dir_records):
             merge_protokoll(rec["sub_prot"], protokoll, only_errors=(i != winner_idx))
 
-        # Docs mit Rollen ausspielen
-        for i, rec in enumerate(dir_records):
-            role = "relevant" if i == winner_idx else "entscheidungsrelevant"
-            _emit_docs_with_role(
-                dst_protokoll=protokoll,
-                docs=rec["docs"],
-                base_ctx=merge_kontext(base_ctx, {"nachweis": "ABHEB", "windrichtung_deg": rec["windrichtung_deg"]}),
-                role=role,
-            )
-
         sicherheit_min_global = winner["dir_min_sicherheit"]
         ballast_erforderlich_max = max(r["dir_ballast_max"] for r in dir_records)
 
@@ -450,16 +421,6 @@ def _abhebesicherheit_DinEn17879_2024_08(
         # Messages: Gewinner alles, Verlierer nur Errors
         for i, rec in enumerate(dir_records):
             merge_protokoll(rec["sub_prot"], protokoll, only_errors=(i != winner_idx))
-
-        # Docs mit Rollen ausspielen
-        for i, rec in enumerate(dir_records):
-            role = "relevant" if i == winner_idx else "entscheidungsrelevant"
-            _emit_docs_with_role(
-                dst_protokoll=protokoll,
-                docs=rec["docs"],
-                base_ctx=merge_kontext(base_ctx, {"nachweis": "ABHEB", "windrichtung_deg": rec["windrichtung_deg"]}),
-                role=role,
-            )
 
         sicherheit_min_global = winner["dir_min_sicherheit"]
         ballast_erforderlich_max = max(r["dir_ballast_max"] for r in dir_records)
