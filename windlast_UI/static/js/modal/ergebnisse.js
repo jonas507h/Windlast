@@ -14,23 +14,82 @@ import {
 
 // === Filter: Nachweis & Rollen (aus Footer übernommen) ===
 const NACHWEIS_CHOICES = ["ALLE", "KIPP", "GLEIT", "ABHEB", "BALLAST", "LOADS"];
+const ROLE_ORDER = { relevant: 3, entscheidungsrelevant: 2, irrelevant: 1 };
 
 function filterDocsByNachweis(docs, sel) {
+  // "ALLE" => keine Einschränkung
   if (!sel || sel === "ALLE") return docs || [];
+
+  // Spezialsicht: reine Lastdaten
+  if (sel === "LOADS") {
+    return (docs || []).filter(d => {
+      const n = d?.context?.nachweis ?? null;
+      return n === "LOADS";
+    });
+  }
+
   return (docs || []).filter(d => {
-    const n = d?.context?.nachweis ?? null;
-    // LOADS zählen immer dazu, ebenso Docs ohne Nachweis (Meta/Allgemein)
-    return n === sel || n === "LOADS" || n === null;
+    const ctx = d?.context || {};
+    const relMap = ctx.rolle_pro_nachweis || ctx.relevanz_pro_nachweis || null;
+    const n = ctx.nachweis ?? null;
+
+    // Wenn es eine explizite Rollen-Angabe pro Nachweis gibt,
+    // ist die maßgebend: nur Docs mit Rolle für diesen Nachweis.
+    if (relMap) {
+      if (Object.prototype.hasOwnProperty.call(relMap, sel)) {
+        return true;
+      }
+      // Hat eine Rollen-Map, aber keine Rolle für diesen Nachweis
+      // ⇒ in dieser Sicht nicht anzeigen.
+      return false;
+    }
+
+    // Fallback für alte / meta-Daten (ohne rollen_map):
+    // - explizit diesem Nachweis zugeordnet
+    // - LOADS oder nachweislos gelten als global
+    if (n === sel) return true;
+    if (n === "LOADS" || n === null) return true;
+
+    return false;
   });
 }
 
-function filterDocsByRole(docs, activeRoles /* Set<string> */) {
-  const getRole = d => (d?.context?.rolle ?? d?.context?.role ?? "")
-    .toString().toLowerCase();
+// Liefert die Rolle eines Docs für einen gewählten Nachweis.
+// Für "ALLE" oder fehlende rolle_pro_nachweis wird ein sinnvoller Fallback gewählt.
+function getRoleForNachweis(d, nachweisSel) {
+  const ctx = d?.context || {};
+  const relMap = ctx.rolle_pro_nachweis || ctx.relevanz_pro_nachweis || null;
 
+  // Konkrete Nachweis-Sicht
+  if (nachweisSel && nachweisSel !== "ALLE" && relMap && relMap[nachweisSel] != null) {
+    return String(relMap[nachweisSel]).toLowerCase();
+  }
+
+  // "ALLE"-Sicht oder keine explizite Zuordnung zu nachweisSel:
+  // Wenn mehrere Rollen existieren, nimm die "stärkste".
+  if (relMap && typeof relMap === "object") {
+    let best = "";
+    let bestScore = 0;
+    for (const val of Object.values(relMap)) {
+      const role = String(val || "").toLowerCase();
+      const score = ROLE_ORDER[role] || 0;
+      if (score > bestScore) {
+        bestScore = score;
+        best = role;
+      }
+    }
+    if (best) return best;
+  }
+
+  // Fallback: alte Felder rolle / role (für Übergangsphase)
+  const legacy = (ctx.rolle ?? ctx.role ?? "").toString().toLowerCase();
+  return legacy;
+}
+
+function filterDocsByRole(docs, nachweisSel, activeRoles /* Set<string> */) {
   // KEIN Chip aktiv → NUR "relevant" zeigen
   if (!activeRoles || activeRoles.size === 0) {
-    return (docs || []).filter(d => getRole(d) === "relevant");
+    return (docs || []).filter(d => getRoleForNachweis(d, nachweisSel) === "relevant");
   }
 
   // Mind. ein Chip aktiv:
@@ -38,7 +97,7 @@ function filterDocsByRole(docs, activeRoles /* Set<string> */) {
   // - zusätzlich: alle ausgewählten Rollen
   // - Items ohne Rolle NICHT zeigen
   return (docs || []).filter(d => {
-    const role = getRole(d);
+    const role = getRoleForNachweis(d, nachweisSel);
     if (role === "relevant") return true;
     if (!role) return false;
     return activeRoles.has(role);
@@ -197,7 +256,7 @@ function renderDocsByElement(docsInDir){
   }).join("");
 }
 
-function renderDocsByAxis(docs){
+function renderDocsByAxis(docs, nachweisSel){
   const { groups, keys } = groupBy(docs, {
     keyFn: d => _pickAxisIndex(d?.context),
     emptyKey: "__ohne_achse__",
@@ -208,14 +267,14 @@ function renderDocsByAxis(docs){
   const hasAxes = keys.some(k => k !== "__ohne_achse__");
   if (!hasAxes) {
     const only = groups.get("__ohne_achse__") || [];
-    return `<ul class="doc-list">${renderDocsListItems(only)}</ul>`;
+    return `<ul class="doc-list">${renderDocsListItems(only, nachweisSel)}</ul>`;
   }
 
   return keys.map((k, idx) => {
     const list = groups.get(k) || [];
     const title = (k === "__ohne_achse__") ? "ohne Achse" : `Achse ${k}`;
     const count = `<span class="muted" style="font-weight:400; margin-left:.5rem;">(${list.length})</span>`;
-    const body = `<ul class="doc-list">${renderDocsListItems(list)}</ul>`;
+    const body = `<ul class="doc-list">${renderDocsListItems(list, nachweisSel)}</ul>`;
     return renderAccordionGroup({
       cardClass:"axis-card", detailsClass:"axis-group", summaryClass:"axis-summary",
       title, count, bodyHtml: body, open: idx===0
@@ -223,7 +282,7 @@ function renderDocsByAxis(docs){
   }).join("");
 }
 
-function renderDocsListItems(docs) {
+function renderDocsListItems(docs, nachweisSel) {
   return (docs || []).map(d => {
     const titleHtml = formatLabelWithSubscripts(d?.title ?? "—");
     // Zahl ODER Vektor formatiert; Unit separat escapen
@@ -242,10 +301,11 @@ function renderDocsListItems(docs) {
     const dataAttr =
       `data-formula="${escapeHtml(formula)}" ` +
       `data-formula_source="${escapeHtml(String(formulaSource))}" ` +
-      `data-ctx-json="${ctxJson}"`
+      `data-ctx-json="${ctxJson}"`;
 
     // Rolle (relevant | entscheidungsrelevant | irrelevant) als Klasse
-    const roleRaw = (d?.context?.rolle ?? d?.context?.role ?? "").toString().toLowerCase();
+    // → jetzt nach ausgewähltem Nachweis
+    const roleRaw = getRoleForNachweis(d, nachweisSel);  // <— NEU
     const roleClass =
       roleRaw === "entscheidungsrelevant" ? "role-key" :
       roleRaw === "relevant"              ? "role-rel" :
@@ -361,8 +421,8 @@ export function openErgebnisseModal(normKey, szenario = null, { initialNachweis 
   const activeRoles = new Set(); // leer ⇒ nur "relevant"
   const apply = () => {
     const byNachweis = filterDocsByNachweis(items, activeNachweis);
-    const finalDocs  = filterDocsByRole(byNachweis, activeRoles);
-    listWrap.innerHTML = renderDocsByWindrichtung(finalDocs);
+    const finalDocs  = filterDocsByRole(byNachweis, activeNachweis, activeRoles);
+    listWrap.innerHTML = renderDocsByWindrichtung(finalDocs, activeNachweis);
   };
 
   apply();

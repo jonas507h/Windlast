@@ -160,6 +160,74 @@ def _collect_docs_from_list(items):
 
     return list(dedup.values())
 
+def _build_richtungsrollen(docs: list[dict]) -> Dict[str, Dict[object, str]]:
+    """
+    Liest aus den vorhandenen dir-Docs die Rollen pro (Nachweis, Windrichtung) aus.
+    Ergebnis: z.B. {"KIPP": {0.0: "relevant"}, "GLEIT": {90.0: "entscheidungsrelevant"}, ...}
+    """
+    rollen_by = {
+        "KIPP": {},
+        "GLEIT": {},
+        "ABHEBE": {},
+        "BALLAST": {},  # füllen wir erst später sinnvoll
+    }
+
+    for d in docs:
+        ctx = d.get("context") or {}
+        nachweis = ctx.get("nachweis")
+        doc_type = ctx.get("doc_type")
+        wdir = ctx.get("windrichtung_deg")
+        rolle = ctx.get("rolle") or ctx.get("role")
+        if wdir is None or rolle is None:
+            continue
+
+        # GLEIT / ABHEBE: dir_sicherheit ist die "Richtungszusammenfassung"
+        if nachweis == "GLEIT" and doc_type == "dir_sicherheit":
+            rollen_by["GLEIT"][wdir] = rolle
+
+        if nachweis == "ABHEBE" and doc_type == "dir_sicherheit":
+            rollen_by["ABHEBE"][wdir] = rolle
+
+        # KIPP: dir_min_sicherheit ist die maßgebende Richtungsinfo
+        if nachweis == "KIPP" and doc_type == "dir_min_sicherheit":
+            rollen_by["KIPP"][wdir] = rolle
+
+        # BALLAST lassen wir vorerst leer oder aliasen später explizit
+
+    return rollen_by
+
+
+def _annotate_rolle_pro_nachweis(docs: list[dict]) -> None:
+    """
+    Schreibt für jedes Doc ein Mapping rolle_pro_nachweis in den Kontext,
+    basierend auf den Rollen der dir-Docs.
+    """
+    rollen_by = _build_richtungsrollen(docs)
+
+    for d in docs:
+        ctx = d.get("context") or {}
+        wdir = ctx.get("windrichtung_deg")
+        if wdir is None:
+            continue
+
+        rel_map: Dict[str, str] = {}
+
+        for nz in ("KIPP", "GLEIT", "ABHEBE"):
+            rolle = rollen_by.get(nz, {}).get(wdir)
+            if rolle:
+                rel_map[nz] = rolle
+
+        # Erstmal einfache Default-Strategie für BALLAST:
+        # → BALLAST folgt KIPP (können wir später verfeinern)
+        if "KIPP" in rel_map:
+            rel_map["BALLAST"] = rel_map["KIPP"]
+
+        if rel_map:
+            ctx = dict(ctx)  # defensiv kopieren
+            ctx["rolle_pro_nachweis"] = rel_map
+            d["context"] = ctx
+
+
 # ====== Eingaben Meta ======
 _DENY_KEYS = {
     "headers", "header", "authorization", "auth", "token", "csrf_token",
@@ -328,7 +396,14 @@ def build_api_output(ergebnis, input_payload: Dict[str, Any]) -> Dict[str, Any]:
                         alt_docs_map[sc].append(d)
                     else:
                         docs_main.append(d)
-                # =================================================================
+                # ========= NEU: Relevanz pro Nachweis je Doc berechnen =========
+                if docs_main:
+                    _annotate_rolle_pro_nachweis(docs_main)
+                if alt_docs_map:
+                    for name, docs_list in alt_docs_map.items():
+                        if docs_list:
+                            _annotate_rolle_pro_nachweis(docs_list)
+                # ===============================================================
 
         # --- attach split messages/docs to alternatives ---
         if alts:

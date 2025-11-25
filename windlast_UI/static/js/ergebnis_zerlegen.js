@@ -112,6 +112,39 @@
         return byNorm[altName] || altName;
       },
 
+      // ==================== DOCS (Zwischenergebnisse) ====================
+
+      // Direkter Zugriff: Haupt vs. Alternative
+      getDocs(normKey, altName = null) {
+        if (altName) {
+          return this.docsByAlt?.[normKey]?.[altName] || [];
+        }
+        return this.docsMainByNorm?.[normKey] || [];
+      },
+
+      // Szenario-basiert (wie bei Messages):
+      // - scenario === null / "" / "_gesamt" -> Haupt-Daten
+      // - scenario == Alt-Name              -> Alternative
+      // - sonst: Filter auf Haupt über context.szenario / context.scenario
+      listDocs(normKey, scenario = null) {
+        if (scenario == null || String(scenario).trim() === "" || scenario === "_gesamt") {
+          return this.getDocs(normKey, null);
+        }
+        const altNames = new Set(this.listAlternativen(normKey));
+        const sc = String(scenario).trim();
+        if (altNames.has(sc)) return this.getDocs(normKey, sc);
+
+        // Fallback: seltene Sonder-Szenarien in Haupt über Kontext
+        const main = this.getDocs(normKey, null);
+        return main.filter(d => (d?.context?.szenario ?? d?.context?.scenario ?? "") === sc);
+      },
+
+      // Nur Haupt-Docs (ohne Alternativen)
+      listDocsMainOnly(normKey) {
+        // Haupt enthält bereits keine Alt-Docs mehr (die liegen in alternativen[].docs)
+        return this.getDocs(normKey, null);
+      },
+
       // ==================== MESSAGES ====================
 
       // Direkter Zugriff: Haupt vs. Alternative
