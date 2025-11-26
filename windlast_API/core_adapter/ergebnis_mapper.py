@@ -255,6 +255,19 @@ def _annotate_rolle_pro_nachweis(docs: list[dict]) -> None:
             "BALLAST": "irrelevant",
         }
 
+        # --- BASIS: immer und überall relevant ----------------------
+        if nachweis_doc == "BASIS":
+            rel_map: Dict[str, str] = {
+                "KIPP": "relevant",
+                "GLEIT": "relevant",
+                "ABHEBE": "relevant",
+                "BALLAST": "relevant",
+            }
+            new_ctx = dict(ctx)
+            new_ctx["rolle_pro_nachweis"] = rel_map
+            d["context"] = new_ctx
+            continue
+
         # --- 1) Rolle für den "eigenen" Nachweis -----------------------
         if nachweis_doc in ("KIPP", "GLEIT", "ABHEBE"):
             # Hier vertrauen wir komplett der Rechenfunktion:

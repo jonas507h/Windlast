@@ -13,13 +13,14 @@ import {
 } from "../utils/formatierung.js";
 
 // === Filter: Nachweis & Rollen (aus Footer übernommen) ===
-const NACHWEIS_CHOICES = ["ALLE", "KIPP", "GLEIT", "ABHEBE", "BALLAST", "LOADS"];
+const NACHWEIS_CHOICES = ["ALLE", "KIPP", "GLEIT", "ABHEBE", "BALLAST", "BASIS", "LOADS"];
 const NACHWEIS_LABELS = {
   "ALLE":   "Alle",
   "KIPP":   "Kippen",
   "GLEIT":  "Gleiten",
   "ABHEBE":  "Abheben",
   "BALLAST":"Ballast",
+  "BASIS":  "Basis",
   "LOADS":  "Kräfte"
 };
 const ROLE_ORDER = { relevant: 3, entscheidungsrelevant: 2, irrelevant: 1 };
@@ -30,7 +31,15 @@ function filterDocsByNachweis(docs, sel) {
   if (sel === "LOADS") {
     return (docs || []).filter(d => {
       const n = d?.context?.nachweis ?? null;
-      return n === "LOADS";
+      return (n === "LOADS")||(n === "BASIS");
+    });
+  }
+
+  // Spezialsicht: BASIS
+  if (sel === "BASIS") {
+    return (docs || []).filter(d => {
+      const n = d?.context?.nachweis ?? null;
+      return n === "BASIS";
     });
   }
 
@@ -394,7 +403,7 @@ export function openErgebnisseModal(normKey, szenario = null, { initialNachweis 
   // --- Filterleiste (Nachweis) mit initialNachweis aus Klick ---
   const bar = document.createElement("div");
   bar.className = "nachweis-filter";
-  const start = (initialNachweis && ["ALLE","KIPP","GLEIT","ABHEBE","BALLAST","LOADS"].includes(initialNachweis))
+  const start = (initialNachweis && ["ALLE","KIPP","GLEIT","ABHEBE","BALLAST","BASIS","LOADS"].includes(initialNachweis))
     ? initialNachweis : "ALLE";
   bar.innerHTML = NACHWEIS_CHOICES.map(c => {
   const label = NACHWEIS_LABELS[c] ?? c;  // Fallback auf Key, falls mal was fehlt

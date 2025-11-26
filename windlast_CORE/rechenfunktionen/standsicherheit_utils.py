@@ -31,11 +31,6 @@ def generiere_windrichtungen(
         winkelabstand = 360.0 / anzahl
         result = [(i * winkelabstand + startwinkel, einheitsvektor_aus_winkeln(i * winkelabstand + startwinkel, 0.0)) for i in range(anzahl)]
 
-    protokolliere_doc(
-        protokoll,
-        bundle=make_docbundle(titel="Windrichtungen", wert=[w for w, _ in result], einheit="°"),
-        kontext=base_ctx,
-    )
     return result
 
 def ermittle_kraefte_pro_windrichtung(
