@@ -27,42 +27,18 @@ def _emit_kipp_docs_two_stage(
     is_global_winner: bool,
     best_achse_idx: int | None,
 ):
-    """
-    Gewinner-Richtung:
-      - relevant:
-          * alle Docs OHNE achse_index (richtungsweite Zwischenwerte: Windkräfte etc.)
-          * alle Docs der besten Achse (achse_index == best_achse_idx)
-          * alle Richtungs-Docs (doc_type startet mit 'dir_')
-      - entscheidungsrelevant:
-          * 'axis_sicherheit' der NICHT besten Achsen
-      - irrelevant:
-          * übrige Docs der NICHT besten Achsen
-
-    Verlierer-Richtung:
-      - entscheidungsrelevant: nur 'dir_min_sicherheit'
-      - irrelevant:            alles andere
-    """
     for bundle, ctx in docs:
         ktx = merge_kontext(base_ctx, ctx or {})
         doc_type    = (ktx.get("doc_type") or "")
         achse_index = ktx.get("achse_index")
 
         if is_global_winner:
-            if (
-                achse_index is None                              # ⟵ NEU: alle nicht-achsbezogenen Werte grün
-                or (isinstance(doc_type, str) and doc_type.startswith("dir_"))
-                or (best_achse_idx is not None and achse_index == best_achse_idx)
-            ):
+            if isinstance(doc_type, str) and doc_type.startswith("dir_"):
                 ktx["rolle"] = "relevant"
-            else:
-                # andere Achsen in der Gewinner-Richtung
-                if doc_type in ("axis_sicherheit", "axis_ballast"):
-                    ktx["rolle"] = "entscheidungsrelevant"
-                else:
-                    ktx["rolle"] = "irrelevant"
         else:
             # Verlierer-Richtungen: nur Richtungs-Sicherheit ist blau
-            ktx["rolle"] = "entscheidungsrelevant" if doc_type in ("dir_min_sicherheit", "dir_ballast") else "irrelevant"
+            if doc_type in ("dir_min_sicherheit", "dir_ballast"):
+                ktx["rolle"] = "entscheidungsrelevant"
 
         protokolliere_doc(dst_protokoll, bundle=bundle, kontext=ktx)
 
