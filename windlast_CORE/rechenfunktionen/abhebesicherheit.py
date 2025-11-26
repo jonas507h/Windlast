@@ -103,7 +103,7 @@ def _abhebesicherheit_DinEn13814_2005_06(
 
     if vereinfachung_konstruktion is not VereinfachungKonstruktion.KEINE:
         protokolliere_msg(
-            protokoll, severity=Severity.ERROR, code="ABHEB/NOT_IMPLEMENTED",
+            protokoll, severity=Severity.ERROR, code="ABHEBE/NOT_IMPLEMENTED",
             text=f"Vereinfachung '{vereinfachung_konstruktion.value}' ist noch nicht implementiert.",
             kontext=base_ctx,
         )
@@ -141,7 +141,7 @@ def _abhebesicherheit_DinEn13814_2005_06(
             total_normal_down = 0.0
             total_normal_up = 0.0
 
-            richtung_ctx = merge_kontext(base_ctx, {"windrichtung_deg": f"{winkel}°", "windrichtung": richtung, "nachweis": "ABHEB"})
+            richtung_ctx = merge_kontext(base_ctx, {"windrichtung_deg": f"{winkel}°", "windrichtung": richtung, "nachweis": "ABHEBE"})
 
             for element, lastfaelle_elem in kraefte_nach_element.items():
                 N_down_b, N_up_b = abhebe_envelope_pro_bauelement(norm, lastfaelle_elem, protokoll=sub_prot, kontext=merge_kontext(richtung_ctx, {"element_id": str(element)}))
@@ -152,7 +152,7 @@ def _abhebesicherheit_DinEn13814_2005_06(
                         wert=N_down_b,
                         einheit="N",
                     ),
-                    kontext=merge_kontext(base_ctx, {"nachweis": "ABHEB", "doc_type": "element_normalkraft_down", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
+                    kontext=merge_kontext(base_ctx, {"nachweis": "ABHEBE", "doc_type": "element_normalkraft_down", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
                 )
                 protokolliere_doc(
                     sub_prot,
@@ -161,7 +161,7 @@ def _abhebesicherheit_DinEn13814_2005_06(
                         wert=N_up_b,
                         einheit="N",
                     ),
-                    kontext=merge_kontext(base_ctx, {"nachweis": "ABHEB", "doc_type": "element_normalkraft_up", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
+                    kontext=merge_kontext(base_ctx, {"nachweis": "ABHEBE", "doc_type": "element_normalkraft_up", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
                 )
                 total_normal_down += N_down_b
                 total_normal_up += N_up_b
@@ -174,7 +174,7 @@ def _abhebesicherheit_DinEn13814_2005_06(
                     wert=total_normal_down,
                     einheit="N",
                 ),
-                kontext={"nachweis": "ABHEB", "doc_type": "dir_N_down_sum", "windrichtung_deg": f"{winkel}°"},
+                kontext={"nachweis": "ABHEBE", "doc_type": "dir_N_down_sum", "windrichtung_deg": f"{winkel}°"},
             )
             protokolliere_doc(
                 sub_prot,
@@ -183,7 +183,7 @@ def _abhebesicherheit_DinEn13814_2005_06(
                     wert=total_normal_up,
                     einheit="N",
                 ),
-                kontext={"nachweis": "ABHEB", "doc_type": "dir_N_up_sum", "windrichtung_deg": f"{winkel}°"},
+                kontext={"nachweis": "ABHEBE", "doc_type": "dir_N_up_sum", "windrichtung_deg": f"{winkel}°"},
             )
 
             sicherheit = inf if total_normal_up <= _EPS else (total_normal_down / total_normal_up)
@@ -216,7 +216,7 @@ def _abhebesicherheit_DinEn13814_2005_06(
                     formelzeichen=["N_up", "N_down", "γ_g"],
                     quelle_formel="---",
                 ),
-                kontext={"nachweis": "ABHEB", "doc_type": "dir_ballast", "windrichtung_deg": f"{winkel}°"},
+                kontext={"nachweis": "ABHEBE", "doc_type": "dir_ballast", "windrichtung_deg": f"{winkel}°"},
             )
 
             # WICHTIG: nicht hier schon mergen/entscheiden – erst sammeln:
@@ -244,7 +244,7 @@ def _abhebesicherheit_DinEn13814_2005_06(
             _emit_docs_with_role(
                 dst_protokoll=protokoll,
                 docs=rec["docs"],
-                base_ctx=merge_kontext(base_ctx, {"nachweis": "ABHEB", "windrichtung_deg": rec["windrichtung_deg"]}),
+                base_ctx=merge_kontext(base_ctx, {"nachweis": "ABHEBE", "windrichtung_deg": rec["windrichtung_deg"]}),
                 role=role,
             )
 
@@ -278,14 +278,14 @@ def _abhebesicherheit_DinEn13814_2005_06(
                 quelle_formel="---",
                 quelle_formelzeichen=["---"],
             ),
-            kontext=merge_kontext(base_ctx, {"nachweis": "ABHEB", "rolle": "relevant"}),
+            kontext=merge_kontext(base_ctx, {"nachweis": "ABHEBE", "rolle": "relevant"}),
         )
 
         return [Zwischenergebnis(wert=sicherheit_min_global), Zwischenergebnis(wert=ballast_kg)]
 
     else:
         protokolliere_msg(
-            protokoll, severity=Severity.ERROR, code="ABHEB/METHOD_NI",
+            protokoll, severity=Severity.ERROR, code="ABHEBE/METHOD_NI",
             text=f"Methode '{methode.value}' ({methode.name}) ist noch nicht implementiert.",
             kontext=base_ctx,
         )
@@ -313,7 +313,7 @@ def _abhebesicherheit_DinEn17879_2024_08(
 
     if vereinfachung_konstruktion is not VereinfachungKonstruktion.KEINE:
         protokolliere_msg(
-            protokoll, severity=Severity.ERROR, code="ABHEB/NOT_IMPLEMENTED",
+            protokoll, severity=Severity.ERROR, code="ABHEBE/NOT_IMPLEMENTED",
             text=f"Vereinfachung '{vereinfachung_konstruktion.value}' ist noch nicht implementiert.",
             kontext=base_ctx,
         )
@@ -351,7 +351,7 @@ def _abhebesicherheit_DinEn17879_2024_08(
             total_normal_down = 0.0
             total_normal_up = 0.0
 
-            richtung_ctx = merge_kontext(base_ctx, {"windkel_deg": f"{winkel}°", "windrichtung": richtung, "nachweis": "ABHEB"})
+            richtung_ctx = merge_kontext(base_ctx, {"windkel_deg": f"{winkel}°", "windrichtung": richtung, "nachweis": "ABHEBE"})
 
             for element, lastfaelle_elem in kraefte_nach_element.items():
                 N_down_b, N_up_b = abhebe_envelope_pro_bauelement(norm, lastfaelle_elem, protokoll=sub_prot, kontext=merge_kontext(richtung_ctx, {"element_id": str(element)}))
@@ -362,7 +362,7 @@ def _abhebesicherheit_DinEn17879_2024_08(
                         wert=N_down_b,
                         einheit="N",
                     ),
-                    kontext=merge_kontext(base_ctx, {"nachweis": "ABHEB", "doc_type": "element_normalkraft_down", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
+                    kontext=merge_kontext(base_ctx, {"nachweis": "ABHEBE", "doc_type": "element_normalkraft_down", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
                 )
                 protokolliere_doc(
                     sub_prot,
@@ -371,7 +371,7 @@ def _abhebesicherheit_DinEn17879_2024_08(
                         wert=N_up_b,
                         einheit="N",
                     ),
-                    kontext=merge_kontext(base_ctx, {"nachweis": "ABHEB", "doc_type": "element_normalkraft_up", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
+                    kontext=merge_kontext(base_ctx, {"nachweis": "ABHEBE", "doc_type": "element_normalkraft_up", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
                 )
                 total_normal_down += N_down_b
                 total_normal_up += N_up_b
@@ -384,7 +384,7 @@ def _abhebesicherheit_DinEn17879_2024_08(
                     wert=total_normal_down,
                     einheit="N",
                 ),
-                kontext={"nachweis": "ABHEB", "doc_type": "dir_N_down_sum", "windrichtung_deg": f"{winkel}°"},
+                kontext={"nachweis": "ABHEBE", "doc_type": "dir_N_down_sum", "windrichtung_deg": f"{winkel}°"},
             )
             protokolliere_doc(
                 sub_prot,
@@ -393,7 +393,7 @@ def _abhebesicherheit_DinEn17879_2024_08(
                     wert=total_normal_up,
                     einheit="N",
                 ),
-                kontext={"nachweis": "ABHEB", "doc_type": "dir_N_up_sum", "windrichtung_deg": f"{winkel}°"},
+                kontext={"nachweis": "ABHEBE", "doc_type": "dir_N_up_sum", "windrichtung_deg": f"{winkel}°"},
             )
 
             sicherheit = inf if total_normal_up <= _EPS else (total_normal_down / total_normal_up)
@@ -406,7 +406,7 @@ def _abhebesicherheit_DinEn17879_2024_08(
                     formelzeichen=["N_down", "N_up"],
                     quelle_formel="---",
                 ),
-                kontext={"nachweis": "ABHEB", "doc_type": "dir_sicherheit", "windrichtung_deg": f"{winkel}°"},
+                kontext={"nachweis": "ABHEBE", "doc_type": "dir_sicherheit", "windrichtung_deg": f"{winkel}°"},
             )
 
             if total_normal_up <= _EPS:
@@ -426,7 +426,7 @@ def _abhebesicherheit_DinEn17879_2024_08(
                     formelzeichen=["N_up", "N_down", "γ_g"],
                     quelle_formel="---",
                 ),
-                kontext={"nachweis": "ABHEB", "doc_type": "dir_ballast", "windrichtung_deg": f"{winkel}°"},
+                kontext={"nachweis": "ABHEBE", "doc_type": "dir_ballast", "windrichtung_deg": f"{winkel}°"},
             )
 
             # WICHTIG: nicht hier schon mergen/entscheiden – erst sammeln:
@@ -454,7 +454,7 @@ def _abhebesicherheit_DinEn17879_2024_08(
             _emit_docs_with_role(
                 dst_protokoll=protokoll,
                 docs=rec["docs"],
-                base_ctx=merge_kontext(base_ctx, {"nachweis": "ABHEB", "windrichtung_deg": rec["windrichtung_deg"]}),
+                base_ctx=merge_kontext(base_ctx, {"nachweis": "ABHEBE", "windrichtung_deg": rec["windrichtung_deg"]}),
                 role=role,
             )
 
@@ -475,7 +475,7 @@ def _abhebesicherheit_DinEn17879_2024_08(
                 quelle_formel="---",
                 quelle_formelzeichen=["---"],
             ),
-            kontext=merge_kontext(base_ctx, {"nachweis": "ABHEB", "rolle": "relevant"}),
+            kontext=merge_kontext(base_ctx, {"nachweis": "ABHEBE", "rolle": "relevant"}),
         )
         protokolliere_doc(
             protokoll,
@@ -488,14 +488,14 @@ def _abhebesicherheit_DinEn17879_2024_08(
                 quelle_formel="---",
                 quelle_formelzeichen=["---"],
             ),
-            kontext=merge_kontext(base_ctx, {"nachweis": "ABHEB", "rolle": "relevant"}),
+            kontext=merge_kontext(base_ctx, {"nachweis": "ABHEBE", "rolle": "relevant"}),
         )
 
         return [Zwischenergebnis(wert=sicherheit_min_global), Zwischenergebnis(wert=ballast_kg)]
 
     else:
         protokolliere_msg(
-            protokoll, severity=Severity.ERROR, code="ABHEB/METHOD_NI",
+            protokoll, severity=Severity.ERROR, code="ABHEBE/METHOD_NI",
             text=f"Methode '{methode.value}' ({methode.name}) ist noch nicht implementiert.",
             kontext=base_ctx,
         )
@@ -548,7 +548,7 @@ def abhebesicherheit(
         )
     except Exception as e:
         protokolliere_msg(
-            protokoll, severity=Severity.ERROR, code="ABHEB/INPUT_INVALID",
+            protokoll, severity=Severity.ERROR, code="ABHEBE/INPUT_INVALID",
             text=str(e), kontext=base_ctx,
         )
         return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]

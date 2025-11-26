@@ -217,7 +217,7 @@ function setDatasetFromId(el, id) {
     key === "ballast" ? "BALLAST" :
     key === "kipp"    ? "KIPP"    :
     key === "gleit"   ? "GLEIT"   :
-    key === "abhebe"  ? "ABHEB"   : "";
+    key === "abhebe"  ? "ABHEBE"   : "";
   if (el.dataset.alt) delete el.dataset.alt;
 }
 
@@ -359,7 +359,7 @@ function renderAlternativenBlocksVM(vm) {
           row.key === "ballast" ? "BALLAST" :
           row.key === "kipp"    ? "KIPP"    :
           row.key === "gleit"   ? "GLEIT"   :
-          row.key === "abhebe"  ? "ABHEB"   : "";
+          row.key === "abhebe"  ? "ABHEBE"   : "";
         if (altName) {
           td.dataset.alt = altName;         // (falls noch woanders genutzt)
           td.dataset.szenario = altName;

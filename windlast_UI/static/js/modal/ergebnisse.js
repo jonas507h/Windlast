@@ -13,7 +13,7 @@ import {
 } from "../utils/formatierung.js";
 
 // === Filter: Nachweis & Rollen (aus Footer übernommen) ===
-const NACHWEIS_CHOICES = ["ALLE", "KIPP", "GLEIT", "ABHEB", "BALLAST", "LOADS"];
+const NACHWEIS_CHOICES = ["ALLE", "KIPP", "GLEIT", "ABHEBE", "BALLAST", "LOADS"];
 const ROLE_ORDER = { relevant: 3, entscheidungsrelevant: 2, irrelevant: 1 };
 
 function filterDocsByNachweis(docs, sel) {
@@ -38,7 +38,7 @@ function filterDocsByNachweis(docs, sel) {
     if (relMap) {
       if (Object.prototype.hasOwnProperty.call(relMap, sel)) {
         const rolle = String(relMap[sel] || "").toLowerCase();
-        return rolle && rolle !== "irrelevant";
+        return rolle;
       }
       // Hat eine Rollen-Map, aber keine Rolle für diesen Nachweis
       // ⇒ in dieser Sicht nicht anzeigen.
@@ -397,7 +397,7 @@ export function openErgebnisseModal(normKey, szenario = null, { initialNachweis 
   // --- Filterleiste (Nachweis) mit initialNachweis aus Klick ---
   const bar = document.createElement("div");
   bar.className = "nachweis-filter";
-  const start = (initialNachweis && ["ALLE","KIPP","GLEIT","ABHEB","BALLAST","LOADS"].includes(initialNachweis))
+  const start = (initialNachweis && ["ALLE","KIPP","GLEIT","ABHEBE","BALLAST","LOADS"].includes(initialNachweis))
     ? initialNachweis : "ALLE";
   bar.innerHTML = NACHWEIS_CHOICES.map(c =>
     `<button class="nf-chip${c===start?" active":""}" data-nachweis="${c}" aria-pressed="${c===start}">${c==="ALLE"?"Alle":c}</button>`
