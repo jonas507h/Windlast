@@ -34,7 +34,7 @@ async function initHeaderDropdowns() {
 
     // Optional Defaults (kannst du anpassen)
     fillSelect(dauerSel, dauerOpts, { placeholder: null, defaultValue: "MONAT" });
-    fillSelect(windSel,  windOpts,  { placeholder: null });
+    fillSelect(windSel,  windOpts,  { placeholder: null, defaultValue: "II_BINNENLAND" });
 
   } catch (err) {
     console.error("Header-Dropdowns konnten nicht geladen werden:", err);

@@ -18,9 +18,9 @@ function readFormForSteher() {
   const untergrund = document.getElementById('untergrund_typ')?.value || 'BETON';
 
   return {
-    hoehe_m:  isFinite(hoehe)  && hoehe  > 0 ? hoehe  : 3,
-    rohr_laenge_m: isFinite(rohr_laenge) && rohr_laenge > 0 ? rohr_laenge : 2,
-    rohr_hoehe_m: isFinite(rohr_hoehe) && rohr_hoehe > 0 ? rohr_hoehe : 2.5,
+    hoehe_m:  isFinite(hoehe)  && hoehe  > 0 ? hoehe  : 4.5,
+    rohr_laenge_m: isFinite(rohr_laenge) && rohr_laenge > 0 ? rohr_laenge : 1.5,
+    rohr_hoehe_m: isFinite(rohr_hoehe) && rohr_hoehe > 0 ? rohr_hoehe : 4.0,
     traverse_name_intern,
     bodenplatte_name_intern,
     rohr_name_intern,

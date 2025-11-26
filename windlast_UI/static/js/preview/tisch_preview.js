@@ -17,9 +17,9 @@ function readFormForTisch() {
   const untergrund = document.getElementById('untergrund_typ')?.value || 'BETON';
 
   return {
-    breite_m: isFinite(breite) && breite > 0 ? breite : 6,
-    hoehe_m:  isFinite(hoehe)  && hoehe  > 0 ? hoehe  : 3,
-    tiefe_m:  isFinite(tiefe)  && tiefe  > 0 ? tiefe  : 4,
+    breite_m: isFinite(breite) && breite > 0 ? breite : 8,
+    hoehe_m:  isFinite(hoehe)  && hoehe  > 0 ? hoehe  : 4,
+    tiefe_m:  isFinite(tiefe)  && tiefe  > 0 ? tiefe  : 6,
     traverse_name_intern,
     bodenplatte_name_intern,
     gummimatte,

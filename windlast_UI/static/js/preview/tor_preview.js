@@ -23,8 +23,8 @@ function readFormForTor() {
   const orientierung = readTraversenOrientierungSafe();
 
   return {
-    breite_m: isFinite(breite) && breite > 0 ? breite : 4,
-    hoehe_m:  isFinite(hoehe)  && hoehe  > 0 ? hoehe  : 3,
+    breite_m: isFinite(breite) && breite > 0 ? breite : 6,
+    hoehe_m:  isFinite(hoehe)  && hoehe  > 0 ? hoehe  : 4,
     traverse_name_intern,
     bodenplatte_name_intern,
     gummimatte,

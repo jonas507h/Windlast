@@ -44,9 +44,9 @@ async function initSteherDropdowns() {
     ]);
 
     // Dropdowns füllen
-    fillSelect(document.getElementById("traverse_name_intern"), traversen);
-    fillSelect(document.getElementById("rohr_name_intern"), rohre);
-    fillSelect(document.getElementById("bodenplatte_name_intern"), bps);
+    fillSelect(document.getElementById("traverse_name_intern"), traversen, { defaultValue: "prolyte_h30v" });
+    fillSelect(document.getElementById("rohr_name_intern"), rohre, { defaultValue: "alu_48x3" });
+    fillSelect(document.getElementById("bodenplatte_name_intern"), bps, { defaultValue: "bp_stahl_100x100" });
     fillSelect(document.getElementById("untergrund_typ"), untergruende, { defaultValue: "BETON" });
 
     // Statisches Dropdown: Gummimatte (Ja/Nein), Default = Ja
