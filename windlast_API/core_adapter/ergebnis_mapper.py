@@ -286,6 +286,18 @@ def _annotate_rolle_pro_nachweis(docs: list[dict]) -> None:
                 if rolle_source is not None:
                     rel_map["BALLAST"] = rolle_source
 
+            # --- 3b) globaler Vergleich KIPP/GLEIT/ABHEB für den Ballast -------
+            # Wenn z.B. KIPP gewinnt, sollen die Einzelnachweis-Ballaste von
+            # GLEIT und ABHEB für BALLAST "entscheidungsrelevant" sein.
+            if nachweis_doc in ("KIPP", "GLEIT", "ABHEBE") and nachweis_doc != ballast_source:
+                # Heuristik: End-Ballast-Dokus der Einzelnachweise erkennen
+                title = (d.get("title") or d.get("titel") or "")
+                if isinstance(title, str) and title.startswith("Erforderlicher Ballast m_Ballast"):
+                    # In ihrem eigenen Nachweis sind diese Werte "relevant" (Endwert),
+                    # im globalen Ballast-Vergleich aber Verlierer -> "entscheidungsrelevant".
+                    if rel_map.get(nachweis_doc) == "relevant":
+                        rel_map["BALLAST"] = "entscheidungsrelevant"
+
         # Kontext mit rolle_pro_nachweis zurückschreiben
         new_ctx = dict(ctx)
         new_ctx["rolle_pro_nachweis"] = rel_map

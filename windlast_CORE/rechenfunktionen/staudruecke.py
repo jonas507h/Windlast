@@ -461,6 +461,7 @@ def staudruecke(
         "norm": getattr(norm, "value", str(norm)),
         "zustand": getattr(zustand, "value", str(zustand)),
         "windzone": getattr(windzone, "value", str(windzone)) if windzone is not None else None,
+        "nachweis": "BASIS",
     })
 
     try:

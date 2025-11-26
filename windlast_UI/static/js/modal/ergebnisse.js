@@ -14,6 +14,14 @@ import {
 
 // === Filter: Nachweis & Rollen (aus Footer übernommen) ===
 const NACHWEIS_CHOICES = ["ALLE", "KIPP", "GLEIT", "ABHEBE", "BALLAST", "LOADS"];
+const NACHWEIS_LABELS = {
+  "ALLE":   "Alle",
+  "KIPP":   "Kippen",
+  "GLEIT":  "Gleiten",
+  "ABHEBE":  "Abheben",
+  "BALLAST":"Ballast",
+  "LOADS":  "Kräfte"
+};
 const ROLE_ORDER = { relevant: 3, entscheidungsrelevant: 2, irrelevant: 1 };
 
 function filterDocsByNachweis(docs, sel) {
@@ -388,9 +396,13 @@ export function openErgebnisseModal(normKey, szenario = null, { initialNachweis 
   bar.className = "nachweis-filter";
   const start = (initialNachweis && ["ALLE","KIPP","GLEIT","ABHEBE","BALLAST","LOADS"].includes(initialNachweis))
     ? initialNachweis : "ALLE";
-  bar.innerHTML = NACHWEIS_CHOICES.map(c =>
-    `<button class="nf-chip${c===start?" active":""}" data-nachweis="${c}" aria-pressed="${c===start}">${c==="ALLE"?"Alle":c}</button>`
-  ).join("");
+  bar.innerHTML = NACHWEIS_CHOICES.map(c => {
+  const label = NACHWEIS_LABELS[c] ?? c;  // Fallback auf Key, falls mal was fehlt
+  const isActive = c === start;
+  return `<button class="nf-chip${isActive ? " active" : ""}"
+                  data-nachweis="${c}"
+                  aria-pressed="${isActive}">${label}</button>`;
+}).join("");
   root.appendChild(bar);
 
   // --- Rollen-Filterleiste (Multi) ---
