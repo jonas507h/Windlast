@@ -99,6 +99,20 @@ def _collect_messages_from_list(items: Iterable[Any], fallback_szenario: str | N
         })
     return out
 
+def _find_ballast_source_nachweis(docs: list[dict]) -> str | None:
+    """
+    Sucht das globale BALLAST-Dokument und liest daraus, welcher Nachweis
+    (`"KIPP"`, `"GLEIT"`, `"ABHEBE"`) den Ballast bestimmt.
+    """
+    for d in docs:
+        ctx = d.get("context") or {}
+        if ctx.get("nachweis") != "BALLAST":
+            continue
+        src = ctx.get("quelle_nachweis")
+        if src in ("KIPP", "GLEIT", "ABHEBE"):
+            return src
+    return None
+
 # ----- docs: (bundle, ctx) -> JSON -----
 
 _ROLE_ORDER = {"relevant": 3, "entscheidungsrelevant": 2, "irrelevant": 1, None: 0}
@@ -182,6 +196,11 @@ def _build_richtungsrollen(docs: list[dict]) -> tuple[Dict[str, Dict[object, str
         wdir = ctx.get("windrichtung_deg")
         rolle = ctx.get("rolle") or ctx.get("role")
 
+        if nachweis == "BALLAST" and ballast_source is None:
+            qs = ctx.get("quelle_nachweis")
+            if qs in ("KIPP", "GLEIT", "ABHEBE"):
+                ballast_source = qs
+
         if wdir is None:
             continue
         if rolle is not None:
@@ -197,12 +216,6 @@ def _build_richtungsrollen(docs: list[dict]) -> tuple[Dict[str, Dict[object, str
         # KIPP: dir_min_sicherheit ist die maßgebende Richtungsinfo
         if nachweis == "KIPP" and doc_type == "dir_min_sicherheit" and rolle:
             rollen_by["KIPP"][wdir] = rolle
-
-        # Ballast-Dokument: merkt sich nur, welcher Nachweis den Ballast bestimmt
-        if nachweis == "BALLAST" and ballast_source is None:
-            qs = ctx.get("quelle_nachweis")
-            if qs in ("KIPP", "GLEIT", "ABHEBE"):
-                ballast_source = qs
 
     # 2) BALLAST-Richtungsrollen = Rollen des ballastkritischen Nachweises
     if ballast_source:
@@ -222,8 +235,8 @@ def _annotate_rolle_pro_nachweis(docs: list[dict]) -> None:
       Richtungsrollen abgeleitet:
         * Nur die kritische Richtung (rolle == "relevant") wird als relevant gezogen.
         * Alles andere bleibt für diesen Nachweis "irrelevant".
-    - Für BALLAST werden zusätzlich der ballastkritische Nachweis und die zugehörigen
-      Sicherheitswerte sichtbar gemacht.
+    - Für BALLAST gilt: jedes Doc bekommt für BALLAST genau die Rolle, die es
+      für den ballastkritischen Nachweis hat (copy/paste).
     """
     rollen_by, ballast_source = _build_richtungsrollen(docs)
 
@@ -262,18 +275,16 @@ def _annotate_rolle_pro_nachweis(docs: list[dict]) -> None:
                 if isinstance(rolle_dir, str) and rolle_dir.lower() == "relevant":
                     rel_map[nz] = "relevant"
 
-            # BALLAST-Sicht für LOADS: gleiche Windrichtung wie ballastkritischer Nachweis
-            if ballast_source and wdir is not None:
-                rolle_dir = rollen_by.get(ballast_source, {}).get(wdir)
-                if isinstance(rolle_dir, str) and rolle_dir.lower() == "relevant":
-                    rel_map["BALLAST"] = "relevant"
-
-        # --- 3) BALLAST-Sicht: Nachweis, der den Ballast liefert -------------
-        # Alle Sicherheits-/Ballast-Dokumente des ballastkritischen Nachweises
-        # sind auch für BALLAST relevant/entscheidungsrelevant.
-        if ballast_source and nachweis_doc == ballast_source:
-            if own_role in ("relevant", "entscheidungsrelevant"):
-                rel_map["BALLAST"] = own_role
+        # --- 3) BALLAST: copy/paste von der entscheidenden Sicherheit ---------
+        if ballast_source:
+            if nachweis_doc == "BALLAST":
+                # globales Ballast-Dokument behält seine eigene Rolle (oben gesetzt)
+                pass
+            else:
+                # Alle anderen Docs: BALLAST-Rolle = Rolle des ballastkritischen Nachweises
+                rolle_source = rel_map.get(ballast_source)
+                if rolle_source is not None:
+                    rel_map["BALLAST"] = rolle_source
 
         # Kontext mit rolle_pro_nachweis zurückschreiben
         new_ctx = dict(ctx)
