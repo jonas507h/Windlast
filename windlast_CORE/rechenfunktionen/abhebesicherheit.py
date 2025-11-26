@@ -27,8 +27,11 @@ def _emit_docs_with_role(*, dst_protokoll, docs, base_ctx: dict, role: str, extr
         ktx = merge_kontext(base_ctx, ctx or {})
         doc_type = (ktx.get("doc_type") or (ctx or {}).get("doc_type"))
 
-        if doc_type in TOPLEVEL:
-            ktx["rolle"] = role
+        eff_role = role
+        if role == "entscheidungsrelevant" and doc_type not in TOPLEVEL:
+            eff_role = "irrelevant"
+
+        ktx["rolle"] = eff_role
         if extra_ctx:
             ktx.update(extra_ctx)
         protokolliere_doc(dst_protokoll, bundle=bundle, kontext=ktx)
@@ -196,7 +199,7 @@ def _abhebesicherheit_DinEn13814_2005_06(
                     formelzeichen=["N_down", "N_up"],
                     quelle_formel="---",
                 ),
-                kontext={"nachweis": "ABHEB", "doc_type": "dir_sicherheit", "windrichtung_deg": f"{winkel}°"},
+                kontext={"nachweis": "ABHEBE", "doc_type": "dir_sicherheit", "windrichtung_deg": f"{winkel}°"},
             )
 
             if total_normal_up <= _EPS:
@@ -265,7 +268,7 @@ def _abhebesicherheit_DinEn13814_2005_06(
                 quelle_formel="---",
                 quelle_formelzeichen=["---"],
             ),
-            kontext=merge_kontext(base_ctx, {"nachweis": "ABHEB", "rolle": "relevant"}),
+            kontext=merge_kontext(base_ctx, {"nachweis": "ABHEBE", "rolle": "relevant"}),
         )
         protokolliere_doc(
             protokoll,
