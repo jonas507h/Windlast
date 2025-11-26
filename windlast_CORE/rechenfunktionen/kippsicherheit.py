@@ -34,9 +34,9 @@ def _emit_kipp_docs_two_stage(
 
         # 1) Achsentscheidung innerhalb der Richtung
         if isinstance(achse_index, int) and best_achse_idx is not None:
-            if achse_index == best_achse_idx:
+            if is_global_winner:
                 # Diese Achse liefert die Richtungs-Minimum-Sicherheit
-                if is_global_winner:
+                if achse_index == best_achse_idx:
                     ktx["rolle"] = "relevant"
                 else:
                     ktx["rolle"] = "entscheidungsrelevant"
