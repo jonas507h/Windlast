@@ -17,7 +17,15 @@ from windlast_CORE.datenstruktur.standsicherheit_ergebnis import (
     StandsicherheitErgebnis, NormErgebnis, SafetyValue, Message, Meta, NormStatus, NormDetails, AlternativeErgebnis
 )
 from windlast_CORE.rechenfunktionen.staudruecke import staudruecke  # type: ignore
-from windlast_CORE.datenstruktur.zwischenergebnis import make_protokoll, collect_messages, merge_kontext, Protokoll, collect_docs
+from windlast_CORE.datenstruktur.zwischenergebnis import (
+    make_protokoll,
+    collect_messages,
+    merge_kontext,
+    Protokoll,
+    collect_docs,
+    protokolliere_doc,
+    make_docbundle,
+)
 
 def dataclass_to_json(obj):
     """
@@ -190,14 +198,54 @@ def _rechne_drei_nachweise(
                                text=f"Abhebesicherheit ({norm_label}) fehlgeschlagen: {e}", context={}))
         out[Nachweis.ABHEBE] = SafetyValue(None, meth_abhebe, ValueSource.ERROR, [])
 
-    # Max-Ballast bilden
-    ballast_vals = [b for b in (b_kipp, b_gleit, b_abhebe) if b is not None]
+    # Max-Ballast bilden + Quelle-Nachweis merken
+    ballast_pairs: list[tuple[Nachweis, float]] = []
+    if b_kipp is not None:
+        ballast_pairs.append((Nachweis.KIPP, b_kipp))
+    if b_gleit is not None:
+        ballast_pairs.append((Nachweis.GLEIT, b_gleit))
+    if b_abhebe is not None:
+        ballast_pairs.append((Nachweis.ABHEBE, b_abhebe))
+
+    ballast_wert: float | None = None
+    ballast_quelle: Nachweis | None = None
+
+    if ballast_pairs:
+        ballast_quelle, ballast_wert = max(ballast_pairs, key=lambda p: p[1])
+
     out[Nachweis.BALLAST] = SafetyValue(
-        wert=(max(ballast_vals) if ballast_vals else None),
+        wert=ballast_wert,
         methode="MAX_BALLAST_KIPP_GLEIT_ABHEBE",
-        source=ValueSource.COMPUTED if ballast_vals else ValueSource.ERROR,
+        source=ValueSource.COMPUTED if ballast_wert is not None else ValueSource.ERROR,
         messages=[],
     )
+
+    # Globalen Ballast auch als Protokoll-Dokument ablegen
+    if protokoll is not None and ballast_wert is not None:
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(
+                titel="Erforderlicher Ballast m_Ballast,max",
+                wert=ballast_wert,  # Achtung: hier in derselben Einheit wie b_* (kg)
+                einheit="kg",
+                formel="m_Ballast,max = max(m_Ballast,kipp, m_Ballast,gleit, m_Ballast,abheb)",
+                formelzeichen=[
+                    "m_Ballast,kipp",
+                    "m_Ballast,gleit",
+                    "m_Ballast,abheb",
+                ],
+                quelle_formel="---",
+            ),
+            kontext=merge_kontext(base_ctx, {
+                "nachweis": "BALLAST",
+                # Rolle: wie bei den Endwerten der Einzelnachweise → immer 'relevant'
+                # (die sind in KIPP/GLEIT/ABHEB auch mit rolle='relevant' markiert)
+                "rolle": "relevant",
+                # Wichtig für den nächsten Schritt: welcher Nachweis bestimmt den Ballast?
+                "quelle_nachweis": ballast_quelle.name if ballast_quelle is not None else None,
+            }),
+        )
+
     return out, (v_kipp, v_gleit, v_abhebe)
 
 

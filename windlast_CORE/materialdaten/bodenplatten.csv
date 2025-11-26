@@ -1,6 +1,10 @@
 name_intern,anzeige_name,anzahl_ecken,breite_m,tiefe_m,hoehe_m,gewicht_kg,material
-bp_stahl_100x100,100x100 Stahlbodenplatte,4,1.0,1.0,0.0,75,STAHL
-bp_ballast_500,500kg Ballastbase,4,0.8,0.8,0.0,500,STAHL
+bp_stahl_100x100,Stahlbodenplatte,4,0.99,0.99,0.0,75,STAHL
+bp_stahl_halb,Halbe Stahlbodenplatte,4,0.49,0.99,0.0,37.0,STAHL
+bp_ballast_500,500kg Ballastbase,4,0.8,0.8,0.4,500,STAHL
+bp_h30v_klein,H30V Bodenplatte,4,0.329,0.329,0.0,1.86,STAHL
+bp_h40v_klein,H40V Bodenplatte,4,0.429,0.429,0.0,2.82,STAHL
+bp_h30d_klein,H30D Bodenplatte,3,0.329,0.297,0.0,1.16,STAHL
 test_bp_vierpunkt_30x30, Test 30x30 Bodenplatte,4,0.3,0.3,0.0,5,STAHL
 test_bp_rechteck, Test 30x100 Rechteckbodenplatte,4,0.3,1.0,0.0,20,HOLZ
 test_bp_dreieck_gleichseitig, Test Gleichseitige Dreiecksplatte,3,1.0,1.0,0.0,30,HOLZ

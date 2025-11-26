@@ -164,14 +164,16 @@ def _build_richtungsrollen(docs: list[dict]) -> Dict[str, Dict[object, str]]:
     """
     Liest aus den vorhandenen dir-Docs die Rollen pro (Nachweis, Windrichtung) aus.
     Ergebnis: z.B. {"KIPP": {0.0: "relevant"}, "GLEIT": {90.0: "entscheidungsrelevant"}, ...}
+    BALLAST übernimmt die Rollen des ballastkritischen Nachweises (quelle_nachweis).
     """
-    rollen_by = {
+    rollen_by: Dict[str, Dict[object, str]] = {
         "KIPP": {},
         "GLEIT": {},
         "ABHEBE": {},
-        "BALLAST": {},  # füllen wir erst später sinnvoll
+        "BALLAST": {},
     }
 
+    # 1) Rollen aus Richtungs-Top-Level-Docs für KIPP/GLEIT/ABHEBE auslesen
     for d in docs:
         ctx = d.get("context") or {}
         nachweis = ctx.get("nachweis")
@@ -192,15 +194,30 @@ def _build_richtungsrollen(docs: list[dict]) -> Dict[str, Dict[object, str]]:
         if nachweis == "KIPP" and doc_type == "dir_min_sicherheit":
             rollen_by["KIPP"][wdir] = rolle
 
-        # BALLAST lassen wir vorerst leer oder aliasen später explizit
+    # 2) ballastkritischen Nachweis aus BALLAST-Doc holen (standsicherheit.py schreibt quelle_nachweis)
+    ballast_source: str | None = None
+    for d in docs:
+        ctx = d.get("context") or {}
+        if ctx.get("nachweis") != "BALLAST":
+            continue
+        qs = ctx.get("quelle_nachweis")
+        if qs in ("KIPP", "GLEIT", "ABHEBE"):
+            ballast_source = qs
+            break
+
+    # 3) Rollen dieses Nachweises auf BALLAST übertragen
+    if ballast_source is not None:
+        src_map = rollen_by.get(ballast_source, {})
+        dst_map = rollen_by["BALLAST"]
+        for wdir, rolle in src_map.items():
+            dst_map[wdir] = rolle
 
     return rollen_by
-
 
 def _annotate_rolle_pro_nachweis(docs: list[dict]) -> None:
     """
     Schreibt für jedes Doc ein Mapping rolle_pro_nachweis in den Kontext,
-    basierend auf den Rollen der dir-Docs.
+    basierend auf den Rollen der dir-Docs und der ballastkritischen Zuordnung.
     """
     rollen_by = _build_richtungsrollen(docs)
 
@@ -208,24 +225,20 @@ def _annotate_rolle_pro_nachweis(docs: list[dict]) -> None:
         ctx = d.get("context") or {}
         wdir = ctx.get("windrichtung_deg")
         if wdir is None:
+            # keine richtungsabhängige Rolle – z.B. globale Meta-Docs
             continue
 
         rel_map: Dict[str, str] = {}
 
-        for nz in ("KIPP", "GLEIT", "ABHEBE"):
+        for nz in ("KIPP", "GLEIT", "ABHEBE", "BALLAST"):
             rolle = rollen_by.get(nz, {}).get(wdir)
             if rolle:
                 rel_map[nz] = rolle
 
-        # Erstmal einfache Default-Strategie für BALLAST:
-        # → BALLAST folgt KIPP (können wir später verfeinern)
-        if "KIPP" in rel_map:
-            rel_map["BALLAST"] = rel_map["KIPP"]
-
         if rel_map:
-            ctx = dict(ctx)  # defensiv kopieren
-            ctx["rolle_pro_nachweis"] = rel_map
-            d["context"] = ctx
+            new_ctx = dict(ctx)  # defensiv kopieren
+            new_ctx["rolle_pro_nachweis"] = rel_map
+            d["context"] = new_ctx
 
 
 # ====== Eingaben Meta ======
