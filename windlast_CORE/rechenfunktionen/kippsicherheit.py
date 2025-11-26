@@ -32,11 +32,23 @@ def _emit_kipp_docs_two_stage(
         doc_type    = (ktx.get("doc_type") or "")
         achse_index = ktx.get("achse_index")
 
+        # 1) Achsentscheidung innerhalb der Richtung
+        if isinstance(achse_index, int) and best_achse_idx is not None:
+            if achse_index == best_achse_idx:
+                # Diese Achse liefert die Richtungs-Minimum-Sicherheit
+                if is_global_winner:
+                    ktx["rolle"] = "relevant"
+                else:
+                    ktx["rolle"] = "entscheidungsrelevant"
+            else:
+                # andere Achsen bleiben ohne rolle => später "irrelevant"
+                pass
+
+        # 2) Richtungsentscheidung (wie bisher)
         if is_global_winner:
             if isinstance(doc_type, str) and doc_type.startswith("dir_"):
                 ktx["rolle"] = "relevant"
         else:
-            # Verlierer-Richtungen: nur Richtungs-Sicherheit ist blau
             if doc_type in ("dir_min_sicherheit", "dir_ballast"):
                 ktx["rolle"] = "entscheidungsrelevant"
 

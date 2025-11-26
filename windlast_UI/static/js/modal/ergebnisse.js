@@ -38,11 +38,8 @@ function filterDocsByNachweis(docs, sel) {
     if (relMap) {
       if (Object.prototype.hasOwnProperty.call(relMap, sel)) {
         const rolle = String(relMap[sel] || "").toLowerCase();
-        return rolle;
+        if (rolle === "relevant" || rolle === "entscheidungsrelevant") return true;
       }
-      // Hat eine Rollen-Map, aber keine Rolle für diesen Nachweis
-      // ⇒ in dieser Sicht nicht anzeigen.
-      return false;
     }
 
     // Fallback für alte / meta-Daten (ohne rollen_map):
