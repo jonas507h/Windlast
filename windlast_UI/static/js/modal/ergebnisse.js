@@ -17,10 +17,8 @@ const NACHWEIS_CHOICES = ["ALLE", "KIPP", "GLEIT", "ABHEBE", "BALLAST", "LOADS"]
 const ROLE_ORDER = { relevant: 3, entscheidungsrelevant: 2, irrelevant: 1 };
 
 function filterDocsByNachweis(docs, sel) {
-  // "ALLE" => keine Einschränkung
   if (!sel || sel === "ALLE") return docs || [];
 
-  // Spezialsicht: reine Lastdaten
   if (sel === "LOADS") {
     return (docs || []).filter(d => {
       const n = d?.context?.nachweis ?? null;
@@ -34,17 +32,16 @@ function filterDocsByNachweis(docs, sel) {
     const n = ctx.nachweis ?? null;
 
     // Wenn es eine explizite Rollen-Angabe pro Nachweis gibt,
-    // ist die maßgebend: nur Docs mit NICHT-irrelevanter Rolle.
-    if (relMap) {
+    // ist die maßgebend: Doc gehört in diese Nachweis-Sicht,
+    // egal ob relevant / entscheidungsrelevant / irrelevant.
+    if (relMap && typeof relMap === "object") {
       if (Object.prototype.hasOwnProperty.call(relMap, sel)) {
-        const rolle = String(relMap[sel] || "").toLowerCase();
-        if (rolle === "relevant" || rolle === "entscheidungsrelevant") return true;
+        return true;
       }
+      return false;
     }
 
     // Fallback für alte / meta-Daten (ohne rollen_map):
-    // - explizit diesem Nachweis zugeordnet
-    // - LOADS oder nachweislos gelten als global
     if (n === sel) return true;
     if (n === "LOADS" || n === null) return true;
 
@@ -204,7 +201,7 @@ function renderAccordionGroup({ cardClass, detailsClass, summaryClass, title, co
   `;
 }
 
-function renderDocsByWindrichtung(docs){
+function renderDocsByWindrichtung(docs, nachweisSel){
   const { groups, keys } = groupBy(docs, { keyFn: _pickDir, emptyKey:"__none__", sort:"numeric", emptyLast:true });
   if (!keys.length) {
     return `<div class="muted" style="padding:0.75rem 0;">Keine Zwischenergebnisse vorhanden.</div>`;
@@ -214,7 +211,7 @@ function renderDocsByWindrichtung(docs){
     const title = (k === "__none__") ? "ohne Richtung" : `Windrichtung ${k}`;
     const count = `<span class="muted" style="font-weight:400; margin-left:.5rem;">(${list.length})</span>`;
     // innerhalb jeder Richtung weiter nach Element gruppieren
-    const elemGroupsHtml = renderDocsByElement(list);
+    const elemGroupsHtml = renderDocsByElement(list, nachweisSel); // ← nachweisSel durchreichen
     return renderAccordionGroup({
       cardClass:"dir-card", detailsClass:"dir-group", summaryClass:"dir-summary",
       title, count, bodyHtml:`<div class="elem-groups">${elemGroupsHtml}</div>`, open: idx===0
@@ -223,7 +220,7 @@ function renderDocsByWindrichtung(docs){
   return `<div class="doc-groups">${blocks}</div>`;
 }
 
-function renderDocsByElement(docsInDir){
+function renderDocsByElement(docsInDir, nachweisSel){
   const { groups, keys } = groupBy(docsInDir, {
     keyFn: d => _pickElementKey(d?.context),
     emptyKey: "__allgemein__",
@@ -231,22 +228,17 @@ function renderDocsByElement(docsInDir){
     emptyLast: true
   });
 
-  // NEU: Wenn es ausschließlich "allgemein"-Ergebnisse gibt,
-  // dann KEINE "allgemein"-Gruppe anzeigen, sondern direkt
-  // die Achs-Gruppierung unter der Windrichtung rendern.
   const hasSpecificElements = keys.some(k => k !== "__allgemein__");
   if (!hasSpecificElements) {
     const onlyGeneral = groups.get("__allgemein__") || [];
-    // direkt unter der Windrichtung anzeigen (mit Achs-Gruppierung)
-    return `<div class="axis-groups">${renderDocsByAxis(onlyGeneral)}</div>`;
+    return `<div class="axis-groups">${renderDocsByAxis(onlyGeneral, nachweisSel)}</div>`; // ← weiterreichen
   }
 
-  // Es gibt mind. ein spezifisches Element → normale Element-Gruppierung
   return keys.map((k, idx) => {
     const list = groups.get(k) || [];
     const title = (k === "__allgemein__") ? "allgemein" : `Element ${k}`;
     const count = `<span class="muted" style="font-weight:400; margin-left:.5rem;">(${list.length})</span>`;
-    const axisHtml = renderDocsByAxis(list);
+    const axisHtml = renderDocsByAxis(list, nachweisSel); // ← weiterreichen
     return renderAccordionGroup({
       cardClass:"elem-card", detailsClass:"elem-group", summaryClass:"elem-summary",
       title, count, bodyHtml:`<div class="elem-body"><div class="axis-groups">${axisHtml}</div></div>`, open: idx===0
