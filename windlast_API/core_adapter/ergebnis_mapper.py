@@ -160,9 +160,11 @@ def _collect_docs_from_list(items):
 
     return list(dedup.values())
 
-def _build_richtungsrollen(docs: list[dict]) -> Dict[str, Dict[object, str]]:
+def _build_richtungsrollen(docs: list[dict]) -> tuple[Dict[str, Dict[object, str]], str | None]:
     """
-    Baut pro Nachweis und Windrichtung die Rollenkarte.
+    Liest aus den vorhandenen dir-Docs die Rollen pro (Nachweis, Windrichtung) aus.
+    Ergebnis: z.B. {"KIPP": {0.0: "relevant"}, "GLEIT": {90.0: "entscheidungsrelevant"}, ...}
+    BALLAST übernimmt die Richtungsrollen des ballastkritischen Nachweises (quelle_nachweis).
     """
     rollen_by: Dict[str, Dict[object, str]] = {
         "KIPP": {},
@@ -170,10 +172,9 @@ def _build_richtungsrollen(docs: list[dict]) -> Dict[str, Dict[object, str]]:
         "ABHEBE": {},
         "BALLAST": {},
     }
+    ballast_source: str | None = None
 
-    # -------------------------
-    # 1. Richtungsrollen extrahieren
-    # -------------------------
+    # 1) Rollen aus Richtungs-Top-Level-Docs für KIPP / GLEIT / ABHEBE auslesen
     for d in docs:
         ctx = d.get("context") or {}
         nachweis = ctx.get("nachweis")
@@ -181,88 +182,103 @@ def _build_richtungsrollen(docs: list[dict]) -> Dict[str, Dict[object, str]]:
         wdir = ctx.get("windrichtung_deg")
         rolle = ctx.get("rolle") or ctx.get("role")
 
-        if wdir is None or rolle is None:
+        if wdir is None:
             continue
+        if rolle is not None:
+            rolle = str(rolle).lower()
 
-        if nachweis == "GLEIT" and doc_type == "dir_sicherheit":
+        # GLEIT / ABHEBE: dir_sicherheit ist die "Richtungszusammenfassung"
+        if nachweis == "GLEIT" and doc_type == "dir_sicherheit" and rolle:
             rollen_by["GLEIT"][wdir] = rolle
 
-        if nachweis == "ABHEBE" and doc_type == "dir_sicherheit":
+        if nachweis == "ABHEBE" and doc_type == "dir_sicherheit" and rolle:
             rollen_by["ABHEBE"][wdir] = rolle
 
-        if nachweis == "KIPP" and doc_type == "dir_min_sicherheit":
+        # KIPP: dir_min_sicherheit ist die maßgebende Richtungsinfo
+        if nachweis == "KIPP" and doc_type == "dir_min_sicherheit" and rolle:
             rollen_by["KIPP"][wdir] = rolle
 
-    # -------------------------
-    # 2. BALLAST erbt die Rollen aus dem Nachweis, von dem der Ballast stammt
-    # -------------------------
-    ballast_source: str | None = None
-    for d in docs:
-        ctx = d.get("context") or {}
-        if ctx.get("nachweis") != "BALLAST":
-            continue
-        qs = ctx.get("quelle_nachweis")
-        if qs in ("KIPP", "GLEIT", "ABHEBE"):
-            ballast_source = qs
-            break
+        # Ballast-Dokument: merkt sich nur, welcher Nachweis den Ballast bestimmt
+        if nachweis == "BALLAST" and ballast_source is None:
+            qs = ctx.get("quelle_nachweis")
+            if qs in ("KIPP", "GLEIT", "ABHEBE"):
+                ballast_source = qs
 
+    # 2) BALLAST-Richtungsrollen = Rollen des ballastkritischen Nachweises
     if ballast_source:
         src_map = rollen_by.get(ballast_source, {})
         dst_map = rollen_by["BALLAST"]
         for wdir, rolle in src_map.items():
             dst_map[wdir] = rolle
 
-    return rollen_by
+    return rollen_by, ballast_source
 
 def _annotate_rolle_pro_nachweis(docs: list[dict]) -> None:
     """
-    Für jedes Doc wird eine *vollständige* rolle_pro_nachweis Map erzeugt.
-    Jedes Doc bekommt KIPP, GLEIT, ABHEBE, BALLAST.
-    - Für den eigenen Nachweis (oder LOADS/meta) wird die echte Richtungsrolle eingetragen.
-    - Für alle anderen Nachweise: "irrelevant".
+    Schreibt für jedes Doc eine vollständige Map rolle_pro_nachweis in den Kontext.
+
+    - Grundlage ist IMMER die Rolle, die die Rechenfunktionen in ctx["rolle"] gesetzt haben.
+    - Für LOADS (und nachweislose Meta-Docs) werden Rollen pro Nachweis aus den
+      Richtungsrollen abgeleitet:
+        * Nur die kritische Richtung (rolle == "relevant") wird als relevant gezogen.
+        * Alles andere bleibt für diesen Nachweis "irrelevant".
+    - Für BALLAST werden zusätzlich der ballastkritische Nachweis und die zugehörigen
+      Sicherheitswerte sichtbar gemacht.
     """
-    rollen_by = _build_richtungsrollen(docs)
+    rollen_by, ballast_source = _build_richtungsrollen(docs)
 
     for d in docs:
         ctx = d.get("context") or {}
         wdir = ctx.get("windrichtung_deg")
+        nachweis_doc = ctx.get("nachweis")
+        own_role = (ctx.get("rolle") or ctx.get("role"))
+        own_role = str(own_role).lower() if own_role is not None else None
 
-        # Nur Docs mit Windrichtung bekommen Rollen
-        if wdir is None:
-            continue
+        # Grundgerüst: jedes Doc bekommt alle vier Einträge
+        rel_map: Dict[str, str] = {
+            "KIPP": "irrelevant",
+            "GLEIT": "irrelevant",
+            "ABHEBE": "irrelevant",
+            "BALLAST": "irrelevant",
+        }
 
-        nz_this = ctx.get("nachweis")
-        rel_map: Dict[str, str] = {}
+        # --- 1) Rolle für den "eigenen" Nachweis -----------------------
+        if nachweis_doc in ("KIPP", "GLEIT", "ABHEBE"):
+            # Hier vertrauen wir komplett der Rechenfunktion:
+            # nur wo ctx.rolle gesetzt ist, war der Wert im Vergleich / Pfad.
+            if own_role in ("relevant", "entscheidungsrelevant"):
+                rel_map[nachweis_doc] = own_role
 
-        for nz in ("KIPP", "GLEIT", "ABHEBE", "BALLAST"):
-            # Falls keine Rolle für diese Richtung → irrelevant
-            rolle_dir = rollen_by.get(nz, {}).get(wdir, "irrelevant")
+        elif nachweis_doc == "BALLAST":
+            if own_role in ("relevant", "entscheidungsrelevant"):
+                rel_map["BALLAST"] = own_role
 
-            # Gehört dieses Doc zu diesem Nachweis?
-            participates = False
+        # --- 2) LOADS / globale Meta-Daten: Rollen über Richtungsrollen -------
+        # LOADS und nachweislose Docs sollen die kritische Richtung pro Nachweis mitziehen.
+        if nachweis_doc in ("LOADS", None) and wdir is not None:
+            for nz in ("KIPP", "GLEIT", "ABHEBE"):
+                rolle_dir = rollen_by.get(nz, {}).get(wdir)
+                # Nur die wirklich kritische Richtung (rolle == "relevant") als relevant ziehen.
+                if isinstance(rolle_dir, str) and rolle_dir.lower() == "relevant":
+                    rel_map[nz] = "relevant"
 
-            # LOADS oder Docs ohne expliziten Nachweis → gelten für alle
-            if nz_this in (None, "LOADS"):
-                participates = True
+            # BALLAST-Sicht für LOADS: gleiche Windrichtung wie ballastkritischer Nachweis
+            if ballast_source and wdir is not None:
+                rolle_dir = rollen_by.get(ballast_source, {}).get(wdir)
+                if isinstance(rolle_dir, str) and rolle_dir.lower() == "relevant":
+                    rel_map["BALLAST"] = "relevant"
 
-            # Normales Nachweis-Dokument
-            elif nz_this == nz:
-                participates = True
+        # --- 3) BALLAST-Sicht: Nachweis, der den Ballast liefert -------------
+        # Alle Sicherheits-/Ballast-Dokumente des ballastkritischen Nachweises
+        # sind auch für BALLAST relevant/entscheidungsrelevant.
+        if ballast_source and nachweis_doc == ballast_source:
+            if own_role in ("relevant", "entscheidungsrelevant"):
+                rel_map["BALLAST"] = own_role
 
-            # Ballast-Dokument gehört nur zu BALLAST
-            elif nz_this == "BALLAST" and nz == "BALLAST":
-                participates = True
-
-            # Rolle setzen
-            if participates:
-                rel_map[nz] = rolle_dir
-            else:
-                rel_map[nz] = "irrelevant"
-
+        # Kontext mit rolle_pro_nachweis zurückschreiben
         new_ctx = dict(ctx)
         new_ctx["rolle_pro_nachweis"] = rel_map
         d["context"] = new_ctx
-
 
 # ====== Eingaben Meta ======
 _DENY_KEYS = {

@@ -19,6 +19,9 @@ function fillSelect(el, options, { placeholder = null, defaultValue = null } = {
     el.appendChild(opt);
   }
   for (const { value, label } of options) {
+    if (value.startsWith("test_") && !window.APP_STATE?.flags?.show_test_options_dropdown) {
+      continue;
+    }
     const opt = document.createElement("option");
     opt.value = value;      // Request-Wert (name_intern bzw. "beton"/"stahl"/...)
     opt.textContent = label; // Anzeige (anzeige_name bzw. Enum.value)

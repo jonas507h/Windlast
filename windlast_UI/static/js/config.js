@@ -3,7 +3,7 @@
   const VERSION = "2.0.0-dev";
 
   // Echte Build-Rolle (unveränderbar, wird nur gelesen)
-  const BUILD_ROLE = "admin"; // "user" | "debug" | "admin" | "godmode"
+  const BUILD_ROLE = "godmode"; // "user" | "debug" | "admin" | "godmode"
 
   // 1) Flags pro Rolle definieren
   const ROLE_FLAGS = {
@@ -14,6 +14,7 @@
       show_meldungen_tooltip: false,
       show_nullpunkt: false,
       show_suche_tooltip: false,
+      show_test_options_dropdown: false,
     }),
     debug: Object.freeze({
       show_zwischenergebnisse_tooltip: true,
@@ -22,6 +23,7 @@
       show_meldungen_tooltip: true,
       show_nullpunkt: true,
       show_suche_tooltip: true,
+      show_test_options_dropdown: false,
     }),
     admin: Object.freeze({
       show_zwischenergebnisse_tooltip: true,
@@ -30,6 +32,7 @@
       show_meldungen_tooltip: true,
       show_nullpunkt: true,
       show_suche_tooltip: true,
+      show_test_options_dropdown: false,
     }),
     godmode: Object.freeze({
       show_zwischenergebnisse_tooltip: true,
@@ -38,6 +41,7 @@
       show_meldungen_tooltip: true,
       show_nullpunkt: true,
       show_suche_tooltip: true,
+      show_test_options_dropdown: true,
     }),
   };
 

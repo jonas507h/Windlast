@@ -17,8 +17,10 @@ const NACHWEIS_CHOICES = ["ALLE", "KIPP", "GLEIT", "ABHEB", "BALLAST", "LOADS"];
 const ROLE_ORDER = { relevant: 3, entscheidungsrelevant: 2, irrelevant: 1 };
 
 function filterDocsByNachweis(docs, sel) {
+  // "ALLE" => keine Einschränkung
   if (!sel || sel === "ALLE") return docs || [];
 
+  // Spezialsicht: reine Lastdaten
   if (sel === "LOADS") {
     return (docs || []).filter(d => {
       const n = d?.context?.nachweis ?? null;
@@ -31,21 +33,24 @@ function filterDocsByNachweis(docs, sel) {
     const relMap = ctx.rolle_pro_nachweis || ctx.relevanz_pro_nachweis || null;
     const n = ctx.nachweis ?? null;
 
+    // Wenn es eine explizite Rollen-Angabe pro Nachweis gibt,
+    // ist die maßgebend: nur Docs mit NICHT-irrelevanter Rolle.
     if (relMap) {
       if (Object.prototype.hasOwnProperty.call(relMap, sel)) {
-        const rolle = relMap[sel];
-        // Nur zeigen, wenn die Rolle nicht "irrelevant" ist
-        if (rolle && rolle !== "irrelevant") {
-          return true;
-        }
-        return false;
+        const rolle = String(relMap[sel] || "").toLowerCase();
+        return rolle && rolle !== "irrelevant";
       }
+      // Hat eine Rollen-Map, aber keine Rolle für diesen Nachweis
+      // ⇒ in dieser Sicht nicht anzeigen.
       return false;
     }
 
-    // Fallback wie bisher für ganz alte Daten:
+    // Fallback für alte / meta-Daten (ohne rollen_map):
+    // - explizit diesem Nachweis zugeordnet
+    // - LOADS oder nachweislos gelten als global
     if (n === sel) return true;
     if (n === "LOADS" || n === null) return true;
+
     return false;
   });
 }
