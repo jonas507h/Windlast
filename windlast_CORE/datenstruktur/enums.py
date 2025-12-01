@@ -34,6 +34,7 @@ class ObjektTyp(str, Enum):
     TRAVERSE = "Traverse"
     ROHR = "Rohr"
     BODENPLATTE = "Bodenplatte"
+    SENKRECHTE_FLAECHE = "Senkrechte Fläche"
 
 class MaterialTyp(str, Enum):
     HOLZ = "Holz"
@@ -124,3 +125,7 @@ class TraversenOrientierung(str, Enum):
     UP = "up"
     SIDE = "side"
     DOWN = "down"
+
+class senkrechteFlaecheTyp(str, Enum):
+    ANZEIGETAFEL = "Anzeigetafel"
+    WAND = "Wand"

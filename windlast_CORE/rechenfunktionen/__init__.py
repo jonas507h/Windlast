@@ -4,7 +4,25 @@
 #from .gleitsicherheit import gleitsicherheit
 #from .abhebesicherheit import abhebesicherheit
 from .masse import gesamtgewicht
-from .geom3d import vektor_laenge, vektor_normieren, vektoren_addieren, vektor_invertieren, vektor_skalarprodukt, abstand_punkte, flaechenschwerpunkt, vektor_parallelanteil, vektor_senkrechtanteil, vektor_multiplizieren, senkrechter_vektor, Vec3
+from .geom3d import (
+    vektor_laenge,
+    vektor_normieren,
+    vektoren_addieren,
+    vektor_invertieren,
+    vektor_skalarprodukt,
+    abstand_punkte,
+    flaechenschwerpunkt,
+    vektor_parallelanteil,
+    vektor_senkrechtanteil,
+    vektor_multiplizieren,
+    vektor_zwischen_punkten,
+    flaecheninhalt_polygon,
+    is_senkrecht,
+    is_parallel,
+    is_ebene,
+    normale_zu_ebene,
+    Vec3
+)
 
 from .reynoldszahl import reynoldszahl
 from .projizierte_flaeche import projizierte_flaeche
@@ -41,6 +59,12 @@ __all__ = [
     "senkrechter_vektor",
     "vektoren_addieren",
     "vektor_multiplizieren",
+    "vektor_zwischen_punkten",
+    "flaecheninhalt_polygon",
+    "is_senkrecht",
+    "is_parallel",
+    "is_ebene",
+    "normale_zu_ebene",
     "Vec3",
 
     # Segmentierung

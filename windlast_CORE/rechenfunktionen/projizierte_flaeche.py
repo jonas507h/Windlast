@@ -10,7 +10,7 @@ from windlast_CORE.datenstruktur.zwischenergebnis import (
 )
 from windlast_CORE.datenstruktur.enums import Norm, TraversenTyp, ObjektTyp, Severity
 from windlast_CORE.materialdaten.catalog import catalog
-from windlast_CORE.rechenfunktionen.geom3d import Vec3, vektor_laenge, abstand_punkte
+from windlast_CORE.rechenfunktionen.geom3d import Vec3, vektor_laenge, abstand_punkte, flaecheninhalt_polygon
 
 _EPS = 1e-9
 
@@ -18,24 +18,37 @@ def _validate_inputs(
     objekttyp: ObjektTyp,
     objekt_name_intern: Optional[str],
     punkte: Sequence[Vec3],
-    windrichtung: Vec3,
+    windrichtung: Optional[Vec3] = None,
 ) -> None:
     if not isinstance(objekttyp, ObjektTyp):
         raise TypeError("objekttyp muss vom Typ ObjektTyp sein.")
 
     # Windrichtung als Einheitsvektor
-    n = vektor_laenge(windrichtung)
-    if not (0.999 <= n <= 1.001):
-        raise ValueError(f"windrichtung soll Einheitsvektor sein (||v||≈1), ist {n:.6f}.")
+    
 
     # Objekt-spezifische Mindestanforderungen
-    if objekttyp == ObjektTyp.TRAVERSE or objekttyp == ObjektTyp.ROHR:
+    if objekttyp == ObjektTyp.TRAVERSE:
+        if windrichtung is None:
+            raise ValueError("Für TRAVERSE wird windrichtung benötigt.")
+        n = vektor_laenge(windrichtung)
+        if not (0.999 <= n <= 1.001):
+            raise ValueError(f"windrichtung soll Einheitsvektor sein (||v||≈1), ist {n:.6f}.")
         if objekt_name_intern is None:
             raise ValueError("Für TRAVERSE wird objekt_name_intern benötigt.")
         if not isinstance(punkte, (list, tuple)) or len(punkte) < 2:
             raise ValueError("Für TRAVERSE werden mind. Start- und Endpunkt erwartet.")
         if abstand_punkte(punkte[0], punkte[1]) <= _EPS:
             raise ValueError("Start- und Endpunkt dürfen nicht identisch (bzw. zu nah) sein.")
+    elif objekttyp == ObjektTyp.ROHR:
+        if objekt_name_intern is None:
+            raise ValueError("Für ROHR wird objekt_name_intern benötigt.")
+        if not isinstance(punkte, (list, tuple)) or len(punkte) < 2:
+            raise ValueError("Für ROHR werden mind. Start- und Endpunkt erwartet.")
+        if abstand_punkte(punkte[0], punkte[1]) <= _EPS:
+            raise ValueError("Start- und Endpunkt dürfen nicht identisch (bzw. zu nah) sein.")
+    elif objekttyp == ObjektTyp.SENKRECHTE_FLAECHE:
+        if not isinstance(punkte, (list, tuple)) or len(punkte) != 4:
+            raise ValueError("Für SENKRECHTE_FLAECHE werden genau 4 Eckpunkte erwartet.")
     else:
         # Generisch: mind. 1 Punktliste übergeben
         if not isinstance(punkte, (list, tuple)) or len(punkte) == 0:
@@ -45,7 +58,7 @@ def _projizierte_flaeche_default(
     objekttyp: ObjektTyp,
     objekt_name_intern: Optional[str],
     punkte: Sequence[Vec3],
-    windrichtung: Vec3,
+    windrichtung: Optional[Vec3] = None,
     *,
     protokoll: Optional[Protokoll] = None,
     kontext: Optional[dict] = None,
@@ -161,6 +174,21 @@ def _projizierte_flaeche_default(
             kontext=base_ctx,
         )
         return Zwischenergebnis(wert=wert)
+    
+    elif objekttyp == ObjektTyp.SENKRECHTE_FLAECHE:
+        wert = flaecheninhalt_polygon(punkte)
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(
+                titel="Bezugsfläche A",
+                wert=wert,
+                einheit="m²",
+                formel="A_rel = b · h",
+                quelle_formel="DIN EN 1991-1-4:2010-12, Abschnitt 7.4.3",
+            ),
+            kontext=base_ctx,
+        )
+        return Zwischenergebnis(wert=wert)
 
     else:
         raise NotImplementedError(f"Objekttyp '{objekttyp}' wird aktuell nicht unterstützt.")
@@ -174,7 +202,7 @@ def projizierte_flaeche(
     objekttyp: ObjektTyp,
     objekt_name_intern: Optional[str],
     punkte: Sequence[Vec3],   # TRAVERSE: [start, ende, (optional) orientierung]
-    windrichtung: Vec3,       # Einheitsvektor
+    windrichtung: Optional[Vec3] = None,       # Einheitsvektor
     *,
     protokoll: Optional[Protokoll] = None,
     kontext: Optional[dict] = None,

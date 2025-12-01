@@ -641,3 +641,225 @@ def moment_einzelkraft_um_achse(achse: Achse, kraft: Vec3, angriffspunkt: Vec3) 
     moment = vektor_skalarprodukt(moment_vektor, achsen_richtung_norm)
 
     return moment
+
+def flaecheninhalt_polygon(punkte: Sequence[Vec3]) -> float:
+    """
+    Berechnet den Flächeninhalt eines ebenen (nicht selbstschneidenden) 3D-Polygons.
+    Punkte müssen auf einer Ebene liegen und in Reihenfolge des Randes angegeben sein.
+
+    Parameter
+    ---------
+    punkte : Sequenz von Vec3
+        Die Punkte des Polygons.
+
+    Rückgabe
+    --------
+    float : Der Flächeninhalt des Polygons.
+
+    Raises
+    ------
+    ValueError : bei leerer Liste oder kollinearen Punkten
+    """
+    if punkte is None:
+        raise ValueError("punkte darf nicht None sein.")
+
+    n = len(punkte)
+    if n < 3:
+        raise ValueError("flaecheninhalt_polygon erwartet mindestens drei Punkte.")
+
+    # --- Newell-Normale berechnen (robust, auch für konkave Polygone) ---
+    Nx = Ny = Nz = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        xi, yi, zi = map(float, punkte[i])
+        xj, yj, zj = map(float, punkte[j])
+        # einfachste Newell-Variante: Summe der Kreuzprodukte Pi x Pj
+        cx, cy, cz = vektor_kreuzprodukt((xi, yi, zi), (xj, yj, zj))
+        Nx += cx; Ny += cy; Nz += cz
+    N = (Nx, Ny, Nz)
+    # Normale normieren (wirft bei Länge 0 eine Exception)
+    try:
+        n_hat = vektor_normieren(N)
+    except ValueError:
+        # Kollinear / degeneriert
+        raise ValueError("Degeneriertes Polygon: Normale hat Länge 0 (Punkte evtl. kollinear).")
+    # --- Triangulation um P0 ---
+    P0 = tuple(map(float, punkte[0]))
+    A_sum = 0.0
+    for i in range(1, n - 1):
+        Pi = tuple(map(float, punkte[i]))
+        Pj = tuple(map(float, punkte[i+1]))
+
+        # v1 = Pi - P0, v2 = Pj - P0
+        v1 = vektor_zwischen_punkten(P0, Pi)
+        v2 = vektor_zwischen_punkten(P0, Pj)
+
+        # vorzeichenbehaftete Teilfläche: 0.5 * ( (v1 x v2) · n_hat )
+        cx, cy, cz = vektor_kreuzprodukt(v1, v2)
+        area_i = 0.5 * vektor_skalarprodukt((cx, cy, cz), n_hat)
+
+        A_sum += area_i
+    return abs(A_sum)
+
+def is_senkrecht(methode: str, vecs: Optional[Sequence[Vec3]] = None, punkte: Optional[Sequence[Vec3]] = None) -> bool:
+    """
+    Prüft, ob die gegebenen Punkte senkrecht zueinander stehen.
+
+    Parameter
+    ---------
+    methode : str
+        Was wird geprüft: aktuell nur 'vecs' (beleibig viele Vektoren).
+    vecs : Sequenz von Vec3
+        Die Vektoren, die geprüft werden sollen.
+    punkte : Sequenz von Vec3
+        Eckpunkte von Ebenen (derzeit nicht verwendet).
+
+    Rückgabe
+    --------
+    bool : True, wenn die Vektoren senkrecht zueinander stehen, sonst False.
+
+    Raises
+    ------
+    ValueError : falls die Methode ungültig ist oder einer der Punkte nicht genau 3 Komponenten hat
+    """
+    if methode not in ('vecs'):
+        raise ValueError("Ungültige Methode. Erlaubt ist 'vecs'.")
+
+    n = len(vecs)
+    for i in range(n):
+        for j in range(i + 1, n):
+            a = vecs[i]
+            b = vecs[j]
+            if len(a) != 3 or len(b) != 3:
+                raise ValueError("is_senkrecht erwartet Vektoren mit genau 3 Komponenten (x, y, z).")
+            if abs(vektor_skalarprodukt(a, b)) > _EPS:
+                return False
+    return True
+
+def is_parallel(methode: str, vecs: Optional[Sequence[Vec3]] = None, punkte: Optional[Sequence[Vec3]] = None) -> bool:
+    """
+    Prüft, ob die gegebenen Punkte parallel zueinander stehen.
+
+    Parameter
+    ---------
+    methode : str
+        Was wird geprüft: 'vecs' (beleibig viele Vektoren), 'vecs/ebene' (Vektoren und Ebene).
+    vecs : Sequenz von Vec3
+        Die Vektoren, die geprüft werden sollen.
+    punkte : Sequenz von Vec3
+        Eckpunkte von Ebenen (nur bei methode 'vecs/ebene').
+
+    Rückgabe
+    --------
+    bool : True, wenn die Vektoren parallel zueinander stehen, sonst False.
+
+    Raises
+    ------
+    ValueError : falls die Methode ungültig ist oder einer der Punkte nicht genau 3 Komponenten hat
+    """
+    
+    if methode == 'vecs':
+        n = len(vecs)
+        if n < 2:
+            return True  # Weniger als 2 Vektoren sind immer parallel
+
+        ref = vecs[0]
+        for i in range(1, n):
+            v = vecs[i]
+            if len(ref) != 3 or len(v) != 3:
+                raise ValueError("is_parallel erwartet Vektoren mit genau 3 Komponenten (x, y, z).")
+            kreuz = vektor_kreuzprodukt(ref, v)
+            if vektor_laenge(kreuz) > _EPS:
+                return False
+        return True
+    
+    elif methode == 'vecs/ebene':
+        if punkte is None or len(punkte) < 3:
+            raise ValueError("Für methode 'vecs/ebene' werden mindestens 3 Punkte für die Ebene benötigt.")
+
+        # Ebene normal berechnen
+        v1 = vektor_zwischen_punkten(punkte[0], punkte[1])
+        v2 = vektor_zwischen_punkten(punkte[0], punkte[2])
+        ebenen_normal = vektor_kreuzprodukt(v1, v2)
+        try:
+            ebenen_normal = vektor_normieren(ebenen_normal)
+        except ValueError:
+            raise ValueError("Die Punkte der Ebene sind kollinear; keine gültige Ebene definiert.")
+
+        for v in vecs:
+            if len(v) != 3:
+                raise ValueError("is_parallel erwartet Vektoren mit genau 3 Komponenten (x, y, z).")
+            kreuz = vektor_kreuzprodukt(v, ebenen_normal)
+            if vektor_laenge(kreuz) > _EPS:
+                return False
+        return True
+    else:
+        raise ValueError("Ungültige Methode. Erlaubt sind 'vecs' und 'vecs/ebene'.")
+    
+def is_ebene(punkte: Sequence[Vec3]) -> bool:
+    """
+    Prüft, ob die gegebenen Punkte auf einer Ebene liegen.
+
+    Parameter
+    ---------
+    punkte : Sequenz von Vec3
+        Die Punkte, die geprüft werden sollen.
+
+    Rückgabe
+    --------
+    bool : True, wenn die Punkte auf einer Ebene liegen, sonst False.
+
+    Raises
+    ------
+    ValueError : falls weniger als drei Punkte gegeben sind oder einer der Punkte nicht genau 3 Komponenten hat
+    """
+    if len(punkte) < 3:
+        raise ValueError("Mindestens drei Punkte sind erforderlich, um eine Ebene zu definieren.")
+
+    v1 = vektor_zwischen_punkten(punkte[0], punkte[1])
+    v2 = vektor_zwischen_punkten(punkte[0], punkte[2])
+    ebenen_normal = vektor_kreuzprodukt(v1, v2)
+
+    try:
+        ebenen_normal = vektor_normieren(ebenen_normal)
+    except ValueError:
+        return False  # Kollinear / degeneriert
+
+    for i in range(3, len(punkte)):
+        pi = punkte[i]
+        v = vektor_zwischen_punkten(punkte[0], pi)
+        kreuz = vektor_kreuzprodukt(v, ebenen_normal)
+        if vektor_laenge(kreuz) > _EPS:
+            return False
+    return True
+    
+def normale_zu_ebene(punkte: Sequence[Vec3]) -> Vec3:
+    """
+    Berechnet den Normalenvektor einer Ebene, definiert durch mindestens drei Punkte.
+
+    Parameter
+    ---------
+    punkte : Sequenz von Vec3
+        Mindestens drei Punkte, die die Ebene definieren.
+
+    Rückgabe
+    --------
+    Vec3 : Der normierte Normalenvektor der Ebene.
+
+    Raises
+    ------
+    ValueError : falls weniger als drei Punkte gegeben sind oder die Punkte kollinear sind
+    """
+    if len(punkte) < 3:
+        raise ValueError("Mindestens drei Punkte sind erforderlich, um eine Ebene zu definieren.")
+    if not is_ebene(punkte):
+        raise ValueError("Die gegebenen Punkte liegen nicht auf einer Ebene.")
+
+    v1 = vektor_zwischen_punkten(punkte[0], punkte[1])
+    v2 = vektor_zwischen_punkten(punkte[0], punkte[2])
+    normal = vektor_kreuzprodukt(v1, v2)
+
+    try:
+        return vektor_normieren(normal)
+    except ValueError:
+        raise ValueError("Die gegebenen Punkte sind kollinear; kein gültiger Normalenvektor existiert.")
