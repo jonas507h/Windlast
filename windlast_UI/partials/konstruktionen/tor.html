@@ -9,7 +9,6 @@
 <body class="wrap">
   <section>
     <form id="tor-form" onsubmit="return false;">
-      <!-- Reihe 1: Dropdowns -->
       <div class="row row-2">
         <div class="field">
           <div class="label-row">
@@ -94,7 +93,6 @@
         </div>
       </div>
 
-      <!-- Reihe 2: Inputs -->
       <div class="row row-2">
         <div class="field">
           <div class="label-row">
@@ -127,7 +125,23 @@
         </div>
       </div>
 
-      <!-- Button -->
+      <div class="row row-1">
+        <div class="field">
+          <div class="label-row">
+            <label for="unterkante_flaeche">Unterkante Fläche</label>
+            <button
+              type="button"
+              tabindex="-1"
+              class="help-icon-btn"
+              data-help-id="tor:unterkante_flaeche"
+              aria-label="Hilfe zu diesem Bereich"
+            >?</button>
+          </div>
+          <input id="unterkante_flaeche_m" name="unterkante_flaeche_m" type="number" step="0.01" min="0" placeholder="z. B. 6,00" />
+          <p class="error-text" id="err-unterkante_flaeche" hidden>Bitte eine gültige Unterkante ≥ 0 angeben.</p>
+        </div>
+      </div>
+
       <div class="actions">
         <button type="button" class="btn" id="btn-berechnen">Berechnen</button>
       </div>
