@@ -16,8 +16,8 @@ _EPS = 1e-9
 
 def _validate_inputs(
     objekttyp: ObjektTyp,
-    objekt_name_intern: Optional[str],
     punkte: Sequence[Vec3],
+    objekt_name_intern: Optional[str] = None,
     windrichtung: Optional[Vec3] = None,
 ) -> None:
     if not isinstance(objekttyp, ObjektTyp):
@@ -56,8 +56,8 @@ def _validate_inputs(
 
 def _projizierte_flaeche_default(
     objekttyp: ObjektTyp,
-    objekt_name_intern: Optional[str],
     punkte: Sequence[Vec3],
+    objekt_name_intern: Optional[str] = None,
     windrichtung: Optional[Vec3] = None,
     *,
     protokoll: Optional[Protokoll] = None,
@@ -200,8 +200,8 @@ _DISPATCH_PROJ: Dict[Norm, Callable[..., Zwischenergebnis]] = {
 def projizierte_flaeche(
     norm: Norm,
     objekttyp: ObjektTyp,
-    objekt_name_intern: Optional[str],
     punkte: Sequence[Vec3],   # TRAVERSE: [start, ende, (optional) orientierung]
+    objekt_name_intern: Optional[str] = None,
     windrichtung: Optional[Vec3] = None,       # Einheitsvektor
     *,
     protokoll: Optional[Protokoll] = None,
@@ -216,7 +216,7 @@ def projizierte_flaeche(
     })
 
     try:
-        _validate_inputs(objekttyp, objekt_name_intern, punkte, windrichtung)
+        _validate_inputs(objekttyp, punkte, objekt_name_intern, windrichtung)
     except NotImplementedError:
         raise
     except ValueError as e:
@@ -236,6 +236,6 @@ def projizierte_flaeche(
 
     funktion = _DISPATCH_PROJ.get(norm, _DISPATCH_PROJ[Norm.DEFAULT])
     return funktion(
-        objekttyp, objekt_name_intern, punkte, windrichtung,
+        objekttyp, punkte, objekt_name_intern, windrichtung,
         protokoll=protokoll, kontext=base_ctx,
     )

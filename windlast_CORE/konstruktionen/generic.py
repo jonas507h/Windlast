@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import List, Optional, Sequence, Dict, Any
 
-from windlast_CORE.bauelemente import Bodenplatte, Traversenstrecke, Rohr
+from windlast_CORE.bauelemente import Bodenplatte, Traversenstrecke, Rohr, senkrechteFlaeche
 from windlast_CORE.rechenfunktionen import (
     gesamtgewicht as _gesamtgewicht,
 )
@@ -72,14 +72,22 @@ def _build_bauelement(el: Dict[str, Any]) -> object:
         )
 
     if typ == "Rohr":
-        # Falls dein Rohr-Bauelement anders heißt / andere Parameter hat → hier anpassen.
-        from windlast_CORE.bauelemente import Rohr  # optionaler Inline-Import
         return Rohr(
             rohr_name_intern=el["rohr_name_intern"],
             start=tuple(el["start"]),
             ende=tuple(el["ende"]),
             element_id_intern=el.get("element_id_intern"),
             anzeigename=el.get("anzeigename"),
+        )
+    
+    if typ == "senkrechteFlaeche":
+        return senkrechteFlaeche(
+            eckpunkte=[tuple(p) for p in el["eckpunkte"]],
+            flaeche_typ=el.get("flaeche_typ"),
+            element_id_intern=el.get("element_id_intern"),
+            anzeigename=el.get("anzeigename"),
+            flaechenlast=el.get("flaechenlast"),
+            gesamtgewicht=el.get("gesamtgewicht"),
         )
 
     raise ValueError(f"Unbekannter Bauelement-typ: {typ}")

@@ -789,8 +789,8 @@ def is_parallel(methode: str, vecs: Optional[Sequence[Vec3]] = None, punkte: Opt
         for v in vecs:
             if len(v) != 3:
                 raise ValueError("is_parallel erwartet Vektoren mit genau 3 Komponenten (x, y, z).")
-            kreuz = vektor_kreuzprodukt(v, ebenen_normal)
-            if vektor_laenge(kreuz) > _EPS:
+            dot = vektor_skalarprodukt(v, ebenen_normal)
+            if abs(dot) > _EPS:
                 return False
         return True
     else:
@@ -828,8 +828,7 @@ def is_ebene(punkte: Sequence[Vec3]) -> bool:
     for i in range(3, len(punkte)):
         pi = punkte[i]
         v = vektor_zwischen_punkten(punkte[0], pi)
-        kreuz = vektor_kreuzprodukt(v, ebenen_normal)
-        if vektor_laenge(kreuz) > _EPS:
+        if not is_senkrecht('vecs', vecs=[v, ebenen_normal]):
             return False
     return True
     

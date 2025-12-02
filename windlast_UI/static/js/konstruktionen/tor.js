@@ -142,11 +142,16 @@ function validateTorForm() {
   // --- Tor-Eingaben: Höhe/Breite > 0 ---
   const hoeheEl = document.getElementById('hoehe_m');
   const breiteEl = document.getElementById('breite_m');
+  const unterkanteFlaecheEl = document.getElementById('unterkante_flaeche_m');
   const errH = document.getElementById('err-hoehe');
   const errB = document.getElementById('err-breite');
+  const errU = document.getElementById('err-unterkante_flaeche');
 
   const hoehe = parseFloat(hoeheEl?.value);
   const breite = parseFloat(breiteEl?.value);
+  
+  const rawU = unterkanteFlaecheEl?.value?.trim();
+  const unterkanteFlaeche = rawU === "" ? null : parseFloat(rawU);
 
   const hOK = isPositiveNumber(hoehe);
   showFieldError(hoeheEl, errH, !hOK, 'Bitte eine gültige Höhe > 0 angeben.');
@@ -155,6 +160,10 @@ function validateTorForm() {
   const bOK = isPositiveNumber(breite);
   showFieldError(breiteEl, errB, !bOK, 'Bitte eine gültige Breite > 0 angeben.');
   ok = ok && bOK;
+
+  const uOK = rawU === "" || unterkanteFlaeche === 0 || (isFinite(unterkanteFlaeche) && unterkanteFlaeche > 0);
+  showFieldError(unterkanteFlaecheEl, errU, !uOK, 'Bitte eine Zahl ≥ 0 angeben oder leer lassen.');
+  ok = ok && uOK;
 
   // --- Tor-Dropdowns: i. d. R. bereits gültig vorbelegt ---
   // traverse_name_intern, bodenplatte_name_intern, traversen_orientierung,
@@ -232,6 +241,7 @@ async function submitTor() {
 
     const breite_m = parseFloat(document.getElementById("breite_m").value);
     const hoehe_m  = parseFloat(document.getElementById("hoehe_m").value);
+    const unterkante_flaeche_m = document.getElementById("unterkante_flaeche_m").value;
     const traverse_name_intern    = document.getElementById("traverse_name_intern").value;
     const bodenplatte_name_intern = document.getElementById("bodenplatte_name_intern").value;
     const orientierung            = readTraversenOrientierung();
@@ -240,6 +250,7 @@ async function submitTor() {
     const konstruktion = buildTor({
       breite_m,
       hoehe_m,
+      unterkante_flaeche_m,
       traverse_name_intern,
       bodenplatte_name_intern,
       gummimatte: gummimatte_bool,

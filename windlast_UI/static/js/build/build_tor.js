@@ -9,9 +9,9 @@ const vec = {
 export const ORIENTIERUNG = Object.freeze({ up: 'up', side: 'side', down: 'down' });
 
 const ORIENT_MAP = {
-  [ORIENTIERUNG.up]:   { links: [-1, 0,  0], oben: [0, 0,  1], rechts: [ 1, 0,  0] },
-  [ORIENTIERUNG.side]: { links: [ 0, 1,  0], oben: [0, 1,  0], rechts: [ 0, 1,  0] },
-  [ORIENTIERUNG.down]: { links: [ 1, 0,  0], oben: [0, 0, -1], rechts: [-1, 0,  0] },
+  [ORIENTIERUNG.up]:   { links: [-1, 0,  0], oben: [0, 0,  1], rechts: [ 1, 0,  0], unten: [0, 0, -1] },
+  [ORIENTIERUNG.side]: { links: [ 0, 1,  0], oben: [0, 1,  0], rechts: [ 0, 1,  0], unten: [0, 1,  0] },
+  [ORIENTIERUNG.down]: { links: [ 1, 0,  0], oben: [0, 0, -1], rechts: [-1, 0,  0], unten: [0, 0,  1] },
 };
 
 /**
@@ -19,7 +19,7 @@ const ORIENT_MAP = {
  * Wirft bei Fehlern eine aussagekräftige Exception.
  */
 export function validateTorInputs({
-  breite_m, hoehe_m, traverse_name_intern, bodenplatte_name_intern, untergrund, orientierung = ORIENTIERUNG.up,
+  breite_m, hoehe_m, unterkante_flaeche_m, traverse_name_intern, bodenplatte_name_intern, untergrund, orientierung = ORIENTIERUNG.up,
 }, catalog) {
   if (!catalog || typeof catalog.getTraverse !== 'function' || typeof catalog.getBodenplatte !== 'function') {
     throw new Error('catalog mit getTraverse/getBodenplatte erforderlich.');
@@ -27,6 +27,16 @@ export function validateTorInputs({
 
   const B = Number(breite_m);
   const H = Number(hoehe_m);
+  let U = unterkante_flaeche_m;
+
+  if (U === "" || U === null || U === undefined) {
+    U = null;
+  } else {
+    U = Number(U);
+    if (!isFinite(U) || U < 0) {
+      throw new Error('unterkante_flaeche_m muss leer oder eine Zahl ≥ 0 sein.');
+    }
+  }
   if (!isFinite(B) || !isFinite(H)) throw new Error('breite_m und hoehe_m müssen Zahlen sein.');
   if (B <= 0 || H <= 0) throw new Error('Breite und Höhe müssen > 0 sein.');
   if (!traverse_name_intern) throw new Error('traverse_name_intern fehlt.');
@@ -65,6 +75,7 @@ export function validateTorInputs({
  * @param {Object} inputs
  * @param {number} inputs.breite_m
  * @param {number} inputs.hoehe_m
+ * @param {number} inputs.unterkante_flaeche_m
  * @param {string} inputs.traverse_name_intern
  * @param {string} inputs.bodenplatte_name_intern
  * @param {boolean} [inputs.gummimatte=true]
@@ -76,46 +87,58 @@ export function validateTorInputs({
  */
 export function buildTor(inputs, catalog) {
   const {
-    breite_m, hoehe_m, traverse_name_intern, bodenplatte_name_intern,
+    breite_m, hoehe_m, unterkante_flaeche_m, traverse_name_intern, bodenplatte_name_intern,
     gummimatte = true,
     untergrund,
     orientierung = ORIENTIERUNG.up,
     name = 'Tor',
   } = inputs;
 
-  validateTorInputs({ breite_m, hoehe_m, traverse_name_intern, bodenplatte_name_intern, untergrund, orientierung }, catalog);
+  validateTorInputs({ breite_m, hoehe_m, unterkante_flaeche_m, traverse_name_intern, bodenplatte_name_intern, untergrund, orientierung }, catalog);
 
   const B = Number(breite_m);
   const H = Number(hoehe_m);
+  let U = null;
+  if (unterkante_flaeche_m !== "" && unterkante_flaeche_m !== null && unterkante_flaeche_m !== undefined) {
+    U = Number(unterkante_flaeche_m);
+  }
   const travSpec = catalog.getTraverse(traverse_name_intern);
   const is3punkt = Number(travSpec.anzahl_gurtrohre) === 3;
 
   // Orientierungsgerechte Traversenhöhe bestimmen
   let t_part;
+  let flaeche_offset;
   switch (orientierung) {
     case ORIENTIERUNG.side:
       if (is3punkt) {
         t_part = Number(travSpec.B_hoehe ?? travSpec.hoehe) / 2;
+        flaeche_offset = Number(travSpec.A_hoehe ?? travSpec.hoehe) / 3;
       } else {
         t_part = Number(travSpec.B_hoehe ?? travSpec.A_hoehe ?? travSpec.hoehe) / 2;
+        flaeche_offset = t_part;
       }
       break;
     case ORIENTIERUNG.up:
       if (is3punkt) {
         t_part = Number(travSpec.A_hoehe ?? travSpec.hoehe) * 2 / 3;
+        flaeche_offset = Number(travSpec.B_hoehe ?? travSpec.hoehe) / 2;
       } else {
         t_part = Number(travSpec.A_hoehe ?? travSpec.B_hoehe ?? travSpec.hoehe) / 2;
+        flaeche_offset = t_part;
       }
       break;
     case ORIENTIERUNG.down:
       if (is3punkt) {
         t_part = Number(travSpec.A_hoehe ?? travSpec.hoehe) / 3;
+        flaeche_offset = Number(travSpec.B_hoehe ?? travSpec.hoehe) / 2;
       } else {
         t_part = Number(travSpec.A_hoehe ?? travSpec.B_hoehe ?? travSpec.hoehe) / 2;
+        flaeche_offset = t_part;
       }
       break;
     default:
       t_part = Number(travSpec.A_hoehe ?? travSpec.B_hoehe ?? travSpec.hoehe);
+      flaeche_offset = t_part;
       break;
   }
 
@@ -193,6 +216,39 @@ export function buildTor(inputs, catalog) {
     anzeigename: plateAnzeige,
   };
 
+  // Basis-Bauelemente
+  const bauelemente = [trav_left, trav_top, trav_right, plate_left, plate_right];
+
+  // --- Wenn Unterkante definiert, dann Fläche und untere Truss ---
+  if (U !== null) {
+    const trav_bottom = {
+      typ: 'Traversenstrecke',
+      traverse_name_intern,
+      start: [ 0, 0, U + t_part ],
+      ende:  [ B, 0, U + t_part ],
+      orientierung: vecs.unten,
+      objekttyp: 'TRAVERSE',
+      element_id_intern: 'Strecke_Unten',
+      anzeigename: travAnzeige,
+    };
+
+    const flaeche = {
+      typ: 'senkrechteFlaeche',
+      eckpunkte: [
+        [ 0, flaeche_offset, U ],
+        [ 0, flaeche_offset, H ],
+        [ B, flaeche_offset, H ],
+        [ B, flaeche_offset, U ],
+      ],
+      objekttyp: 'SENKRECHTE_FLAECHE',
+      element_id_intern: 'Flaeche',
+      anzeigename: 'Fläche',
+      flaechenlast: null,
+      gesamtgewicht: null,
+    }
+    bauelemente.push(trav_bottom, flaeche);
+  }
+
   // Gesamtobjekt (flach, gut serialisierbar)
   const konstruktion = {
     version: 1,
@@ -202,7 +258,7 @@ export function buildTor(inputs, catalog) {
     hoehe_m: H,
     traverse_name_intern: traverse_name_intern,
     traversen_orientierung: orientierung,
-    bauelemente: [ trav_left, trav_top, trav_right, plate_left, plate_right ],
+    bauelemente: bauelemente,
   };
 
   return konstruktion;

@@ -128,8 +128,8 @@ class Rohr:
                 protokoll=protokoll, kontext=seg_ctx,
             )
             _projizierte_Flaeche = projizierte_flaeche(
-                norm, self.objekttyp, self.rohr_name_intern,
-                [start_lokal, ende_lokal], windrichtung,
+                norm, self.objekttyp, [start_lokal, ende_lokal],
+                self.rohr_name_intern, windrichtung,
                 protokoll=protokoll, kontext=seg_ctx,
             )
             _eingeschlossene_Flaeche = eingeschlossene_flaeche(

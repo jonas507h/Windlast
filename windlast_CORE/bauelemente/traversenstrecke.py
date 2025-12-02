@@ -126,8 +126,8 @@ class Traversenstrecke:
                 protokoll=protokoll, kontext=seg_ctx,
             )
             _projizierte_Flaeche = projizierte_flaeche(
-                norm, self.objekttyp, self.traverse_name_intern,
-                [start_lokal, ende_lokal, self.orientierung], windrichtung,
+                norm, self.objekttyp, [start_lokal, ende_lokal, self.orientierung],
+                self.traverse_name_intern, windrichtung,
                 protokoll=protokoll, kontext=seg_ctx,
             )
             _eingeschlossene_Flaeche = eingeschlossene_flaeche(

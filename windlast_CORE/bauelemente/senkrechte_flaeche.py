@@ -76,11 +76,11 @@ class senkrechteFlaeche:
             flaeche = flaecheninhalt_polygon(self.eckpunkte)  # [m²]
             Fz = -flaeche * self.flaechenlast * aktuelle_konstanten().erdbeschleunigung  # [N]
         else:
-            protokolliere_msg(
-                protokoll, severity=Severity.WARN, code="SENKRECHTE_FLAECHE/NO_WEIGHT",
-                text="Weder Gesamtgewicht noch Flächenlast angegeben. Es werden keine Gewichtskräfte berechnet.",
-                kontext=base_ctx,
-            )
+            # protokolliere_msg(
+            #     protokoll, severity=Severity.WARN, code="SENKRECHTE_FLAECHE/NO_WEIGHT",
+            #     text="Weder Gesamtgewicht noch Flächenlast der Fläche angegeben. Es werden keine Gewichtskräfte berechnet.",
+            #     kontext=base_ctx,
+            # )
             Fz = 0.0
 
         einzelkraefte_vektoren: list[Vec3] = [(0.0, 0.0, Fz)]
@@ -178,7 +178,7 @@ class senkrechteFlaeche:
                     protokoll,
                     severity=Severity.ERROR,
                     code="WINDKRAEFTE/NOT_IMPLEMENTED",
-                    text=f"Windkraefte für Objekttyp {self.objekttyp.name} sind noch nicht implementiert.",
+                    text=f"Windkraefte für Flächetyp {self.flaeche_typ.name} sind noch nicht implementiert.",
                     kontext=base_ctx,
             )
             return []
