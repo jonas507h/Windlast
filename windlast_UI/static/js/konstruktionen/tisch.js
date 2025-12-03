@@ -147,8 +147,19 @@ function validateTischForm() {
   showFieldError(tiefeEl, errT, !tOK, 'Bitte eine gültige Tiefe > 0 angeben.');
   ok = ok && tOK;
 
-  const uOK = rawU === "" || unterkanteFlaeche === 0 || (isFinite(unterkanteFlaeche) && unterkanteFlaeche > 0);
-  showFieldError(unterkanteFlaecheEl, errUF, !uOK, 'Bitte eine Zahl ≥ 0 angeben oder leer lassen.');
+  let uOK = true;
+  let uMsg = '';
+  if (!(rawU === "" || unterkanteFlaeche === 0 || (isFinite(unterkanteFlaeche) && unterkanteFlaeche > 0))) {
+    uOK = false;
+    uMsg = 'Bitte eine Zahl ≥ 0 angeben oder leer lassen.';
+  } else if (unterkanteFlaeche !== null && isFinite(unterkanteFlaeche)) {
+    const maxU = unterkanteFlaeche < parseFloat(hoeheEl?.value);
+    if (!maxU) {
+      uOK = false;
+      uMsg = 'Die Unterkante muss kleiner als die Höhe sein.';
+    }
+  }
+  showFieldError(unterkanteFlaecheEl, errUF, !uOK, uMsg);
   ok = ok && uOK;
 
   // Pflicht-Dropdowns (z. T. mit Defaults aus initTischDropdowns)

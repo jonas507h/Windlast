@@ -136,7 +136,7 @@ function validateSteherForm() {
   const errH = document.getElementById('err-hoehe');
   const errL = document.getElementById('err-laenge');
   const errRH = document.getElementById('err-rhoehe');
-  const errUF = document.getElementById('err-unterkante-flaeche');
+  const errUF = document.getElementById('err-unterkante_flaeche');
 
   const rawU = unterkanteFlaecheEl?.value?.trim();
   const unterkanteFlaeche = rawU === "" ? null : parseFloat(rawU);
@@ -149,15 +149,37 @@ function validateSteherForm() {
   showFieldError(rLaengeEl, errL, !lOK, 'Bitte eine gültige Länge > 0 angeben.');
   ok = ok && lOK;
 
-  const rhOK = isPositiveNumber(parseFloat(rHoeheEl?.value));
-  showFieldError(rHoeheEl, errRH, !rhOK, 'Bitte eine gültige Rohrhöhe > 0 angeben.');
-  ok = ok && rhOK;
-  const maxRH = (parseFloat(rHoeheEl?.value)) <= (parseFloat(hoeheEl?.value));
-  showFieldError(rHoeheEl, errRH, !maxRH, 'Die Rohrhöhe darf die Gesamthöhe nicht überschreiten.');
-  ok = ok && maxRH;
+  let rhOK = true;
+  let rhMsg = '';
+  if (!(isPositiveNumber(parseFloat(rHoeheEl?.value)))) {
+    rhOK = false;
+    rhMsg = 'Bitte eine gültige Rohrhöhe > 0 angeben.';
+  } else {
+    const maxRH = (parseFloat(rHoeheEl?.value)) <= (parseFloat(hoeheEl?.value));
 
-  const uOK = rawU === "" || unterkanteFlaeche === 0 || (isFinite(unterkanteFlaeche) && unterkanteFlaeche > 0);
-  showFieldError(unterkanteFlaecheEl, errUF, !uOK, 'Bitte eine Zahl ≥ 0 angeben oder leer lassen.');
+    if (!maxRH) {
+      rhOK = false;
+      rhMsg = 'Die Rohrhöhe darf die Gesamthöhe nicht überschreiten.';
+    }
+  }
+  showFieldError(rHoeheEl, errRH, !rhOK, rhMsg);
+  ok = ok && rhOK;
+
+  let uOK = true;
+  let uMsg = '';
+  if (!(rawU === "" || unterkanteFlaeche === 0 || (isFinite(unterkanteFlaeche) && unterkanteFlaeche > 0))) {
+    // Fehlerfall 1: keine gültige Zahl ≥ 0
+    uOK = false;
+    uMsg = 'Bitte eine Zahl ≥ 0 angeben oder leer lassen.';
+  } else if (unterkanteFlaeche !== null && isFinite(unterkanteFlaeche)) {
+    // Fehlerfall 2: Zahl ok, aber Unterkante nicht < Höhe
+    const maxU = unterkanteFlaeche < parseFloat(rHoeheEl?.value);
+    if (!maxU) {
+      uOK = false;
+      uMsg = 'Die Unterkante muss kleiner als die Rohrhöhe sein.';
+    }
+  }
+  showFieldError(unterkanteFlaecheEl, errUF, !uOK, uMsg);
   ok = ok && uOK;
 
   // --- Pflicht-Dropdowns (haben meist Defaults, aber sicherheitshalber prüfen) ---
