@@ -11,7 +11,7 @@ const vec = {
  * Wirft bei Fehlern eine aussagekräftige Exception.
  */
 export function validateTischInputs({
-  breite_m, hoehe_m, tiefe_m, traverse_name_intern, bodenplatte_name_intern, untergrund,
+  breite_m, hoehe_m, tiefe_m, unterkante_flaeche_m, traverse_name_intern, bodenplatte_name_intern, untergrund,
 }, catalog) {
   if (!catalog || typeof catalog.getTraverse !== 'function' || typeof catalog.getBodenplatte !== 'function') {
     throw new Error('catalog mit getTraverse/getBodenplatte erforderlich.');
@@ -20,6 +20,16 @@ export function validateTischInputs({
   const B = Number(breite_m);
   const H = Number(hoehe_m);
   const T = Number(tiefe_m);
+  let U = unterkante_flaeche_m;
+
+  if (U === "" || U === null || U === undefined) {
+    U = null;
+  } else {
+    U = Number(U);
+    if (!isFinite(U) || U < 0) {
+      throw new Error('unterkante_flaeche_m muss leer oder eine Zahl ≥ 0 sein.');
+    }
+  }
   if (!isFinite(B) || !isFinite(H) || !isFinite(T)) throw new Error('breite_m, hoehe_m und tiefe_m müssen Zahlen sein.');
   if (B <= 0 || H <= 0 || T <= 0) throw new Error('Breite, Höhe und Tiefe müssen > 0 sein.');
   if (!traverse_name_intern) throw new Error('traverse_name_intern fehlt.');
@@ -50,6 +60,7 @@ export function validateTischInputs({
  * @param {number} inputs.breite_m
  * @param {number} inputs.hoehe_m
  * @param {number} inputs.tiefe_m
+ * @param {number|null} inputs.unterkante_flaeche_m
  * @param {string} inputs.traverse_name_intern
  * @param {string} inputs.bodenplatte_name_intern
  * @param {boolean} [inputs.gummimatte=true]
@@ -60,17 +71,21 @@ export function validateTischInputs({
  */
 export function buildTisch(inputs, catalog) {
   const {
-    breite_m, hoehe_m, tiefe_m, traverse_name_intern, bodenplatte_name_intern,
+    breite_m, hoehe_m, tiefe_m, unterkante_flaeche_m, traverse_name_intern, bodenplatte_name_intern,
     gummimatte = true,
     untergrund,
     name = 'Tisch',
   } = inputs;
 
-  validateTischInputs({ breite_m, hoehe_m, tiefe_m, traverse_name_intern, bodenplatte_name_intern, untergrund }, catalog);
+  validateTischInputs({ breite_m, hoehe_m, tiefe_m, unterkante_flaeche_m, traverse_name_intern, bodenplatte_name_intern, untergrund }, catalog);
 
   const B = Number(breite_m);
   const H = Number(hoehe_m);
   const T = Number(tiefe_m);
+  let U = null;
+  if (unterkante_flaeche_m !== "" && unterkante_flaeche_m !== null && unterkante_flaeche_m !== undefined) {
+    U = Number(unterkante_flaeche_m);
+  }
   const travSpec = catalog.getTraverse(traverse_name_intern);
   const is3punkt = Number(travSpec.anzahl_gurtrohre) === 3;
 
@@ -228,6 +243,41 @@ export function buildTisch(inputs, catalog) {
     anzeigename: plateAnzeige,
   };
 
+  // Basis-Bauelemente
+  const bauelemente = [ trav_front_left, trav_front_right, trav_back_left, trav_back_right,
+                       trav_top_front, trav_top_back, trav_top_left, trav_top_right,
+                       plate_front_left, plate_front_right, plate_back_left, plate_back_right ];
+
+  // --- Wenn Unterkante definiert, dann Fläche und untere Truss ---
+  if (U !== null) {
+    const trav_bottom_front = {
+      typ: 'Traversenstrecke',
+      traverse_name_intern,
+      start: [ 0, t_b, t_a ],
+      ende:  [ B, t_b, t_a ],
+      orientierung: [ 0, 0, 1],
+      objekttyp: 'TRAVERSE',
+      element_id_intern: 'Strecke_Unten_Vorne',
+      anzeigename: travAnzeige,
+    };
+
+    const flaeche = {
+      typ: 'senkrechteFlaeche',
+      eckpunkte: [
+        [ 0, 0, U ],
+        [ 0, 0, H ],
+        [ B, 0, H ],
+        [ B, 0, U ],
+      ],
+      objekttyp: 'SENKRECHTE_FLAECHE',
+      element_id_intern: 'Flaeche_Vorne',
+      anzeigename: 'Fläche',
+      flaechenlast: null,
+      gesamtgewicht: null,
+    }
+    bauelemente.push(trav_bottom_front, flaeche);
+  }
+
   // Gesamtobjekt (flach, gut serialisierbar)
   const konstruktion = {
     version: 1,
@@ -237,9 +287,7 @@ export function buildTisch(inputs, catalog) {
     hoehe_m: H,
     tiefe_m: T,
     traverse_name_intern: traverse_name_intern,
-    bauelemente: [ trav_front_left, trav_front_right, trav_back_left, trav_back_right,
-                   trav_top_front, trav_top_back, trav_top_left, trav_top_right,
-                   plate_front_left, plate_front_right, plate_back_left, plate_back_right ],
+    bauelemente: bauelemente,
   };
 
   return konstruktion;

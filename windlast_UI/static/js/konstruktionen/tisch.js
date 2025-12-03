@@ -125,10 +125,15 @@ function validateTischForm() {
   const hoeheEl  = document.getElementById('hoehe_m');
   const breiteEl = document.getElementById('breite_m');
   const tiefeEl  = document.getElementById('tiefe_m');
+  const unterkanteFlaecheEl = document.getElementById('unterkante_flaeche_m');
 
   const errH = document.getElementById('err-hoehe');
   const errB = document.getElementById('err-breite');
   const errT = document.getElementById('err-tiefe');
+  const errUF = document.getElementById('err-unterkante_flaeche');
+
+  const rawU = unterkanteFlaecheEl?.value?.trim();
+  const unterkanteFlaeche = rawU === "" ? null : parseFloat(rawU);
 
   const hOK = isPositiveNumber(parseFloat(hoeheEl?.value));
   showFieldError(hoeheEl, errH, !hOK, 'Bitte eine gültige Höhe > 0 angeben.');
@@ -142,22 +147,26 @@ function validateTischForm() {
   showFieldError(tiefeEl, errT, !tOK, 'Bitte eine gültige Tiefe > 0 angeben.');
   ok = ok && tOK;
 
+  const uOK = rawU === "" || unterkanteFlaeche === 0 || (isFinite(unterkanteFlaeche) && unterkanteFlaeche > 0);
+  showFieldError(unterkanteFlaecheEl, errUF, !uOK, 'Bitte eine Zahl ≥ 0 angeben oder leer lassen.');
+  ok = ok && uOK;
+
   // Pflicht-Dropdowns (z. T. mit Defaults aus initTischDropdowns)
-  const reqSelectIds = [
-    'traverse_name_intern',
-    'bodenplatte_name_intern',
-    'untergrund_typ',
-    'gummimatte'
-  ];
-  for (const id of reqSelectIds) {
-    const el = document.getElementById(id);
-    if (!el) continue;
-    const hasValue = !!el.value;
-    const wrap = el.closest('.field');
-    if (wrap) wrap.classList.toggle('is-invalid', !hasValue);
-    el.setAttribute('aria-invalid', hasValue ? 'false' : 'true');
-    ok = ok && hasValue;
-  }
+  // const reqSelectIds = [
+  //   'traverse_name_intern',
+  //   'bodenplatte_name_intern',
+  //   'untergrund_typ',
+  //   'gummimatte'
+  // ];
+  // for (const id of reqSelectIds) {
+  //   const el = document.getElementById(id);
+  //   if (!el) continue;
+  //   const hasValue = !!el.value;
+  //   const wrap = el.closest('.field');
+  //   if (wrap) wrap.classList.toggle('is-invalid', !hasValue);
+  //   el.setAttribute('aria-invalid', hasValue ? 'false' : 'true');
+  //   ok = ok && hasValue;
+  // }
 
   return ok;
 }
@@ -233,6 +242,7 @@ async function submitTisch() {
       breite_m: parseFloat(document.getElementById("breite_m").value),
       tiefe_m:  parseFloat(document.getElementById("tiefe_m").value),
       hoehe_m:  parseFloat(document.getElementById("hoehe_m").value),
+      unterkante_flaeche_m: document.getElementById("unterkante_flaeche_m").value,
       traverse_name_intern:    document.getElementById("traverse_name_intern").value,
       bodenplatte_name_intern: document.getElementById("bodenplatte_name_intern").value,
       gummimatte: gummimatte_bool,
