@@ -145,7 +145,7 @@ function validateTorForm() {
   const unterkanteFlaecheEl = document.getElementById('unterkante_flaeche_m');
   const errH = document.getElementById('err-hoehe');
   const errB = document.getElementById('err-breite');
-  const errU = document.getElementById('err-unterkante_flaeche');
+  const errUF = document.getElementById('err-unterkante_flaeche');
 
   const hoehe = parseFloat(hoeheEl?.value);
   const breite = parseFloat(breiteEl?.value);
@@ -162,7 +162,7 @@ function validateTorForm() {
   ok = ok && bOK;
 
   const uOK = rawU === "" || unterkanteFlaeche === 0 || (isFinite(unterkanteFlaeche) && unterkanteFlaeche > 0);
-  showFieldError(unterkanteFlaecheEl, errU, !uOK, 'Bitte eine Zahl ≥ 0 angeben oder leer lassen.');
+  showFieldError(unterkanteFlaecheEl, errUF, !uOK, 'Bitte eine Zahl ≥ 0 angeben oder leer lassen.');
   ok = ok && uOK;
 
   // --- Tor-Dropdowns: i. d. R. bereits gültig vorbelegt ---

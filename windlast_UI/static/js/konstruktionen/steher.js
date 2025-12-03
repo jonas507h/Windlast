@@ -131,10 +131,15 @@ function validateSteherForm() {
   const hoeheEl = document.getElementById('hoehe_m');
   const rLaengeEl = document.getElementById('rohr_laenge_m');
   const rHoeheEl = document.getElementById('rohr_hoehe_m');
+  const unterkanteFlaecheEl = document.getElementById('unterkante_flaeche_m');
 
   const errH = document.getElementById('err-hoehe');
   const errL = document.getElementById('err-laenge');
   const errRH = document.getElementById('err-rhoehe');
+  const errUF = document.getElementById('err-unterkante-flaeche');
+
+  const rawU = unterkanteFlaecheEl?.value?.trim();
+  const unterkanteFlaeche = rawU === "" ? null : parseFloat(rawU);
 
   const hOK = isPositiveNumber(parseFloat(hoeheEl?.value));
   showFieldError(hoeheEl, errH, !hOK, 'Bitte eine gültige Höhe > 0 angeben.');
@@ -151,23 +156,27 @@ function validateSteherForm() {
   showFieldError(rHoeheEl, errRH, !maxRH, 'Die Rohrhöhe darf die Gesamthöhe nicht überschreiten.');
   ok = ok && maxRH;
 
+  const uOK = rawU === "" || unterkanteFlaeche === 0 || (isFinite(unterkanteFlaeche) && unterkanteFlaeche > 0);
+  showFieldError(unterkanteFlaecheEl, errUF, !uOK, 'Bitte eine Zahl ≥ 0 angeben oder leer lassen.');
+  ok = ok && uOK;
+
   // --- Pflicht-Dropdowns (haben meist Defaults, aber sicherheitshalber prüfen) ---
-  const reqSelectIds = [
-    'traverse_name_intern',
-    'rohr_name_intern',
-    'bodenplatte_name_intern',
-    'untergrund_typ',
-    'gummimatte'
-  ];
-  for (const id of reqSelectIds) {
-    const el = document.getElementById(id);
-    if (!el) continue;
-    const hasValue = !!el.value;
-    const wrap = el.closest('.field');
-    if (wrap) wrap.classList.toggle('is-invalid', !hasValue);
-    el.setAttribute('aria-invalid', hasValue ? 'false' : 'true');
-    ok = ok && hasValue;
-  }
+  // const reqSelectIds = [
+  //   'traverse_name_intern',
+  //   'rohr_name_intern',
+  //   'bodenplatte_name_intern',
+  //   'untergrund_typ',
+  //   'gummimatte'
+  // ];
+  // for (const id of reqSelectIds) {
+  //   const el = document.getElementById(id);
+  //   if (!el) continue;
+  //   const hasValue = !!el.value;
+  //   const wrap = el.closest('.field');
+  //   if (wrap) wrap.classList.toggle('is-invalid', !hasValue);
+  //   el.setAttribute('aria-invalid', hasValue ? 'false' : 'true');
+  //   ok = ok && hasValue;
+  // }
 
   return ok;
 }
@@ -240,6 +249,7 @@ async function submitSteher() {
       hoehe_m:        parseFloat(document.getElementById("hoehe_m").value),
       rohr_laenge_m:  parseFloat(document.getElementById("rohr_laenge_m").value),
       rohr_hoehe_m:   parseFloat(document.getElementById("rohr_hoehe_m").value),
+      unterkante_flaeche_m: document.getElementById("unterkante_flaeche_m").value,
       traverse_name_intern:   document.getElementById("traverse_name_intern").value,
       bodenplatte_name_intern:document.getElementById("bodenplatte_name_intern").value,
       rohr_name_intern:       document.getElementById("rohr_name_intern").value,

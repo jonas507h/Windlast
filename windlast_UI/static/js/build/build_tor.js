@@ -75,7 +75,7 @@ export function validateTorInputs({
  * @param {Object} inputs
  * @param {number} inputs.breite_m
  * @param {number} inputs.hoehe_m
- * @param {number} inputs.unterkante_flaeche_m
+ * @param {number|null} inputs.unterkante_flaeche_m
  * @param {string} inputs.traverse_name_intern
  * @param {string} inputs.bodenplatte_name_intern
  * @param {boolean} [inputs.gummimatte=true]
@@ -256,6 +256,7 @@ export function buildTor(inputs, catalog) {
     name,
     breite_m: B,
     hoehe_m: H,
+    unterkante_flaeche_m: U,
     traverse_name_intern: traverse_name_intern,
     traversen_orientierung: orientierung,
     bauelemente: bauelemente,
