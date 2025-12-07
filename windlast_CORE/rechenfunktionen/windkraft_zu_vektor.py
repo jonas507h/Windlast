@@ -118,7 +118,7 @@ def _windkraft_zu_vektor_default(
             parallelanteil = vektor_parallelanteil(windrichtung, normale)
             kraft_vec: Vec3 = vektor_multiplizieren(parallelanteil, windkraft)
 
-        protokolliere_doc(
+            protokolliere_doc(
             protokoll,
             bundle=make_docbundle(
                 titel="Windkraft-Vektor F_W",
@@ -128,6 +128,29 @@ def _windkraft_zu_vektor_default(
             ),
             kontext=base_ctx,
         )
+        elif senkrechte_flaeche_typ == senkrechteFlaecheTyp.WAND:
+            normale = normale_zu_ebene(punkte)
+            kraft_vec: Vec3 = vektor_multiplizieren(normale, windkraft)
+
+            protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(
+                titel="Windkraft-Vektor F_W",
+                wert=kraft_vec,
+                einzelwerte=[windkraft],
+                einheit="N",
+            ),
+            kontext=base_ctx,
+        )
+        else:
+            protokolliere_msg(
+                protokoll,
+                severity=Severity.ERROR,
+                code="WINDVEK/INVALID_SURFACE_TYPE",
+                text=f"Ungültiger Typ für senkrechte Fläche: {senkrechte_flaeche_typ}.",
+                kontext=base_ctx,
+            )
+            return Zwischenergebnis_Vektor(wert=(float("nan"), float("nan"), float("nan")))
         return Zwischenergebnis_Vektor(wert=kraft_vec)
     
     else:

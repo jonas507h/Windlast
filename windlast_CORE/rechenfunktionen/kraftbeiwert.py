@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Dict, Callable, Optional
 import math
 
-from windlast_CORE.datenstruktur.enums import Norm, ObjektTyp, Severity, senkrechteFlaecheTyp
+from windlast_CORE.datenstruktur.enums import Norm, ObjektTyp, Severity, senkrechteFlaecheTyp, Zone
 from windlast_CORE.datenstruktur.zwischenergebnis import (
     Zwischenergebnis,
     Protokoll,
@@ -12,7 +12,41 @@ from windlast_CORE.datenstruktur.zwischenergebnis import (
     protokolliere_msg,
     protokolliere_doc,
 )
-from windlast_CORE.rechenfunktionen.geom3d import Vec3, vektor_laenge, is_parallel
+from windlast_CORE.rechenfunktionen.geom3d import Vec3, vektor_laenge, is_parallel, vektor_zwischen_punkten, vektoren_addieren
+from windlast_CORE.datenstruktur.konstanten import _EPS
+
+# Druckbeiwerte für Wände in Abhängigkeit von der Zone und dem Höhen-/Breitenverhältnis
+ZONE_DRUCKBEIWERT = {
+    Zone.A: [
+        {"max_ratio": 3.0,  "Druckbeiwert": 2.3},
+        {"max_ratio": 5.0,  "Druckbeiwert": 2.9},
+        {"max_ratio": 10.0, "Druckbeiwert": 3.4},
+    ],
+    Zone.B: [
+        {"max_ratio": 3.0,  "Druckbeiwert": 1.4},
+        {"max_ratio": 5.0,  "Druckbeiwert": 1.8},
+        {"max_ratio": 10.0, "Druckbeiwert": 2.1},
+    ],
+    Zone.C: [
+        {"max_ratio": 3.0,  "Druckbeiwert": 1.2},
+        {"max_ratio": 5.0,  "Druckbeiwert": 1.4},
+        {"max_ratio": 10.0, "Druckbeiwert": 1.7},
+    ],
+    Zone.D: [
+        {"max_ratio": 3.0,  "Druckbeiwert": 1.2},
+        {"max_ratio": 5.0,  "Druckbeiwert": 1.2},
+        {"max_ratio": 10.0, "Druckbeiwert": 1.2},
+    ],
+}
+
+def druckbeiwert_zone(zone: Zone, ratio: float) -> float:
+    """Gibt den Druckbeiwert für eine Zone (A-D) und ein Verhältnis l/h zurück."""
+    eintraege = ZONE_DRUCKBEIWERT[zone]
+    for e in eintraege:
+        if ratio <= e["max_ratio"]:
+            return e["Druckbeiwert"]
+    return eintraege[-1]["Druckbeiwert"]  # Fallback (sollte nicht passieren)
+
 
 def _validate_inputs(
     objekttyp: ObjektTyp,
@@ -21,6 +55,7 @@ def _validate_inputs(
     windrichtung: Optional[Vec3] = None,
     senkrechte_flaeche_typ: Optional[senkrechteFlaecheTyp] = None,
     punkte: Optional[list[Vec3]] = None,
+    zone: Optional[Zone] = None,
 ) -> None:
     if not isinstance(objekttyp, ObjektTyp):
         raise TypeError("objekttyp muss vom Typ ObjektTyp sein.")
@@ -42,10 +77,14 @@ def _validate_inputs(
         n_wind = vektor_laenge(windrichtung)
         if senkrechte_flaeche_typ is None:
             raise ValueError("Für SENKRECHTE_FLAECHE ist senkrechte_flaeche_typ erforderlich.")
+        elif senkrechte_flaeche_typ == senkrechteFlaecheTyp.WAND:
+            if zone is None:
+                raise ValueError("Für SENKRECHTE_FLAECHE vom Typ WAND ist zone erforderlich.")
         if not (0.999 <= n_wind <= 1.001):
             raise ValueError(f"windrichtung soll Einheitsvektor sein (||v||≈1), ist {n_wind:.6f}.")
         if not isinstance(punkte, (list, tuple)) or len(punkte) != 4:
             raise ValueError("Für SENKRECHTE_FLAECHE werden genau 4 Eckpunkte erwartet.")
+        
 
 def _kraftbeiwert_default(
     objekttyp: ObjektTyp,
@@ -54,6 +93,7 @@ def _kraftbeiwert_default(
     windrichtung: Optional[Vec3] = None,
     senkrechte_flaeche_typ: Optional[senkrechteFlaecheTyp] = None,
     punkte: Optional[list[Vec3]] = None,
+    zone: Optional[Zone] = None,
     *,
     protokoll: Optional[Protokoll] = None,
     kontext: Optional[dict] = None,
@@ -128,6 +168,30 @@ def _kraftbeiwert_default(
                     kontext=base_ctx,
                 )
             return Zwischenergebnis(wert=wert)
+        elif senkrechte_flaeche_typ == senkrechteFlaecheTyp.WAND:
+            # Höhe und Breite bestimmen
+            oberkante = max(p[2] for p in punkte)
+            unterkante = min(p[2] for p in punkte)
+            hoehe = oberkante - unterkante
+            endpunkte_unterkante = [p for p in punkte if abs(p[2] - unterkante) <= _EPS]
+            wand_dir = vektor_zwischen_punkten(endpunkte_unterkante[0], endpunkte_unterkante[1])
+            breite = vektor_laenge(wand_dir)
+
+            verhaeltnis = breite / hoehe
+            wert = druckbeiwert_zone(zone, verhaeltnis)
+            
+            protokolliere_doc(
+                protokoll,
+                bundle=make_docbundle(
+                    titel="Nettodruckbeiwert c_p,net",
+                    wert=wert,
+                    einzelwerte=[zone.value, verhaeltnis],
+                    formel=f"c_p,net = {wert} für Wand in Zone {zone.value} mit l/h = {verhaeltnis:.2f}",
+                    quelle_formel="DIN EN 1991-1-4:2010-12, Tabelle 7.9",
+                ),
+                kontext=base_ctx,
+            )
+            return Zwischenergebnis(wert=wert)
         else:
             protokolliere_msg(
                 protokoll,
@@ -158,6 +222,7 @@ def kraftbeiwert(
     windrichtung: Optional[Vec3] = None,
     senkrechte_flaeche_typ: Optional[senkrechteFlaecheTyp] = None,
     punkte: Optional[list[Vec3]] = None,
+    zone: Optional[Zone] = None,
     *,
     protokoll: Optional[Protokoll] = None,
     kontext: Optional[dict] = None,
@@ -170,7 +235,7 @@ def kraftbeiwert(
     })
 
     try:
-        _validate_inputs(objekttyp, grundkraftbeiwert, abminderungsfaktor_schlankheit, windrichtung, senkrechte_flaeche_typ, punkte)
+        _validate_inputs(objekttyp, grundkraftbeiwert, abminderungsfaktor_schlankheit, windrichtung, senkrechte_flaeche_typ, punkte, zone)
     except NotImplementedError:
         raise
     except ValueError as e:
@@ -190,6 +255,6 @@ def kraftbeiwert(
     
     funktion = _DISPATCH.get(norm, _DISPATCH[Norm.DEFAULT])
     return funktion(
-        objekttyp, grundkraftbeiwert, abminderungsfaktor_schlankheit, windrichtung, senkrechte_flaeche_typ, punkte,
+        objekttyp, grundkraftbeiwert, abminderungsfaktor_schlankheit, windrichtung, senkrechte_flaeche_typ, punkte, zone,
         protokoll=protokoll, kontext=base_ctx,
     )

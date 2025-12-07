@@ -22,6 +22,8 @@ from .geom3d import (
     is_parallel,
     is_ebene,
     normale_zu_ebene,
+    projektion_vektor_auf_ebene,
+    vektor_winkel,
     Vec3
 )
 
@@ -67,6 +69,8 @@ __all__ = [
     "is_parallel",
     "is_ebene",
     "normale_zu_ebene",
+    "projektion_vektor_auf_ebene",
+    "vektor_winkel",
     "Vec3",
 
     # Segmentierung

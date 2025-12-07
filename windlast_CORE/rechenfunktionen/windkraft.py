@@ -107,14 +107,24 @@ def _windkraft_default(
             )
             return Zwischenergebnis(wert=wert)
         elif senkrechte_flaeche_typ == senkrechteFlaecheTyp.WAND:
-            wert = float("nan")
-            protokolliere_msg(
+            wert = kraftbeiwert * staudruck * projizierte_flaeche
+
+            protokolliere_doc(
                 protokoll,
-                severity=Severity.ERROR,
-                code="WINDKRAFT/WAND_NOT_IMPLEMENTED",
-                text="Windkraft für senkrechte Flächen des Typs 'WAND' ist noch nicht implementiert.",
-                kontext=kontext,
+                bundle=make_docbundle(
+                    titel="Windkraft F_w",
+                    wert=wert,
+                    einzelwerte=[kraftbeiwert, staudruck, projizierte_flaeche],
+                    formel="F_W = c_p,net · q · A",
+                    quelle_formel="DIN EN 1991-1-4:2010-12, Abschnitte 5.2 & 5.3",
+                    einheit="N",
+                ),
+                kontext=merge_kontext(kontext, {
+                    "funktion": "Windkraft",
+                    "objekttyp": getattr(objekttyp, "value", str(objekttyp)),
+                }),
             )
+            return Zwischenergebnis(wert=wert)
         else:
             wert = float("nan")
             protokolliere_msg(

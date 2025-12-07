@@ -129,3 +129,9 @@ class TraversenOrientierung(str, Enum):
 class senkrechteFlaecheTyp(str, Enum):
     ANZEIGETAFEL = "Anzeigetafel"
     WAND = "Wand"
+
+class Zone (str, Enum):
+    A = "A"
+    B = "B"
+    C = "C"
+    D = "D"

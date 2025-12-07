@@ -2,8 +2,7 @@
 from __future__ import annotations
 from typing import Sequence, List, Dict, Tuple, Optional
 from windlast_CORE.rechenfunktionen.geom3d import Vec3, schnittpunkt_strecke_ebene, abstand_punkte
-
-_EPS = 1e-9
+from windlast_CORE.datenstruktur.konstanten import _EPS
 
 def in_intervall(z: float, z_min: float, z_max: float, is_first: bool) -> bool:
     return (z_min + _EPS < z <= (z_max + _EPS)) or (is_first and z_min - _EPS <= z <= z_max + _EPS)
