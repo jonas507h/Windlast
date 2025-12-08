@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Tuple, List, Sequence, Optional
 import math
 from windlast_CORE.datenstruktur.konstanten import PhysikKonstanten, aktuelle_konstanten
-from windlast_CORE.datenstruktur.zwischenergebnis import Protokoll, merge_kontext, protokolliere_msg
+from windlast_CORE.datenstruktur.zwischenergebnis import Protokoll, make_docbundle, merge_kontext, protokolliere_msg, protokolliere_doc
 from windlast_CORE.rechenfunktionen import (
     Vec3,
     flaechenschwerpunkt,
@@ -176,11 +176,26 @@ class senkrechteFlaeche:
         if self.flaeche_typ == senkrechteFlaecheTyp.ANZEIGETAFEL:
             # Staudruck auf mittlerer Höhe der Anzeigetafel
             mitte_hoehe = (oberkante + unterkante) / 2
+            tafel_ctx = merge_kontext(base_ctx, {
+                "flaeche_typ": self.flaeche_typ.value,
+                "mittlere_hoehe": mitte_hoehe,
+            })
             staudruck = 0.0
             for i, grenze in enumerate(obergrenzen):
                 if mitte_hoehe <= grenze:
                     staudruck = staudruecke[i]
                     break
+            protokolliere_doc(
+                protokoll,
+                bundle=make_docbundle(
+                    titel="Staudruck q",
+                    wert=staudruck,
+                    einheit="N/m²",
+                    formel="Staudruck auf mittlerer Höhe der Anzeigetafel",
+                    quelle_formel="DIN EN 1991-1-4:2010-12, Abschnitt 7.4.3",
+                    ),
+                kontext=tafel_ctx,
+            )
 
             _kraftbeiwert = kraftbeiwert(
                 norm, objekttyp=self.objekttyp, windrichtung=windrichtung, senkrechte_flaeche_typ=self.flaeche_typ, punkte=self.eckpunkte,
@@ -226,8 +241,12 @@ class senkrechteFlaeche:
             # Winkel 0°…180° zwischen horizontaler Wandrichtung und horizontaler Windrichtung
             winkel = vektor_winkel(wand_dir_xy, wind_xy)
 
-            winkel_ctx = dict(base_ctx)
-            winkel_ctx["winkel_wand_wind_deg"] = winkel
+            wand_ctx = merge_kontext(base_ctx, {
+                "flaeche_typ": self.flaeche_typ.value,
+                "wand_breite": f"{breite}m",
+                "wand_hoehe": f"{hoehe}m",
+                "winkel_wand_wind": f"{winkel:.2f}°",
+            })
 
             # Fall 1: Wind praktisch parallel
             if winkel < 5.0 or winkel > 175.0:
@@ -236,7 +255,7 @@ class senkrechteFlaeche:
                     severity=Severity.HINT,
                     code="WINDKRAEFTE/WAND_PARALLEL",
                     text=f"Winkel zwischen Wand und Windrichtung = {winkel:.2f}° -> Wind nahezu parallel, keine Windkraft angesetzt.",
-                    kontext=winkel_ctx,
+                    kontext=wand_ctx,
                 )
                 return []
 
@@ -410,7 +429,7 @@ class senkrechteFlaeche:
                     protokoll,
                     severity=Severity.ERROR,
                     code="WINDKRAEFTE/NOT_IMPLEMENTED",
-                    text=f"Windkraefte für Flächetyp {self.flaeche_typ.name} sind noch nicht implementiert.",
+                    text=f"Windkraefte für Flächetyp {self.flaeche_typ.value} sind noch nicht implementiert.",
                     kontext=base_ctx,
             )
             return []
