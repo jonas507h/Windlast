@@ -1,5 +1,6 @@
 import { buildTor } from '../build/build_tor.js';
 import { showFieldError } from '../utils/error.js';
+import { showLoading, hideLoading } from "/static/js/utils/loading.js";
 
 async function fetchOptions(url) {
   // Holt Dropdown-Inhalte von der API
@@ -246,6 +247,8 @@ async function submitTor() {
     const ok = await UI_WARN.confirmNichtZertifiziert();
     if (!ok) return;
 
+    showLoading();
+
     const gmVal = document.getElementById("gummimatte")?.value ?? "ja";
     const gummimatte_bool = (gmVal === "ja");
     const untergrund = document.getElementById("untergrund_typ").value;
@@ -295,6 +298,8 @@ async function submitTor() {
     document.dispatchEvent(new CustomEvent("toast", {
       detail: { level: "error", text: String(e?.message || e) }
     }));
+  } finally {
+    hideLoading();
   }
 }
 

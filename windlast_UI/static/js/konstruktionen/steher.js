@@ -1,5 +1,6 @@
 import { buildSteher } from '../build/build_steher.js';
 import { showFieldError } from '../utils/error.js';
+import { showLoading, hideLoading } from "/static/js/utils/loading.js";
 
 async function fetchOptions(url) {
   // Holt Dropdown-Inhalte von der API
@@ -263,6 +264,7 @@ async function submitSteher() {
 
     const okConfirm = await window.UI_WARN?.confirmNichtZertifiziert?.();
     if (okConfirm === false) return;
+    showLoading();
 
     const gmVal = document.getElementById("gummimatte")?.value ?? "ja";
     const gummimatte_bool = (gmVal === "ja");
@@ -305,6 +307,8 @@ async function submitSteher() {
     document.dispatchEvent(new CustomEvent("toast", {
       detail: { level: "error", text: String(e?.message || e) }
     }));
+  } finally {
+    hideLoading();
   }
 }
 
