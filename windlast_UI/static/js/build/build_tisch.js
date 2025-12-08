@@ -253,8 +253,8 @@ export function buildTisch(inputs, catalog) {
     const trav_bottom_front = {
       typ: 'Traversenstrecke',
       traverse_name_intern,
-      start: [ 0, t_b, t_a ],
-      ende:  [ B, t_b, t_a ],
+      start: [ 0, t_b, U + t_a ],
+      ende:  [ B, t_b, U + t_a ],
       orientierung: [ 0, 0, 1],
       objekttyp: 'TRAVERSE',
       element_id_intern: 'Strecke_Unten_Vorne',

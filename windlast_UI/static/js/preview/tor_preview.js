@@ -65,7 +65,7 @@ export function mountTorPreview(mountEl) {
   rerender();
 
   // simple live update: auf Änderungen der relevanten Inputs reagieren
-  const ids = ['breite_m','hoehe_m','traverse_name_intern','bodenplatte_name_intern','gummimatte','untergrund_typ','traversen_orientierung'];
+  const ids = ['breite_m','hoehe_m','traverse_name_intern','bodenplatte_name_intern','gummimatte','untergrund_typ','traversen_orientierung', 'unterkante_flaeche_m'];
   const listeners = [];
   for (const id of ids) {
     const el = document.getElementById(id);

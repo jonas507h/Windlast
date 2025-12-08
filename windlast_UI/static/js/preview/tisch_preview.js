@@ -9,6 +9,7 @@ function readFormForTisch() {
   const breite = parseFloat(document.getElementById('breite_m')?.value);
   const hoehe  = parseFloat(document.getElementById('hoehe_m')?.value);
   const tiefe  = parseFloat(document.getElementById('tiefe_m')?.value);
+  const unterkanteFlaeche = document.getElementById('unterkante_flaeche_m')?.value;
 
   const traverse_name_intern   = document.getElementById('traverse_name_intern')?.value || 'TRUSS';
   const bodenplatte_name_intern= document.getElementById('bodenplatte_name_intern')?.value || 'BP';
@@ -20,6 +21,7 @@ function readFormForTisch() {
     breite_m: isFinite(breite) && breite > 0 ? breite : 8,
     hoehe_m:  isFinite(hoehe)  && hoehe  > 0 ? hoehe  : 4,
     tiefe_m:  isFinite(tiefe)  && tiefe  > 0 ? tiefe  : 6,
+    unterkante_flaeche_m: isFinite(parseFloat(unterkanteFlaeche)) ? parseFloat(unterkanteFlaeche) : null,
     traverse_name_intern,
     bodenplatte_name_intern,
     gummimatte,
@@ -57,7 +59,7 @@ export function mountTischPreview(mountEl) {
   rerender();
 
   // simple live update: auf Änderungen der relevanten Inputs reagieren
-  const ids = ['breite_m','hoehe_m','tiefe_m','traverse_name_intern','bodenplatte_name_intern','gummimatte','untergrund_typ'];
+  const ids = ['breite_m','hoehe_m','tiefe_m','traverse_name_intern','bodenplatte_name_intern','gummimatte','untergrund_typ', 'unterkante_flaeche_m'];
   const listeners = [];
   for (const id of ids) {
     const el = document.getElementById(id);
