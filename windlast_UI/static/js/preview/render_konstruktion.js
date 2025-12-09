@@ -90,7 +90,18 @@ export function render_konstruktion(container, konstruktion, opts = {}) {
       const data = bodenplatte_linien(el);
       allSegments.push(...(data.segments || []));
       if (data.polygon && data.frame) {
-        const m = createUnlitPlateMesh(THREE, data.polygon, data.frame, theme.plateFill);
+        const hasGummi = !!el.gummimatte;  // 'GUMMI' → true, null → false
+
+        const fillColor =
+          hasGummi && theme.plateFillGummi
+            ? theme.plateFillGummi
+            : theme.plateFill;
+
+        const m = createUnlitPlateMesh(THREE, data.polygon, data.frame, fillColor);
+
+        m.userData = m.userData || {};
+        m.userData.hasGummi = hasGummi;
+
         plateMeshes.push(m);
       }
     } else if (el.typ === 'Traversenstrecke') {
@@ -210,7 +221,12 @@ export function render_konstruktion(container, konstruktion, opts = {}) {
 
     for (const m of plateMeshes) {
       if (m.material && m.material.color) {
-        m.material.color.set(t.plateFill);
+        const hasGummi = m.userData && m.userData.hasGummi;
+        const fillColor =
+          hasGummi && t.plateFillGummi
+            ? t.plateFillGummi
+            : t.plateFill;
+        m.material.color.set(fillColor);
       }
     }
 
