@@ -22,6 +22,7 @@ export const TOR_HELP_PAGES = [
       <help-include page="tor:untergrund" auto-level="true"></help-include>
       <help-include page="tor:hoehe" auto-level="true"></help-include>
       <help-include page="tor:breite" auto-level="true"></help-include>
+      <help-include page="tor:unterkante_flaeche" auto-level="true"></help-include>
     `
   },
 
@@ -64,7 +65,8 @@ export const TOR_HELP_PAGES = [
     body: `
       <p>
         Wählt hier aus unseren Pool-Bodenplatten die entsprechende Bodenplatte aus. Die Auswahl beeinflusst alle in der Konstruktion verwendeten Bodenplatten.
-        Bei der Berechnung werden Größe und Geometrie, Gewicht und Material der Bodenplatten berücksichtigt.
+        Bei der Berechnung werden Größe und Geometrie, Gewicht und Material der Bodenplatten berücksichtigt. Eine blau markierte Bodenplatte im
+        [[app:vorschau|Vorschaufenster]] zeigt an, dass unter der Bodenplatte eine Gummimatte verwendet wird.
       </p>
     `
   },
@@ -77,8 +79,8 @@ export const TOR_HELP_PAGES = [
     body: `
       <p>
         Wählt hier aus, ob ihr Gummimatten unter den Bodenplatten verwendet. Gummimatten erhöhen in der Regel den Reibwert zwischen Bodenplatte und Untergrund
-        und können sich positiv auf die Gleitsicherheit der Konstruktion auswirken.
-      </p>
+        und können sich positiv auf die Gleitsicherheit der Konstruktion auswirken. Im [[app:vorschau|Vorschaufenster]] werden Bodenplatten mit untergelegten
+        Gummimatten blau markiert.
       <p>
         <b>Achtung:</b> Da in den zugrunde gelegten Normen (DIN EN 13814:2005-06 und DIN EN 17879:2024-08) nur Reibwerte für Gummi in Kombination mit Holz, Stahl oder Beton angegeben sind, führt eine andere Auswahl im [[tor:untergrund|Untergrund-Feld]]
         zu einem Fehler in der Berechnung.
@@ -125,5 +127,26 @@ export const TOR_HELP_PAGES = [
         Gebt hier die Breite des Tors ein. Die Breite ist definiert von Außenkante zu Außenkante der Traversencorner in den oberen Ecken.
       </p>
     `
-  }
+  },
+
+  {
+    id: "tor:unterkante_flaeche",
+    title: "Unterkante Fläche (optional)",
+    shortTitle: "Unterkante Fläche",
+    pfad: ["app:konstruktionen", "tor:allgemein"],
+    body: `
+      <p>
+        Wenn ihr eine Fläche (z. B. Plane oder Banner) am Tor befestigen möchtet, könnt ihr hier dieser Fläche eingeben.
+        Bei der Berechnung wird nur die Windangriffsfläche aber nicht das Eigengewicht der Fläche berücksichtigt.
+        Wenn ihr hier etwas eingebt, wird diese Fläche und eine Traverse an der Unterkante der Fläche automatisch erstellt.
+      </p>
+      <p>
+        <b>Achtung:</b> Der eingegebene Wert muss niedriger als die Höhe des Tors sein.<br>
+        <b>Achtung:</b> Durch das Spannen von Planen oder Bannern können zusätzliche Kräfte auf die Konstruktion wirken, die in der Berechnung nicht berücksichtigt werden.
+      </p>
+      <p>
+        Wenn ihr keine Fläche befestigen möchtet, lasst das Feld einfach leer.
+      </p>
+    `
+  },
 ];

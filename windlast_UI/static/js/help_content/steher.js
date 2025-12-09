@@ -23,6 +23,7 @@ export const STEHER_HELP_PAGES = [
       <help-include page="steher:hoehe" auto-level="true"></help-include>
       <help-include page="steher:laenge_rohr" auto-level="true"></help-include>
       <help-include page="steher:hoehe_rohr" auto-level="true"></help-include>
+      <help-include page="steher:unterkante_flaeche" auto-level="true"></help-include>
     `
   },
 
@@ -136,5 +137,26 @@ export const STEHER_HELP_PAGES = [
         <b>Achtung:</b> Die Höhe des Rohrs muss kleiner als die Gesamthöhe des Stehers sein.
       </p>
     `
-  }
+  },
+
+  {
+    id: "steher:unterkante_flaeche",
+    title: "Unterkante Fläche (optional)",
+    shortTitle: "Unterkante Fläche",
+    pfad: ["app:konstruktionen", "steher:allgemein"],
+    body: `
+      <p>
+        Wenn ihr eine Fläche (z. B. Plane oder Banner) am Steher befestigen möchtet, könnt ihr hier die Höhe dieser Fläche eingeben.
+        Bei der Berechnung wird nur die Windangriffsfläche aber nicht das Eigengewicht der Fläche berücksichtigt.
+        Wenn ihr hier etwas eingebt, wird diese Fläche und ein Rohr an der Unterkante der Fläche automatisch erstellt.
+      </p>
+      <p>
+        <b>Achtung:</b> Der eingegebene Wert muss niedriger als die Höhe des oberen Rohrs sein.<br>
+        <b>Achtung:</b> Durch das Spannen von Planen oder Bannern können zusätzliche Kräfte auf die Konstruktion wirken, die in der Berechnung nicht berücksichtigt werden.
+      </p>
+      <p>
+        Wenn ihr keine Fläche befestigen möchtet, lasst das Feld einfach leer.
+      </p> 
+    `
+  },
 ];

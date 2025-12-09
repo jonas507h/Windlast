@@ -66,7 +66,8 @@ export const GENERAL_HELP_PAGES = [
     body: `
       <p>
         Links neben den Eingabefeldern befindet sich ein Vorschaufenster, das die aktuellen Eingaben grafisch darstellt. Es aktualisiert sich automatisch bei jeder Änderung der Eingaben.
-        Visualisiert werden die Geometrie aller Bauteile (wobei Rohre als Linien dargestellt werden), deren Lage und Ausrichtung im Raum, die realen Abmessungen sowie die rechts eingegebenen Maße.
+        Visualisiert werden die Geometrie aller Bauteile (wobei Rohre als Linien dargestellt werden), deren Lage und Ausrichtung im Raum, die realen Abmessungen sowie die rechts eingegebenen Maße.<br>
+        Bodenplatten werden blau markiert, wenn unter ihnen Gummimatten verwendet werden.
       </p>
       <p>
       Die Vorschau ist dreidimensional und unterstützt die Interaktion mit der Maus:
@@ -77,7 +78,7 @@ export const GENERAL_HELP_PAGES = [
         <li><b>Rechte Maustaste + Ziehen:</b> Verschiebung</li>
       </ul>
       <p>
-        Die Vorschau spiegelt 1:1 die geometrischen Ausgangsdaten der Berechnung wieder. Entspricht die Vorschau nicht der Realität, entspricht auch die Berechnung nicht der Realität.
+        Die Vorschau spiegelt 1:1 die geometrischen Ausgangsdaten der Berechnung wieder. Was in der Vorschau nicht dargestellt wird, wird auch nicht berechnet.
       </p>
     `
   },
@@ -87,7 +88,8 @@ export const GENERAL_HELP_PAGES = [
     title: "Konstruktionen",
     body: `
       <p>
-        Der Windlasterechner unterstützt verschiedene, einfache Konstruktionstypen. Aktuell werden folgende Konstruktionen unterstützt:
+        Der Windlasterechner unterstützt verschiedene, einfache Konstruktionstypen. Bei allen Konstruktionen können auch größere Windangriffsflächen
+        (z.B. für Banner oder Planen) berücksichtigt werden. Aktuell werden folgende Konstruktionen unterstützt:
       </p>
       <ul>
         <li>[[tor:allgemein|Traversentor]]</li>
