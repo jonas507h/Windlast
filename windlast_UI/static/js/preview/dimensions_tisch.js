@@ -15,6 +15,7 @@ export function computeDimensionsTisch(konstruktion){
   const B = konstruktion.breite_m;
   const H = konstruktion.hoehe_m;
   const T = konstruktion.tiefe_m;
+  const U = konstruktion.unterkante_flaeche_m;
   const traverse_name_intern = konstruktion.traverse_name_intern;
   const els = konstruktion.bauelemente||[];
 
@@ -24,6 +25,7 @@ export function computeDimensionsTisch(konstruktion){
   let label_breite;
   let label_hoehe;
   let label_tiefe;
+  let label_unterkante;
 
   const breite_input = parseFloat(document.getElementById('breite_m')?.value);
   if (isFinite(breite_input) && breite_input > 0) {
@@ -42,6 +44,12 @@ export function computeDimensionsTisch(konstruktion){
     label_tiefe = `Tiefe: ${fmtDE(tiefe_input)} m`;
   } else {
     label_tiefe = `Tiefe`;
+  }
+  const unterkante_input = parseFloat(document.getElementById('unterkante_flaeche_m')?.value);
+  if (isFinite(unterkante_input)) {
+    label_unterkante = `Unterkante Fläche: ${fmtDE(unterkante_input)} m`;
+  } else {
+    label_unterkante = `Unterkante Fläche`;
   }
 
   if (is3punkt) {
@@ -81,6 +89,14 @@ export function computeDimensionsTisch(konstruktion){
     specs.push({
       kind:'linear', param_key:'tiefe_m', label: label_tiefe,
       anchors:{ a, b, dir:[0,0,1], offset: real_offset_a, textSize:0.28 }
+    });
+  }
+
+  if (U != null && isFinite(U)) {
+    const a = [B,0,0]; const b = [B,0,U];
+    specs.push({
+      kind:'linear', param_key:'unterkante_flaeche_m', label: label_unterkante,
+      anchors:{ a, b, dir:[1,0,0], offset: real_offset_b, textSize:0.28 }
     });
   }
 

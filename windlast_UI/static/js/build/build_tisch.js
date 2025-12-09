@@ -286,6 +286,7 @@ export function buildTisch(inputs, catalog) {
     breite_m: B,
     hoehe_m: H,
     tiefe_m: T,
+    unterkante_flaeche_m: U,
     traverse_name_intern: traverse_name_intern,
     bauelemente: bauelemente,
   };

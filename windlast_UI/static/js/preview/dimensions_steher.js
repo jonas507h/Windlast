@@ -13,12 +13,15 @@ let rohr_offset = rohr_eff_offset;
 const rh_eff_offset = 0.2;
 let rh_real_offset = rh_eff_offset;
 let rohr_offset_to_front = 0.0;
+let u_flaeche_eff_offset = 0.2;
+let u_flaeche_real_offset = u_flaeche_eff_offset;
 
 export function computeDimensionsSteher(konstruktion){
   const specs=[];
   const H = konstruktion.hoehe_m;
   const R_L = konstruktion.rohr_laenge_m;
   const R_H = konstruktion.rohr_hoehe_m;
+  const U = konstruktion.unterkante_flaeche_m;
   const traverse_name_intern = konstruktion.traverse_name_intern;
   const rohr_name_intern = konstruktion.rohr_name_intern;
   const els = konstruktion.bauelemente||[];
@@ -29,6 +32,7 @@ export function computeDimensionsSteher(konstruktion){
   let label_hoehe;
   let label_rohr_laenge;
   let label_rohr_hoehe;
+  let label_unterkante;
 
   const hoehe_input  = parseFloat(document.getElementById('hoehe_m')?.value);
   if (isFinite(hoehe_input) && hoehe_input > 0) {
@@ -48,10 +52,17 @@ export function computeDimensionsSteher(konstruktion){
   } else {
     label_rohr_hoehe = `Höhe Rohr`;
   }
+  const unterkante_input = parseFloat(document.getElementById('unterkante_flaeche_m')?.value);
+  if (isFinite(unterkante_input)) {
+    label_unterkante = `Unterkante Fläche: ${fmtDE(unterkante_input)} m`;
+  } else {
+    label_unterkante = `Unterkante Fläche`;
+  }
 
-  trav_real_offset = trav_eff_offset + (Number(travSpec.B_hoehe ?? travSpec.A_hoehe ?? travSpec.hoehe) / 2);
+  trav_real_offset = trav_eff_offset * 2 + (Number(travSpec.B_hoehe ?? travSpec.A_hoehe ?? travSpec.hoehe) / 2) + (R_L / 2);
   rh_real_offset = rh_eff_offset + R_L / 2;
   rohr_offset = rohr_eff_offset + H - R_H;
+  u_flaeche_real_offset = u_flaeche_eff_offset + R_L / 2;
 
   if (is3punkt) {
     rohr_offset_to_front = -1 * (Number(travSpec.A_hoehe ?? travSpec.hoehe) / 3);
@@ -89,5 +100,14 @@ export function computeDimensionsSteher(konstruktion){
       anchors:{ a, b, dir:[-1,0,0], offset: rh_real_offset, textSize:0.28 }
     });
   }
+
+  if (U != null && isFinite(U)) {
+    const a = [0,rohr_offset_to_front,0]; const b = [0,rohr_offset_to_front,U];
+    specs.push({
+      kind:'linear', param_key:'unterkante_flaeche_m', label: label_unterkante,
+      anchors:{ a, b, dir:[1,0,0], offset: u_flaeche_real_offset, textSize:0.28 }
+    });
+  }
+
   return specs;
 }
