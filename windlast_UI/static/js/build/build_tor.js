@@ -112,33 +112,33 @@ export function buildTor(inputs, catalog) {
     case ORIENTIERUNG.side:
       if (is3punkt) {
         t_part = Number(travSpec.B_hoehe ?? travSpec.hoehe) / 2;
-        flaeche_offset = Number(travSpec.A_hoehe ?? travSpec.hoehe) / 3;
+        flaeche_offset = -1 * Number(travSpec.A_hoehe ?? travSpec.hoehe) / 3;
       } else {
         t_part = Number(travSpec.B_hoehe ?? travSpec.A_hoehe ?? travSpec.hoehe) / 2;
-        flaeche_offset = t_part;
+        flaeche_offset = -t_part;
       }
       break;
     case ORIENTIERUNG.up:
       if (is3punkt) {
         t_part = Number(travSpec.A_hoehe ?? travSpec.hoehe) * 2 / 3;
-        flaeche_offset = Number(travSpec.B_hoehe ?? travSpec.hoehe) / 2;
+        flaeche_offset = -1 * Number(travSpec.B_hoehe ?? travSpec.hoehe) / 2;
       } else {
         t_part = Number(travSpec.A_hoehe ?? travSpec.B_hoehe ?? travSpec.hoehe) / 2;
-        flaeche_offset = t_part;
+        flaeche_offset = -t_part;
       }
       break;
     case ORIENTIERUNG.down:
       if (is3punkt) {
         t_part = Number(travSpec.A_hoehe ?? travSpec.hoehe) / 3;
-        flaeche_offset = Number(travSpec.B_hoehe ?? travSpec.hoehe) / 2;
+        flaeche_offset = -1 * Number(travSpec.B_hoehe ?? travSpec.hoehe) / 2;
       } else {
         t_part = Number(travSpec.A_hoehe ?? travSpec.B_hoehe ?? travSpec.hoehe) / 2;
-        flaeche_offset = t_part;
+        flaeche_offset = -t_part;
       }
       break;
     default:
       t_part = Number(travSpec.A_hoehe ?? travSpec.B_hoehe ?? travSpec.hoehe);
-      flaeche_offset = t_part;
+      flaeche_offset = -t_part;
       break;
   }
 

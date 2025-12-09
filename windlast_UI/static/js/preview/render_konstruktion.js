@@ -7,6 +7,7 @@ import { OrbitControls } from '/static/vendor/OrbitControls.js';
 import { bodenplatte_linien } from './linien_bodenplatte.js';
 import { traversenstrecke_linien } from './linien_traverse.js';
 import { rohr_linien } from './linien_rohr.js';
+import { senkrechteFlaeche_linien } from './linien_senkrechteFlaeche.js';
 import { computeAABB, expandAABB, segmentsToThreeLineSegments, fitCameraToAABB } from './linien_helpers.js';
 import { render_dimensions, update_dimension_arrows } from './render_dimensions.js';
 import { getPreviewTheme, subscribePreviewTheme } from './preview_farben.js';
@@ -81,6 +82,7 @@ export function render_konstruktion(container, konstruktion, opts = {}) {
   // 1) Linien sammeln
   const allSegments = [];
   const plateMeshes = [];
+  const flaecheMeshes = [];
   let lines = null;
 
   for (const el of konstruktion.bauelemente || []) {
@@ -97,6 +99,13 @@ export function render_konstruktion(container, konstruktion, opts = {}) {
     } else if (el.typ === 'Rohr') {
       const { segments } = rohr_linien(el);
       allSegments.push(...segments);
+    } else if (el.typ === 'senkrechteFlaeche') {
+      const data = senkrechteFlaeche_linien(el);
+      allSegments.push(...(data.segments || []));
+      if (data.polygon && data.frame) {
+        const m = createUnlitPlateMesh(THREE, data.polygon, data.frame, theme.wallFill);
+        flaecheMeshes.push(m);
+      }
     }
   }
   if (!allSegments.length) { console.warn('render_konstruktion: keine Segmente'); return null; }
@@ -123,6 +132,7 @@ export function render_konstruktion(container, konstruktion, opts = {}) {
   }
 
   for (const m of plateMeshes) scene.add(m);
+  for (const m of flaecheMeshes) scene.add(m);
 
   // 4) Kamera auf Bounding Box fitten
   const aabb = expandAABB(computeAABB(allSegments), 0.15);
@@ -204,6 +214,12 @@ export function render_konstruktion(container, konstruktion, opts = {}) {
       }
     }
 
+    for (const m of flaecheMeshes) {
+      if (m.material && m.material.color) {
+        m.material.color.set(t.wallFill ?? t.plateFill);
+      }
+    }
+
     // Bemaßung neu rendern
     if (dimensionSpecs && dimensionSpecs.length) {
       if (dimensionGroup) {
@@ -225,6 +241,7 @@ export function render_konstruktion(container, konstruktion, opts = {}) {
   return {
     scene, camera, renderer, lines, controls,
     plateMeshes,
+    flaecheMeshes,
     dispose() {
       disposed = true;
       window.removeEventListener('resize', onResize);

@@ -11,6 +11,7 @@ export const PREVIEW_THEMES = {
     // Konstruktion
     lineColor: 0x111111,
     plateFill: 0xf5f5f5,
+    wallFill:  0xaaaaaa,
 
     // Maße
     dimensions: {
@@ -36,6 +37,7 @@ export const PREVIEW_THEMES = {
     // Konstruktion
     lineColor: 0xaaaaaa,
     plateFill: 0x222222,
+    wallFill:  0x333333,
 
     // Maße (leicht leuchtendes Rot mit dunkler Outline)
     dimensions: {

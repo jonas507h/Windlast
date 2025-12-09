@@ -138,10 +138,9 @@ class senkrechteFlaeche:
     ) -> List[Kraefte]:
         base_ctx = merge_kontext(kontext, {
             "funktion": "windkraefte",
-            "norm": norm.name,
+            "norm": norm.value,
             "element_id": self.element_id_intern,
-            "objekttyp": self.objekttyp.name,
-            "flaechentyp": self.flaeche_typ.name if self.flaeche_typ else None,
+            "objekttyp": self.objekttyp.value,
             "windrichtung": windrichtung,
         })
 
@@ -177,8 +176,8 @@ class senkrechteFlaeche:
             # Staudruck auf mittlerer Höhe der Anzeigetafel
             mitte_hoehe = (oberkante + unterkante) / 2
             tafel_ctx = merge_kontext(base_ctx, {
-                "flaeche_typ": self.flaeche_typ.value,
                 "mittlere_hoehe": mitte_hoehe,
+                "flaeche_typ": self.flaeche_typ.value,
             })
             staudruck = 0.0
             for i, grenze in enumerate(obergrenzen):
@@ -199,19 +198,19 @@ class senkrechteFlaeche:
 
             _kraftbeiwert = kraftbeiwert(
                 norm, objekttyp=self.objekttyp, windrichtung=windrichtung, senkrechte_flaeche_typ=self.flaeche_typ, punkte=self.eckpunkte,
-                protokoll=protokoll, kontext=kontext
+                protokoll=protokoll, kontext=tafel_ctx
             )
             _bezugsflaeche = projizierte_flaeche(
                 norm, objekttyp=self.objekttyp, punkte=self.eckpunkte,
-                protokoll=protokoll, kontext=kontext
+                protokoll=protokoll, kontext=tafel_ctx
             )
             _windkraft = windkraft(
                 norm, objekttyp=self.objekttyp, kraftbeiwert=_kraftbeiwert.wert, staudruck=staudruck, projizierte_flaeche=_bezugsflaeche.wert,senkrechte_flaeche_typ=self.flaeche_typ,
-                protokoll=protokoll, kontext=kontext
+                protokoll=protokoll, kontext=tafel_ctx
             )
             _windkraft_vec = windkraft_zu_vektor(
                 norm, objekttyp=self.objekttyp, punkte=self.eckpunkte, windkraft=_windkraft.wert, windrichtung=windrichtung, senkrechte_flaeche_typ=self.flaeche_typ,
-                protokoll=protokoll, kontext=kontext
+                protokoll=protokoll, kontext=tafel_ctx
             )
             einzelkraefte_vektoren = [_windkraft_vec.wert]
             angriffsbereiche = [self.eckpunkte]
@@ -242,10 +241,10 @@ class senkrechteFlaeche:
             winkel = vektor_winkel(wand_dir_xy, wind_xy)
 
             wand_ctx = merge_kontext(base_ctx, {
-                "flaeche_typ": self.flaeche_typ.value,
                 "wand_breite": f"{breite}m",
                 "wand_hoehe": f"{hoehe}m",
                 "winkel_wand_wind": f"{winkel:.2f}°",
+                "flaeche_typ": self.flaeche_typ.value,
             })
 
             # Fall 1: Wind praktisch parallel
@@ -286,6 +285,10 @@ class senkrechteFlaeche:
                     teilvektor_unterkante = vektor_zwischen_punkten(unten_start, unten_ende)
                     zone = zonen[i]
 
+                    zonen_ctx = merge_kontext(wand_ctx, {
+                        "zone": zone.value,
+                    })
+
                     # Segmentierung nach Höhenbereichen
                     segmente = segmentiere_strecke_nach_hoehenbereichen(
                         unten_start, oben_start, staudruecke, obergrenzen
@@ -294,7 +297,7 @@ class senkrechteFlaeche:
                         protokolliere_msg(
                             protokoll, severity=Severity.ERROR, code="WAND/NO_WIND_SEGMENTS",
                             text="Wand liegt in keinem Windbereich.",
-                            kontext=base_ctx,
+                            kontext=zonen_ctx,
                         )
                         return []
                     
@@ -306,22 +309,26 @@ class senkrechteFlaeche:
                         oben_ende_lokal   = vektoren_addieren([oben_start_lokal, teilvektor_unterkante])
                         staudruck   = seg["staudruck"]
 
+                        seg_ctx = merge_kontext(zonen_ctx, {
+                            "segment_index": j,
+                        })
+
                         _kraftbeiwert = kraftbeiwert(
                             norm, objekttyp=self.objekttyp, windrichtung=windrichtung, senkrechte_flaeche_typ=self.flaeche_typ, zone=zone,
                             punkte=self.eckpunkte,
-                            protokoll=protokoll, kontext=base_ctx
+                            protokoll=protokoll, kontext=seg_ctx
                         )
                         _bezugsflaeche = projizierte_flaeche(
                             norm, objekttyp=self.objekttyp, punkte=self.eckpunkte,
-                            protokoll=protokoll, kontext=kontext
+                            protokoll=protokoll, kontext=seg_ctx
                         )
                         _windkraft = windkraft(
                             norm, objekttyp=self.objekttyp, kraftbeiwert=_kraftbeiwert.wert, staudruck=staudruck, projizierte_flaeche=_bezugsflaeche.wert,senkrechte_flaeche_typ=self.flaeche_typ,
-                            protokoll=protokoll, kontext=kontext
+                            protokoll=protokoll, kontext=seg_ctx
                         )
                         _windkraft_vec = windkraft_zu_vektor(
                             norm, objekttyp=self.objekttyp, punkte=self.eckpunkte, windkraft=_windkraft.wert, windrichtung=windrichtung, senkrechte_flaeche_typ=self.flaeche_typ,
-                            protokoll=protokoll, kontext=kontext
+                            protokoll=protokoll, kontext=seg_ctx
                         )
 
                         einzelkraefte_vektoren.append(_windkraft_vec.wert)
@@ -367,6 +374,10 @@ class senkrechteFlaeche:
                     teilvektor_unterkante = vektor_zwischen_punkten(unten_start, unten_ende)
                     zone = zonen[i]
 
+                    zonen_ctx = merge_kontext(wand_ctx, {
+                        "zone": zone.value,
+                    })
+
                     # Segmentierung nach Höhenbereichen
                     segmente = segmentiere_strecke_nach_hoehenbereichen(
                         unten_start, oben_start, staudruecke, obergrenzen
@@ -387,22 +398,26 @@ class senkrechteFlaeche:
                         oben_ende_lokal   = vektoren_addieren([oben_start_lokal, teilvektor_unterkante])
                         staudruck   = seg["staudruck"]
 
+                        seg_ctx = merge_kontext(zonen_ctx, {
+                            "segment_index": j,
+                        })
+
                         _kraftbeiwert = kraftbeiwert(
                             norm, objekttyp=self.objekttyp, windrichtung=windrichtung, senkrechte_flaeche_typ=self.flaeche_typ, zone=zone,
                             punkte=self.eckpunkte,
-                            protokoll=protokoll, kontext=base_ctx
+                            protokoll=protokoll, kontext=seg_ctx
                         )
                         _bezugsflaeche = projizierte_flaeche(
                             norm, objekttyp=self.objekttyp, punkte=self.eckpunkte,
-                            protokoll=protokoll, kontext=kontext
+                            protokoll=protokoll, kontext=seg_ctx
                         )
                         _windkraft = windkraft(
                             norm, objekttyp=self.objekttyp, kraftbeiwert=_kraftbeiwert.wert, staudruck=staudruck, projizierte_flaeche=_bezugsflaeche.wert,senkrechte_flaeche_typ=self.flaeche_typ,
-                            protokoll=protokoll, kontext=kontext
+                            protokoll=protokoll, kontext=seg_ctx
                         )
                         _windkraft_vec = windkraft_zu_vektor(
                             norm, objekttyp=self.objekttyp, punkte=self.eckpunkte, windkraft=_windkraft.wert, windrichtung=windrichtung, senkrechte_flaeche_typ=self.flaeche_typ,
-                            protokoll=protokoll, kontext=kontext
+                            protokoll=protokoll, kontext=seg_ctx
                         )
 
                         einzelkraefte_vektoren.append(_windkraft_vec.wert)

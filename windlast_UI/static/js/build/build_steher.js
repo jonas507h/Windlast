@@ -92,10 +92,10 @@ export function buildSteher(inputs, catalog) {
   let flaeche_offset;
   if (is3punkt) {
         t_part = Number(travSpec.A_hoehe ?? travSpec.hoehe) / 3;
-        flaeche_offset = t_part;
+        flaeche_offset = -t_part;
       } else {
         t_part = Number(travSpec.A_hoehe ?? travSpec.B_hoehe ?? travSpec.hoehe) / 2;
-        flaeche_offset = t_part;
+        flaeche_offset = -t_part;
       }
 
   // Fallback: Wenn nichts passt, Fehler werfen
