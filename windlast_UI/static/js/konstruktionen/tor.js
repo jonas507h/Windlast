@@ -143,16 +143,16 @@ function validateTorForm() {
   // --- Tor-Eingaben: Höhe/Breite > 0 ---
   const hoeheEl = document.getElementById('hoehe_m');
   const breiteEl = document.getElementById('breite_m');
-  const unterkanteFlaecheEl = document.getElementById('unterkante_flaeche_m');
+  const hoeheFlaecheEl = document.getElementById('hoehe_flaeche_m');
   const errH = document.getElementById('err-hoehe');
   const errB = document.getElementById('err-breite');
-  const errUF = document.getElementById('err-unterkante_flaeche');
+  const errHF = document.getElementById('err-hoehe_flaeche');
 
   const hoehe = parseFloat(hoeheEl?.value);
   const breite = parseFloat(breiteEl?.value);
   
-  const rawU = unterkanteFlaecheEl?.value?.trim();
-  const unterkanteFlaeche = rawU === "" ? null : parseFloat(rawU);
+  const rawHF = hoeheFlaecheEl?.value?.trim();
+  const hoeheFlaeche = rawHF === "" ? null : parseFloat(rawHF);
 
   const hOK = isPositiveNumber(hoehe);
   showFieldError(hoeheEl, errH, !hOK, 'Bitte eine gültige Höhe > 0 angeben.');
@@ -164,17 +164,17 @@ function validateTorForm() {
 
   let uOK = true;
   let uMsg = '';
-  if (!(rawU === "" || unterkanteFlaeche === 0 || (isFinite(unterkanteFlaeche) && unterkanteFlaeche > 0))) {
+  if (!(rawHF === "" || (isFinite(hoeheFlaeche) && hoeheFlaeche > 0))) {
     uOK = false;
-    uMsg = 'Bitte eine Zahl ≥ 0 angeben oder leer lassen.';
-  } else if (unterkanteFlaeche !== null && isFinite(unterkanteFlaeche)) {
-    const maxU = unterkanteFlaeche < parseFloat(hoeheEl?.value);
+    uMsg = 'Bitte eine Zahl > 0 angeben oder leer lassen.';
+  } else if (hoeheFlaeche !== null && isFinite(hoeheFlaeche)) {
+    const maxU = hoeheFlaeche < parseFloat(hoeheEl?.value);
     if (!maxU) {
       uOK = false;
-      uMsg = 'Die Unterkante muss kleiner als die Höhe sein.';
+      uMsg = 'Die Höhe der Fläche muss kleiner als die Gesamthöhe sein.';
     }
   }
-  showFieldError(unterkanteFlaecheEl, errUF, !uOK, uMsg);
+  showFieldError(hoeheFlaecheEl, errHF, !uOK, uMsg);
   ok = ok && uOK;
 
   // --- Tor-Dropdowns: i. d. R. bereits gültig vorbelegt ---
@@ -255,7 +255,7 @@ async function submitTor() {
 
     const breite_m = parseFloat(document.getElementById("breite_m").value);
     const hoehe_m  = parseFloat(document.getElementById("hoehe_m").value);
-    const unterkante_flaeche_m = document.getElementById("unterkante_flaeche_m").value;
+    const hoehe_flaeche_m = document.getElementById("hoehe_flaeche_m").value;
     const traverse_name_intern    = document.getElementById("traverse_name_intern").value;
     const bodenplatte_name_intern = document.getElementById("bodenplatte_name_intern").value;
     const orientierung            = readTraversenOrientierung();
@@ -264,7 +264,7 @@ async function submitTor() {
     const konstruktion = buildTor({
       breite_m,
       hoehe_m,
-      unterkante_flaeche_m,
+      hoehe_flaeche_m: hoehe_flaeche_m,
       traverse_name_intern,
       bodenplatte_name_intern,
       gummimatte: gummimatte_bool,

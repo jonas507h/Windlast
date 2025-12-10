@@ -14,7 +14,7 @@ export function computeDimensionsTor(konstruktion){
   const specs=[];
   const B = konstruktion.breite_m;
   const H = konstruktion.hoehe_m;
-  const U = konstruktion.unterkante_flaeche_m;
+  const H_F = konstruktion.hoehe_flaeche_m;
   const traverse_name_intern = konstruktion.traverse_name_intern;
   const orientierung = konstruktion.traversen_orientierung;
   const els = konstruktion.bauelemente||[];
@@ -24,7 +24,7 @@ export function computeDimensionsTor(konstruktion){
 
   let label_breite;
   let label_hoehe;
-  let label_unterkante;
+  let label_hoehe_flaeche;
 
   const breite_input = parseFloat(document.getElementById('breite_m')?.value);
   if (isFinite(breite_input) && breite_input > 0) {
@@ -38,11 +38,11 @@ export function computeDimensionsTor(konstruktion){
   } else {
     label_hoehe = `Höhe`;
   }
-  const unterkante_input = parseFloat(document.getElementById('unterkante_flaeche_m')?.value);
-  if (isFinite(unterkante_input)) {
-    label_unterkante = `Unterkante Fläche: ${fmtDE(unterkante_input)} m`;
+  const hoehe_flaeche_input = parseFloat(document.getElementById('hoehe_flaeche_m')?.value);
+  if (isFinite(hoehe_flaeche_input)) {
+    label_hoehe_flaeche = `Höhe Fläche: ${fmtDE(hoehe_flaeche_input)} m`;
   } else {
-    label_unterkante = `Unterkante Fläche`;
+    label_hoehe_flaeche = `Höhe Fläche`;
   }
 
   switch (orientierung) {
@@ -101,10 +101,10 @@ export function computeDimensionsTor(konstruktion){
     });
   }
 
-  if (U != null && isFinite(U)) {
-    const a = [B, -flaeche_offset, 0]; const b = [B, -flaeche_offset, U];
+  if (H_F != null && isFinite(H_F)) {
+    const a = [B, -flaeche_offset, H]; const b = [B, -flaeche_offset, H - H_F];
     specs.push({
-      kind:'linear', param_key:'unterkante_flaeche_m', label: label_unterkante,
+      kind:'linear', param_key:'hoehe_flaeche_m', label: label_hoehe_flaeche,
       anchors:{ a, b, dir:[1,0,0], offset: real_offset, textSize:0.28 }
     });
   }

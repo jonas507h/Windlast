@@ -132,15 +132,15 @@ function validateSteherForm() {
   const hoeheEl = document.getElementById('hoehe_m');
   const rLaengeEl = document.getElementById('rohr_laenge_m');
   const rHoeheEl = document.getElementById('rohr_hoehe_m');
-  const unterkanteFlaecheEl = document.getElementById('unterkante_flaeche_m');
+  const hoeheFlaecheEl = document.getElementById('hoehe_flaeche_m');
 
   const errH = document.getElementById('err-hoehe');
   const errL = document.getElementById('err-laenge');
   const errRH = document.getElementById('err-rhoehe');
-  const errUF = document.getElementById('err-unterkante_flaeche');
+  const errHF = document.getElementById('err-hoehe_flaeche');
 
-  const rawU = unterkanteFlaecheEl?.value?.trim();
-  const unterkanteFlaeche = rawU === "" ? null : parseFloat(rawU);
+  const rawHF = hoeheFlaecheEl?.value?.trim();
+  const hoeheFlaeche = rawHF === "" ? null : parseFloat(rawHF);
 
   const hOK = isPositiveNumber(parseFloat(hoeheEl?.value));
   showFieldError(hoeheEl, errH, !hOK, 'Bitte eine gültige Höhe > 0 angeben.');
@@ -168,19 +168,17 @@ function validateSteherForm() {
 
   let uOK = true;
   let uMsg = '';
-  if (!(rawU === "" || unterkanteFlaeche === 0 || (isFinite(unterkanteFlaeche) && unterkanteFlaeche > 0))) {
-    // Fehlerfall 1: keine gültige Zahl ≥ 0
+  if (!(rawHF === "" || (isFinite(hoeheFlaeche) && hoeheFlaeche > 0))) {
     uOK = false;
-    uMsg = 'Bitte eine Zahl ≥ 0 angeben oder leer lassen.';
-  } else if (unterkanteFlaeche !== null && isFinite(unterkanteFlaeche)) {
-    // Fehlerfall 2: Zahl ok, aber Unterkante nicht < Höhe
-    const maxU = unterkanteFlaeche < parseFloat(rHoeheEl?.value);
+    uMsg = 'Bitte eine Zahl > 0 angeben oder leer lassen.';
+  } else if (hoeheFlaeche !== null && isFinite(hoeheFlaeche)) {
+    const maxU = hoeheFlaeche < parseFloat(rHoeheEl?.value);
     if (!maxU) {
       uOK = false;
-      uMsg = 'Die Unterkante muss kleiner als die Rohrhöhe sein.';
+      uMsg = 'Die Höhe der Fläche muss kleiner als die Rohrhöhe sein.';
     }
   }
-  showFieldError(unterkanteFlaecheEl, errUF, !uOK, uMsg);
+  showFieldError(hoeheFlaecheEl, errHF, !uOK, uMsg);
   ok = ok && uOK;
 
   // --- Pflicht-Dropdowns (haben meist Defaults, aber sicherheitshalber prüfen) ---
@@ -273,7 +271,7 @@ async function submitSteher() {
       hoehe_m:        parseFloat(document.getElementById("hoehe_m").value),
       rohr_laenge_m:  parseFloat(document.getElementById("rohr_laenge_m").value),
       rohr_hoehe_m:   parseFloat(document.getElementById("rohr_hoehe_m").value),
-      unterkante_flaeche_m: document.getElementById("unterkante_flaeche_m").value,
+      hoehe_flaeche_m: document.getElementById("hoehe_flaeche_m").value,
       traverse_name_intern:   document.getElementById("traverse_name_intern").value,
       bodenplatte_name_intern:document.getElementById("bodenplatte_name_intern").value,
       rohr_name_intern:       document.getElementById("rohr_name_intern").value,

@@ -11,7 +11,7 @@ const vec = {
  * Wirft bei Fehlern eine aussagekräftige Exception.
  */
 export function validateSteherInputs({
-  hoehe_m, rohr_laenge_m, rohr_hoehe_m, unterkante_flaeche_m, traverse_name_intern, bodenplatte_name_intern, rohr_name_intern, untergrund,
+  hoehe_m, rohr_laenge_m, rohr_hoehe_m, hoehe_flaeche_m: hoehe_flaeche_m, traverse_name_intern, bodenplatte_name_intern, rohr_name_intern, untergrund,
 }, catalog) {
   if (!catalog || typeof catalog.getTraverse !== 'function' || typeof catalog.getBodenplatte !== 'function' || typeof catalog.getRohr !== 'function') {
     throw new Error('catalog mit getTraverse/getBodenplatte/getRohr erforderlich.');
@@ -20,14 +20,14 @@ export function validateSteherInputs({
   const H = Number(hoehe_m);
   const R_L = Number(rohr_laenge_m);
   const R_H = Number(rohr_hoehe_m);
-  let U = unterkante_flaeche_m;
+  let H_F = hoehe_flaeche_m;
 
-  if (U === "" || U === null || U === undefined) {
-    U = null;
+  if (H_F === "" || H_F === null || H_F === undefined) {
+    H_F = null;
   } else {
-    U = Number(U);
-    if (!isFinite(U) || U < 0) {
-      throw new Error('unterkante_flaeche_m muss leer oder eine Zahl ≥ 0 sein.');
+    H_F = Number(H_F);
+    if (!isFinite(H_F) || H_F <= 0) {
+      throw new Error('hoehe_flaeche_m muss leer oder eine Zahl > 0 sein.');
     }
   }
   if (!isFinite(H) || !isFinite(R_L) || !isFinite(R_H)) throw new Error('hoehe_m, rohr_laenge_m und rohr_hoehe_m müssen Zahlen sein.');
@@ -59,7 +59,7 @@ export function validateSteherInputs({
  * @param {number} inputs.hoehe_m
  * @param {number} inputs.rohr_laenge_m
  * @param {number} inputs.rohr_hoehe_m
- * @param {number|null} inputs.unterkante_flaeche_m
+ * @param {number|null} inputs.hoehe_flaeche_m
  * @param {string} inputs.traverse_name_intern
  * @param {string} inputs.bodenplatte_name_intern
  * @param {boolean} [inputs.gummimatte=true]
@@ -71,19 +71,19 @@ export function validateSteherInputs({
  */
 export function buildSteher(inputs, catalog) {
   const {
-    hoehe_m, rohr_laenge_m, rohr_hoehe_m, unterkante_flaeche_m, traverse_name_intern, bodenplatte_name_intern, rohr_name_intern,
+    hoehe_m, rohr_laenge_m, rohr_hoehe_m, hoehe_flaeche_m, traverse_name_intern, bodenplatte_name_intern, rohr_name_intern,
     gummimatte = true,
     untergrund,
     name = 'Steher',
   } = inputs;
 
-  validateSteherInputs({hoehe_m, rohr_laenge_m, rohr_hoehe_m, unterkante_flaeche_m, traverse_name_intern, bodenplatte_name_intern, rohr_name_intern, untergrund }, catalog);
+  validateSteherInputs({hoehe_m, rohr_laenge_m, rohr_hoehe_m, hoehe_flaeche_m, traverse_name_intern, bodenplatte_name_intern, rohr_name_intern, untergrund }, catalog);
   const H = Number(hoehe_m);
   const R_L = Number(rohr_laenge_m);
   const R_H = Number(rohr_hoehe_m);
-  let U = null;
-  if (unterkante_flaeche_m !== "" && unterkante_flaeche_m !== null && unterkante_flaeche_m !== undefined) {
-    U = Number(unterkante_flaeche_m);
+  let H_F = null;
+  if (hoehe_flaeche_m !== "" && hoehe_flaeche_m !== null && hoehe_flaeche_m !== undefined) {
+    H_F = Number(hoehe_flaeche_m);
   }
   const travSpec = catalog.getTraverse(traverse_name_intern);
   const is3punkt = Number(travSpec.anzahl_gurtrohre) === 3;
@@ -150,24 +150,24 @@ export function buildSteher(inputs, catalog) {
   const bauelemente = [ trav, rohr, plate ];
 
   // --- Wenn Unterkante definiert, dann Fläche und untere Pipe ---
-  if (U !== null) {
+  if (H_F !== null) {
     const rohr_bottom = {
     typ: 'Rohr',
     rohr_name_intern,
-    start: [ -R_L / 2, -t_part, U ],
-    ende:  [ R_L / 2, -t_part, U ],
+    start: [ -R_L / 2, -t_part, R_H - H_F ],
+    ende:  [ R_L / 2, -t_part, R_H - H_F ],
     objekttyp: 'ROHR',
     element_id_intern: 'Rohr_unten',
     anzeigename: rohr_name_intern,
   };
 
     const flaeche = {
-      typ: 'senkrechteFlaeche',
+      typ: 'senkrechteFlaeche', 
       eckpunkte: [
-        [ -R_L / 2, flaeche_offset, U ],
+        [ -R_L / 2, flaeche_offset, R_H - H_F ],
         [ -R_L / 2, flaeche_offset, R_H ],
         [ R_L / 2, flaeche_offset, R_H ],
-        [ R_L / 2, flaeche_offset, U ],
+        [ R_L / 2, flaeche_offset, R_H - H_F ],
       ],
       objekttyp: 'SENKRECHTE_FLAECHE',
       element_id_intern: 'Flaeche',
@@ -186,7 +186,7 @@ export function buildSteher(inputs, catalog) {
     hoehe_m: H,
     rohr_laenge_m: R_L,
     rohr_hoehe_m: R_H,
-    unterkante_flaeche_m: U,
+    hoehe_flaeche_m: H_F,
     traverse_name_intern: traverse_name_intern,
     bodenplatte_name_intern: bodenplatte_name_intern,
     rohr_name_intern: rohr_name_intern,

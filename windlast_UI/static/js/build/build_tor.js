@@ -19,7 +19,7 @@ const ORIENT_MAP = {
  * Wirft bei Fehlern eine aussagekräftige Exception.
  */
 export function validateTorInputs({
-  breite_m, hoehe_m, unterkante_flaeche_m, traverse_name_intern, bodenplatte_name_intern, untergrund, orientierung = ORIENTIERUNG.up,
+  breite_m, hoehe_m, hoehe_flaeche_m: hoehe_flaeche_m, traverse_name_intern, bodenplatte_name_intern, untergrund, orientierung = ORIENTIERUNG.up,
 }, catalog) {
   if (!catalog || typeof catalog.getTraverse !== 'function' || typeof catalog.getBodenplatte !== 'function') {
     throw new Error('catalog mit getTraverse/getBodenplatte erforderlich.');
@@ -27,14 +27,14 @@ export function validateTorInputs({
 
   const B = Number(breite_m);
   const H = Number(hoehe_m);
-  let U = unterkante_flaeche_m;
+  let H_F = hoehe_flaeche_m;
 
-  if (U === "" || U === null || U === undefined) {
-    U = null;
+  if (H_F === "" || H_F === null || H_F === undefined) {
+    H_F = null;
   } else {
-    U = Number(U);
-    if (!isFinite(U) || U < 0) {
-      throw new Error('unterkante_flaeche_m muss leer oder eine Zahl ≥ 0 sein.');
+    H_F = Number(H_F);
+    if (!isFinite(H_F) || H_F <= 0) {
+      throw new Error('hoehe_flaeche_m muss leer oder eine Zahl > 0 sein.');
     }
   }
   if (!isFinite(B) || !isFinite(H)) throw new Error('breite_m und hoehe_m müssen Zahlen sein.');
@@ -75,7 +75,7 @@ export function validateTorInputs({
  * @param {Object} inputs
  * @param {number} inputs.breite_m
  * @param {number} inputs.hoehe_m
- * @param {number|null} inputs.unterkante_flaeche_m
+ * @param {number|null} inputs.hoehe_flaeche_m
  * @param {string} inputs.traverse_name_intern
  * @param {string} inputs.bodenplatte_name_intern
  * @param {boolean} [inputs.gummimatte=true]
@@ -87,20 +87,20 @@ export function validateTorInputs({
  */
 export function buildTor(inputs, catalog) {
   const {
-    breite_m, hoehe_m, unterkante_flaeche_m, traverse_name_intern, bodenplatte_name_intern,
+    breite_m, hoehe_m, hoehe_flaeche_m, traverse_name_intern, bodenplatte_name_intern,
     gummimatte = true,
     untergrund,
     orientierung = ORIENTIERUNG.up,
     name = 'Tor',
   } = inputs;
 
-  validateTorInputs({ breite_m, hoehe_m, unterkante_flaeche_m, traverse_name_intern, bodenplatte_name_intern, untergrund, orientierung }, catalog);
+  validateTorInputs({ breite_m, hoehe_m, hoehe_flaeche_m, traverse_name_intern, bodenplatte_name_intern, untergrund, orientierung }, catalog);
 
   const B = Number(breite_m);
   const H = Number(hoehe_m);
-  let U = null;
-  if (unterkante_flaeche_m !== "" && unterkante_flaeche_m !== null && unterkante_flaeche_m !== undefined) {
-    U = Number(unterkante_flaeche_m);
+  let H_F = null;
+  if (hoehe_flaeche_m !== "" && hoehe_flaeche_m !== null && hoehe_flaeche_m !== undefined) {
+    H_F = Number(hoehe_flaeche_m);
   }
   const travSpec = catalog.getTraverse(traverse_name_intern);
   const is3punkt = Number(travSpec.anzahl_gurtrohre) === 3;
@@ -220,12 +220,12 @@ export function buildTor(inputs, catalog) {
   const bauelemente = [trav_left, trav_top, trav_right, plate_left, plate_right];
 
   // --- Wenn Unterkante definiert, dann Fläche und untere Truss ---
-  if (U !== null) {
+  if (H_F !== null) {
     const trav_bottom = {
       typ: 'Traversenstrecke',
       traverse_name_intern,
-      start: [ 0, 0, U + t_part ],
-      ende:  [ B, 0, U + t_part ],
+      start: [ 0, 0, H - H_F + t_part ],
+      ende:  [ B, 0, H - H_F + t_part ],
       orientierung: vecs.unten,
       objekttyp: 'TRAVERSE',
       element_id_intern: 'Strecke_Unten',
@@ -235,10 +235,10 @@ export function buildTor(inputs, catalog) {
     const flaeche = {
       typ: 'senkrechteFlaeche',
       eckpunkte: [
-        [ 0, flaeche_offset, U ],
+        [ 0, flaeche_offset, H - H_F ],
         [ 0, flaeche_offset, H ],
         [ B, flaeche_offset, H ],
-        [ B, flaeche_offset, U ],
+        [ B, flaeche_offset, H - H_F ],
       ],
       objekttyp: 'SENKRECHTE_FLAECHE',
       element_id_intern: 'Flaeche',
@@ -256,7 +256,7 @@ export function buildTor(inputs, catalog) {
     name,
     breite_m: B,
     hoehe_m: H,
-    unterkante_flaeche_m: U,
+    hoehe_flaeche_m: H_F,
     traverse_name_intern: traverse_name_intern,
     traversen_orientierung: orientierung,
     bauelemente: bauelemente,

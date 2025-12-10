@@ -23,7 +23,7 @@ export const STEHER_HELP_PAGES = [
       <help-include page="steher:hoehe" auto-level="true"></help-include>
       <help-include page="steher:laenge_rohr" auto-level="true"></help-include>
       <help-include page="steher:hoehe_rohr" auto-level="true"></help-include>
-      <help-include page="steher:unterkante_flaeche" auto-level="true"></help-include>
+      <help-include page="steher:hoehe_flaeche" auto-level="true"></help-include>
     `
   },
 
@@ -140,9 +140,9 @@ export const STEHER_HELP_PAGES = [
   },
 
   {
-    id: "steher:unterkante_flaeche",
-    title: "Unterkante Fläche (optional)",
-    shortTitle: "Unterkante Fläche",
+    id: "steher:hoehe_flaeche",
+    title: "Höhe Fläche (optional)",
+    shortTitle: "Höhe Fläche",
     pfad: ["app:konstruktionen", "steher:allgemein"],
     body: `
       <p>

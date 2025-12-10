@@ -21,7 +21,7 @@ export const TISCH_HELP_PAGES = [
       <help-include page="tisch:hoehe" auto-level="true"></help-include>
       <help-include page="tisch:breite" auto-level="true"></help-include>
       <help-include page="tisch:tiefe" auto-level="true"></help-include>
-      <help-include page="tisch:unterkante_flaeche" auto-level="true"></help-include>
+      <help-include page="tisch:hoehe_flaeche" auto-level="true"></help-include>
     `
   },
 
@@ -122,9 +122,9 @@ export const TISCH_HELP_PAGES = [
   },
 
   {
-    id: "tisch:unterkante_flaeche",
-    title: "Unterkante Fläche (optional)",
-    shortTitle: "Unterkante Fläche",
+    id: "tisch:hoehe_flaeche",
+    title: "Höhe Fläche (optional)",
+    shortTitle: "Höhe Fläche",
     pfad: ["app:konstruktionen", "tisch:allgemein"],
     body: `
       <p>

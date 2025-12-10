@@ -22,7 +22,7 @@ export const TOR_HELP_PAGES = [
       <help-include page="tor:untergrund" auto-level="true"></help-include>
       <help-include page="tor:hoehe" auto-level="true"></help-include>
       <help-include page="tor:breite" auto-level="true"></help-include>
-      <help-include page="tor:unterkante_flaeche" auto-level="true"></help-include>
+      <help-include page="tor:hoehe_flaeche" auto-level="true"></help-include>
     `
   },
 
@@ -130,9 +130,9 @@ export const TOR_HELP_PAGES = [
   },
 
   {
-    id: "tor:unterkante_flaeche",
-    title: "Unterkante Fläche (optional)",
-    shortTitle: "Unterkante Fläche",
+    id: "tor:hoehe_flaeche",
+    title: "Höhe Fläche (optional)",
+    shortTitle: "Höhe Fläche",
     pfad: ["app:konstruktionen", "tor:allgemein"],
     body: `
       <p>

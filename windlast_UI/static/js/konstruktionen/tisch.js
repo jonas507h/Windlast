@@ -126,15 +126,15 @@ function validateTischForm() {
   const hoeheEl  = document.getElementById('hoehe_m');
   const breiteEl = document.getElementById('breite_m');
   const tiefeEl  = document.getElementById('tiefe_m');
-  const unterkanteFlaecheEl = document.getElementById('unterkante_flaeche_m');
+  const hoeheFlaecheEl = document.getElementById('hoehe_flaeche_m');
 
   const errH = document.getElementById('err-hoehe');
   const errB = document.getElementById('err-breite');
   const errT = document.getElementById('err-tiefe');
-  const errUF = document.getElementById('err-unterkante_flaeche');
+  const errHF = document.getElementById('err-hoehe_flaeche');
 
-  const rawU = unterkanteFlaecheEl?.value?.trim();
-  const unterkanteFlaeche = rawU === "" ? null : parseFloat(rawU);
+  const rawHF = hoeheFlaecheEl?.value?.trim();
+  const hoeheFlaeche = rawHF === "" ? null : parseFloat(rawHF);
 
   const hOK = isPositiveNumber(parseFloat(hoeheEl?.value));
   showFieldError(hoeheEl, errH, !hOK, 'Bitte eine gültige Höhe > 0 angeben.');
@@ -150,17 +150,17 @@ function validateTischForm() {
 
   let uOK = true;
   let uMsg = '';
-  if (!(rawU === "" || unterkanteFlaeche === 0 || (isFinite(unterkanteFlaeche) && unterkanteFlaeche > 0))) {
+  if (!(rawHF === "" || (isFinite(hoeheFlaeche) && hoeheFlaeche > 0))) {
     uOK = false;
-    uMsg = 'Bitte eine Zahl ≥ 0 angeben oder leer lassen.';
-  } else if (unterkanteFlaeche !== null && isFinite(unterkanteFlaeche)) {
-    const maxU = unterkanteFlaeche < parseFloat(hoeheEl?.value);
+    uMsg = 'Bitte eine Zahl > 0 angeben oder leer lassen.';
+  } else if (hoeheFlaeche !== null && isFinite(hoeheFlaeche)) {
+    const maxU = hoeheFlaeche < parseFloat(hoeheEl?.value);
     if (!maxU) {
       uOK = false;
-      uMsg = 'Die Unterkante muss kleiner als die Höhe sein.';
+      uMsg = 'Die Höhe der Fläche muss kleiner als die Gesamthöhe sein.';
     }
   }
-  showFieldError(unterkanteFlaecheEl, errUF, !uOK, uMsg);
+  showFieldError(hoeheFlaecheEl, errHF, !uOK, uMsg);
   ok = ok && uOK;
 
   // Pflicht-Dropdowns (z. T. mit Defaults aus initTischDropdowns)
@@ -256,7 +256,7 @@ async function submitTisch() {
       breite_m: parseFloat(document.getElementById("breite_m").value),
       tiefe_m:  parseFloat(document.getElementById("tiefe_m").value),
       hoehe_m:  parseFloat(document.getElementById("hoehe_m").value),
-      unterkante_flaeche_m: document.getElementById("unterkante_flaeche_m").value,
+      hoehe_flaeche_m: document.getElementById("hoehe_flaeche_m").value,
       traverse_name_intern:    document.getElementById("traverse_name_intern").value,
       bodenplatte_name_intern: document.getElementById("bodenplatte_name_intern").value,
       gummimatte: gummimatte_bool,

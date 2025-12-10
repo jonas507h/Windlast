@@ -9,7 +9,7 @@ function readFormForSteher() {
   const hoehe  = parseFloat(document.getElementById('hoehe_m')?.value);
   const rohr_laenge  = parseFloat(document.getElementById('rohr_laenge_m')?.value);
   const rohr_hoehe  = parseFloat(document.getElementById('rohr_hoehe_m')?.value);
-  const unterkanteFlaeche = document.getElementById('unterkante_flaeche_m')?.value;
+  const hoeheFlaeche = document.getElementById('hoehe_flaeche_m')?.value;
 
   const traverse_name_intern   = document.getElementById('traverse_name_intern')?.value || 'TRUSS';
   const bodenplatte_name_intern= document.getElementById('bodenplatte_name_intern')?.value || 'BP';
@@ -22,7 +22,7 @@ function readFormForSteher() {
     hoehe_m:  isFinite(hoehe)  && hoehe  > 0 ? hoehe  : 4.5,
     rohr_laenge_m: isFinite(rohr_laenge) && rohr_laenge > 0 ? rohr_laenge : 1.5,
     rohr_hoehe_m: isFinite(rohr_hoehe) && rohr_hoehe > 0 ? rohr_hoehe : 4.0,
-    unterkante_flaeche_m: isFinite(parseFloat(unterkanteFlaeche)) ? parseFloat(unterkanteFlaeche) : null,
+    hoehe_flaeche_m: isFinite(parseFloat(hoeheFlaeche)) ? parseFloat(hoeheFlaeche) : null,
     traverse_name_intern,
     bodenplatte_name_intern,
     rohr_name_intern,
@@ -61,7 +61,7 @@ export function mountSteherPreview(mountEl) {
   rerender();
 
   // simple live update: auf Änderungen der relevanten Inputs reagieren
-  const ids = ['hoehe_m','rohr_laenge_m','rohr_hoehe_m','traverse_name_intern','bodenplatte_name_intern','rohr_name_intern','gummimatte','untergrund_typ','unterkante_flaeche_m'];
+  const ids = ['hoehe_m','rohr_laenge_m','rohr_hoehe_m','traverse_name_intern','bodenplatte_name_intern','rohr_name_intern','gummimatte','untergrund_typ','hoehe_flaeche_m'];
   const listeners = [];
   for (const id of ids) {
     const el = document.getElementById(id);
