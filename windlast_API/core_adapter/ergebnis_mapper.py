@@ -4,7 +4,27 @@ from math import isfinite, isinf, isnan
 from dataclasses import is_dataclass, asdict
 from windlast_CORE.datenstruktur.enums import Norm, Nachweis
 
-# ---------- API keys (same as before) ----------
+# ---------------------------------------------------------------------------
+# Deduplikations-Konfiguration für Zwischenergebnisse
+# Ergebnisse werden über diese Felder dedupliziert, d.h. wenn
+# mehrere Dokumente mit identischen Werten für diese Felder existieren,
+# werden sie als Duplikate betrachtet und nur eines bleibt erhalten.
+# ---------------------------------------------------------------------------
+
+DEDUP_FIELDS = [
+    "title",
+    "doc_type",
+    "nachweis",
+    "szenario",
+    "windrichtung_deg",
+    "achse_index",
+    "element_id",
+    "segment_index",
+    "zone",
+    "ref_nachweis",
+]
+
+# ---------- API keys ----------
 _NORM_KEY = {
     Norm.DIN_EN_13814_2005_06:    "EN_13814_2005",
     Norm.DIN_EN_17879_2024_08:    "EN_17879_2024",
@@ -137,6 +157,34 @@ def _normalize_doc_bundle(bundle, ctx):
     }
     return out
 
+def _make_dedup_key(doc):
+    ctx = doc["context"] or {}
+
+    # Scenario-Feld vereinheitlichen
+    scenario = ctx.get("szenario")
+    if scenario is None:
+        scenario = ctx.get("scenario")
+
+    # Element-Feld vereinheitlichen
+    element = ctx.get("element_id")
+    if element is None:
+        element = ctx.get("element_id_intern")
+
+    # Lookup-Map, damit wir keinen riesigen if/else Block brauchen
+    value_map = {
+        "title":           doc.get("title"),
+        "doc_type":        ctx.get("doc_type"),
+        "nachweis":        ctx.get("nachweis"),
+        "szenario":        scenario,
+        "windrichtung_deg": ctx.get("windrichtung_deg"),
+        "achse_index":      ctx.get("achse_index"),
+        "element_id":       element,
+        "segment_index":    ctx.get("segment_index"),
+        "ref_nachweis":     ctx.get("ref_nachweis"),
+    }
+
+    return tuple(value_map.get(field) for field in DEDUP_FIELDS)
+
 def _collect_docs_from_list(items):
     """
     items: List[Tuple[bundle, ctx]]
@@ -152,17 +200,7 @@ def _collect_docs_from_list(items):
     for bundle, ctx in items:
         doc = _normalize_doc_bundle(bundle, ctx)
         c = doc["context"] or {}
-        key = (
-            doc["title"],
-            c.get("doc_type"),
-            c.get("nachweis"),                         # wichtig: pro Nachweis getrennt
-            c.get("szenario") or c.get("scenario"),
-            c.get("windrichtung_deg"),
-            c.get("achse_index"),
-            c.get("element_id") or c.get("element_id_intern"),
-            c.get("segment_index"),
-            c.get("ref_nachweis"),                     # z.B. LOADS, falls gesetzt
-        )
+        key = _make_dedup_key(doc)
         role_new = (c.get("rolle") or c.get("role"))
 
         if key in dedup:

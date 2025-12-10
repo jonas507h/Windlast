@@ -12,7 +12,17 @@ import {
     formatMathWithSubSup,
 } from "../utils/formatierung.js";
 
-// === Filter: Nachweis & Rollen (aus Footer übernommen) ===
+// === Konfiguration der Gruppierung der Zwischenergebnisse ===
+// Format: [merkmalKeyAusContext, labelFürFehlendeWerte]
+const DOC_GROUP_CONFIG = [
+  ["windrichtung_deg", "ohne Richtung"],
+  ["element_id",       "allgemein"],
+  ["achse_index",      "ohne Achse"],
+  ["zone",             "ohne Zone"],
+  ["segment_index",    "kein Segment"],
+];
+
+// === Filter: Nachweis & Rollen ===
 const NACHWEIS_CHOICES = ["ALLE", "KIPP", "GLEIT", "ABHEBE", "BALLAST", "BASIS", "LOADS"];
 const NACHWEIS_LABELS = {
   "ALLE":   "Alle",
@@ -207,6 +217,55 @@ function _pickAxisIndex(ctx) {
   return Number.isFinite(n) ? n : null;
 }
 
+function getGroupValueFromContext(doc, key) {
+  const ctx = doc?.context || {};
+
+  switch (key) {
+    case "windrichtung_deg":
+      return _pickDir(doc);              // wie bisher
+    case "element_id":
+      return _pickElementKey(ctx);       // nutzt alle Fallbacks
+    case "achse_index":
+      return _pickAxisIndex(ctx);        // numeric only
+    default:
+      // generischer Fallback: direkt aus dem Kontext lesen
+      return (ctx[key] !== undefined) ? ctx[key] : null;
+  }
+}
+
+// Sortierstrategie je Merkmal
+function inferSortForGroupKey(key) {
+  if (key === "element_id") return "alnum";
+  // Default: numerisch (wie Windrichtung/Achse)
+  return "numeric";
+}
+
+// Titeltext je Gruppenschlüssel
+function buildGroupTitle(key, value) {
+  if (value === null || value === undefined || value === "") return "";
+
+  if (key === "windrichtung_deg") {
+    return `Windrichtung ${value}`;
+  }
+  if (key === "element_id") {
+    return `Element ${value}`;
+  }
+  if (key === "achse_index") {
+    return `Achse ${value}`;
+  }
+
+  // generischer Fallback
+  const niceKey = prettyKey(key); // z.B. "windrichtung_deg" → "Windrichtung deg"
+  return `${niceKey} ${value}`;
+}
+
+// CSS-Klassen pro Ebene (für existierende Styles)
+const GROUP_LEVEL_CLASSES = [
+  { card: "dir-card",  details: "dir-group",  summary: "dir-summary"  }, // Ebene 0
+  { card: "elem-card", details: "elem-group", summary: "elem-summary" }, // Ebene 1
+  { card: "axis-card", details: "axis-group", summary: "axis-summary" }, // Ebene 2
+];
+
 function renderAccordionGroup({ cardClass, detailsClass, summaryClass, title, count, bodyHtml, open=false }) {
   return `
     <div class="group-card ${cardClass}">
@@ -218,76 +277,138 @@ function renderAccordionGroup({ cardClass, detailsClass, summaryClass, title, co
   `;
 }
 
-function renderDocsByWindrichtung(docs, nachweisSel){
-  const { groups, keys } = groupBy(docs, { keyFn: _pickDir, emptyKey:"__none__", sort:"numeric", emptyLast:true });
-  if (!keys.length) {
-    return `<div class="muted" style="padding:0.75rem 0;">Keine Zwischenergebnisse vorhanden.</div>`;
+function renderDocsGrouped(docs, nachweisSel, groupConfig = DOC_GROUP_CONFIG, level = 0) {
+  // Keine Gruppierung konfiguriert → einfach Liste ausgeben
+  if (!groupConfig || groupConfig.length === 0 || level >= groupConfig.length) {
+    return `<ul class="doc-list">${renderDocsListItems(docs, nachweisSel)}</ul>`;
   }
+
+  const [key, emptyLabel] = groupConfig[level];
+  const emptyKey = `__empty_${key}__`;
+  const sort = inferSortForGroupKey(key);
+
+  const { groups, keys } = groupBy(docs, {
+    keyFn: d => getGroupValueFromContext(d, key),
+    emptyKey,
+    sort,
+    emptyLast: true
+  });
+
+  if (!keys.length) {
+    // gar nichts da
+    if (level === 0) {
+      return `<div class="muted" style="padding:0.75rem 0;">Keine Zwischenergebnisse vorhanden.</div>`;
+    }
+    return "";
+  }
+
+  // Wenn es nur die "leere" Gruppe gibt → Ebene überspringen, tiefer gehen
+  const hasNonEmpty = keys.some(k => k !== emptyKey);
+  if (!hasNonEmpty) {
+    const only = groups.get(emptyKey) || [];
+    return renderDocsGrouped(only, nachweisSel, groupConfig, level + 1);
+  }
+
   const blocks = keys.map((k, idx) => {
     const list = groups.get(k) || [];
-    const title = (k === "__none__") ? "ohne Richtung" : `Windrichtung ${k}`;
+    const title = (k === emptyKey) ? emptyLabel : buildGroupTitle(key, k);
     const count = `<span class="muted" style="font-weight:400; margin-left:.5rem;">(${list.length})</span>`;
-    // innerhalb jeder Richtung weiter nach Element gruppieren
-    const elemGroupsHtml = renderDocsByElement(list, nachweisSel); // ← nachweisSel durchreichen
+    const bodyHtml = renderDocsGrouped(list, nachweisSel, groupConfig, level + 1);
+
+    const cls = GROUP_LEVEL_CLASSES[level] || {};
+    const cardClass    = cls.card    || `lvl-${level}-card`;
+    const detailsClass = cls.details || `lvl-${level}-group`;
+    const summaryClass = cls.summary || `lvl-${level}-summary`;
+
     return renderAccordionGroup({
-      cardClass:"dir-card", detailsClass:"dir-group", summaryClass:"dir-summary",
-      title, count, bodyHtml:`<div class="elem-groups">${elemGroupsHtml}</div>`, open: idx===0
+      cardClass,
+      detailsClass,
+      summaryClass,
+      title,
+      count,
+      bodyHtml,
+      open: idx === 0
     });
   }).join("");
-  return `<div class="doc-groups">${blocks}</div>`;
-}
 
-function renderDocsByElement(docsInDir, nachweisSel){
-  const { groups, keys } = groupBy(docsInDir, {
-    keyFn: d => _pickElementKey(d?.context),
-    emptyKey: "__allgemein__",
-    sort: "alnum",
-    emptyLast: true
-  });
-
-  const hasSpecificElements = keys.some(k => k !== "__allgemein__");
-  if (!hasSpecificElements) {
-    const onlyGeneral = groups.get("__allgemein__") || [];
-    return `<div class="axis-groups">${renderDocsByAxis(onlyGeneral, nachweisSel)}</div>`; // ← weiterreichen
+  // Oberste Ebene bekommt wie bisher einen Wrapper
+  if (level === 0) {
+    return `<div class="doc-groups">${blocks}</div>`;
   }
 
-  return keys.map((k, idx) => {
-    const list = groups.get(k) || [];
-    const title = (k === "__allgemein__") ? "allgemein" : `Element ${k}`;
-    const count = `<span class="muted" style="font-weight:400; margin-left:.5rem;">(${list.length})</span>`;
-    const axisHtml = renderDocsByAxis(list, nachweisSel); // ← weiterreichen
-    return renderAccordionGroup({
-      cardClass:"elem-card", detailsClass:"elem-group", summaryClass:"elem-summary",
-      title, count, bodyHtml:`<div class="elem-body"><div class="axis-groups">${axisHtml}</div></div>`, open: idx===0
-    });
-  }).join("");
+  return blocks;
 }
 
-function renderDocsByAxis(docs, nachweisSel){
-  const { groups, keys } = groupBy(docs, {
-    keyFn: d => _pickAxisIndex(d?.context),
-    emptyKey: "__ohne_achse__",
-    sort: "numeric",
-    emptyLast: true
-  });
+// function renderDocsByWindrichtung(docs, nachweisSel){
+//   const { groups, keys } = groupBy(docs, { keyFn: _pickDir, emptyKey:"__none__", sort:"numeric", emptyLast:true });
+//   if (!keys.length) {
+//     return `<div class="muted" style="padding:0.75rem 0;">Keine Zwischenergebnisse vorhanden.</div>`;
+//   }
+//   const blocks = keys.map((k, idx) => {
+//     const list = groups.get(k) || [];
+//     const title = (k === "__none__") ? "ohne Richtung" : `Windrichtung ${k}`;
+//     const count = `<span class="muted" style="font-weight:400; margin-left:.5rem;">(${list.length})</span>`;
+//     // innerhalb jeder Richtung weiter nach Element gruppieren
+//     const elemGroupsHtml = renderDocsByElement(list, nachweisSel); // ← nachweisSel durchreichen
+//     return renderAccordionGroup({
+//       cardClass:"dir-card", detailsClass:"dir-group", summaryClass:"dir-summary",
+//       title, count, bodyHtml:`<div class="elem-groups">${elemGroupsHtml}</div>`, open: idx===0
+//     });
+//   }).join("");
+//   return `<div class="doc-groups">${blocks}</div>`;
+// }
 
-  const hasAxes = keys.some(k => k !== "__ohne_achse__");
-  if (!hasAxes) {
-    const only = groups.get("__ohne_achse__") || [];
-    return `<ul class="doc-list">${renderDocsListItems(only, nachweisSel)}</ul>`;
-  }
+// function renderDocsByElement(docsInDir, nachweisSel){
+//   const { groups, keys } = groupBy(docsInDir, {
+//     keyFn: d => _pickElementKey(d?.context),
+//     emptyKey: "__allgemein__",
+//     sort: "alnum",
+//     emptyLast: true
+//   });
 
-  return keys.map((k, idx) => {
-    const list = groups.get(k) || [];
-    const title = (k === "__ohne_achse__") ? "ohne Achse" : `Achse ${k}`;
-    const count = `<span class="muted" style="font-weight:400; margin-left:.5rem;">(${list.length})</span>`;
-    const body = `<ul class="doc-list">${renderDocsListItems(list, nachweisSel)}</ul>`;
-    return renderAccordionGroup({
-      cardClass:"axis-card", detailsClass:"axis-group", summaryClass:"axis-summary",
-      title, count, bodyHtml: body, open: idx===0
-    });
-  }).join("");
-}
+//   const hasSpecificElements = keys.some(k => k !== "__allgemein__");
+//   if (!hasSpecificElements) {
+//     const onlyGeneral = groups.get("__allgemein__") || [];
+//     return `<div class="axis-groups">${renderDocsByAxis(onlyGeneral, nachweisSel)}</div>`; // ← weiterreichen
+//   }
+
+//   return keys.map((k, idx) => {
+//     const list = groups.get(k) || [];
+//     const title = (k === "__allgemein__") ? "allgemein" : `Element ${k}`;
+//     const count = `<span class="muted" style="font-weight:400; margin-left:.5rem;">(${list.length})</span>`;
+//     const axisHtml = renderDocsByAxis(list, nachweisSel); // ← weiterreichen
+//     return renderAccordionGroup({
+//       cardClass:"elem-card", detailsClass:"elem-group", summaryClass:"elem-summary",
+//       title, count, bodyHtml:`<div class="elem-body"><div class="axis-groups">${axisHtml}</div></div>`, open: idx===0
+//     });
+//   }).join("");
+// }
+
+// function renderDocsByAxis(docs, nachweisSel){
+//   const { groups, keys } = groupBy(docs, {
+//     keyFn: d => _pickAxisIndex(d?.context),
+//     emptyKey: "__ohne_achse__",
+//     sort: "numeric",
+//     emptyLast: true
+//   });
+
+//   const hasAxes = keys.some(k => k !== "__ohne_achse__");
+//   if (!hasAxes) {
+//     const only = groups.get("__ohne_achse__") || [];
+//     return `<ul class="doc-list">${renderDocsListItems(only, nachweisSel)}</ul>`;
+//   }
+
+//   return keys.map((k, idx) => {
+//     const list = groups.get(k) || [];
+//     const title = (k === "__ohne_achse__") ? "ohne Achse" : `Achse ${k}`;
+//     const count = `<span class="muted" style="font-weight:400; margin-left:.5rem;">(${list.length})</span>`;
+//     const body = `<ul class="doc-list">${renderDocsListItems(list, nachweisSel)}</ul>`;
+//     return renderAccordionGroup({
+//       cardClass:"axis-card", detailsClass:"axis-group", summaryClass:"axis-summary",
+//       title, count, bodyHtml: body, open: idx===0
+//     });
+//   }).join("");
+// }
 
 function renderDocsListItems(docs, nachweisSel) {
   return (docs || []).map(d => {
@@ -433,7 +554,7 @@ export function openErgebnisseModal(normKey, szenario = null, { initialNachweis 
   const apply = () => {
     const byNachweis = filterDocsByNachweis(items, activeNachweis);
     const finalDocs  = filterDocsByRole(byNachweis, activeNachweis, activeRoles);
-    listWrap.innerHTML = renderDocsByWindrichtung(finalDocs, activeNachweis);
+    listWrap.innerHTML = renderDocsGrouped(finalDocs, activeNachweis, DOC_GROUP_CONFIG);
   };
 
   apply();

@@ -100,8 +100,21 @@
   border-radius: 10px;
   background: var(--panel);
   overflow: hidden;
-  margin: 4px 0;
+  margin: 6px 4px;        /* mehr vertikaler Abstand + ein Tick horizontal */
 }
+
+/* erste Ebene darf ruhig ein bisschen "luftiger" sein */
+#modal-root .doc-groups > .group-card {
+  margin: 8px 0;
+}
+
+/* verschachtelte Cards leicht eingerückt,
+   damit sich die Rahmen nicht direkt berühren */
+#modal-root .group-card .group-card {
+  margin: 6px 8px;
+}
+
+/* leichte optische Unterschiede je Ebene (optional) */
 #modal-root .axis-card { border-radius: 8px; }
 #modal-root .elem-card { border-style: solid; }
 #modal-root .axis-card { border-style: solid; }
@@ -115,71 +128,17 @@
   border-radius: 0;
 }
 
-/* Summary-Titel (Windrichtung / Element / Achse) */
-#modal-root .dir-summary,
-#modal-root .elem-summary,
-#modal-root .axis-summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 12px;
-  font-weight: 600;
-  position: relative;
-  padding-left: 1.2em; /* Platz für den Pfeil */
-  cursor: pointer;
-  user-select: none;
-}
-
-/* Zähler (z. B. (13)) */
+/* Zähler (z. B. (13)) – Standard im Modal */
 #modal-root .muted {
   font-size: .9em;
   margin-left: .4rem;
   color: var(--muted);
 }
 
-/* Unterelemente in der Card leicht eingerückt */
+/* Unterelemente in der Card leicht eingerückt (historische Klassen) */
 #modal-root .dir-card   .elem-groups   { padding: 4px 14px 4px 14px; }
 #modal-root .elem-card  .axis-groups   { padding: 4px 12px 4px 12px; }
 #modal-root .axis-card  .doc-list      { padding: 4px 12px 4px 12px; }
-
-/* Offene Gruppen – Trenner */
-#modal-root .dir-group[open]  > .dir-summary,
-#modal-root .elem-group[open] > .elem-summary,
-#modal-root .axis-group[open] > .axis-summary {
-  border-bottom: 1px solid var(--border);
-}
-
-/* kleine optische Trennung zwischen Cards */
-#modal-root .group-card:not(:last-child) {
-  margin-bottom: 2px;
-}
-
-/* --- Aus/Einklapp-Dreieck --- */
-
-/* native Marker ausblenden */
-#modal-root .dir-summary::-webkit-details-marker,
-#modal-root .elem-summary::-webkit-details-marker,
-#modal-root .axis-summary::-webkit-details-marker { display: none; }
-
-/* Pfeil absolut davor platzieren */
-#modal-root .dir-summary::before,
-#modal-root .elem-summary::before,
-#modal-root .axis-summary::before {
-  content: "▸";
-  position: absolute;
-  left: 0.3em;
-  top: 50%;
-  transform: translateY(-50%);
-  opacity: 0.8;
-  font-size: 0.9em;
-}
-
-/* Geöffneter Zustand */
-#modal-root .dir-group[open]  > .dir-summary::before,
-#modal-root .elem-group[open] > .elem-summary::before,
-#modal-root .axis-group[open] > .axis-summary::before {
-  content: "▾";
-}
 
 /* === Listeneinträge innerhalb der Achsen === */
 #modal-root .doc-list {
@@ -257,4 +216,39 @@
 #modal-root .doc-list .doc-li.role-irr {
   background-color: var(--role-irr-bg);
   color: var(--role-irr-fg);
+}
+
+/* ===== Generisches Summary-Styling für alle Gruppen ===== */
+#modal-root .group-card > details > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  font-weight: 600;
+  position: relative;
+  padding-left: 1.2em; /* Platz für den Pfeil */
+  cursor: pointer;
+  user-select: none;
+  border-bottom: 1px solid var(--border); /* Trennlinie unter jedem Titel */
+}
+
+/* native Marker ausblenden */
+#modal-root .group-card > details > summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Pfeil vor jedem Summary */
+#modal-root .group-card > details > summary::before {
+  content: "▸";
+  position: absolute;
+  left: 0.3em;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.8;
+  font-size: 0.9em;
+}
+
+/* Geöffnet: Pfeil nach unten */
+#modal-root .group-card > details[open] > summary::before {
+  content: "▾";
 }

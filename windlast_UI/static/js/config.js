@@ -2,7 +2,7 @@
 (function () {
   const VERSION = "2.0.0-dev";
 
-  // Echte Build-Rolle (unveränderbar, wird nur gelesen)
+  // Echte Build-Rolle
   const BUILD_ROLE = "godmode"; // "user" | "debug" | "admin" | "godmode"
 
   // 1) Flags pro Rolle definieren
@@ -12,6 +12,7 @@
       show_nichtZertifiziert_warnung: true,
       show_doppelte_meldungen: false,
       show_meldungen_tooltip: false,
+      show_real_kontext_keys: false,
       show_nullpunkt: false,
       show_suche_tooltip: false,
       show_test_options_dropdown: false,
@@ -21,6 +22,7 @@
       show_nichtZertifiziert_warnung: true,
       show_doppelte_meldungen: true,
       show_meldungen_tooltip: true,
+      show_real_kontext_keys: false,
       show_nullpunkt: true,
       show_suche_tooltip: true,
       show_test_options_dropdown: false,
@@ -30,6 +32,7 @@
       show_nichtZertifiziert_warnung: false,
       show_doppelte_meldungen: true,
       show_meldungen_tooltip: true,
+      show_real_kontext_keys: false,
       show_nullpunkt: true,
       show_suche_tooltip: true,
       show_test_options_dropdown: false,
@@ -39,6 +42,7 @@
       show_nichtZertifiziert_warnung: true,
       show_doppelte_meldungen: true,
       show_meldungen_tooltip: true,
+      show_real_kontext_keys: true,
       show_nullpunkt: true,
       show_suche_tooltip: true,
       show_test_options_dropdown: true,
