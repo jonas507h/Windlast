@@ -4,6 +4,8 @@
 // ------------------------------------
 // Konstanten
 // ------------------------------------
+export const DISPLAY_EPS = 1e-9;
+
 export const ALT_LABELS = {
   IN_BETRIEB: "mit Schutzmaßnahmen",
 };
@@ -64,6 +66,7 @@ export const CONTEXT_ALIASES = {
   windrichtung_deg: "Windrichtung",
   paarung: "Materialpaarung",
   norm_used: "Verwendete Norm",
+  segment_index: "Segment",
 };
 
 export const CONTEXT_BLACKLIST = new Set([
@@ -78,8 +81,17 @@ export const CONTEXT_BLACKLIST_PREFIXES = [
 ];
 
 // ------------------------------------
-// Helfer (aus footer.js)
+// Helfer
 // ------------------------------------
+function useDisplayEps() {
+  try {
+    if (typeof window === "undefined") return false;
+    return !!(window.APP_STATE?.flags?.use_eps_on_anzeige);
+  } catch {
+    return false;
+  }
+}
+
 export function displayAltName(name) {
   return (name && ALT_LABELS[name]) || name || "";
 }
@@ -94,10 +106,17 @@ export function escapeHtml(s){
 
 // 1:1 Zahl-/Vektorformatierung (DE, wissenschaftlich bei großen/kleinen Zahlen)
 export function formatNumberDE(value, sig = 4) {
-  if (value == null || value === "INF" || value === "-INF" || Number.isNaN(value)) return String(value);
+  if (value == null || value === "INF" || value === "-INF" || Number.isNaN(value)) {
+    return String(value);
+  }
 
-  const num = Number(value);
+  let num = Number(value);
   if (!Number.isFinite(num)) return String(value);
+
+  // Optional: sehr kleine Beträge auf 0 setzen (nur Anzeige)
+  if (useDisplayEps() && Math.abs(num) < DISPLAY_EPS) {
+    num = 0;
+  }
 
   // Ganzzahlen ohne Nachkommastellen
   if (Number.isInteger(num)) {

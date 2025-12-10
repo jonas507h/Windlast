@@ -16,6 +16,7 @@
       show_nullpunkt: false,
       show_suche_tooltip: false,
       show_test_options_dropdown: false,
+      use_eps_on_anzeige: true,
     }),
     debug: Object.freeze({
       show_zwischenergebnisse_tooltip: true,
@@ -26,6 +27,7 @@
       show_nullpunkt: true,
       show_suche_tooltip: true,
       show_test_options_dropdown: false,
+      use_eps_on_anzeige: true,
     }),
     admin: Object.freeze({
       show_zwischenergebnisse_tooltip: true,
@@ -36,16 +38,18 @@
       show_nullpunkt: true,
       show_suche_tooltip: true,
       show_test_options_dropdown: false,
+      use_eps_on_anzeige: true,
     }),
     godmode: Object.freeze({
       show_zwischenergebnisse_tooltip: true,
-      show_nichtZertifiziert_warnung: true,
+      show_nichtZertifiziert_warnung: false,
       show_doppelte_meldungen: true,
       show_meldungen_tooltip: true,
       show_real_kontext_keys: true,
       show_nullpunkt: true,
       show_suche_tooltip: true,
       show_test_options_dropdown: true,
+      use_eps_on_anzeige: false,
     }),
   };
 

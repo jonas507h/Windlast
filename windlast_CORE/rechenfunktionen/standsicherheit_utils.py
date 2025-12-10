@@ -384,11 +384,11 @@ def ermittle_min_reibwert(
             )
 
     if not mu_werte:
-        protokolliere_msg(
-            protokoll, severity=Severity.WARN, code="GLEIT/NO_PLATE_MU",
-            text="Kein Reibwert gefunden – setze konservativ μ=0.",
-            kontext=base_ctx,
-        )
+        # protokolliere_msg(
+        #     protokoll, severity=Severity.WARN, code="GLEIT/NO_PLATE_MU",
+        #     text="Kein Reibwert gefunden – setze konservativ μ=0.",
+        #     kontext=base_ctx,
+        # )
         return 0.0
 
     mu_min = min(mu_werte)

@@ -12,6 +12,7 @@ export const GENERAL_HELP_PAGES = [
       <ul>
         <li>[[norm:allgemein|Normen]]</li>
         <li>[[app:bedienung|Bedienung des Programms]]</li>
+        <li>[[app:konstruktionen|Konstruktionen]]</li>
         <li>[[ergebnisse:allgemein|Ergebnisse]]</li>
       </ul>
 

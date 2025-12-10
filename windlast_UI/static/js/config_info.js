@@ -22,7 +22,7 @@
     `• Build-Rolle:              ${window.APP_STATE?.buildRole}`,
     "• Aktuelle Rolle:           APP_STATE.role",
     "• Aktuelle Flags:           APP_STATE.flags",
-    "• Rolle setzen:             APP_STATE.setRole('debug')   // 'user' | 'debug' | 'admin' | 'dev'",
+    "• Rolle setzen:             APP_STATE.setRole('debug')   // 'user' | 'debug' | 'admin'",
     "• Persistente Rolle setzen: APP_STATE.setRole('admin', { persist: true })",
     "• Persistenz löschen:       localStorage.removeItem('windlast_ui_role')",
     "• Seite neu laden:          location.reload()",

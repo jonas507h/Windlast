@@ -36,11 +36,22 @@ export const MELDUNGEN_HELP_PAGES = [
           ([[norm:DIN_EN_13814_2005|DIN EN 13814:2005-06]] bis 50m, [[norm:DIN_EN_17879_2024|DIN EN 17879:2024-08]] bis 30m,
           [[norm:DIN_EN_1991_1_4_2010|DIN EN 1991-1-4:2010-12]] bis 25m).
         </faq>
+        <faq question="Kein Reibwert für Paarung ...–... in den bekannten Normen vorhanden.">
+          Die Konstruktion kann nicht berechnet werden, weil kein Reibwert für die gewählte Materialpaarung in [[norm:DIN_EN_13814_2005|DIN EN 13814:2005-06]]
+          oder [[norm:DIN_EN_17879_2024|DIN EN 17879:2024-08]] vorhanden ist. Der Fehler kann nur auftreten, wenn ihr Gummimatten nutzt. Für Gummi sind nur Reibwerte mit Beton,
+          Stahl oder Holz definiert.
+        </faq>
       <h4>Warnungen</h4>
-        <faq question="Abminderungen der Windlasten sind bei fliegenden Bauten nicht zulässig. Der Abminderungsfaktor wird hier nur auf ausdrücklichen Wunsch angewendet.">
+        <faq question="Abminderungen der Windlasten nach DIN EN 1991-1-4:2010-12/NA sind bei Bauten, die jederzeit errichtet und demontiert werden können (z.B. fliegende Bauten), nicht zulässig.">
           Im nationalen Anhang der [[norm:DIN_EN_1991_1_4_2010|DIN EN 1991-1-4:2010-12]] ist festgelegt, dass bei kurzen Aufstelldauern eine Abminderung des Staudrucks möglich ist.
-          Fliegende Bauten bzw. allgemein Bauten, die jederzeit errichtet und demontiert werden können, sind von dieser Regelung jedoch explizit ausgenommen.
+          Fliegende Bauten bzw. allgemein Bauten, die jederzeit errichtet und demontiert werden können, sind von dieser Regelung jedoch explizit ausgenommen
+          (siehe [[norm:DIN_EN_1991_1_4_2010:abminderungen|DIN EN 1991-1-4:2010-12 – Abminderung von Staudrücken]]).
           Die Software wendet die Abminderung dennoch an. Soll dies nicht geschehen, könnt ihr das Feld [[header:aufstelldauer|Aufstelldauer]] einfach leer lassen.
+        </faq>
+        <faq question="Die verwendete Aufstelldauer zwischen 3 Tagen und 3 Monaten führt zu einer Abminderung des Staudrucks, die nur für den Zeitraum von Mai bis August zulässig ist.">
+          Die hier benutzte [[norm:DIN_EN_1991_1_4_2010:abminderungen|Abminderung der Staudrücke]] gemäß dem nationalen Anhang der
+          [[norm:DIN_EN_1991_1_4_2010|DIN EN 1991-1-4:2010-12]] ist nur in einem Aufstellzeitraum zwischen Mai und August zulässig.
+          Wenn das bei euch nicht der Fall ist, könnt ihr einfach eine Aufstelldauer zwischen 3 und 12 Monaten angeben.
         </faq>
       <h4>Hinweise</h4>
         <faq question="Für Paarung ...–... wurde auf DIN EN ... zurückgegriffen.">

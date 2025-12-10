@@ -23,25 +23,53 @@ const DOC_GROUP_CONFIG = [
 ];
 
 // === Filter: Nachweis & Rollen ===
-const NACHWEIS_CHOICES = ["ALLE", "KIPP", "GLEIT", "ABHEBE", "BALLAST", "BASIS", "LOADS"];
+const NACHWEIS_CHOICES = ["ALLE", "KIPP", "GLEIT", "ABHEBE", "BALLAST", "LOADS", "BASIS"];
 const NACHWEIS_LABELS = {
   "ALLE":   "Alle",
   "KIPP":   "Kippen",
   "GLEIT":  "Gleiten",
   "ABHEBE":  "Abheben",
   "BALLAST":"Ballast",
+  "LOADS":  "Kräfte",
   "BASIS":  "Basis",
-  "LOADS":  "Kräfte"
 };
 const ROLE_ORDER = { relevant: 3, entscheidungsrelevant: 2, irrelevant: 1 };
+
+function isDocVisibleInNachweisView(ctx, sel) {
+  const n = ctx?.nachweis ?? null;
+
+  // "ALLE" sieht alles
+  if (!sel || sel === "ALLE") return true;
+
+  // Spezialsicht: BASIS – nur BASIS selbst
+  if (sel === "BASIS") {
+    return n === "BASIS";
+  }
+
+  // Spezialsicht: LOADS – nur LOADS + BASIS (wie bisher)
+  if (sel === "LOADS") {
+    return n === "LOADS" || n === "BASIS";
+  }
+
+  // Normale Nachweise: KIPP, GLEIT, ABHEBE, BALLAST
+  // → eigene Docs + globale BASIS/LOADS + nachweislose Meta-Docs
+  if (n === sel) return true;
+  if (n === "BASIS") return true;
+  if (n === "LOADS") return true;
+  if (n === null) return true; // Meta-Daten ohne eigenen Nachweis
+
+  // Alles andere (z.B. GLEIT-Docs in KIPP-Sicht) raus
+  return false;
+}
 
 function filterDocsByNachweis(docs, sel) {
   if (!sel || sel === "ALLE") return docs || [];
 
+  // LOADS-Sicht: nur LOADS + BASIS
   if (sel === "LOADS") {
     return (docs || []).filter(d => {
       const n = d?.context?.nachweis ?? null;
-      return (n === "LOADS")||(n === "BASIS");
+      return (n === "LOADS") || (n === "BASIS");
     });
   }
 
@@ -53,24 +81,47 @@ function filterDocsByNachweis(docs, sel) {
     });
   }
 
+  // Spezialsicht: BALLAST
+  if (sel === "BALLAST") {
+    return (docs || []).filter(d => {
+      const ctx    = d?.context || {};
+      const relMap = ctx.rolle_pro_nachweis || ctx.relevanz_pro_nachweis || null;
+
+      // „alles zulassen im Rahmen der Relevanz für den Ballast“
+      // ⇒ Doc gehört in die BALLAST-Sicht, wenn es dort überhaupt eine Rolle hat.
+      if (relMap && typeof relMap === "object") {
+        return Object.prototype.hasOwnProperty.call(relMap, "BALLAST");
+      }
+
+      // Fallback für ganz alte Daten ohne Map:
+      const n = ctx.nachweis ?? null;
+      if (n === "BALLAST") return true;
+      if (n === "BASIS" || n === "LOADS" || n === null) return true;
+      return false;
+    });
+  }
+
+  // Normale Nachweise: KIPP, GLEIT, ABHEBE
   return (docs || []).filter(d => {
-    const ctx = d?.context || {};
+    const ctx    = d?.context || {};
     const relMap = ctx.rolle_pro_nachweis || ctx.relevanz_pro_nachweis || null;
-    const n = ctx.nachweis ?? null;
+    const n      = ctx.nachweis ?? null;
+
+    // Nur Docs aus dem „passenden“ Nachweis-Kontext zulassen,
+    // plus globale Dinge (BASIS/LOADS/Meta)
+    if (!(n === sel || n === "BASIS" || n === "LOADS" || n === null)) {
+      return false;
+    }
 
     // Wenn es eine explizite Rollen-Angabe pro Nachweis gibt,
-    // ist die maßgebend: Doc gehört in diese Nachweis-Sicht,
-    // egal ob relevant / entscheidungsrelevant / irrelevant.
+    // gehört das Doc nur dann in die Sicht, wenn der Nachweis im Map auftaucht.
     if (relMap && typeof relMap === "object") {
-      if (Object.prototype.hasOwnProperty.call(relMap, sel)) {
-        return true;
-      }
-      return false;
+      return Object.prototype.hasOwnProperty.call(relMap, sel);
     }
 
     // Fallback für alte / meta-Daten (ohne rollen_map):
     if (n === sel) return true;
-    if (n === "LOADS" || n === null) return true;
+    if (n === "LOADS" || n === "BASIS" || n === null) return true;
 
     return false;
   });
@@ -642,12 +693,58 @@ export function registerErgebnisseContextTooltip() {
           root.appendChild(divider);
         }
 
-        const ordered = orderContextEntries(ctx);
-        for (const [k, v] of ordered) {
-          const row = document.createElement('div'); row.className = 'ctx-row';
-          const kEl = document.createElement('span'); kEl.className = 'ctx-k'; kEl.textContent = prettyKey(k) + ": ";
-          const vEl = document.createElement('span'); vEl.className = 'ctx-v'; vEl.innerHTML = prettyValHTML(k, v);
-          row.appendChild(kEl); row.appendChild(vEl); root.appendChild(row);
+        const showRealKeys = !!(window.APP_STATE?.flags?.show_real_kontext_keys);
+        if (showRealKeys) {
+          // Debug-Modus: rohe Kontext-Keys/-Werte ohne Aliase, Sortierung oder weitere Formatierung
+          const entries = ctx && typeof ctx === "object" ? Object.entries(ctx) : [];
+          for (const [k, v] of entries) {
+            const row = document.createElement('div');
+            row.className = 'ctx-row';
+
+            const kEl = document.createElement('span');
+            kEl.className = 'ctx-k';
+            kEl.textContent = `${k}: `;
+
+            const vEl = document.createElement('span');
+            vEl.className = 'ctx-v';
+
+            let val;
+            if (v === null || v === undefined) {
+              val = "—";
+            } else if (typeof v === "string") {
+              val = v;
+            } else {
+              try {
+                val = JSON.stringify(v);
+              } catch {
+                val = String(v);
+              }
+            }
+            vEl.textContent = val;
+
+            row.appendChild(kEl);
+            row.appendChild(vEl);
+            root.appendChild(row);
+          }
+        } else {
+          // Standard-Modus: sortierte, "hübsche" Kontextanzeige mit Aliases und Zahlformatierung
+          const ordered = orderContextEntries(ctx);
+          for (const [k, v] of ordered) {
+            const row = document.createElement('div');
+            row.className = 'ctx-row';
+
+            const kEl = document.createElement('span');
+            kEl.className = 'ctx-k';
+            kEl.textContent = prettyKey(k) + ": ";
+
+            const vEl = document.createElement('span');
+            vEl.className = 'ctx-v';
+            vEl.innerHTML = prettyValHTML(k, v);
+
+            row.appendChild(kEl);
+            row.appendChild(vEl);
+            root.appendChild(row);
+          }
         }
         return root;
       } catch {
