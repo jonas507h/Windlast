@@ -100,6 +100,11 @@ def create_app():
     def healthz():
         return {"status": "ok"}
     
+    # Lizenz-Datei ausliefern
+    @app.get("/licenses")
+    def licenses():
+        return send_from_directory(ROOT, "THIRD_PARTY_NOTICES.txt")
+    
     _ensure_housekeeper()  # beim App-Start einmal starten
 
     @app.post("/__client_event")

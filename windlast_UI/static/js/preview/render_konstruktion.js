@@ -12,10 +12,10 @@ import { computeAABB, expandAABB, segmentsToThreeLineSegments, fitCameraToAABB }
 import { render_dimensions, update_dimension_arrows } from './render_dimensions.js';
 import { getPreviewTheme, subscribePreviewTheme } from './preview_farben.js';
 
-function createUnlitPlateMesh(THREE, polygon, frame, color) {
+function createUnlitPlateMesh(THREE, polygon, frame, color, thickness = 0, edgeColor = null) {
   const { u, v, n, C } = frame;
 
-  // 2D-Shape im lokalen Frame (x = v, y = u)
+  // 2D-Shape im lokalen Frame (x = u (Tiefe), y = v (Breite))
   const shape = new THREE.Shape();
   for (let i = 0; i < polygon.length; i++) {
     const rel = {
@@ -23,17 +23,34 @@ function createUnlitPlateMesh(THREE, polygon, frame, color) {
       y: polygon[i][1] - C[1],
       z: polygon[i][2] - C[2],
     };
-    // x = u (Tiefe), y = v (Breite)
     const xu = rel.x * u[0] + rel.y * u[1] + rel.z * u[2];
     const yv = rel.x * v[0] + rel.y * v[1] + rel.z * v[2];
     if (i === 0) shape.moveTo(xu, yv); else shape.lineTo(xu, yv);
   }
   shape.closePath();
 
-  const geom = new THREE.ShapeGeometry(shape);
+  let geom;
+  const t = Number(thickness) || 0;
+
+  if (t > 0) {
+    // 🔥 Extrudiertes Polygon:
+    // - Lokaler z=0 ist die Plattenebene
+    // - Extrusion verläuft von z=0 → z=+t
+    // - Basis-Matrix dreht z-Achse nach n ⇒ Extrusion entlang Normalen, "nach oben"
+    const extrudeSettings = {
+      depth: t,
+      bevelEnabled: false,
+    };
+    geom = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+    // KEINE Verschiebung um -t/2 → komplette Dicke liegt in +n-Richtung
+  } else {
+    // Flache Platte wie bisher
+    geom = new THREE.ShapeGeometry(shape);
+  }
+
   const mat = new THREE.MeshBasicMaterial({
     color: color ?? 0xffffff,
-    side: THREE.DoubleSide,   // ← von oben UND unten sichtbar
+    side: THREE.DoubleSide,   // von oben UND unten sichtbar
     depthWrite: true,
     depthTest: true,
     polygonOffset: true,
@@ -42,6 +59,19 @@ function createUnlitPlateMesh(THREE, polygon, frame, color) {
   });
 
   const mesh = new THREE.Mesh(geom, mat);
+
+  // Optional: Kantenlinien nur bei extrudierten Platten
+  if (t > 0) {
+    const edgeGeom = new THREE.EdgesGeometry(geom);
+    const edgeMat = new THREE.LineBasicMaterial({
+      color: edgeColor != null ? edgeColor : (color ?? 0x000000),
+      depthWrite: true,
+      depthTest: true,
+    });
+    const edgeLines = new THREE.LineSegments(edgeGeom, edgeMat);
+    edgeLines.renderOrder = 1; // leicht über der Fläche
+    mesh.add(edgeLines);
+  }
 
   // Vollständige Orientierung: Basis (x=u, y=v, z=n)
   const uVec = new THREE.Vector3(u[0], u[1], u[2]).normalize();
@@ -52,7 +82,7 @@ function createUnlitPlateMesh(THREE, polygon, frame, color) {
   mesh.quaternion.copy(q);
   mesh.position.set(C[0], C[1], C[2]);
 
-  // Damit die Linien sicher “oben” liegen:
+  // Linien-Layer (segmentsToThreeLineSegments) liegt darüber
   mesh.renderOrder = 0;
 
   return mesh;
@@ -97,10 +127,14 @@ export function render_konstruktion(container, konstruktion, opts = {}) {
             ? theme.plateFillGummi
             : theme.plateFill;
 
-        const m = createUnlitPlateMesh(THREE, data.polygon, data.frame, fillColor);
+        const thickness = Number(data.thickness) || 0;
+        const edgeColor = theme.lineColor ?? 0x000000;
+
+        const m = createUnlitPlateMesh(THREE, data.polygon, data.frame, fillColor, thickness, edgeColor);
 
         m.userData = m.userData || {};
         m.userData.hasGummi = hasGummi;
+        m.userData.thickness = thickness;
 
         plateMeshes.push(m);
       }
@@ -114,7 +148,7 @@ export function render_konstruktion(container, konstruktion, opts = {}) {
       const data = senkrechteFlaeche_linien(el);
       allSegments.push(...(data.segments || []));
       if (data.polygon && data.frame) {
-        const m = createUnlitPlateMesh(THREE, data.polygon, data.frame, theme.wallFill);
+        const m = createUnlitPlateMesh(THREE, data.polygon, data.frame, theme.wallFill, 0, null);
         flaecheMeshes.push(m);
       }
     }

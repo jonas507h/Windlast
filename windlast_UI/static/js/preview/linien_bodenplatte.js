@@ -36,6 +36,7 @@ function getPlateSpec(name_intern, plate){
   return {
     breite: Number(cat?.breite ?? plate?.breite ?? 1.0),
     tiefe:  Number(cat?.tiefe  ?? plate?.tiefe  ?? 1.0),
+    hoehe:  Number(cat?.hoehe  ?? plate?.hoehe  ?? 0.0),
     anzahl_ecken: Number(cat?.anzahl_ecken ?? 4)
   };
 }
@@ -45,6 +46,7 @@ export function bodenplatte_linien(plate){
   const spec = getPlateSpec(plate?.name_intern, plate);
   const breite = Math.max(0, Number(spec.breite));
   const tiefe  = Math.max(0, Number(spec.tiefe));
+  const hoehe  = Math.max(0, Number(spec.hoehe));
   const nEcken = (spec.anzahl_ecken === 3) ? 3 : 4; // clamp auf 3|4
 
   // --- Zentrum & lokale Achsen -------------------------------------------
@@ -128,6 +130,7 @@ export function bodenplatte_linien(plate){
     segments,
     polygon,
     frame: { u, v, n, C },
+    thickness: hoehe,
     metadata: {
       typ: 'BODENPLATTE',
       id: plate?.element_id_intern,

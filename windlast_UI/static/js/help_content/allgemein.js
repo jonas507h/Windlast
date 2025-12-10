@@ -19,10 +19,11 @@ export const GENERAL_HELP_PAGES = [
       <h4>Sonstige nützliche Seiten</h4>
       <ul>
         <li>[[meldungen:haeufige_meldungen|Häufige Meldungen]]</li>
-        <li>[[app:faq|FAQ]]</li>
       </ul>
     `
   },
+  //FAQ für später
+  //<li>[[app:faq|FAQ]]</li>
 
   {
     id: "app:bedienung",
