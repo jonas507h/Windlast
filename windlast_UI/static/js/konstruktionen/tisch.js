@@ -154,10 +154,10 @@ function validateTischForm() {
     uOK = false;
     uMsg = 'Bitte eine Zahl > 0 angeben oder leer lassen.';
   } else if (hoeheFlaeche !== null && isFinite(hoeheFlaeche)) {
-    const maxU = hoeheFlaeche < parseFloat(hoeheEl?.value);
+    const maxU = hoeheFlaeche <= parseFloat(hoeheEl?.value);
     if (!maxU) {
       uOK = false;
-      uMsg = 'Die Höhe der Fläche muss kleiner als die Gesamthöhe sein.';
+      uMsg = 'Die Höhe der Fläche darf nicht größer als die Gesamthöhe sein.';
     }
   }
   showFieldError(hoeheFlaecheEl, errHF, !uOK, uMsg);

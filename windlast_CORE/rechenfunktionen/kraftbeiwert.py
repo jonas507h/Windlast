@@ -86,7 +86,7 @@ def _validate_inputs(
             raise ValueError("Für SENKRECHTE_FLAECHE werden genau 4 Eckpunkte erwartet.")
         
 
-def _kraftbeiwert_default(
+def _kraftbeiwert_DinEn1991_1_4_2010_12(
     objekttyp: ObjektTyp,
     grundkraftbeiwert: Optional[float] = None,
     abminderungsfaktor_schlankheit: Optional[float] = None,
@@ -211,7 +211,8 @@ def _kraftbeiwert_default(
         raise NotImplementedError(f"Schlankheit für Objekttyp '{objekttyp}' ist noch nicht implementiert.")
 
 _DISPATCH: Dict[Norm, Callable[..., Zwischenergebnis]] = {
-    Norm.DEFAULT: _kraftbeiwert_default,
+    Norm.DEFAULT: _kraftbeiwert_DinEn1991_1_4_2010_12,
+    Norm.DIN_EN_1991_1_4_2010_12: _kraftbeiwert_DinEn1991_1_4_2010_12,
 }
 
 def kraftbeiwert(

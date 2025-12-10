@@ -157,33 +157,27 @@ def _normalize_doc_bundle(bundle, ctx):
     }
     return out
 
-def _make_dedup_key(doc):
-    ctx = doc["context"] or {}
+def _make_dedup_key(doc: dict) -> tuple:
+    ctx = doc.get("context") or {}
 
-    # Scenario-Feld vereinheitlichen
-    scenario = ctx.get("szenario")
-    if scenario is None:
-        scenario = ctx.get("scenario")
+    def _resolve(field: str):
+        # Spezialfälle mit Normalisierung:
+        if field == "title":
+            return doc.get("title")
 
-    # Element-Feld vereinheitlichen
-    element = ctx.get("element_id")
-    if element is None:
-        element = ctx.get("element_id_intern")
+        if field == "szenario":
+            return ctx.get("szenario") or ctx.get("scenario")
 
-    # Lookup-Map, damit wir keinen riesigen if/else Block brauchen
-    value_map = {
-        "title":           doc.get("title"),
-        "doc_type":        ctx.get("doc_type"),
-        "nachweis":        ctx.get("nachweis"),
-        "szenario":        scenario,
-        "windrichtung_deg": ctx.get("windrichtung_deg"),
-        "achse_index":      ctx.get("achse_index"),
-        "element_id":       element,
-        "segment_index":    ctx.get("segment_index"),
-        "ref_nachweis":     ctx.get("ref_nachweis"),
-    }
+        if field == "element_id":
+            return ctx.get("element_id") or ctx.get("element_id_intern")
 
-    return tuple(value_map.get(field) for field in DEDUP_FIELDS)
+        # Generischer Fallback:
+        if field in ctx:
+            return ctx.get(field)
+        return doc.get(field)
+
+    return tuple(_resolve(f) for f in DEDUP_FIELDS)
+
 
 def _collect_docs_from_list(items):
     """

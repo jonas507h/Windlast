@@ -307,6 +307,7 @@ class senkrechteFlaeche:
                         unten_ende_lokal = vektoren_addieren([unten_start_lokal, teilvektor_unterkante])
                         oben_start_lokal  = seg["ende_lokal"]
                         oben_ende_lokal   = vektoren_addieren([oben_start_lokal, teilvektor_unterkante])
+                        eckpunkte_lokal = [ unten_start_lokal, unten_ende_lokal, oben_ende_lokal, oben_start_lokal ]
                         staudruck   = seg["staudruck"]
 
                         seg_ctx = merge_kontext(zonen_ctx, {
@@ -315,19 +316,19 @@ class senkrechteFlaeche:
 
                         _kraftbeiwert = kraftbeiwert(
                             norm, objekttyp=self.objekttyp, windrichtung=windrichtung, senkrechte_flaeche_typ=self.flaeche_typ, zone=zone,
-                            punkte=self.eckpunkte,
+                            punkte=eckpunkte_lokal,
                             protokoll=protokoll, kontext=seg_ctx
                         )
                         _bezugsflaeche = projizierte_flaeche(
-                            norm, objekttyp=self.objekttyp, punkte=self.eckpunkte,
+                            norm, objekttyp=self.objekttyp, punkte=eckpunkte_lokal,
                             protokoll=protokoll, kontext=seg_ctx
                         )
                         _windkraft = windkraft(
-                            norm, objekttyp=self.objekttyp, kraftbeiwert=_kraftbeiwert.wert, staudruck=staudruck, projizierte_flaeche=_bezugsflaeche.wert,senkrechte_flaeche_typ=self.flaeche_typ,
+                            norm, objekttyp=self.objekttyp, kraftbeiwert=_kraftbeiwert.wert, staudruck=staudruck, projizierte_flaeche=_bezugsflaeche.wert, senkrechte_flaeche_typ=self.flaeche_typ,
                             protokoll=protokoll, kontext=seg_ctx
                         )
                         _windkraft_vec = windkraft_zu_vektor(
-                            norm, objekttyp=self.objekttyp, punkte=self.eckpunkte, windkraft=_windkraft.wert, windrichtung=windrichtung, senkrechte_flaeche_typ=self.flaeche_typ,
+                            norm, objekttyp=self.objekttyp, punkte=eckpunkte_lokal, windkraft=_windkraft.wert, windrichtung=windrichtung, senkrechte_flaeche_typ=self.flaeche_typ,
                             protokoll=protokoll, kontext=seg_ctx
                         )
 
@@ -396,6 +397,7 @@ class senkrechteFlaeche:
                         unten_ende_lokal = vektoren_addieren([unten_start_lokal, teilvektor_unterkante])
                         oben_start_lokal  = seg["ende_lokal"]
                         oben_ende_lokal   = vektoren_addieren([oben_start_lokal, teilvektor_unterkante])
+                        eckpunkte_lokal = [ unten_start_lokal, unten_ende_lokal, oben_ende_lokal, oben_start_lokal ]
                         staudruck   = seg["staudruck"]
 
                         seg_ctx = merge_kontext(zonen_ctx, {
@@ -404,19 +406,19 @@ class senkrechteFlaeche:
 
                         _kraftbeiwert = kraftbeiwert(
                             norm, objekttyp=self.objekttyp, windrichtung=windrichtung, senkrechte_flaeche_typ=self.flaeche_typ, zone=zone,
-                            punkte=self.eckpunkte,
+                            punkte=eckpunkte_lokal,
                             protokoll=protokoll, kontext=seg_ctx
                         )
                         _bezugsflaeche = projizierte_flaeche(
-                            norm, objekttyp=self.objekttyp, punkte=self.eckpunkte,
+                            norm, objekttyp=self.objekttyp, punkte=eckpunkte_lokal,
                             protokoll=protokoll, kontext=seg_ctx
                         )
                         _windkraft = windkraft(
-                            norm, objekttyp=self.objekttyp, kraftbeiwert=_kraftbeiwert.wert, staudruck=staudruck, projizierte_flaeche=_bezugsflaeche.wert,senkrechte_flaeche_typ=self.flaeche_typ,
+                            norm, objekttyp=self.objekttyp, kraftbeiwert=_kraftbeiwert.wert, staudruck=staudruck, projizierte_flaeche=_bezugsflaeche.wert, senkrechte_flaeche_typ=self.flaeche_typ,
                             protokoll=protokoll, kontext=seg_ctx
                         )
                         _windkraft_vec = windkraft_zu_vektor(
-                            norm, objekttyp=self.objekttyp, punkte=self.eckpunkte, windkraft=_windkraft.wert, windrichtung=windrichtung, senkrechte_flaeche_typ=self.flaeche_typ,
+                            norm, objekttyp=self.objekttyp, punkte=eckpunkte_lokal, windkraft=_windkraft.wert, windrichtung=windrichtung, senkrechte_flaeche_typ=self.flaeche_typ,
                             protokoll=protokoll, kontext=seg_ctx
                         )
 

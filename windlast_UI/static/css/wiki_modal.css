@@ -111,6 +111,15 @@
   text-decoration-thickness: 2px;
 }
 
+/* Externe Links im Hilfesystem: kleines "↗"-Icon */
+.help-link.external::after {
+  content: "↗";
+  font-size: 0.75em;
+  margin-left: 0.25em;
+  opacity: 0.7;
+  vertical-align: baseline;
+}
+
 /* Fragezeichen-Button (global wiederverwendbar) */
 .help-icon-btn {
   border: 1px solid var(--help-icon-border);

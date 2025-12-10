@@ -172,10 +172,10 @@ function validateSteherForm() {
     uOK = false;
     uMsg = 'Bitte eine Zahl > 0 angeben oder leer lassen.';
   } else if (hoeheFlaeche !== null && isFinite(hoeheFlaeche)) {
-    const maxU = hoeheFlaeche < parseFloat(rHoeheEl?.value);
+    const maxU = hoeheFlaeche <= parseFloat(rHoeheEl?.value);
     if (!maxU) {
       uOK = false;
-      uMsg = 'Die Höhe der Fläche muss kleiner als die Rohrhöhe sein.';
+      uMsg = 'Die Höhe der Fläche darf nicht größer als die Rohrhöhe sein.';
     }
   }
   showFieldError(hoeheFlaecheEl, errHF, !uOK, uMsg);

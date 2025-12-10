@@ -64,11 +64,26 @@ function normId(normKey, szenario = null) {
 // --- Link-Syntax auflösen ---
 // [[page-id]]                → <a data-help-id="page-id">Titel der Seite</a>
 // [[page-id|Linktext]]       → <a data-help-id="page-id">Linktext</a>
+// externe Links:
+// [[ext:https://example.com]]         → <a href="https://example.com" class="external">https://example.com</a>
+// [[ext:https://example.com|Label]]   → <a href="https://example.com" class="external">Label</a>
 function resolveHelpLinks(html) {
   if (!html || typeof html !== "string") return html || "";
 
   return html.replace(/\[\[([^\]|]+)(\|([^\]]+))?\]\]/g, (_m, rawId, _rest, label) => {
     const id = String(rawId).trim();
+
+    // --- 1) EXTERNER LINK --- 
+    // Syntax: [[ext:https://example.com | Label]]
+    if (id.startsWith("ext:")) {
+      const url = id.slice(4).trim();
+      const text = label || url;
+      const escapedText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+      return `<a href="${url}" class="help-link external" target="_blank" rel="noopener noreferrer">${escapedText}</a>`;
+    }
+
+    // --- 2) INTERNE HÄLFTE (bestehender Code) ---
     const page = PAGES_BY_ID[id];
     const text = label || page?.shortTitle || page?.title || id;
     const escapedText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -76,6 +91,7 @@ function resolveHelpLinks(html) {
     return `<a href="#help:${id}" data-help-id="${id}" class="help-link">${escapedText}</a>`;
   });
 }
+
 
 // --- Seitenzugriff ---
 function getPage(id) {

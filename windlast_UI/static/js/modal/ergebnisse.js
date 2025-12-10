@@ -360,6 +360,12 @@ function renderDocsGrouped(docs, nachweisSel, groupConfig = DOC_GROUP_CONFIG, le
     return renderDocsGrouped(only, nachweisSel, groupConfig, level + 1);
   }
 
+  // Wenn innerhalb einer Gruppe nur eine Untergruppe existiert → Ebene überspringen
+  if (level > 0 && keys.length === 1 && keys[0] !== emptyKey) {
+    const only = groups.get(keys[0]) || [];
+    return renderDocsGrouped(only, nachweisSel, groupConfig, level + 1);
+  }
+
   const blocks = keys.map((k, idx) => {
     const list = groups.get(k) || [];
     const title = (k === emptyKey) ? emptyLabel : buildGroupTitle(key, k);
