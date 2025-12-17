@@ -11,7 +11,7 @@ const vec = {
  * Wirft bei Fehlern eine aussagekräftige Exception.
  */
 export function validateTischInputs({
-  breite_m, hoehe_m, tiefe_m, hoehe_flaeche_m: hoehe_flaeche_m, traverse_name_intern, bodenplatte_name_intern, untergrund,
+  breite_m, hoehe_m, tiefe_m, hoehe_flaeche_m, anzahl_steher_breite, anzahl_steher_tiefe, traverse_name_intern, bodenplatte_name_intern, untergrund,
 }, catalog) {
   if (!catalog || typeof catalog.getTraverse !== 'function' || typeof catalog.getBodenplatte !== 'function') {
     throw new Error('catalog mit getTraverse/getBodenplatte erforderlich.');
@@ -21,6 +21,15 @@ export function validateTischInputs({
   const H = Number(hoehe_m);
   const T = Number(tiefe_m);
   let H_F = hoehe_flaeche_m;
+  const A_SB = Number(anzahl_steher_breite);
+  const A_ST = Number(anzahl_steher_tiefe);
+
+  if (!isFinite(A_SB) || A_SB < 2 || !Number.isInteger(A_SB)) {
+    throw new Error('anzahl_steher_breite muss eine ganze Zahl ≥ 2 sein.');
+  }
+  if (!isFinite(A_ST) || A_ST < 2 || !Number.isInteger(A_ST)) {
+    throw new Error('anzahl_steher_tiefe muss eine ganze Zahl ≥ 2 sein.');
+  }
 
   if (H_F === "" || H_F === null || H_F === undefined) {
     H_F = null;
@@ -62,6 +71,8 @@ export function validateTischInputs({
  * @param {number} inputs.hoehe_m
  * @param {number} inputs.tiefe_m
  * @param {number|null} inputs.hoehe_flaeche_m
+ * @param {number} inputs.anzahl_steher_breite
+ * @param {number} inputs.anzahl_steher_tiefe
  * @param {string} inputs.traverse_name_intern
  * @param {string} inputs.bodenplatte_name_intern
  * @param {boolean} [inputs.gummimatte=true]
@@ -72,18 +83,20 @@ export function validateTischInputs({
  */
 export function buildTisch(inputs, catalog) {
   const {
-    breite_m, hoehe_m, tiefe_m, hoehe_flaeche_m, traverse_name_intern, bodenplatte_name_intern,
+    breite_m, hoehe_m, tiefe_m, hoehe_flaeche_m, anzahl_steher_breite, anzahl_steher_tiefe, traverse_name_intern, bodenplatte_name_intern,
     gummimatte = true,
     untergrund,
     name = 'Tisch',
   } = inputs;
 
-  validateTischInputs({ breite_m, hoehe_m, tiefe_m, hoehe_flaeche_m, traverse_name_intern, bodenplatte_name_intern, untergrund }, catalog);
+  validateTischInputs({ breite_m, hoehe_m, tiefe_m, hoehe_flaeche_m, anzahl_steher_breite, anzahl_steher_tiefe, traverse_name_intern, bodenplatte_name_intern, untergrund }, catalog);
 
   const B = Number(breite_m);
   const H = Number(hoehe_m);
   const T = Number(tiefe_m);
   let H_F = null;
+  const A_SB = Number(anzahl_steher_breite);
+  const A_ST = Number(anzahl_steher_tiefe);
   if (hoehe_flaeche_m !== "" && hoehe_flaeche_m !== null && hoehe_flaeche_m !== undefined) {
     H_F = Number(hoehe_flaeche_m);
   }
@@ -112,142 +125,93 @@ export function buildTisch(inputs, catalog) {
   const plateSpec = catalog.getBodenplatte(bodenplatte_name_intern) || {};
   const plateAnzeige = plateSpec.anzeige_name || bodenplatte_name_intern;
 
-  // --- Traversenstrecken ---
-  const trav_front_left = {
-    typ: 'Traversenstrecke',
-    traverse_name_intern,
-    start: [ t_b, t_a, 0 ],
-    ende:  [ t_b, t_a, H ],
-    orientierung: [0, 1, 0],
-    objekttyp: 'TRAVERSE',
-    element_id_intern: 'Strecke_Vorne_Links',
-    anzeigename: travAnzeige,
-  };
-  const trav_front_right = {
-    typ: 'Traversenstrecke',
-    traverse_name_intern,
-    start: [ B - t_b, t_a, 0 ],
-    ende:  [ B - t_b, t_a, H ],
-    orientierung: [0, 1, 0],
-    objekttyp: 'TRAVERSE',
-    element_id_intern: 'Strecke_Vorne_Rechts',
-    anzeigename: travAnzeige,
-  };
-  const trav_back_left = {
-    typ: 'Traversenstrecke',
-    traverse_name_intern,
-    start: [ t_b, T - t_a, 0 ],
-    ende:  [ t_b, T - t_a, H ],
-    orientierung: [0, -1, 0],
-    objekttyp: 'TRAVERSE',
-    element_id_intern: 'Strecke_Hinten_Links',
-    anzeigename: travAnzeige,
-  };
-  const trav_back_right = {
-    typ: 'Traversenstrecke',
-    traverse_name_intern,
-    start: [ B - t_b, T - t_a, 0 ],
-    ende:  [ B - t_b, T - t_a, H ],
-    orientierung: [0, -1, 0],
-    objekttyp: 'TRAVERSE',
-    element_id_intern: 'Strecke_Hinten_Rechts',
-    anzeigename: travAnzeige,
-  };
-  const trav_top_front = {
-    typ: 'Traversenstrecke',
-    traverse_name_intern,
-    start: [ 0, t_b, H - t_a ],
-    ende:  [ B, t_b, H - t_a ],
-    orientierung: [0, 0, -1],
-    objekttyp: 'TRAVERSE',  
-    element_id_intern: 'Strecke_Oben_Vorne',
-    anzeigename: travAnzeige,
-  };
-  const trav_top_back = {
-    typ: 'Traversenstrecke',
-    traverse_name_intern,
-    start: [ 0, T - t_b, H - t_a ],
-    ende:  [ B, T - t_b, H - t_a ],
-    orientierung: [0, 0, -1],
-    objekttyp: 'TRAVERSE',  
-    element_id_intern: 'Strecke_Oben_Hinten',
-    anzeigename: travAnzeige,
-  };
-  const trav_top_left = {
-    typ: 'Traversenstrecke',
-    traverse_name_intern,
-    start: [ t_b, 0, H - t_a ],
-    ende:  [ t_b, T, H - t_a ],
-    orientierung: [0, 0, -1],
-    objekttyp: 'TRAVERSE',  
-    element_id_intern: 'Strecke_Oben_Links',
-    anzeigename: travAnzeige,
-  };
-  const trav_top_right = {
-    typ: 'Traversenstrecke',
-    traverse_name_intern,
-    start: [ B - t_b, 0, H - t_a ],
-    ende:  [ B - t_b, T, H - t_a ],
-    orientierung: [0, 0, -1],
-    objekttyp: 'TRAVERSE',  
-    element_id_intern: 'Strecke_Oben_Rechts',
-    anzeigename: travAnzeige,
-  };
+  // Positionen der Steher (Raster)
+  const dx = (B - 2 * t_b) / (A_SB - 1);
+  const dy = (T - 2 * t_a) / (A_ST - 1);
 
-  // --- Bodenplatten ---
-  const plate_front_left = {
-    typ: 'Bodenplatte',
-    name_intern: bodenplatte_name_intern,
-    mittelpunkt: [t_b, t_a, 0],
-    orientierung: [0, 0, 1],
-    drehung: [0, 1, 0],
-    untergrund: untergrund,
-    gummimatte: gummimatte ? 'GUMMI' : null,
-    objekttyp: 'BODENPLATTE',
-    element_id_intern: 'Bodenplatte_Vorne_Links',
-    anzeigename: plateAnzeige,
-  };
-  const plate_front_right = {
-    typ: 'Bodenplatte',
-    name_intern: bodenplatte_name_intern,
-    mittelpunkt: [B - t_b, t_a, 0],
-    orientierung: [0, 0, 1],
-    drehung: [0, 1, 0],
-    untergrund: untergrund,
-    gummimatte: gummimatte ? 'GUMMI' : null,
-    objekttyp: 'BODENPLATTE',
-    element_id_intern: 'Bodenplatte_Vorne_Rechts',
-    anzeigename: plateAnzeige,
-  };
-  const plate_back_left = {
-    typ: 'Bodenplatte',
-    name_intern: bodenplatte_name_intern,
-    mittelpunkt: [t_b, T - t_a, 0],
-    orientierung: [0, 0, 1],
-    drehung: [0, -1, 0],
-    untergrund: untergrund,
-    gummimatte: gummimatte ? 'GUMMI' : null,
-    objekttyp: 'BODENPLATTE',
-    element_id_intern: 'Bodenplatte_Hinten_Links',
-    anzeigename: plateAnzeige,
-  };
-  const plate_back_right = {
-    typ: 'Bodenplatte',
-    name_intern: bodenplatte_name_intern,
-    mittelpunkt: [B - t_b, T - t_a, 0],
-    orientierung: [0, 0, 1],
-    drehung: [0, -1, 0],
-    untergrund: untergrund,
-    gummimatte: gummimatte ? 'GUMMI' : null,
-    objekttyp: 'BODENPLATTE',
-    element_id_intern: 'Bodenplatte_Hinten_Rechts',
-    anzeigename: plateAnzeige,
-  };
+  const midY = Math.floor(A_ST / 2); // mittlere Reihe zählt zur vorderen Hälfte
+
+  const traversen = [];
+  const bodenplatten = [];
+
+  // --- Vertikale Steher (Traversenstrecken) + Bodenplatten ---
+  let steherCount = 0;
+  let plateCount = 0;
+
+  for (let j = 0; j < A_ST; j++) {
+    const y = t_a + j * dy;
+
+    // vordere Hälfte -> nach hinten (+y), hintere Hälfte -> nach vorne (-y)
+    const orientY = (j <= midY) ? [0, 1, 0] : [0, -1, 0];
+
+    for (let i = 0; i < A_SB; i++) {
+      const x = t_b + i * dx;
+
+      steherCount++;
+      traversen.push({
+        typ: 'Traversenstrecke',
+        traverse_name_intern,
+        start: [x, y, 0],
+        ende:  [x, y, H],
+        orientierung: orientY,
+        objekttyp: 'TRAVERSE',
+        element_id_intern: `Steher_${steherCount}`,
+        anzeigename: travAnzeige,
+      });
+
+      plateCount++;
+      bodenplatten.push({
+        typ: 'Bodenplatte',
+        name_intern: bodenplatte_name_intern,
+        mittelpunkt: [x, y, 0],
+        orientierung: [0, 0, 1],
+        drehung: orientY,
+        untergrund,
+        gummimatte: gummimatte ? 'GUMMI' : null,
+        objekttyp: 'BODENPLATTE',
+        element_id_intern: `Bodenplatte_${plateCount}`,
+        anzeigename: plateAnzeige,
+      });
+    }
+  }
+
+  // --- Top-Traversen: A_ST Stück in y-Richtung (über Breite B), A_SB Stück in x-Richtung (über Tiefe T)
+  const topTraversen = [];
+
+  // quer über B, an mehreren y-Positionen (Nutze t_b wie im alten Code für "oben vorne/hinten")
+  const dyTop = (T - 2 * t_b) / (A_ST - 1);
+  for (let j = 0; j < A_ST; j++) {
+    const yTop = t_b + j * dyTop;
+    topTraversen.push({
+      typ: 'Traversenstrecke',
+      traverse_name_intern,
+      start: [0, yTop, H - t_a],
+      ende:  [B, yTop, H - t_a],
+      orientierung: [0, 0, -1],
+      objekttyp: 'TRAVERSE',
+      element_id_intern: `Top_B_${j + 1}`,
+      anzeigename: travAnzeige,
+    });
+  }
+
+  // quer über T, an mehreren x-Positionen
+  const dxTop = (B - 2 * t_b) / (A_SB - 1);
+  for (let i = 0; i < A_SB; i++) {
+    const xTop = t_b + i * dxTop;
+    topTraversen.push({
+      typ: 'Traversenstrecke',
+      traverse_name_intern,
+      start: [xTop, 0, H - t_a],
+      ende:  [xTop, T, H - t_a],
+      orientierung: [0, 0, -1],
+      objekttyp: 'TRAVERSE',
+      element_id_intern: `Top_T_${i + 1}`,
+      anzeigename: travAnzeige,
+    });
+  }
 
   // Basis-Bauelemente
-  const bauelemente = [ trav_front_left, trav_front_right, trav_back_left, trav_back_right,
-                       trav_top_front, trav_top_back, trav_top_left, trav_top_right,
-                       plate_front_left, plate_front_right, plate_back_left, plate_back_right ];
+  const bauelemente = [ ...traversen, ...bodenplatten, ...topTraversen ];
 
   // --- Wenn Unterkante definiert, dann Fläche und untere Truss ---
   if (H_F !== null) {

@@ -79,25 +79,22 @@ export function computeDimensionsTor(konstruktion){
       break;
   }
 
-  const top = findEl(els,'Strecke_Oben');
-  const left = findEl(els,'Strecke_Links');
-
-  if (top && top.start && top.ende){
+  if (B != null && isFinite(B)) {
     // Breite entlang der oberen Traverse, Maßlinie leicht darüber (Z-up: +Z)
-    const a = top.start; const b = top.ende;
+    const a = [0, 0, H]; const b = [B, 0, H];
     specs.push({
       kind:'linear', param_key:'breite_m', label: label_breite,
-      anchors:{ a, b, dir:[0,0,1], offset: real_offset, textSize:0.28 }
+      anchors:{ a, b, dir:[0,0,1], offset: eff_offset, textSize:0.28 }
     });
   }
 
-  if (left && left.start && left.ende){
+  if (H != null && isFinite(H)) {
     // Höhe entlang der linken Stütze, Maßlinie leicht links daneben
-    const a = left.start; const b = left.ende;
+    const a = [0, 0, 0]; const b = [0, 0, H];
     // Linke Stütze steht bei x≈0 → quer nach -X raus bemaßen
     specs.push({
       kind:'linear', param_key:'hoehe_m', label: label_hoehe,
-      anchors:{ a, b, dir:[-1,0,0], offset: real_offset, textSize:0.28 }
+      anchors:{ a, b, dir:[-1,0,0], offset: eff_offset, textSize:0.28 }
     });
   }
 

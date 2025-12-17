@@ -10,6 +10,8 @@ function readFormForTisch() {
   const hoehe  = parseFloat(document.getElementById('hoehe_m')?.value);
   const tiefe  = parseFloat(document.getElementById('tiefe_m')?.value);
   const hoeheFlaeche = document.getElementById('hoehe_flaeche_m')?.value;
+  const anzahl_steher_breite = parseInt(document.getElementById('anzahl_steher_breite')?.value);
+  const anzahl_steher_tiefe = parseInt(document.getElementById('anzahl_steher_tiefe')?.value);
 
   const traverse_name_intern   = document.getElementById('traverse_name_intern')?.value || 'TRUSS';
   const bodenplatte_name_intern= document.getElementById('bodenplatte_name_intern')?.value || 'BP';
@@ -22,6 +24,8 @@ function readFormForTisch() {
     hoehe_m:  isFinite(hoehe)  && hoehe  > 0 ? hoehe  : 4,
     tiefe_m:  isFinite(tiefe)  && tiefe  > 0 ? tiefe  : 6,
     hoehe_flaeche_m: isFinite(parseFloat(hoeheFlaeche)) ? parseFloat(hoeheFlaeche) : null,
+    anzahl_steher_breite: isFinite(anzahl_steher_breite) && anzahl_steher_breite >= 2 ? anzahl_steher_breite : 2,
+    anzahl_steher_tiefe: isFinite(anzahl_steher_tiefe) && anzahl_steher_tiefe >= 2 ? anzahl_steher_tiefe : 2,
     traverse_name_intern,
     bodenplatte_name_intern,
     gummimatte,
@@ -64,7 +68,7 @@ export function mountTischPreview(mountEl) {
   rerender();
 
   // simple live update: auf Änderungen der relevanten Inputs reagieren
-  const ids = ['breite_m','hoehe_m','tiefe_m','traverse_name_intern','bodenplatte_name_intern','gummimatte','untergrund_typ', 'hoehe_flaeche_m'];
+  const ids = ['breite_m','hoehe_m','tiefe_m','anzahl_steher_breite','anzahl_steher_tiefe','traverse_name_intern','bodenplatte_name_intern','gummimatte','untergrund_typ', 'hoehe_flaeche_m'];
   const listeners = [];
   for (const id of ids) {
     const el = document.getElementById(id);

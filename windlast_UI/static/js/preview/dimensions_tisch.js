@@ -60,35 +60,31 @@ export function computeDimensionsTisch(konstruktion){
     real_offset_b = eff_offset + (Number(travSpec.B_hoehe ?? travSpec.hoehe) / 2);
   }
 
-  const breite = findEl(els,'Strecke_Oben_Vorne');
-  const hoehe = findEl(els,'Strecke_Vorne_Links');
-  const tiefe = findEl(els,'Strecke_Oben_Links');
-
-  if (breite && breite.start && breite.ende){
+  if (B != null && isFinite(B)) {
     // Breite entlang der oberen Traverse, Maßlinie leicht darüber (Z-up: +Z)
     const a = [0,0,H]; const b = [B,0,H];
     specs.push({
       kind:'linear', param_key:'breite_m', label: label_breite,
-      anchors:{ a, b, dir:[0,0,1], offset: real_offset_a, textSize:0.28 }
+      anchors:{ a, b, dir:[0,0,1], offset: eff_offset, textSize:0.28 }
     });
   }
 
-  if (hoehe && hoehe.start && hoehe.ende){
+  if (H != null && isFinite(H)) {
     // Höhe entlang der linken Stütze, Maßlinie leicht links daneben
     const a = [0,0,0]; const b = [0,0,H];
     // Linke Stütze steht bei x≈0 → quer nach -X raus bemaßen
     specs.push({
       kind:'linear', param_key:'hoehe_m', label: label_hoehe,
-      anchors:{ a, b, dir:[-1,0,0], offset: real_offset_a, textSize:0.28 }
+      anchors:{ a, b, dir:[-1,0,0], offset: eff_offset, textSize:0.28 }
     });
   }
 
-  if (tiefe && tiefe.start && tiefe.ende){
+  if (T != null && isFinite(T)) {
     // Tiefe entlang der oberen linken Traverse, Maßlinie leicht links daneben
     const a = [0,0,H]; const b = [0,T,H];
     specs.push({
       kind:'linear', param_key:'tiefe_m', label: label_tiefe,
-      anchors:{ a, b, dir:[0,0,1], offset: real_offset_a, textSize:0.28 }
+      anchors:{ a, b, dir:[0,0,1], offset: eff_offset, textSize:0.28 }
     });
   }
 

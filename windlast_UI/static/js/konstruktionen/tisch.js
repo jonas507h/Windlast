@@ -180,6 +180,30 @@ function validateHoeheFlaecheField() {
   return uOK;
 }
 
+function validateAnzahlSteherBreiteField() {
+  const anzahlEl  = document.getElementById('anzahl_steher_breite');
+  const errA = document.getElementById('err-anzahl_steher_breite');
+  if (!anzahlEl) return true;
+
+  const n = parseInt(anzahlEl.value, 10);
+  const aOK = Number.isInteger(n) && n >= 2;
+
+  showFieldError(anzahlEl, errA, !aOK, 'Bitte eine ganze Zahl ≥ 2 angeben.');
+  return aOK;
+}
+
+function validateAnzahlSteherTiefeField() {
+  const anzahlEl  = document.getElementById('anzahl_steher_tiefe');
+  const errA = document.getElementById('err-anzahl_steher_tiefe');
+  if (!anzahlEl) return true;
+
+  const n = parseInt(anzahlEl.value, 10);
+  const aOK = Number.isInteger(n) && n >= 2;
+
+  showFieldError(anzahlEl, errA, !aOK, 'Bitte eine ganze Zahl ≥ 2 angeben.');
+  return aOK;
+}
+
 // --- Formular-Gesamtvalidierung -------------------------------------------
 
 function validateTischForm() {
@@ -190,6 +214,8 @@ function validateTischForm() {
   ok = validateBreiteField()        && ok;
   ok = validateTiefeField()         && ok;
   ok = validateHoeheFlaecheField()  && ok;
+  ok = validateAnzahlSteherBreiteField() && ok;
+  ok = validateAnzahlSteherTiefeField()  && ok;
 
   return ok;
 }
@@ -268,6 +294,8 @@ async function submitTisch() {
       tiefe_m:  parseFloat(document.getElementById("tiefe_m").value),
       hoehe_m:  parseFloat(document.getElementById("hoehe_m").value),
       hoehe_flaeche_m: document.getElementById("hoehe_flaeche_m").value,
+      anzahl_steher_breite: parseInt(document.getElementById("anzahl_steher_breite").value, 10),
+      anzahl_steher_tiefe:  parseInt(document.getElementById("anzahl_steher_tiefe").value, 10),
       traverse_name_intern:    document.getElementById("traverse_name_intern").value,
       bodenplatte_name_intern: document.getElementById("bodenplatte_name_intern").value,
       gummimatte: gummimatte_bool,
@@ -339,6 +367,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
       case "hoehe_flaeche_m":
         validateHoeheFlaecheField();
+        break;
+
+      case "anzahl_steher_breite":
+        validateAnzahlSteherBreiteField();
+        break;
+      
+      case "anzahl_steher_tiefe":
+        validateAnzahlSteherTiefeField();
         break;
 
       default:
