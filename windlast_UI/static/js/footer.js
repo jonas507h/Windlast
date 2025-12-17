@@ -245,7 +245,8 @@ function applyBallastToCell(td, valKg, { allowBlank=false } = {}) {
   if (valKg === "INF" || valKg === "-INF") {
     td.textContent = valKg === "INF" ? "∞" : "−∞";
     td.title = "";
-    td.classList.remove("val-ok", "val-bad"); // bei Ballast keine Klassifizierung
+    td.classList.remove("val-ok", "val-bad");
+    td.classList.add("val-neutral");
     return;
   }
   const n = typeof valKg === "string" ? Number(valKg) : valKg;
@@ -253,6 +254,7 @@ function applyBallastToCell(td, valKg, { allowBlank=false } = {}) {
     td.textContent = allowBlank ? "" : "—";
     td.title = "";
     td.classList.remove("val-ok", "val-bad");
+    td.classList.add("val-neutral");
     return;
   }
   td.textContent = formatBallast(n);

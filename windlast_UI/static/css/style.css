@@ -412,6 +412,7 @@ nav.tabs { display:flex; gap:8px; margin:0 0 10px; }
 /* Safety-Zellen */
 .results-table td.value.val-ok  { background: var(--ok-bg);  transition: background .2s ease; }
 .results-table td.value.val-bad { background: var(--bad-bg); transition: background .2s ease; }
+.results-table td.value.val-neutral { background: none; transition: background .2s ease; }
 
 /* Positionierung im Header */
 .results-table thead th.has-count-badge,
