@@ -30,7 +30,7 @@ const PENALTY_MISSING_FULL_TERM  = 1;
 const PENALTY_PER_SYNONYM        = 1;
 
 // Obergrenze: Treffer mit Score > MAX_TOTAL_SCORE fliegen raus
-const MAX_TOTAL_SCORE            = 12;
+const MAX_TOTAL_SCORE            = 8;
 
 // Strafe für "in diesem Feld gar nichts gefunden".
 // Liegt bewusst über MAX_TOTAL_SCORE, damit solche Felder nie den Best-Score liefern.

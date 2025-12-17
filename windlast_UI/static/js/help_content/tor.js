@@ -23,6 +23,7 @@ export const TOR_HELP_PAGES = [
       <help-include page="tor:hoehe" auto-level="true"></help-include>
       <help-include page="tor:breite" auto-level="true"></help-include>
       <help-include page="tor:hoehe_flaeche" auto-level="true"></help-include>
+      <help-include page="tor:anzahl_steher" auto-level="true"></help-include>
     `
   },
 
@@ -149,4 +150,17 @@ export const TOR_HELP_PAGES = [
       </p>
     `
   },
+
+  {
+    id: "tor:anzahl_steher",
+    title: "Anzahl Steher (Pflichtfeld)",
+    shortTitle: "Anzahl Steher",
+    pfad: ["app:konstruktionen", "tor:allgemein"],
+    body: `
+      <p>
+        Gebt hier die Anzahl der Steher des Tors an. Mindestens zwei Steher sind erforderlich. 
+        Wird die Anzahl der Steher erhöht, werden diese gleichmäßig auf die Breite des Tors verteilt.
+      </p>
+    `
+  }
 ];

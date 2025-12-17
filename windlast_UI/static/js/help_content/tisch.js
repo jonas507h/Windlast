@@ -22,6 +22,8 @@ export const TISCH_HELP_PAGES = [
       <help-include page="tisch:breite" auto-level="true"></help-include>
       <help-include page="tisch:tiefe" auto-level="true"></help-include>
       <help-include page="tisch:hoehe_flaeche" auto-level="true"></help-include>
+      <help-include page="tisch:anzahl_steher_breite" auto-level="true"></help-include>
+      <help-include page="tisch:anzahl_steher_tiefe" auto-level="true"></help-include>
     `
   },
 
@@ -142,4 +144,30 @@ export const TISCH_HELP_PAGES = [
       </p>
     `
   },
+
+  {
+    id: "tisch:anzahl_steher_breite",
+    title: "Anzahl Steher (Breite) (Pflichtfeld)",
+    shortTitle: "Anzahl Steher (Breite)",
+    pfad: ["app:konstruktionen", "tisch:allgemein"],
+    body: `
+      <p>
+        Gebt hier die Anzahl der Steher des Tisches in Breitenrichtung an. Mindestens zwei Steher sind erforderlich. 
+        Wird die Anzahl der Steher erhöht, werden diese gleichmäßig auf die Breite des Tisches verteilt.
+      </p>
+    `
+  },
+
+  {
+    id: "tisch:anzahl_steher_tiefe",
+    title: "Anzahl Steher (Tiefe) (Pflichtfeld)",
+    shortTitle: "Anzahl Steher (Tiefe)",
+    pfad: ["app:konstruktionen", "tisch:allgemein"],
+    body: `
+      <p>
+        Gebt hier die Anzahl der Steher des Tisches in Tiefenrichtung an. Mindestens zwei Steher sind erforderlich. 
+        Wird die Anzahl der Steher erhöht, werden diese gleichmäßig auf die Tiefe des Tisches verteilt.
+      </p>
+    `
+  }
 ];
