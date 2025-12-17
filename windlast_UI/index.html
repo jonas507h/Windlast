@@ -44,8 +44,13 @@
   <script src="static/js/theme.js"></script>
   <script>
     function toggleTheme(){
-      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-      window.__setTheme(isDark ? 'light' : 'dark');
+      const theme = document.documentElement.getAttribute('data-theme');
+      if (theme === 'special') {
+        // Sondermodus: letztes normales Theme wiederherstellen
+        window.__setTheme('standard');
+        return;
+      }
+      window.__setTheme((theme === 'dark') ? 'light' : 'dark');
     }
   </script>
 </head>

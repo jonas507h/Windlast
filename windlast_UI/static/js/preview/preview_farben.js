@@ -54,6 +54,32 @@ export const PREVIEW_THEMES = {
       textBorderWidth: 20,
     },
   },
+
+  special: {
+    name: 'special',
+
+    // dunkler “cosmic” Hintergrund
+    background: 0x07050e,
+
+    // Konstruktion (bunter als dark, aber noch gut lesbar)
+    lineColor: 0xd8c7ff,       // hell-violett für Linien
+    plateFill: 0x160a2a,       // violetter Plate-Fill
+    plateFillGummi: 0x38bdf8,  // cyan (passt zum UI-Akzent)
+    wallFill: 0x24103f,        // etwas heller als plateFill
+
+    // Maße (neon-magenta mit dunkler Outline, gut sichtbar)
+    dimensions: {
+      lineColor: 0xff5cff,
+
+      textFill: '#fff2ff',
+      textOutline: '#07050e',
+      textOutlineWidth: 4,
+
+      textBackground: '#07050e',
+      textBorder: '#7fe7ff',
+      textBorderWidth: 20,
+    },
+  },
 };
 
 /**
