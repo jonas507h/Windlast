@@ -1,17 +1,4 @@
-/* ================================
- * config_info.js — HowTo & kleine Helfer
- * Voraussetzungen:
- *   - config.js liefert window.APP_STATE mit:
- *       - APP_STATE.role      -> "user" | "debug" | "admin" | "dev"
- *       - APP_STATE.buildRole -> unveränderbare Build-Rolle
- *       - APP_STATE.flags     -> { show_zwischenergebnisse_tooltip, ... }
- *       - APP_STATE.setRole(nextRole, { persist=true })
- *       - APP_STATE.onRoleChanged(handler)
- *
- * Einbinden (nach config.js):
- *   <script src="/static/js/config.js"></script>
- *   <script src="/static/js/config_info.js"></script>
- * ================================ */
+// config_info.js
 
 /* --------------------------------
  * 0) Kurz-Hilfe im Console-Log
@@ -23,13 +10,6 @@
     "• Aktuelle Rolle:           APP_STATE.role",
     "• Aktuelle Flags:           APP_STATE.flags",
     "• Rolle setzen:             APP_STATE.setRole('debug')   // 'user' | 'debug' | 'admin'",
-    "• Persistente Rolle setzen: APP_STATE.setRole('admin', { persist: true })",
-    "• Persistenz löschen:       localStorage.removeItem('windlast_ui_role')",
-    "• Seite neu laden:          location.reload()",
-    "• Passwort-Umschalter:      UI.promptRoleWithPassword()",
-    "• Elemente via Attribute:   data-requires-flag, data-requires-role",
-    "• Elemente via JS:          UI.showIfFlag('#sel','show_zwischenergebnisse_tooltip');",
-    "                            UI.showIfRole('#sel',['admin','debug']);",
   ];
   if (typeof console !== "undefined") {
     console.log(lines.join("\n"));
@@ -37,7 +17,7 @@
 })();
 
 /* --------------------------------
- * 1) Kleine UI-Helfer
+ * 1) UI-Helfer
  * -------------------------------- */
 (function initUIHelpers() {
   const $all = (sel, root = document) => Array.from(root.querySelectorAll(sel));
@@ -112,37 +92,10 @@
     applyAttributeVisibility();
   }
 
-  /** Öffentlich machen */
   window.UI = {
     showIfFlag, hideIfFlag,
     showIfRole, hideIfRole,
     guard, guardRole,
-    applyAttributeVisibility, // falls du nachträglich DOM einfügst
-    /* --------------------------------
-     * 2) Beispiele zur Nutzung im Code
-     * --------------------------------
-     * // a) Ereignisse nur registrieren, wenn Flag aktiv:
-     * UI.guard('show_debug_tooltip', () => registerDebugTooltips());
-     *
-     * // b) Admin-only Logik:
-     * UI.guardRole(['admin'], () => enableDangerZone());
-     *
-     * // c) Selektive Anzeige:
-     * UI.showIfFlag('.debug-panel', 'show_debug_tooltip');
-     * UI.showIfRole('#adminButton', ['admin']);
-     */
+    applyAttributeVisibility,
   };
 })();
-
-
-/* HTML Beispiele:
-
-<!-- Wird automatisch von info.js sichtbar/unsichtbar geschaltet -->
-<div class="debug-panel" data-requires-flag="show_debug_tooltip">
-  Debug Infos …
-</div>
-
-<button data-requires-role="admin,debug" onclick="doSomething()">Interner Button</button>
-<button data-requires-role="admin" onclick="UI.promptRoleWithPassword()">Rolle wechseln (Demo)</button>
-
-*/

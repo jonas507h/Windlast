@@ -23,8 +23,67 @@ Exe starten
 cd dist
 .\windlastUI.exe
 
-Admin Passwort
-// Beispiel: "MeinSicheresPasswort123" XOR 37
-// Das hier ist nur ein Platzhalter, bitte mit deinem eigenen Passwort neu erzeugen.
-// Kurzes Hilfssnippet (in der Browser-Konsole ausführen, NICHT im Produktivcode lassen):
-//   Array.from("MeinSicheresPasswort123").map(c => c.charCodeAt(0) ^ 37)
+
+================== Rollen Management =============================
+
+--- Admin Passwort ---
+Beispiel: "MeinSicheresPasswort123" XOR 37
+Das hier ist nur ein Platzhalter, bitte mit deinem eigenen Passwort neu erzeugen.
+Kurzes Hilfssnippet (in der Browser-Konsole ausführen, NICHT im Produktivcode lassen):
+  Array.from("MeinSicheresPasswort123").map(c => c.charCodeAt(0) ^ 37)
+Aktuell: 1234
+
+--- Beispiele zur Nutzung im Code ---
+* // a) Ereignisse nur registrieren, wenn Flag aktiv:
+* UI.guard('show_debug_tooltip', () => registerDebugTooltips());
+*
+* // b) Admin-only Logik:
+* UI.guardRole(['admin'], () => enableDangerZone());
+*
+* // c) Selektive Anzeige:
+* UI.showIfFlag('.debug-panel', 'show_debug_tooltip');
+* UI.showIfRole('#adminButton', ['admin']);
+
+--- HTML Beispiele ---
+
+<!-- Wird automatisch von info.js sichtbar/unsichtbar geschaltet -->
+<div class="debug-panel" data-requires-flag="show_debug_tooltip">
+  Debug Infos …
+</div>
+
+<button data-requires-role="admin,debug" onclick="doSomething()">Interner Button</button>
+<button data-requires-role="admin" onclick="UI.promptRoleWithPassword()">Rolle wechseln (Demo)</button>
+
+--- config — Nutzungsnotizen ---
+
+Konzept
+  Es gibt eine Build-Rolle (APP_STATE.buildRole) und eine aktuelle Laufzeitrolle (APP_STATE.role).
+  Flags werden pro Rolle über APP_STATE.flags bereitgestellt.
+
+Quick Help (Konsole)
+* APP_STATE.buildRole → aktive Build-Rolle
+* APP_STATE.role → aktuelle Rolle
+* APP_STATE.flags → aktuelle Flags
+* APP_STATE.setRole('debug') → Rolle setzen (z.B. 'user' | 'debug' | 'admin' | 'godmode' je nach Build)
+
+API
+* APP_STATE.role (getter): aktuelle Rolle
+* APP_STATE.flags (getter): Flag-Objekt für die aktuelle Rolle
+* APP_STATE.buildRole (getter): Build-Rolle
+* APP_STATE.setRole(role, { persist = true }): Rolle setzen (optional persistent via LocalStorage)
+* APP_STATE.setBuild(role): nur verfügbar, wenn BUILD_ROLE === 'godmode' (simuliert andere Build-Rollen)
+* APP_STATE.ROLE_FLAGS: Debug-Access auf das Rollen->Flags Mapping
+
+Persistenz
+  Rolle wird (wenn persist: true) unter localStorage['windlast_ui_role'] gespeichert.
+
+DOM-Attribute
+  Beim Rollenwechsel setzt die Config Attribute auf document.documentElement:
+  * data-role = aktuelle Rolle
+  * data-build-role = Build-Rolle
+  * data-active-build (nur wenn simuliert/abweichend)
+    → kann für CSS/Feature-Toggles genutzt werden.
+
+Events
+  Beim Rollenwechsel: ui:role-changed mit { detail: { role } }
+  Beim Build-Switch (nur godmode): ui:build-changed mit { detail: { build } }

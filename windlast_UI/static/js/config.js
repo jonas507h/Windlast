@@ -54,15 +54,14 @@
   };
 
   // 2) Aktive Build-Rolle (simuliert) + aktuelle Laufzeitrolle
-  let activeBuildRole = BUILD_ROLE;  // kann NUR im godmode-Build via setBuild geändert werden
-  let currentRole     = BUILD_ROLE;  // "user" | "debug" | "admin" | "godmode"
+  let activeBuildRole = BUILD_ROLE;
+  let currentRole     = BUILD_ROLE;
 
   const LS_KEY = "windlast_ui_role";
 
-  // 3) Admin-Passwort leicht verschleiert
+  // 3) Admin-Passwort
   const ADMIN_PWD_MASK = 37;
   const ADMIN_PWD_BYTES = [
-    // dein XOR-codiertes Passwort (hier nur Platzhalter)
     20, 23, 22, 17
   ];
 
@@ -76,7 +75,6 @@
 
   // 4) Rolle aus LocalStorage anwenden, abhängig von der *aktiven* Build-Rolle
   function applyRoleFromStorage() {
-    // Default: Rolle = aktive Build-Rolle
     currentRole = activeBuildRole;
 
     let fromStorage = null;
@@ -88,23 +86,19 @@
 
     if (!fromStorage || !ROLE_FLAGS[fromStorage]) return;
 
-    // godmode aus Storage nur erlauben, wenn aktiver Build godmode ist
     if (fromStorage === "godmode" && activeBuildRole !== "godmode") {
       try { localStorage.removeItem(LS_KEY); } catch (_) {}
       return;
     }
 
-    // admin aus Storage NICHT automatisch übernehmen, wenn aktiver Build user/debug ist
     if (fromStorage === "admin" && (activeBuildRole === "user" || activeBuildRole === "debug")) {
       try { localStorage.removeItem(LS_KEY); } catch (_) {}
       return;
     }
 
-    // ansonsten darf die gespeicherte Rolle übernommen werden
     currentRole = fromStorage;
   }
 
-  // beim ersten Laden einmal anwenden
   applyRoleFromStorage();
 
   // 5) DOM-Hook + State
@@ -112,8 +106,8 @@
     get role()       { return currentRole; },
     get flags()      { return ROLE_FLAGS[currentRole]; },
     get version()    { return VERSION; },
-    get buildRole()  { return BUILD_ROLE; },     // echte Build-Rolle (unveränderbar)
-    get activeBuild(){ return activeBuildRole; },// aktuell simulierte Build-Rolle (nur godmode kann ändern)
+    get buildRole()  { return BUILD_ROLE; },
+    get activeBuild(){ return activeBuildRole; },
 
     applyDomAttributes() {
       document.documentElement.setAttribute("data-role", currentRole);
@@ -130,12 +124,10 @@
         throw new Error(`Unknown role: ${nextRole}`);
       }
 
-      // godmode-Rolle nur, wenn aktiver Build godmode ist
       if (nextRole === "godmode" && activeBuildRole !== "godmode") {
         throw new Error(`Unknown role: ${nextRole}`);
       }
 
-      // Admin-Wechsel ggf. mit Passwort schützen – abhängig von *aktiver* Build-Rolle
       const goingToAdmin = nextRole === "admin" && currentRole !== "admin";
       if (goingToAdmin) {
         const buildIsFreeAdmin =
@@ -166,7 +158,6 @@
       );
     },
 
-    // NUR im godmode-Build vorhanden (siehe unten beim Export von APP_STATE)
     setBuild(nextBuildRole) {
       if (BUILD_ROLE !== "godmode") {
         throw new Error("APP_STATE.setBuild ist nicht verfügbar.");
@@ -175,15 +166,12 @@
         throw new Error(`Unknown build role: ${nextBuildRole}`);
       }
 
-      // aktive Build-Rolle umschalten
       activeBuildRole = nextBuildRole;
-      currentRole = activeBuildRole; // Rolle zurücksetzen
+      currentRole = activeBuildRole;
 
-      // Rolle so setzen, wie es ein *echter* Start mit diesem Build tun würde
       applyRoleFromStorage();
       state.applyDomAttributes();
 
-      // Optional: Event für UI, falls du darauf reagieren willst
       document.dispatchEvent(
         new CustomEvent("ui:build-changed", {
           detail: { build: activeBuildRole, role: currentRole }
@@ -199,15 +187,14 @@
     get role()        { return state.role; },
     get flags()       { return state.flags; },
     get version()     { return state.version; },
-    get buildRole()   { return state.buildRole; },   // echte Build-Rolle
-    get activeBuild() { return state.activeBuild; }, // simulierte Build-Rolle
+    get buildRole()   { return state.buildRole; },
+    get activeBuild() { return state.activeBuild; },
     setRole: state.setRole,
     onRoleChanged(handler) {
       document.addEventListener("ui:role-changed", e => handler(e.detail.role));
     },
   };
 
-  // Nur im godmode-Build: Build-Switcher nach außen freigeben
   if (BUILD_ROLE === "godmode") {
     api.setBuild = function(nextBuildRole) {
       state.setBuild(nextBuildRole);
@@ -219,7 +206,6 @@
 
   window.APP_STATE = Object.freeze(api);
 
-  // initial DOM-Attribute setzen
   if (document.readyState === "loading")
     document.addEventListener("DOMContentLoaded", state.applyDomAttributes);
   else
