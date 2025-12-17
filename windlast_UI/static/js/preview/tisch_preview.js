@@ -1,7 +1,7 @@
 // tisch_preview.js — verbindet Formwerte → build_tisch → render_konstruktion
 // Erwartet: build_tisch.js, linien_* und render_konstruktion.js sind erreichbar (ES-Module)
 
-import { buildTisch} from '../build/build_tisch.js';
+import { buildTisch, validateTischInputs} from '../build/build_tisch.js';
 import { render_konstruktion } from './render_konstruktion.js';
 import { computeDimensionsTisch } from './dimensions_tisch.js';
 
@@ -33,10 +33,16 @@ export function mountTischPreview(mountEl) {
   let handle = null;
 
   function rerender() {
-    const katalog = window.Catalog || null;
-    const konstruktion = buildTisch(readFormForTisch(), katalog || undefined);
-    // erst Container leeren (altes Canvas raus), aber alten Handle noch NICHT dispose'n,
-    // damit wir seine Kamera/Target als prevView verwenden können
+    const katalog = window.Catalog;
+    if (!katalog) return;
+
+    let inputs;
+    try { inputs = readFormForTisch() } catch { return }
+    try { validateTischInputs(inputs, katalog) } catch { return }
+
+    let konstruktion;
+    try { konstruktion = buildTisch(inputs, katalog) } catch { return}
+    
     try { mountEl.innerHTML = ''; } catch {}
 
     const next = render_konstruktion(
@@ -50,7 +56,6 @@ export function mountTischPreview(mountEl) {
       }
     );
 
-    // alten Renderer jetzt entsorgen
     try { handle?.dispose?.(); } catch {}
     handle = next;
   }

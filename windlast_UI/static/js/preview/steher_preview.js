@@ -1,7 +1,7 @@
   // steher_preview.js — verbindet Formwerte → build_steher → render_konstruktion
 // Erwartet: build_steher.js, linien_* und render_konstruktion.js sind erreichbar (ES-Module)
 
-import { buildSteher } from '../build/build_steher.js';
+import { buildSteher, validateSteherInputs } from '../build/build_steher.js';
 import { render_konstruktion } from './render_konstruktion.js';
 import { computeDimensionsSteher } from './dimensions_steher.js';
 
@@ -35,10 +35,16 @@ export function mountSteherPreview(mountEl) {
   let handle = null;
 
   function rerender() {
-    const katalog = window.Catalog || null;
-    const konstruktion = buildSteher(readFormForSteher(), katalog || undefined);
-    // erst Container leeren (altes Canvas raus), aber alten Handle noch NICHT dispose'n,
-    // damit wir seine Kamera/Target als prevView verwenden können
+    const katalog = window.Catalog;
+    if (!katalog) return;
+
+    let inputs;
+    try { inputs = readFormForSteher() } catch { return }
+    try { validateSteherInputs(inputs, katalog) } catch { return }
+
+    let konstruktion;
+    try { konstruktion = buildSteher(inputs, katalog) } catch { return}
+    
     try { mountEl.innerHTML = ''; } catch {}
 
     const next = render_konstruktion(

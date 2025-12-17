@@ -39,6 +39,7 @@ export function validateTorInputs({
   }
   if (!isFinite(B) || !isFinite(H)) throw new Error('breite_m und hoehe_m müssen Zahlen sein.');
   if (B <= 0 || H <= 0) throw new Error('Breite und Höhe müssen > 0 sein.');
+  if (H_F !== null && H_F > H) throw new Error('hoehe_flaeche_m darf nicht größer als hoehe_m sein.');
   if (!traverse_name_intern) throw new Error('traverse_name_intern fehlt.');
   if (!bodenplatte_name_intern) throw new Error('bodenplatte_name_intern fehlt.');
   if (!untergrund) throw new Error('untergrund fehlt.');

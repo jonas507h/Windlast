@@ -1,7 +1,7 @@
 // tor_preview.js — verbindet Formwerte → build_tor → render_konstruktion
 // Erwartet: build_tor.js, linien_* und render_konstruktion.js sind erreichbar (ES-Module)
 
-import { buildTor, ORIENTIERUNG } from '../build/build_tor.js';
+import { buildTor, ORIENTIERUNG, validateTorInputs } from '../build/build_tor.js';
 import { render_konstruktion } from './render_konstruktion.js';
 import { computeDimensionsTor } from './dimensions_tor.js';
 
@@ -39,10 +39,16 @@ export function mountTorPreview(mountEl) {
   let handle = null;
 
   function rerender() {
-    const katalog = window.Catalog || null;
-    const konstruktion = buildTor(readFormForTor(), katalog || undefined);
-    // erst Container leeren (altes Canvas raus), aber alten Handle noch NICHT dispose'n,
-    // damit wir seine Kamera/Target als prevView verwenden können
+    const katalog = window.Catalog;
+    if (!katalog) return;
+
+    let inputs;
+    try { inputs = readFormForTor() } catch { return }
+    try { validateTorInputs(inputs, katalog) } catch { return }
+
+    let konstruktion;
+    try { konstruktion = buildTor(inputs, katalog) } catch { return}
+    
     try { mountEl.innerHTML = ''; } catch {}
 
     const next = render_konstruktion(
