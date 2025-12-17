@@ -115,89 +115,102 @@ function isPositiveNumber(v) {
   return typeof v === 'number' && isFinite(v) && v > 0;
 }
 
-function validateSteherForm() {
-  let ok = true;
+// --- Einzelfeld-Validierungen ---------------------------------------------
 
-  // --- Header: Windzone ist Pflicht (Aufstelldauer explizit NICHT) ---
+function validateWindzoneField() {
   const windzoneEl = document.getElementById('windzone'); // kommt aus dem Header
-  const windzoneOK = !!(windzoneEl && windzoneEl.value);
-  if (windzoneEl) {
-    const fakeField = windzoneEl.closest('.field') || windzoneEl.parentElement;
-    if (fakeField) fakeField.classList.toggle('is-invalid', !windzoneOK);
-    windzoneEl.setAttribute('aria-invalid', windzoneOK ? 'false' : 'true');
-  }
-  ok = ok && windzoneOK;
+  if (!windzoneEl) return true;
 
-  // --- Pflicht-Zahlenfelder: > 0 ---
+  const windzoneOK = !!windzoneEl.value;
+  const fakeField = windzoneEl.closest('.field') || windzoneEl.parentElement;
+  if (fakeField) fakeField.classList.toggle('is-invalid', !windzoneOK);
+  windzoneEl.setAttribute('aria-invalid', windzoneOK ? 'false' : 'true');
+
+  return windzoneOK;
+}
+
+function validateHoeheField() {
   const hoeheEl = document.getElementById('hoehe_m');
-  const rLaengeEl = document.getElementById('rohr_laenge_m');
-  const rHoeheEl = document.getElementById('rohr_hoehe_m');
-  const hoeheFlaecheEl = document.getElementById('hoehe_flaeche_m');
-
   const errH = document.getElementById('err-hoehe');
-  const errL = document.getElementById('err-laenge');
-  const errRH = document.getElementById('err-rhoehe');
-  const errHF = document.getElementById('err-hoehe_flaeche');
+  if (!hoeheEl) return true;
 
-  const rawHF = hoeheFlaecheEl?.value?.trim();
-  const hoeheFlaeche = rawHF === "" ? null : parseFloat(rawHF);
-
-  const hOK = isPositiveNumber(parseFloat(hoeheEl?.value));
+  const hOK = isPositiveNumber(parseFloat(hoeheEl.value));
   showFieldError(hoeheEl, errH, !hOK, 'Bitte eine gültige Höhe > 0 angeben.');
-  ok = ok && hOK;
+  return hOK;
+}
 
-  const lOK = isPositiveNumber(parseFloat(rLaengeEl?.value));
+function validateRohrLaengeField() {
+  const rLaengeEl = document.getElementById('rohr_laenge_m');
+  const errL = document.getElementById('err-laenge');
+  if (!rLaengeEl) return true;
+
+  const lOK = isPositiveNumber(parseFloat(rLaengeEl.value));
   showFieldError(rLaengeEl, errL, !lOK, 'Bitte eine gültige Länge > 0 angeben.');
-  ok = ok && lOK;
+  return lOK;
+}
+
+function validateRohrHoeheField() {
+  const hoeheEl = document.getElementById('hoehe_m');
+  const rHoeheEl = document.getElementById('rohr_hoehe_m');
+  const errRH = document.getElementById('err-rhoehe');
+  if (!rHoeheEl) return true;
 
   let rhOK = true;
   let rhMsg = '';
-  if (!(isPositiveNumber(parseFloat(rHoeheEl?.value)))) {
+
+  const rh = parseFloat(rHoeheEl.value);
+  if (!isPositiveNumber(rh)) {
     rhOK = false;
     rhMsg = 'Bitte eine gültige Rohrhöhe > 0 angeben.';
   } else {
-    const maxRH = (parseFloat(rHoeheEl?.value)) <= (parseFloat(hoeheEl?.value));
-
-    if (!maxRH) {
+    const hGes = parseFloat(hoeheEl?.value);
+    if (isFinite(hGes) && rh > hGes) {
       rhOK = false;
       rhMsg = 'Die Rohrhöhe darf die Gesamthöhe nicht überschreiten.';
     }
   }
+
   showFieldError(rHoeheEl, errRH, !rhOK, rhMsg);
-  ok = ok && rhOK;
+  return rhOK;
+}
+
+function validateHoeheFlaecheField() {
+  const rHoeheEl = document.getElementById('rohr_hoehe_m');
+  const hoeheFlaecheEl = document.getElementById('hoehe_flaeche_m');
+  const errHF = document.getElementById('err-hoehe_flaeche');
+  if (!hoeheFlaecheEl) return true;
+
+  const rawHF = hoeheFlaecheEl.value?.trim();
+  const hf = rawHF === "" ? null : parseFloat(rawHF);
 
   let uOK = true;
   let uMsg = '';
-  if (!(rawHF === "" || (isFinite(hoeheFlaeche) && hoeheFlaeche > 0))) {
+
+  if (!(rawHF === "" || (isFinite(hf) && hf > 0))) {
     uOK = false;
     uMsg = 'Bitte eine Zahl > 0 angeben oder leer lassen.';
-  } else if (hoeheFlaeche !== null && isFinite(hoeheFlaeche)) {
-    const maxU = hoeheFlaeche <= parseFloat(rHoeheEl?.value);
-    if (!maxU) {
+  } else if (hf !== null && isFinite(hf)) {
+    const rh = parseFloat(rHoeheEl?.value);
+    if (isFinite(rh) && hf > rh) {
       uOK = false;
       uMsg = 'Die Höhe der Fläche darf nicht größer als die Rohrhöhe sein.';
     }
   }
-  showFieldError(hoeheFlaecheEl, errHF, !uOK, uMsg);
-  ok = ok && uOK;
 
-  // --- Pflicht-Dropdowns (haben meist Defaults, aber sicherheitshalber prüfen) ---
-  // const reqSelectIds = [
-  //   'traverse_name_intern',
-  //   'rohr_name_intern',
-  //   'bodenplatte_name_intern',
-  //   'untergrund_typ',
-  //   'gummimatte'
-  // ];
-  // for (const id of reqSelectIds) {
-  //   const el = document.getElementById(id);
-  //   if (!el) continue;
-  //   const hasValue = !!el.value;
-  //   const wrap = el.closest('.field');
-  //   if (wrap) wrap.classList.toggle('is-invalid', !hasValue);
-  //   el.setAttribute('aria-invalid', hasValue ? 'false' : 'true');
-  //   ok = ok && hasValue;
-  // }
+  showFieldError(hoeheFlaecheEl, errHF, !uOK, uMsg);
+  return uOK;
+}
+
+// --- Formular-Gesamtvalidierung -------------------------------------------
+
+function validateSteherForm() {
+  let ok = true;
+
+  ok = validateWindzoneField()      && ok;
+  ok = validateHoeheField()         && ok;
+  ok = validateRohrLaengeField()    && ok;
+  ok = validateRohrHoeheField()     && ok;
+  ok = validateHoeheFlaecheField()  && ok;
 
   return ok;
 }
@@ -310,10 +323,46 @@ async function submitSteher() {
   }
 }
 
-// Funktion für Berechnen-Button, wenn das Dokument geladen ist
 document.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById("btn-berechnen");
   if (btn) btn.addEventListener("click", submitSteher);
+
+  // Delegierter blur-Handler (capturing!), damit es auch bei dynamischem DOM klappt
+  document.addEventListener("blur", (ev) => {
+    const el = ev.target;
+    if (!el || !(el instanceof HTMLInputElement || el instanceof HTMLSelectElement)) return;
+
+    switch (el.id) {
+      case "windzone":
+        validateWindzoneField();
+        break;
+
+      case "hoehe_m":
+        validateHoeheField();
+        // abhängig: Rohrhöhe darf Gesamthöhe nicht überschreiten
+        validateRohrHoeheField();
+        // und Fläche hängt indirekt an Rohrhöhe
+        validateHoeheFlaecheField();
+        break;
+
+      case "rohr_laenge_m":
+        validateRohrLaengeField();
+        break;
+
+      case "rohr_hoehe_m":
+        validateRohrHoeheField();
+        // abhängig: Fläche darf nicht größer als Rohrhöhe sein
+        validateHoeheFlaecheField();
+        break;
+
+      case "hoehe_flaeche_m":
+        validateHoeheFlaecheField();
+        break;
+
+      default:
+        break;
+    }
+  }, true); // << wichtig: blur bubbelt nicht
 });
 
 // --- Globale Hooks für index.html ---

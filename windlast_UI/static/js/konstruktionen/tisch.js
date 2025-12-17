@@ -109,76 +109,87 @@ function isPositiveNumber(v) {
   return typeof v === 'number' && isFinite(v) && v > 0;
 }
 
-function validateTischForm() {
-  let ok = true;
+// --- Einzelfeld-Validierungen ---------------------------------------------
 
-  // Header: Windzone ist Pflicht (Aufstelldauer explizit NICHT)
+function validateWindzoneField() {
   const windzoneEl = document.getElementById('windzone'); // kommt aus dem Header
-  const windzoneOK = !!(windzoneEl && windzoneEl.value);
-  if (windzoneEl) {
-    const wrap = windzoneEl.closest('.field') || windzoneEl.parentElement;
-    if (wrap) wrap.classList.toggle('is-invalid', !windzoneOK);
-    windzoneEl.setAttribute('aria-invalid', windzoneOK ? 'false' : 'true');
-  }
-  ok = ok && windzoneOK;
+  if (!windzoneEl) return true;
 
-  // Zahlenfelder > 0
-  const hoeheEl  = document.getElementById('hoehe_m');
-  const breiteEl = document.getElementById('breite_m');
-  const tiefeEl  = document.getElementById('tiefe_m');
-  const hoeheFlaecheEl = document.getElementById('hoehe_flaeche_m');
+  const windzoneOK = !!windzoneEl.value;
+  const wrap = windzoneEl.closest('.field') || windzoneEl.parentElement;
+  if (wrap) wrap.classList.toggle('is-invalid', !windzoneOK);
+  windzoneEl.setAttribute('aria-invalid', windzoneOK ? 'false' : 'true');
 
+  return windzoneOK;
+}
+
+function validateHoeheField() {
+  const hoeheEl = document.getElementById('hoehe_m');
   const errH = document.getElementById('err-hoehe');
-  const errB = document.getElementById('err-breite');
-  const errT = document.getElementById('err-tiefe');
-  const errHF = document.getElementById('err-hoehe_flaeche');
+  if (!hoeheEl) return true;
 
-  const rawHF = hoeheFlaecheEl?.value?.trim();
-  const hoeheFlaeche = rawHF === "" ? null : parseFloat(rawHF);
-
-  const hOK = isPositiveNumber(parseFloat(hoeheEl?.value));
+  const hOK = isPositiveNumber(parseFloat(hoeheEl.value));
   showFieldError(hoeheEl, errH, !hOK, 'Bitte eine gültige Höhe > 0 angeben.');
-  ok = ok && hOK;
+  return hOK;
+}
 
-  const bOK = isPositiveNumber(parseFloat(breiteEl?.value));
+function validateBreiteField() {
+  const breiteEl = document.getElementById('breite_m');
+  const errB = document.getElementById('err-breite');
+  if (!breiteEl) return true;
+
+  const bOK = isPositiveNumber(parseFloat(breiteEl.value));
   showFieldError(breiteEl, errB, !bOK, 'Bitte eine gültige Breite > 0 angeben.');
-  ok = ok && bOK;
+  return bOK;
+}
 
-  const tOK = isPositiveNumber(parseFloat(tiefeEl?.value));
+function validateTiefeField() {
+  const tiefeEl = document.getElementById('tiefe_m');
+  const errT = document.getElementById('err-tiefe');
+  if (!tiefeEl) return true;
+
+  const tOK = isPositiveNumber(parseFloat(tiefeEl.value));
   showFieldError(tiefeEl, errT, !tOK, 'Bitte eine gültige Tiefe > 0 angeben.');
-  ok = ok && tOK;
+  return tOK;
+}
+
+function validateHoeheFlaecheField() {
+  const hoeheEl = document.getElementById('hoehe_m');
+  const hoeheFlaecheEl = document.getElementById('hoehe_flaeche_m');
+  const errHF = document.getElementById('err-hoehe_flaeche');
+  if (!hoeheFlaecheEl) return true;
+
+  const rawHF = hoeheFlaecheEl.value?.trim();
+  const hoeheFlaeche = rawHF === "" ? null : parseFloat(rawHF);
 
   let uOK = true;
   let uMsg = '';
+
   if (!(rawHF === "" || (isFinite(hoeheFlaeche) && hoeheFlaeche > 0))) {
     uOK = false;
     uMsg = 'Bitte eine Zahl > 0 angeben oder leer lassen.';
   } else if (hoeheFlaeche !== null && isFinite(hoeheFlaeche)) {
-    const maxU = hoeheFlaeche <= parseFloat(hoeheEl?.value);
-    if (!maxU) {
+    const hGes = parseFloat(hoeheEl?.value);
+    if (isFinite(hGes) && hoeheFlaeche > hGes) {
       uOK = false;
       uMsg = 'Die Höhe der Fläche darf nicht größer als die Gesamthöhe sein.';
     }
   }
-  showFieldError(hoeheFlaecheEl, errHF, !uOK, uMsg);
-  ok = ok && uOK;
 
-  // Pflicht-Dropdowns (z. T. mit Defaults aus initTischDropdowns)
-  // const reqSelectIds = [
-  //   'traverse_name_intern',
-  //   'bodenplatte_name_intern',
-  //   'untergrund_typ',
-  //   'gummimatte'
-  // ];
-  // for (const id of reqSelectIds) {
-  //   const el = document.getElementById(id);
-  //   if (!el) continue;
-  //   const hasValue = !!el.value;
-  //   const wrap = el.closest('.field');
-  //   if (wrap) wrap.classList.toggle('is-invalid', !hasValue);
-  //   el.setAttribute('aria-invalid', hasValue ? 'false' : 'true');
-  //   ok = ok && hasValue;
-  // }
+  showFieldError(hoeheFlaecheEl, errHF, !uOK, uMsg);
+  return uOK;
+}
+
+// --- Formular-Gesamtvalidierung -------------------------------------------
+
+function validateTischForm() {
+  let ok = true;
+
+  ok = validateWindzoneField()      && ok;
+  ok = validateHoeheField()         && ok;
+  ok = validateBreiteField()        && ok;
+  ok = validateTiefeField()         && ok;
+  ok = validateHoeheFlaecheField()  && ok;
 
   return ok;
 }
@@ -301,6 +312,39 @@ async function submitTisch() {
 document.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById("btn-berechnen");
   if (btn) btn.addEventListener("click", submitTisch);
+
+  // Delegierter blur-Handler (capturing!), damit es auch bei dynamischem DOM klappt
+  document.addEventListener("blur", (ev) => {
+    const el = ev.target;
+    if (!el || !(el instanceof HTMLInputElement || el instanceof HTMLSelectElement)) return;
+
+    switch (el.id) {
+      case "windzone":
+        validateWindzoneField();
+        break;
+
+      case "hoehe_m":
+        validateHoeheField();
+        // abhängig: Fläche darf nicht größer als Gesamthöhe sein
+        validateHoeheFlaecheField();
+        break;
+
+      case "breite_m":
+        validateBreiteField();
+        break;
+
+      case "tiefe_m":
+        validateTiefeField();
+        break;
+
+      case "hoehe_flaeche_m":
+        validateHoeheFlaecheField();
+        break;
+
+      default:
+        break;
+    }
+  }, true); // << wichtig: blur bubbelt nicht
 });
 
 // --- Globale Hooks für index.html ---

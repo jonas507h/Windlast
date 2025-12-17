@@ -126,61 +126,89 @@ function isPositiveNumber(v) {
   return typeof v === 'number' && isFinite(v) && v > 0;
 }
 
-function validateTorForm() {
-  let ok = true;
 
-  // --- Header: Windzone ist Pflicht (Aufstelldauer explizit NICHT) ---
-  const windzoneEl = document.getElementById('windzone');      // aus header form
-  const windzoneOK = !!(windzoneEl && windzoneEl.value);
-  // Header hat kein .field-Wrapper/Fehltext – wir markieren nur optisch (kein Text)
-  if (windzoneEl) {
-    const fakeField = windzoneEl.closest('.field') || windzoneEl.parentElement;
-    if (fakeField) fakeField.classList.toggle('is-invalid', !windzoneOK);
-    windzoneEl.setAttribute('aria-invalid', windzoneOK ? 'false' : 'true');
-  }
-  ok = ok && windzoneOK;
+// --- Einzelfeld-Validierungen ---------------------------------------------
 
-  // --- Tor-Eingaben: Höhe/Breite > 0 ---
+function validateWindzoneField() {
+  const windzoneEl = document.getElementById('windzone');
+  if (!windzoneEl) return true;
+
+  const windzoneOK = !!windzoneEl.value;
+
+  const fakeField = windzoneEl.closest('.field') || windzoneEl.parentElement;
+  if (fakeField) fakeField.classList.toggle('is-invalid', !windzoneOK);
+  windzoneEl.setAttribute('aria-invalid', windzoneOK ? 'false' : 'true');
+
+  return windzoneOK;
+}
+
+function validateHoeheField() {
   const hoeheEl = document.getElementById('hoehe_m');
-  const breiteEl = document.getElementById('breite_m');
-  const hoeheFlaecheEl = document.getElementById('hoehe_flaeche_m');
-  const errH = document.getElementById('err-hoehe');
-  const errB = document.getElementById('err-breite');
-  const errHF = document.getElementById('err-hoehe_flaeche');
+  const errH    = document.getElementById('err-hoehe');
+  if (!hoeheEl) return true;
 
-  const hoehe = parseFloat(hoeheEl?.value);
-  const breite = parseFloat(breiteEl?.value);
-  
-  const rawHF = hoeheFlaecheEl?.value?.trim();
+  const hoehe = parseFloat(hoeheEl.value);
+  const hOK   = isPositiveNumber(hoehe);
+
+  showFieldError(hoeheEl, errH, !hOK, 'Bitte eine gültige Höhe > 0 angeben.');
+  return hOK;
+}
+
+function validateBreiteField() {
+  const breiteEl = document.getElementById('breite_m');
+  const errB     = document.getElementById('err-breite');
+  if (!breiteEl) return true;
+
+  const breite = parseFloat(breiteEl.value);
+  const bOK    = isPositiveNumber(breite);
+
+  showFieldError(breiteEl, errB, !bOK, 'Bitte eine gültige Breite > 0 angeben.');
+  return bOK;
+}
+
+function validateHoeheFlaecheField() {
+  const hoeheEl        = document.getElementById('hoehe_m');
+  const hoeheFlaecheEl = document.getElementById('hoehe_flaeche_m');
+  const errHF          = document.getElementById('err-hoehe_flaeche');
+
+  if (!hoeheFlaecheEl) return true;
+
+  const rawHF        = hoeheFlaecheEl.value?.trim();
   const hoeheFlaeche = rawHF === "" ? null : parseFloat(rawHF);
 
-  const hOK = isPositiveNumber(hoehe);
-  showFieldError(hoeheEl, errH, !hOK, 'Bitte eine gültige Höhe > 0 angeben.');
-  ok = ok && hOK;
-
-  const bOK = isPositiveNumber(breite);
-  showFieldError(breiteEl, errB, !bOK, 'Bitte eine gültige Breite > 0 angeben.');
-  ok = ok && bOK;
-
-  let uOK = true;
+  let uOK  = true;
   let uMsg = '';
+
   if (!(rawHF === "" || (isFinite(hoeheFlaeche) && hoeheFlaeche > 0))) {
-    uOK = false;
+    uOK  = false;
     uMsg = 'Bitte eine Zahl > 0 angeben oder leer lassen.';
-  } else if (hoeheFlaeche !== null && isFinite(hoeheFlaeche)) {
-    const maxU = hoeheFlaeche <= parseFloat(hoeheEl?.value);
+  } else if (hoeheFlaeche !== null && isFinite(hoeheFlaeche) && hoeheEl) {
+    const hGes = parseFloat(hoeheEl.value);
+    const maxU = isFinite(hGes) && (hoeheFlaeche <= hGes);
     if (!maxU) {
-      uOK = false;
+      uOK  = false;
       uMsg = 'Die Höhe der Fläche darf nicht größer als die Gesamthöhe sein.';
     }
   }
-  showFieldError(hoeheFlaecheEl, errHF, !uOK, uMsg);
-  ok = ok && uOK;
 
-  // --- Tor-Dropdowns: i. d. R. bereits gültig vorbelegt ---
-  // traverse_name_intern, bodenplatte_name_intern, traversen_orientierung,
-  // gummimatte, untergrund_typ: werden durch initTorDropdowns gefüllt,
-  // inkl. Defaults (up/ja/Beton). → kein Fehlerfall zu erwarten. :contentReference[oaicite:4]{index=4}
+  showFieldError(hoeheFlaecheEl, errHF, !uOK, uMsg);
+  return uOK;
+}
+
+// --- Formular-Gesamtvalidierung -------------------------------------------
+
+function validateTorForm() {
+  let ok = true;
+
+  // Header: Windzone ist Pflicht
+  ok = validateWindzoneField() && ok;
+
+  // Tor-Eingaben
+  ok = validateHoeheField() && ok;
+  ok = validateBreiteField() && ok;
+  ok = validateHoeheFlaecheField() && ok;
+
+  // Dropdowns sind durch initTorDropdowns vorbelegt → kein weiterer Check nötig
 
   return ok;
 }
@@ -303,10 +331,44 @@ async function submitTor() {
   }
 }
 
-// Funktion für Berechnen-Button, wenn das Dokument geladen ist
 document.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById("btn-berechnen");
   if (btn) btn.addEventListener("click", submitTor);
+
+  // Feldweise Validierung beim Verlassen des Feldes via Event Delegation
+  document.addEventListener(
+    "blur",
+    (ev) => {
+      const el = ev.target;
+      if (!el || !(el instanceof HTMLInputElement || el instanceof HTMLSelectElement)) {
+        return;
+      }
+
+      switch (el.id) {
+        case "hoehe_m":
+          validateHoeheField();
+          // abhängig: Fläche darf nicht größer als Höhe sein
+          validateHoeheFlaecheField();
+          break;
+
+        case "breite_m":
+          validateBreiteField();
+          break;
+
+        case "hoehe_flaeche_m":
+          validateHoeheFlaecheField();
+          break;
+
+        case "windzone":
+          validateWindzoneField();
+          break;
+
+        default:
+          break;
+      }
+    },
+    true // <<<< WICHTIG: capturing, weil blur nicht bubbelt
+  );
 });
 
 // --- Globale Hooks für index.html ---
