@@ -19,7 +19,7 @@ const ORIENT_MAP = {
  * Wirft bei Fehlern eine aussagekräftige Exception.
  */
 export function validateTorInputs({
-  breite_m, hoehe_m, hoehe_flaeche_m: hoehe_flaeche_m, traverse_name_intern, bodenplatte_name_intern, untergrund, orientierung = ORIENTIERUNG.up,
+  breite_m, hoehe_m, hoehe_flaeche_m: hoehe_flaeche_m, anzahl_steher,traverse_name_intern, bodenplatte_name_intern, untergrund, orientierung = ORIENTIERUNG.up,
 }, catalog) {
   if (!catalog || typeof catalog.getTraverse !== 'function' || typeof catalog.getBodenplatte !== 'function') {
     throw new Error('catalog mit getTraverse/getBodenplatte erforderlich.');
@@ -28,6 +28,11 @@ export function validateTorInputs({
   const B = Number(breite_m);
   const H = Number(hoehe_m);
   let H_F = hoehe_flaeche_m;
+  const A_S = Number(anzahl_steher);
+
+  if (!isFinite(A_S) || A_S < 2 || !Number.isInteger(A_S)) {
+    throw new Error('anzahl_steher muss eine ganze Zahl ≥ 2 sein.');
+  }
 
   if (H_F === "" || H_F === null || H_F === undefined) {
     H_F = null;
@@ -77,6 +82,7 @@ export function validateTorInputs({
  * @param {number} inputs.breite_m
  * @param {number} inputs.hoehe_m
  * @param {number|null} inputs.hoehe_flaeche_m
+ * @param {number} inputs.anzahl_steher
  * @param {string} inputs.traverse_name_intern
  * @param {string} inputs.bodenplatte_name_intern
  * @param {boolean} [inputs.gummimatte=true]
@@ -88,14 +94,14 @@ export function validateTorInputs({
  */
 export function buildTor(inputs, catalog) {
   const {
-    breite_m, hoehe_m, hoehe_flaeche_m, traverse_name_intern, bodenplatte_name_intern,
+    breite_m, hoehe_m, hoehe_flaeche_m, anzahl_steher, traverse_name_intern, bodenplatte_name_intern,
     gummimatte = true,
     untergrund,
     orientierung = ORIENTIERUNG.up,
     name = 'Tor',
   } = inputs;
 
-  validateTorInputs({ breite_m, hoehe_m, hoehe_flaeche_m, traverse_name_intern, bodenplatte_name_intern, untergrund, orientierung }, catalog);
+  validateTorInputs({ breite_m, hoehe_m, hoehe_flaeche_m, anzahl_steher, traverse_name_intern, bodenplatte_name_intern, untergrund, orientierung }, catalog);
 
   const B = Number(breite_m);
   const H = Number(hoehe_m);
@@ -103,6 +109,7 @@ export function buildTor(inputs, catalog) {
   if (hoehe_flaeche_m !== "" && hoehe_flaeche_m !== null && hoehe_flaeche_m !== undefined) {
     H_F = Number(hoehe_flaeche_m);
   }
+  const A_S = Number(anzahl_steher);
   const travSpec = catalog.getTraverse(traverse_name_intern);
   const is3punkt = Number(travSpec.anzahl_gurtrohre) === 3;
 
@@ -156,18 +163,7 @@ export function buildTor(inputs, catalog) {
 
   const vecs = ORIENT_MAP[orientierung];
 
-  // --- Traversenstrecken (links/oben/rechts) – identisch zu CORE-Logik ---
-  const trav_left = {
-    typ: 'Traversenstrecke',
-    traverse_name_intern,
-    start: [ t_part, 0, 0 ],
-    ende:  [ t_part, 0, H ],
-    orientierung: vecs.links,
-    objekttyp: 'TRAVERSE',
-    element_id_intern: 'Strecke_Links',
-    anzeigename: travAnzeige,
-  };
-
+  // --- obere Strecke ---
   const trav_top = {
     typ: 'Traversenstrecke',
     traverse_name_intern,
@@ -179,46 +175,49 @@ export function buildTor(inputs, catalog) {
     anzeigename: travAnzeige,
   };
 
-  const trav_right = {
-    typ: 'Traversenstrecke',
-    traverse_name_intern,
-    start: [ B - t_part, 0, 0 ],
-    ende:  [ B - t_part, 0, H ],
-    orientierung: vecs.rechts,
-    objekttyp: 'TRAVERSE',
-    element_id_intern: 'Strecke_Rechts',
-    anzeigename: travAnzeige,
-  };
+  // -- Steher und Bodenplatten ---
+  const x_abstand = (B - 2 * t_part) / (anzahl_steher - 1);
 
-  // --- Bodenplatten (links/rechts) – Orientierung/Drehung wie im CORE ---
-  const plate_left = {
-    typ: 'Bodenplatte',
-    name_intern: bodenplatte_name_intern,
-    mittelpunkt: [t_part, 0, 0],
-    orientierung: [0, 0, 1],
-    drehung: vecs.links,
-    untergrund: untergrund,
-    gummimatte: gummimatte ? 'GUMMI' : null,
-    objekttyp: 'BODENPLATTE',
-    element_id_intern: 'Bodenplatte_Links',
-    anzeigename: plateAnzeige,
-  };
+  // Mittelpunkt-Index
+  const midIndex = Math.floor(anzahl_steher / 2);
 
-  const plate_right = {
-    typ: 'Bodenplatte',
-    name_intern: bodenplatte_name_intern,
-    mittelpunkt: [B - t_part, 0, 0],
-    orientierung: [0, 0, 1],
-    drehung: vecs.rechts,
-    untergrund: untergrund,
-    gummimatte: gummimatte ? 'GUMMI' : null,
-    objekttyp: 'BODENPLATTE',
-    element_id_intern: 'Bodenplatte_Rechts',
-    anzeigename: plateAnzeige,
-  };
+  const traversen = [];
+  const bodenplatten = [];
+
+  for (let n = 0; n < anzahl_steher; n++) {
+    const x = t_part + n * x_abstand;
+
+    const sideVec = (n <= midIndex)
+      ? vecs.links
+      : vecs.rechts;
+
+    traversen.push({
+      typ: 'Traversenstrecke',
+      traverse_name_intern,
+      start: [x, 0, 0],
+      ende:  [x, 0, H],
+      orientierung: sideVec,
+      objekttyp: 'TRAVERSE',
+      element_id_intern: `Steher_${n + 1}`,
+      anzeigename: travAnzeige,
+    });
+
+    bodenplatten.push({
+      typ: 'Bodenplatte',
+      name_intern: bodenplatte_name_intern,
+      mittelpunkt: [x, 0, 0],
+      orientierung: [0, 0, 1],
+      drehung: sideVec,
+      untergrund,
+      gummimatte: gummimatte ? 'GUMMI' : null,
+      objekttyp: 'BODENPLATTE',
+      element_id_intern: `Bodenplatte_${n + 1}`,
+      anzeigename: plateAnzeige,
+    });
+  }
 
   // Basis-Bauelemente
-  const bauelemente = [trav_left, trav_top, trav_right, plate_left, plate_right];
+  const bauelemente = [trav_top, ...traversen, ...bodenplatten];
 
   // --- Wenn Unterkante definiert, dann Fläche und untere Truss ---
   if (H_F !== null) {
@@ -258,6 +257,7 @@ export function buildTor(inputs, catalog) {
     breite_m: B,
     hoehe_m: H,
     hoehe_flaeche_m: H_F,
+    anzahl_steher: A_S,
     traverse_name_intern: traverse_name_intern,
     traversen_orientierung: orientierung,
     bauelemente: bauelemente,

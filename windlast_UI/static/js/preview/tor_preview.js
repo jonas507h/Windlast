@@ -15,6 +15,7 @@ function readFormForTor() {
   const breite = parseFloat(document.getElementById('breite_m')?.value);
   const hoehe  = parseFloat(document.getElementById('hoehe_m')?.value);
   const hoeheFlaeche = document.getElementById('hoehe_flaeche_m')?.value;
+  const anzahl_steher = parseInt(document.getElementById('anzahl_steher')?.value);
 
   const traverse_name_intern   = document.getElementById('traverse_name_intern')?.value || 'TRUSS';
   const bodenplatte_name_intern= document.getElementById('bodenplatte_name_intern')?.value || 'BP';
@@ -27,6 +28,7 @@ function readFormForTor() {
     breite_m: isFinite(breite) && breite > 0 ? breite : 6,
     hoehe_m:  isFinite(hoehe)  && hoehe  > 0 ? hoehe  : 4,
     hoehe_flaeche_m: isFinite(parseFloat(hoeheFlaeche)) ? parseFloat(hoeheFlaeche) : null,
+    anzahl_steher: isFinite(anzahl_steher) && anzahl_steher >= 2 ? anzahl_steher : 2,
     traverse_name_intern,
     bodenplatte_name_intern,
     gummimatte,
@@ -71,7 +73,7 @@ export function mountTorPreview(mountEl) {
   rerender();
 
   // simple live update: auf Änderungen der relevanten Inputs reagieren
-  const ids = ['breite_m','hoehe_m','traverse_name_intern','bodenplatte_name_intern','gummimatte','untergrund_typ','traversen_orientierung', 'hoehe_flaeche_m'];
+  const ids = ['breite_m','hoehe_m','traverse_name_intern','anzahl_steher','bodenplatte_name_intern','gummimatte','untergrund_typ','traversen_orientierung', 'hoehe_flaeche_m'];
   const listeners = [];
   for (const id of ids) {
     const el = document.getElementById(id);

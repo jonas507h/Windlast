@@ -195,6 +195,18 @@ function validateHoeheFlaecheField() {
   return uOK;
 }
 
+function validateAnzahlSteherField() {
+  const anzahlEl  = document.getElementById('anzahl_steher');
+  const errA = document.getElementById('err-anzahl_steher');
+  if (!anzahlEl) return true;
+
+  const n = parseInt(anzahlEl.value, 10);
+  const aOK = Number.isInteger(n) && n >= 2;
+
+  showFieldError(anzahlEl, errA, !aOK, 'Bitte eine ganze Zahl ≥ 2 angeben.');
+  return aOK;
+}
+
 // --- Formular-Gesamtvalidierung -------------------------------------------
 
 function validateTorForm() {
@@ -207,6 +219,7 @@ function validateTorForm() {
   ok = validateHoeheField() && ok;
   ok = validateBreiteField() && ok;
   ok = validateHoeheFlaecheField() && ok;
+  ok = validateAnzahlSteherField() && ok;
 
   // Dropdowns sind durch initTorDropdowns vorbelegt → kein weiterer Check nötig
 
@@ -284,6 +297,7 @@ async function submitTor() {
     const breite_m = parseFloat(document.getElementById("breite_m").value);
     const hoehe_m  = parseFloat(document.getElementById("hoehe_m").value);
     const hoehe_flaeche_m = document.getElementById("hoehe_flaeche_m").value;
+    const anzahl_steher = parseInt(document.getElementById("anzahl_steher").value, 10);
     const traverse_name_intern    = document.getElementById("traverse_name_intern").value;
     const bodenplatte_name_intern = document.getElementById("bodenplatte_name_intern").value;
     const orientierung            = readTraversenOrientierung();
@@ -293,6 +307,7 @@ async function submitTor() {
       breite_m,
       hoehe_m,
       hoehe_flaeche_m: hoehe_flaeche_m,
+      anzahl_steher,
       traverse_name_intern,
       bodenplatte_name_intern,
       gummimatte: gummimatte_bool,
@@ -357,6 +372,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         case "hoehe_flaeche_m":
           validateHoeheFlaecheField();
+          break;
+
+        case "anzahl_steher":
+          validateAnzahlSteherField();
           break;
 
         case "windzone":
