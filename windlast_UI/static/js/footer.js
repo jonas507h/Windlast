@@ -4,6 +4,13 @@ import { configureErgebnisse, setupErgebnisseUI } from "./modal/ergebnisse.js";
 import { displayAltName } from "./utils/formatierung.js";
 import { getNorminfo } from "./modal/norminfo.js";
 
+// Reihenfolge für bestimmte Alternativen erzwingen (Rest bleibt wie geliefert)
+const ALT_ORDER = [
+  "VERSTAERKEND",
+  "SCHUETZEND",
+];
+const ALT_ORDER_INDEX = new Map(ALT_ORDER.map((name, idx) => [name, idx]));
+
 const NORM_ID = {
   "EN_13814_2005": "en13814_2005",
   "EN_17879_2024": "en17879_2024",
@@ -375,9 +382,21 @@ function renderAlternativenBlocksVM(vm) {
   const altLists = {};
   let maxCount = 0;
   for (const normKey of COLS) {
-    const names = vm.listAlternativen(normKey);
-    altLists[normKey] = names;
-    if (names.length > maxCount) maxCount = names.length;
+    const names = vm.listAlternativen(normKey) || [];
+
+    // Custom-Order anwenden: bekannte zuerst in ALT_ORDER-Reihenfolge, unbekannte danach in Original-Reihenfolge
+    const ordered = [...names].sort((a, b) => {
+      const ia = ALT_ORDER_INDEX.has(a) ? ALT_ORDER_INDEX.get(a) : Number.POSITIVE_INFINITY;
+      const ib = ALT_ORDER_INDEX.has(b) ? ALT_ORDER_INDEX.get(b) : Number.POSITIVE_INFINITY;
+
+      if (ia !== ib) return ia - ib;
+
+      // beide unbekannt (oder beide gleich bekannt): Reihenfolge beibehalten
+      return names.indexOf(a) - names.indexOf(b);
+    });
+
+    altLists[normKey] = ordered;
+    if (ordered.length > maxCount) maxCount = ordered.length;
   }
 
   for (let i = 0; i < maxCount; i++) {
