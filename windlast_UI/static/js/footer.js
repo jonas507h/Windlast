@@ -17,6 +17,72 @@ const ROWS = [
   { key: "ballast", label: "erforderlicher Ballast", isSafety: false },
 ];
 
+// === Stale-Markierung (Ergebnisse passen nicht mehr zu Eingaben) ===
+let __lastInputsSnapshot = null;
+
+function __getResultsSectionEl() {
+  return document.getElementById("results-section");
+}
+
+function __setResultsStale(isStale) {
+  const el = __getResultsSectionEl();
+  if (!el) return;
+  el.classList.toggle("results-stale", !!isStale);
+}
+
+function __snapshotInputs() {
+  // Header
+  const headerIds = ["windzone", "aufstelldauer_wert", "aufstelldauer_einheit"];
+
+  // Konstruktionsformular (dynamisch)
+  const container = document.getElementById("konstruktions_container");
+
+  const entries = [];
+
+  for (const id of headerIds) {
+    const el = document.getElementById(id);
+    if (!el) continue;
+    entries.push([`#${id}`, String(el.value ?? "")]);
+  }
+
+  if (container) {
+    container.querySelectorAll("input, select, textarea").forEach((el) => {
+      // wichtig: stabile Zuordnung
+      const key =
+        el.id ? `#${el.id}` :
+        el.name ? `name:${el.name}` :
+        null;
+      if (!key) return;
+
+      // checkbox/radio sauber abbilden
+      let v;
+      if (el.type === "checkbox") v = el.checked ? "1" : "0";
+      else if (el.type === "radio") v = el.checked ? String(el.value ?? "") : "__unchecked__";
+      else v = String(el.value ?? "");
+
+      entries.push([key, v]);
+    });
+  }
+
+  // stabil sortieren
+  entries.sort((a, b) => a[0].localeCompare(b[0]));
+  return JSON.stringify(entries);
+}
+
+function __markStaleIfNeeded() {
+  const el = __getResultsSectionEl();
+  if (!el) return;
+
+  // 🔑 NEU: wenn Footer leer ist → keine Prüfung
+  if (!el.hasChildNodes()) return;
+
+  if (!__lastInputsSnapshot) return;
+
+  const now = __snapshotInputs();
+  __setResultsStale(now !== __lastInputsSnapshot);
+}
+
+
 function buildModal(titleText, bodyNodeOrHtml) {
   const wrap = document.createElement("div");
   const h = document.createElement("h3");
@@ -459,7 +525,23 @@ function updateFooter(payload) {
 
   setupMeldungenUI();
   setupErgebnisseUI();
+
+    // === NEU: Snapshot nach erfolgreichem Update speichern ===
+  __lastInputsSnapshot = __snapshotInputs();
+  __setResultsStale(false);
+
+  if (!payload || Object.keys(payload).length === 0) {
+    __lastInputsSnapshot = null;
+    __setResultsStale(false);
+  }
 }
+
+// Eingabenänderungen beobachten → stale markieren/entmarkieren
+(function registerStaleListeners(){
+  // input: beim Tippen, change: bei selects etc.
+  document.addEventListener("input",  () => __markStaleIfNeeded(), true);
+  document.addEventListener("change", () => __markStaleIfNeeded(), true);
+})();
 
 window.addEventListener("message", (ev) => {
   const msg = ev.data;

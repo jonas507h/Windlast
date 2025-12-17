@@ -8,6 +8,7 @@ export const ERGEBNISSE_HELP_PAGES = [
       <p>
         Die Rechenergebnisse werden im unteren Bereich der Seite in einer Tabelle dargestellt. Jede Spalte repräsentiert eine berechnete Norm.
         Die Tabelle wird aktualisiert durch einen Klick auf den &bdquo;Berechnen&ldquo;-Button. Eine automatische Aktualisierung bei jeder Eingabeänderung erfolgt nicht.
+        Eine gelbe Markierung der Tabelle zeigt an, dass die Ergebnisse nicht mehr aktuell sind und eine Neuberechnung erforderlich ist.
       </p>
       <p>
         <b>Die angezeigten Werte sind Ergebnis einer Überschlagberechnung und ersetzen keine statischen Nachweise durch einen qualifizierten Statiker.</b>
