@@ -1,11 +1,11 @@
 // config.js
 (function () {
-  const VERSION = "2.0.0-dev";
+  const VERSION = "2.0.0-alpha.1";
 
   // Echte Build-Rolle
   const BUILD_ROLE = "godmode"; // "user" | "debug" | "admin" | "godmode"
 
-  // 1) Flags pro Rolle definieren
+  // 1) Flags pro Rolle definieren.
   const ROLE_FLAGS = {
     user:  Object.freeze({
       show_zwischenergebnisse_tooltip: false,
