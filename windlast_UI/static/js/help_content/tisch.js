@@ -48,7 +48,12 @@ export const TISCH_HELP_PAGES = [
     body: `
       <p>
         Wählt hier aus unseren Pool-Bodenplatten die entsprechende Bodenplatte aus. Die Auswahl beeinflusst alle in der Konstruktion verwendeten Bodenplatten.
-        Bei der Berechnung werden Größe und Geometrie, Gewicht und Material der Bodenplatten berücksichtigt.
+        Bei der Berechnung werden Größe und Geometrie, Gewicht und Material der Bodenplatten berücksichtigt.Eine blau markierte Bodenplatte im
+        [[app:vorschau|Vorschaufenster]] zeigt an, dass unter der Bodenplatte eine Gummimatte verwendet wird.<br>
+        Da das Material der Bodenplatte Einfluss auf den Reibwert hat und nicht für alle Materialpaarungen Reibwerte in den zugrunde gelegten Normen
+        ([[norm:DIN_EN_13814_2005|DIN EN 13814:2005-06]] und [[norm:DIN_EN_17879_2024|DIN EN 17879:2024-08]]) angegeben sind, kann die Auswahl der Bodenplatte Einfluss
+        auf die Auswahlmöglichkeiten im [[tisch:gummimatte|Gummimatte-Feld]] und im [[tisch:untergrund|Untergrund-Feld]] haben.
+
       </p>
     `
   },
@@ -61,11 +66,12 @@ export const TISCH_HELP_PAGES = [
     body: `
       <p>
         Wählt hier aus, ob ihr Gummimatten unter den Bodenplatten verwendet. Gummimatten erhöhen in der Regel den Reibwert zwischen Bodenplatte und Untergrund
-        und können sich positiv auf die Gleitsicherheit der Konstruktion auswirken.
-      </p>
-      <p>
-        <b>Achtung:</b> Da in den zugrunde gelegten Normen (DIN EN 13814:2005-06 und DIN EN 17879:2024-08) nur Reibwerte für Gummi in Kombination mit Holz, Stahl oder Beton angegeben sind,
-        führt eine andere Auswahl im [[tisch:untergrund|Untergrund-Feld]] zu einem Fehler in der Berechnung.
+        und können sich positiv auf die Gleitsicherheit der Konstruktion auswirken. Im [[app:vorschau|Vorschaufenster]] werden Bodenplatten mit untergelegten
+        Gummimatten blau markiert.<br>
+        Da die Gummimatte Einfluss auf den Reibwert hat und nicht für alle Materialpaarungen Reibwerte in den zugrunde gelegten Normen
+        ([[norm:DIN_EN_13814_2005|DIN EN 13814:2005-06]] und [[norm:DIN_EN_17879_2024|DIN EN 17879:2024-08]]) angegeben sind, können die Auswahlmöglichkeiten in diesem Feld
+        je nach ausgewählter [[tisch:bodenplatte|Bodenplatte]] eingeschränkt sein. Die Auswahl der Gummimatte kann auch Einfluss auf
+        auf die Auswahlmöglichkeiten im [[tisch:untergrund|Untergrund-Feld]] haben.
       </p>
     `
   },
@@ -78,11 +84,9 @@ export const TISCH_HELP_PAGES = [
     body: `
       <p>
         Wählt hier den Untergrund aus, auf dem die Konstruktion steht. Der Untergrund beeinflusst den Reibwert zwischen Bodenplatte und Untergrund. Dieser wird anhand der
-        DIN EN 13814:2005-06 bzw. DIN EN 17879:2024-08 automatisch bestimmt.
-      </p>
-      <p>
-        <b>Achtung:</b> Bei Verwendung von Gummimatten unter den Bodenplatten (siehe [[tisch:gummimatte|Gummimatte-Feld]]) sind nur die Untergründe Holz, Stahl oder Beton zulässig.
-        Ansonsten führt dies zu einem Fehler in der Berechnung.
+        [[norm:DIN_EN_13814_2005|DIN EN 13814:2005-06]] bzw. [[norm:DIN_EN_17879_2024|DIN EN 17879:2024-08]] automatisch bestimmt.<br>
+        Da der Reibwert nicht für alle Materialpaarungen in den zugrunde gelegten Normen angegeben ist, können die Auswahlmöglichkeiten in diesem Feld
+        je nach ausgewählter [[tisch:bodenplatte|Bodenplatte]] und [[tisch:gummimatte|Gummimatte]] eingeschränkt sein.
       </p>
     `
   },

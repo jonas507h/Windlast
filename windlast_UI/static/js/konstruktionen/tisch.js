@@ -33,6 +33,82 @@ function fillSelect(el, options, { placeholder = null, defaultValue = null } = {
   }
 }
 
+async function fetchKompatibilitaet({ bodenplatte, gummimatte }) {
+  const qs = new URLSearchParams({
+    bodenplatte,
+    gummimatte: gummimatte || "nein",
+  });
+
+  const res = await fetch(`/api/v1/reibwert/kompatibilitaet?${qs.toString()}`, {
+    headers: { "Accept": "application/json" },
+  });
+  if (!res.ok) throw new Error(`Kompatibilität HTTP ${res.status}`);
+  return res.json();
+}
+
+let _isApplyingReibwertFilterTisch = false;
+
+async function applyReibwertDropdownFilteringTisch({ rerunIfChanged = true } = {}) {
+  if (_isApplyingReibwertFilterTisch) return;
+  _isApplyingReibwertFilterTisch = true;
+
+  try {
+    const bpEl = document.getElementById("bodenplatte_name_intern");
+    const gmEl = document.getElementById("gummimatte");
+    const ugEl = document.getElementById("untergrund_typ");
+    if (!bpEl || !gmEl || !ugEl || !window.Catalog) return;
+
+    const bpVal = bpEl.value;
+    if (!bpVal) return;
+
+    const gmRequested = gmEl.value || "nein";
+
+    const data = await fetchKompatibilitaet({
+      bodenplatte: bpVal,
+      gummimatte: gmRequested
+    });
+
+    const gmAllowed = data?.gummimatte?.allowed || ["ja", "nein"];
+    const gmEffective = data?.gummimatte?.effective || gmRequested;
+    const ugAllowed = data?.untergruende?.allowed || [];
+
+    // (1) Gummimatte filtern
+    const gmOptionsAll = [
+      { value: "ja", label: "Ja" },
+      { value: "nein", label: "Nein" },
+    ];
+    const gmOptions = gmOptionsAll.filter(o => gmAllowed.includes(o.value));
+
+    const prevGm = gmEl.value;
+    fillSelect(gmEl, gmOptions, { defaultValue: gmEffective });
+
+    // (2) Untergrund filtern
+    const ugAll = window.Catalog.untergruende || [];
+    const allowedSet = new Set(ugAllowed);
+
+    const ugFiltered = (ugAllowed.length > 0)
+      ? ugAll.filter(o => allowedSet.has(o.value))
+      : ugAll;
+
+    const prevUg = ugEl.value;
+    const nextUg = ugFiltered.some(o => o.value === prevUg)
+      ? prevUg
+      : (ugFiltered[0]?.value ?? "");
+
+    fillSelect(ugEl, ugFiltered, { defaultValue: nextUg });
+
+    // Wenn GM durch effective umspringt: einmal nachziehen
+    if (rerunIfChanged && prevGm !== gmEl.value) {
+      _isApplyingReibwertFilterTisch = false;
+      return applyReibwertDropdownFilteringTisch({ rerunIfChanged: false });
+    }
+  } catch (e) {
+    console.error("Reibwert-Filterung (Tisch) fehlgeschlagen:", e);
+  } finally {
+    _isApplyingReibwertFilterTisch = false;
+  }
+}
+
 async function initTischDropdowns() {
   // Initialisiert die Dropdowns für den Tisch
   try {
@@ -68,6 +144,20 @@ async function initTischDropdowns() {
         return bps.find(b => b.value === nameIntern);
       }
     };
+
+    // --- Reibwert-Filterung ------------------------------
+    await applyReibwertDropdownFilteringTisch({ rerunIfChanged: true });
+
+    const bpEl = document.getElementById("bodenplatte_name_intern");
+    const gmEl = document.getElementById("gummimatte");
+
+    const triggerFilter = () => applyReibwertDropdownFilteringTisch({ rerunIfChanged: true });
+
+    bpEl?.addEventListener("change", triggerFilter);
+    gmEl?.addEventListener("change", triggerFilter);
+
+    bpEl?.addEventListener("blur", triggerFilter);
+    gmEl?.addEventListener("blur", triggerFilter);
   } catch (e) {
     console.error("Tor-Dropdowns konnten nicht geladen werden:", e);
   }

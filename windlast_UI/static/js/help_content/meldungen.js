@@ -37,11 +37,6 @@ export const MELDUNGEN_HELP_PAGES = [
           ([[norm:DIN_EN_13814_2005|DIN EN 13814:2005-06]] bis 50m, [[norm:DIN_EN_17879_2024|DIN EN 17879:2024-08]] bis 30m,
           [[norm:DIN_EN_1991_1_4_2010|DIN EN 1991-1-4:2010-12]] bis 25m).
         </faq>
-        <faq question="Kein Reibwert für Paarung ...–... in den bekannten Normen vorhanden.">
-          Die Konstruktion kann nicht berechnet werden, weil kein Reibwert für die gewählte Materialpaarung in [[norm:DIN_EN_13814_2005|DIN EN 13814:2005-06]]
-          oder [[norm:DIN_EN_17879_2024|DIN EN 17879:2024-08]] vorhanden ist. Der Fehler kann nur auftreten, wenn ihr Gummimatten nutzt. Für Gummi sind nur Reibwerte mit Beton,
-          Stahl oder Holz definiert.
-        </faq>
       <h4>Warnungen</h4>
         <faq question="Abminderungen der Windlasten nach DIN EN 1991-1-4:2010-12/NA sind bei Bauten, die jederzeit errichtet und demontiert werden können (z.B. fliegende Bauten), nicht zulässig.">
           Im nationalen Anhang der [[norm:DIN_EN_1991_1_4_2010|DIN EN 1991-1-4:2010-12]] ist festgelegt, dass bei kurzen Aufstelldauern eine Abminderung des Staudrucks möglich ist.
