@@ -4,6 +4,7 @@ export const MELDUNGEN_HELP_PAGES = [
   {
     id: "meldungen:allgemein",
     title: "Meldungen",
+    stand: "18.12.2025",
     body: `
       <p>
         Im Meldungs-Fenster werden alle Infos, Hinweise, Warnungen und Fehlermeldungen aus der Berechnung angezeigt. Nachdem eine Berechnung durchgeführt wurde, erscheint in der Ergebnis-Tabelle rechts neben dem Titel der Norm eine farblich hinterlegte Zahl.
@@ -28,7 +29,7 @@ export const MELDUNGEN_HELP_PAGES = [
     id: "meldungen:haeufige_meldungen",
     title: "Häufige Meldungen",
     pfad: ["meldungen:allgemein"],
-    stand: "20.11.2025",
+    stand: "18.12.2025",
     body: `
       <h4>Fehler</h4>
         <faq question="Gesamthöhe ...m überschreitet die höchste definierte Obergrenze ...m ">
@@ -47,6 +48,11 @@ export const MELDUNGEN_HELP_PAGES = [
           Fliegende Bauten bzw. allgemein Bauten, die jederzeit errichtet und demontiert werden können, sind von dieser Regelung jedoch explizit ausgenommen
           (siehe [[norm:DIN_EN_1991_1_4_2010:abminderungen|DIN EN 1991-1-4:2010-12 – Abminderung von Staudrücken]]).
           Die Software wendet die Abminderung dennoch an. Soll dies nicht geschehen, könnt ihr das Feld [[header:aufstelldauer|Aufstelldauer]] einfach leer lassen.
+        </faq>
+        <faq question="Die Windgeschwindigkeiten in Windzone '4 ...' überschreiten die für die Anwendung der DIN EN 13814:2005-06 zulässigen Werte.">
+          Die Staudrücke nach [[norm:DIN_EN_13814_2005|DIN EN 13814:2005-06]] sind nur bis zu einer Referenzwindgeschwindigkeit von 28 m/s zulässig. Für Windzone 4 gibt der nationale Anhang
+          der [[norm:DIN_EN_1991_1_4_2010|DIN EN 1991-1-4:2010-12]] jedoch eine höhere Basiswindgeschwindigkeit vor.
+          Die Berechnung wird trotzdem durchgeführt. Ihr solltet jedosch prüfen, ob die Ergebnisse für eure Anwendung noch geeignet sind.
         </faq>
         <faq question="Die verwendete Aufstelldauer zwischen 3 Tagen und 3 Monaten führt zu einer Abminderung des Staudrucks, die nur für den Zeitraum von Mai bis August zulässig ist.">
           Die hier benutzte [[norm:DIN_EN_1991_1_4_2010:abminderungen|Abminderung der Staudrücke]] gemäß dem nationalen Anhang der

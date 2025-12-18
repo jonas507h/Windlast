@@ -203,7 +203,7 @@ def _winddruck_DinEn13814_2005_06(
         if windzone_kritisch:
             protokolliere_msg(
                 protokoll, severity=Severity.WARN, code="STAUD/WINDZONE_CRITICAL",
-                text=f"Die Staudrücke in Windzone '{windzone.value}' überschreiten die für die Anwendung der DIN EN 13814:2005-06 zulässigen Werte.",
+                text=f"Die Windgeschwindigkeiten in Windzone '{windzone.value}' überschreiten die für die Anwendung der DIN EN 13814:2005-06 zulässigen Werte.",
                 kontext=merge_kontext(base_ctx, {"windzone": windzone.value}),
             )
 

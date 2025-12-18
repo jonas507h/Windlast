@@ -8,7 +8,7 @@ export const GENERAL_HELP_PAGES = [
     body: `
       <p>Willkommen in der Hilfe des Windlastrechners.</p>
 
-      <h4>Wichtige Seiten</h4>
+      <h4>Wichtige Links</h4>
       <ul>
         <li>[[norm:allgemein|Normen]]</li>
         <li>[[app:bedienung|Bedienung des Programms]]</li>
@@ -16,7 +16,7 @@ export const GENERAL_HELP_PAGES = [
         <li>[[ergebnisse:allgemein|Ergebnisse]]</li>
       </ul>
 
-      <h4>Sonstige nützliche Seiten</h4>
+      <h4>Fehlermeldungen & FAQs</h4>
       <ul>
         <li>[[meldungen:haeufige_meldungen|Häufige Meldungen]]</li>
       </ul>
