@@ -8,6 +8,15 @@
       el.id = "wiki-modal-root";
       el.innerHTML = `
         <div class="wiki-modal" role="dialog" aria-modal="false" aria-label="Hilfe/Wiki" tabindex="-1" hidden>
+          <div class="wiki-resize-handle wiki-resize-n"></div>
+          <div class="wiki-resize-handle wiki-resize-s"></div>
+          <div class="wiki-resize-handle wiki-resize-e"></div>
+          <div class="wiki-resize-handle wiki-resize-w"></div>
+
+          <div class="wiki-resize-handle wiki-resize-ne"></div>
+          <div class="wiki-resize-handle wiki-resize-nw"></div>
+          <div class="wiki-resize-handle wiki-resize-se"></div>
+          <div class="wiki-resize-handle wiki-resize-sw"></div>
           <div class="wiki-modal-header" data-drag-handle="1">
             <div class="wiki-modal-header-left">
               <button type="button" class="wiki-nav-btn wiki-nav-back" aria-label="Zurück" disabled>←</button>
@@ -199,6 +208,81 @@
     dragHandle.addEventListener("mousedown", onDragStart);
   }
 
+  // --- Resize ---------------------------------------------------------------
+  const MIN_WIDTH  = 420;
+  const MIN_HEIGHT = 260;
+
+  let isResizing = false;
+  let resizeDir = ""; // z.B. "ne", "w", "sw"
+  let rsStartX, rsStartY;
+  let rsStartW, rsStartH, rsStartL, rsStartT;
+
+  dialog.querySelectorAll(".wiki-resize-handle").forEach(handle => {
+    handle.addEventListener("mousedown", ev => {
+      ev.preventDefault();
+      ev.stopPropagation();
+
+      // Richtung aus Klassenname EXAKT extrahieren (n/s/e/w/ne/nw/se/sw)
+      const m = handle.className.match(/\bwiki-resize-(ne|nw|se|sw|n|s|e|w)\b/);
+      resizeDir = m ? m[1] : "";
+
+      isResizing = true;
+
+      const rect = dialog.getBoundingClientRect();
+      rsStartX = ev.clientX;
+      rsStartY = ev.clientY;
+      rsStartW = rect.width;
+      rsStartH = rect.height;
+      rsStartL = rect.left;
+      rsStartT = rect.top;
+
+      document.body.style.userSelect = "none";
+      document.addEventListener("mousemove", onResizeMove);
+      document.addEventListener("mouseup", onResizeEnd);
+    });
+  });
+
+  function onResizeMove(ev) {
+    if (!isResizing) return;
+
+    const dx = ev.clientX - rsStartX;
+    const dy = ev.clientY - rsStartY;
+
+    let w = rsStartW;
+    let h = rsStartH;
+    let l = rsStartL;
+    let t = rsStartT;
+
+    // rechts (e) / links (w)
+    if (resizeDir.includes("e")) {
+      w = Math.max(MIN_WIDTH, rsStartW + dx);
+    }
+    if (resizeDir.includes("w")) {
+      w = Math.max(MIN_WIDTH, rsStartW - dx);
+      l = rsStartL + (rsStartW - w);
+    }
+
+    // unten (s) / oben (n)
+    if (resizeDir.includes("s")) {
+      h = Math.max(MIN_HEIGHT, rsStartH + dy);
+    }
+    if (resizeDir.includes("n")) {
+      h = Math.max(MIN_HEIGHT, rsStartH - dy);
+      t = rsStartT + (rsStartH - h);
+    }
+
+    dialog.style.width  = w + "px";
+    dialog.style.height = h + "px";
+    dialog.style.left   = l + "px";
+    dialog.style.top    = t + "px";
+  }
+
+  function onResizeEnd() {
+    isResizing = false;
+    document.body.style.userSelect = "";
+    document.removeEventListener("mousemove", onResizeMove);
+    document.removeEventListener("mouseup", onResizeEnd);
+  }
   // --- API-Objekt ----------------------------------------------------------
   const WikiModal = {
     open,

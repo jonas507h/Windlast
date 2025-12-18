@@ -435,3 +435,22 @@ mark.help-search-hit {
   from { opacity: 0; transform: translateY(-3px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+/* === Resize Handles ===================================== */
+
+.wiki-resize-handle {
+  position: absolute;
+  z-index: 10;
+}
+
+/* Kanten */
+.wiki-resize-n { top: -4px; left: 0; right: 0; height: 8px; cursor: n-resize; }
+.wiki-resize-s { bottom: -4px; left: 0; right: 0; height: 8px; cursor: s-resize; }
+.wiki-resize-e { right: -4px; top: 0; bottom: 0; width: 8px; cursor: e-resize; }
+.wiki-resize-w { left: -4px; top: 0; bottom: 0; width: 8px; cursor: w-resize; }
+
+/* Ecken */
+.wiki-resize-ne { top: -4px; right: -4px; width: 10px; height: 10px; cursor: ne-resize; }
+.wiki-resize-nw { top: -4px; left: -4px; width: 10px; height: 10px; cursor: nw-resize; }
+.wiki-resize-se { bottom: -4px; right: -4px; width: 10px; height: 10px; cursor: se-resize; }
+.wiki-resize-sw { bottom: -4px; left: -4px; width: 10px; height: 10px; cursor: sw-resize; }
