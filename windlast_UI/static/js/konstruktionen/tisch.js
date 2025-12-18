@@ -2,49 +2,12 @@ import { buildTisch } from '../build/build_tisch.js';
 import { showFieldError } from '../utils/error.js';
 import { showLoading, hideLoading } from "/static/js/utils/loading.js";
 
-async function fetchOptions(url) {
-  // Holt Dropdown-Inhalte von der API
-  const res = await fetch(url, { headers: { "Accept": "application/json" } });
-  if (!res.ok) throw new Error(`${url} -> ${res.status}`);
-  const data = await res.json();
-  return data.options || [];
-}
-
-function fillSelect(el, options, { placeholder = null, defaultValue = null } = {}) {
-  // Füllt ein <select> mit Optionen
-  el.innerHTML = "";
-  if (placeholder) {
-    const opt = document.createElement("option");
-    opt.value = "";
-    opt.textContent = placeholder;
-    el.appendChild(opt);
-  }
-  for (const { value, label } of options) {
-    if (value.startsWith("test_") && !window.APP_STATE?.flags?.show_test_options_dropdown) {
-      continue;
-    }
-    const opt = document.createElement("option");
-    opt.value = value;      // Request-Wert (name_intern bzw. "beton"/"stahl"/...)
-    opt.textContent = label; // Anzeige (anzeige_name bzw. Enum.value)
-    el.appendChild(opt);
-  }
-  if (defaultValue !== null && defaultValue !== undefined) {
-    el.value = defaultValue;
-  }
-}
-
-async function fetchKompatibilitaet({ bodenplatte, gummimatte }) {
-  const qs = new URLSearchParams({
-    bodenplatte,
-    gummimatte: gummimatte || "nein",
-  });
-
-  const res = await fetch(`/api/v1/reibwert/kompatibilitaet?${qs.toString()}`, {
-    headers: { "Accept": "application/json" },
-  });
-  if (!res.ok) throw new Error(`Kompatibilität HTTP ${res.status}`);
-  return res.json();
-}
+import { fetchOptions } from "../utils/catalog.js";
+import { fillSelect } from "../utils/forms.js";
+import { fetchJSON } from "../utils/api.js";
+import { readHeaderValues } from "../utils/header.js";
+import { isPositiveNumber } from "../utils/number.js";
+import { fetchKompatibilitaet } from "../utils/reibwert.js";
 
 let _isApplyingReibwertFilterTisch = false;
 
@@ -161,42 +124,6 @@ async function initTischDropdowns() {
   } catch (e) {
     console.error("Tor-Dropdowns konnten nicht geladen werden:", e);
   }
-}
-
-async function fetchJSON(url, opts) {
-  // Sendet Anfrage an API und wertet die Antwort aus
-  // hier: sendet Eingaben an API und empfängt Rechenergebnisse
-  const res = await fetch(url, {
-    headers: { "Content-Type": "application/json", "Accept": "application/json" },
-    ...opts,
-  });
-  if (!res.ok) {
-    const txt = await res.text().catch(() => "");
-    throw new Error(`HTTP ${res.status}: ${txt || res.statusText}`);
-  }
-  return res.json();
-}
-
-function getHeaderDoc() {
-  return document;
-}
-
-function readHeaderValues() {
-  // Liest Werte aus header.html
-  const hdoc = getHeaderDoc();
-  if (!hdoc) throw new Error("Header-Dokument nicht gefunden");
-  const wert = parseInt(hdoc.getElementById("aufstelldauer_wert")?.value ?? "0", 10);
-  const einheit = hdoc.getElementById("aufstelldauer_einheit")?.value;
-  const windzone = hdoc.getElementById("windzone")?.value;
-
-  return {
-    aufstelldauer: isFinite(wert) && wert > 0 && einheit ? { wert, einheit } : null,
-    windzone,
-  };
-}
-
-function isPositiveNumber(v) {
-  return typeof v === 'number' && isFinite(v) && v > 0;
 }
 
 // --- Einzelfeld-Validierungen ---------------------------------------------

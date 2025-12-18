@@ -4,6 +4,8 @@ import { configureErgebnisse, setupErgebnisseUI } from "./modal/ergebnisse.js";
 import { displayAltName } from "./utils/formatierung.js";
 import { getNorminfo } from "./modal/norminfo.js";
 
+
+
 // Reihenfolge für bestimmte Alternativen erzwingen (Rest bleibt wie geliefert)
 const ALT_ORDER = [
   "VERSTAERKEND",

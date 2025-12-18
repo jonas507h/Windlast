@@ -1,10 +1,9 @@
 python -m scripts.run_windkraft
 
-App ausführen
+Virtuelle Umgebung
 .venv\Scripts\activate
-python app.py
 
-App ausführen neu
+App ausführen
 python .\windlast_API\app.py
 
 App bauen
