@@ -9,3 +9,4 @@ test_bp_vierpunkt_30x30, Test 30x30 Bodenplatte,4,0.3,0.3,0.0,5,STAHL
 test_bp_rechteck, Test 30x100 Rechteckbodenplatte,4,0.3,1.0,0.0,20,HOLZ
 test_bp_dreieck_gleichseitig, Test Gleichseitige Dreiecksplatte,3,1.0,1.0,0.0,30,HOLZ
 test_bp_dreieck_gleichschenklig, Test Gleichschenklige Dreiecksplatte,3,1.0,0.6,0.0,25,HOLZ
+test_kieshaufen_100x100,Kieshaufen,4,0.99,0.99,0.0,75,KIES

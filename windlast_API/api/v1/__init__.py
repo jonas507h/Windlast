@@ -5,3 +5,4 @@ bp_v1 = Blueprint("api_v1", __name__)
 from . import routes_config  # noqa: E402,F401
 from . import routes_catalog
 from . import routes_berechnung
+from . import routes_reibwert

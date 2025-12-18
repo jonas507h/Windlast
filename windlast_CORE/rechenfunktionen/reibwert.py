@@ -1,7 +1,7 @@
 # reibwert.py
 from __future__ import annotations
 
-from typing import List, Optional, Sequence, Dict, Tuple
+from typing import List, Optional, Sequence, Dict, Tuple, Iterable, Set
 
 from windlast_CORE.datenstruktur.enums import MaterialTyp, Norm, Severity
 from windlast_CORE.datenstruktur.zwischenergebnis import (
@@ -13,55 +13,7 @@ from windlast_CORE.datenstruktur.zwischenergebnis import (
     protokolliere_doc,
 )
 from windlast_CORE.materialdaten.catalog import catalog
-
-# Typ-Hinweis: Dict[Norm, Dict[Tuple[MaterialTyp, MaterialTyp], Tuple[float, str]]]
-DATA_REIBWERTE = {
-    Norm.DIN_EN_17879_2024_08: {
-        (MaterialTyp.BETON, MaterialTyp.BETON): (0.5, "DIN EN 17879:2024-08"),
-        (MaterialTyp.BETON, MaterialTyp.GUMMI): (0.6, "DIN EN 17879:2024-08"),
-        (MaterialTyp.BETON, MaterialTyp.HOLZ): (0.6, "DIN EN 17879:2024-08"),
-        (MaterialTyp.BETON, MaterialTyp.KIES): (0.65, "DIN EN 17879:2024-08"),
-        (MaterialTyp.BETON, MaterialTyp.LEHM): (0.4, "DIN EN 17879:2024-08"),
-        (MaterialTyp.BETON, MaterialTyp.SAND): (0.65, "DIN EN 17879:2024-08"),
-        (MaterialTyp.BETON, MaterialTyp.STAHL): (0.2, "DIN EN 17879:2024-08"),
-        (MaterialTyp.BETON, MaterialTyp.TON): (0.25, "DIN EN 17879:2024-08"),
-        (MaterialTyp.GUMMI, MaterialTyp.HOLZ): (0.6, "DIN EN 17879:2024-08"),
-        (MaterialTyp.GUMMI, MaterialTyp.STAHL): (0.6, "DIN EN 17879:2024-08"),
-        (MaterialTyp.HOLZ, MaterialTyp.HOLZ): (0.4, "DIN EN 17879:2024-08"),
-        (MaterialTyp.HOLZ, MaterialTyp.KIES): (0.65, "DIN EN 17879:2024-08"),
-        (MaterialTyp.HOLZ, MaterialTyp.LEHM): (0.4, "DIN EN 17879:2024-08"),
-        (MaterialTyp.HOLZ, MaterialTyp.SAND): (0.65, "DIN EN 17879:2024-08"),
-        (MaterialTyp.HOLZ, MaterialTyp.STAHL): (0.4, "DIN EN 17879:2024-08"),
-        (MaterialTyp.HOLZ, MaterialTyp.TON): (0.25, "DIN EN 17879:2024-08"),
-        (MaterialTyp.KIES, MaterialTyp.STAHL): (0.2, "DIN EN 17879:2024-08"),
-        (MaterialTyp.LEHM, MaterialTyp.STAHL): (0.2, "DIN EN 17879:2024-08"),
-        (MaterialTyp.SAND, MaterialTyp.STAHL): (0.2, "DIN EN 17879:2024-08"),
-        (MaterialTyp.STAHL, MaterialTyp.STAHL): (0.15, "DIN EN 17879:2024-08"),
-        (MaterialTyp.TON, MaterialTyp.STAHL): (0.2, "DIN EN 17879:2024-08"),
-    },
-    # Gummi existiert in 13814 nicht → nur Paarungen ohne Gummi
-    Norm.DIN_EN_13814_2005_06: {
-        (MaterialTyp.BETON, MaterialTyp.BETON): (0.5, "DIN EN 13814:2005-06"),
-        (MaterialTyp.BETON, MaterialTyp.HOLZ): (0.6, "DIN EN 13814:2005-06"),
-        (MaterialTyp.BETON, MaterialTyp.KIES): (0.65, "DIN EN 13814:2005-06"),
-        (MaterialTyp.BETON, MaterialTyp.LEHM): (0.4, "DIN EN 13814:2005-06"),
-        (MaterialTyp.BETON, MaterialTyp.SAND): (0.65, "DIN EN 13814:2005-06"),
-        (MaterialTyp.BETON, MaterialTyp.STAHL): (0.2, "DIN EN 13814:2005-06"),
-        (MaterialTyp.BETON, MaterialTyp.TON): (0.25, "DIN EN 13814:2005-06"),
-        (MaterialTyp.HOLZ, MaterialTyp.HOLZ): (0.4, "DIN EN 13814:2005-06"),
-        (MaterialTyp.HOLZ, MaterialTyp.KIES): (0.65, "DIN EN 13814:2005-06"),
-        (MaterialTyp.HOLZ, MaterialTyp.LEHM): (0.4, "DIN EN 13814:2005-06"),
-        (MaterialTyp.HOLZ, MaterialTyp.SAND): (0.65, "DIN EN 13814:2005-06"),
-        (MaterialTyp.HOLZ, MaterialTyp.STAHL): (0.4, "DIN EN 13814:2005-06"),
-        (MaterialTyp.HOLZ, MaterialTyp.TON): (0.25, "DIN EN 13814:2005-06"),
-        (MaterialTyp.KIES, MaterialTyp.STAHL): (0.2, "DIN EN 13814:2005-06"),
-        (MaterialTyp.LEHM, MaterialTyp.STAHL): (0.2, "DIN EN 13814:2005-06"),
-        (MaterialTyp.SAND, MaterialTyp.STAHL): (0.2, "DIN EN 13814:2005-06"),
-        (MaterialTyp.STAHL, MaterialTyp.STAHL): (0.15, "DIN EN 13814:2005-06"),
-        (MaterialTyp.TON, MaterialTyp.STAHL): (0.2, "DIN EN 13814:2005-06"),
-    },
-}
-
+from windlast_CORE.materialdaten.reibwert_data import DATA_REIBWERTE
 
 def _pair(a: MaterialTyp, b: MaterialTyp) -> tuple[MaterialTyp, MaterialTyp]:
     # Sortiert nach Enum-Wert, so ist (A,B) == (B,A)
@@ -181,3 +133,59 @@ def reibwert(
     )
 
     return Zwischenergebnis(wert=reibwert_eff)
+
+# --- Helper-Funktionen für externe Abfragen ---
+
+def _norm_chain(norm: Norm, prioritaet: tuple[Norm, ...] = REIBWERT_PRIORITAET) -> tuple[Norm, ...]:
+    # angefragte Norm zuerst, dann Priorität ohne Duplikate
+    out = [norm]
+    for n in prioritaet:
+        if n != norm:
+            out.append(n)
+    return tuple(out)
+
+def pair_supported(
+    a: MaterialTyp,
+    b: MaterialTyp,
+    norm: Norm,
+    *,
+    prioritaet: tuple[Norm, ...] = REIBWERT_PRIORITAET,
+) -> bool:
+    try:
+        get_reibwert(a, b, norm, prioritaet=prioritaet)
+        return True
+    except KeyError:
+        return False
+
+def supported_partners(
+    a: MaterialTyp,
+    norm: Norm,
+    *,
+    prioritaet: tuple[Norm, ...] = REIBWERT_PRIORITAET,
+) -> Set[MaterialTyp]:
+    """
+    Liefert alle Materialien b, für die (a,b) unter norm + Fallback-Priorität existiert.
+    """
+    partners: Set[MaterialTyp] = set()
+    for n in _norm_chain(norm, prioritaet):
+        pool = DATA_REIBWERTE.get(n, {})
+        for (m1, m2) in pool.keys():
+            if m1 == a:
+                partners.add(m2)
+            elif m2 == a:
+                partners.add(m1)
+    return partners
+
+def materialfolge_supported(
+    norm: Norm,
+    materialfolge: Sequence[Optional[MaterialTyp]],
+    *,
+    prioritaet: tuple[Norm, ...] = REIBWERT_PRIORITAET,
+) -> bool:
+    cleaned = [m for m in materialfolge if m is not None]
+    if len(cleaned) < 2:
+        return False
+    for i in range(len(cleaned) - 1):
+        if not pair_supported(cleaned[i], cleaned[i+1], norm, prioritaet=prioritaet):
+            return False
+    return True

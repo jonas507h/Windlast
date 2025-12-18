@@ -31,6 +31,11 @@
   /* --- Status / Validation --- */
   --danger: #c23;
 
+  /* --- Warnung / Auto-Änderung (Dropdown Filter) --- */
+  --warn-border: #f0ad4e;
+  --warn-bg: rgba(240, 173, 78, 0.15);
+  --warn-fg: #d99000;
+
   /* --- Results stale (Ergebnisse veraltet) --- */
   --stale-border: #d99000;
   --stale-bg: rgba(240, 173, 78, 0.10);
@@ -139,6 +144,10 @@
   /* Status / Validation */
   --danger: #c23;
 
+  /* --- Warnung / Auto-Änderung (Dropdown Filter) --- */
+  --warn-border: #f0ad4e;
+  --warn-bg: rgba(240, 173, 78, 0.15);
+  --warn-fg: #d99000;
   /* --- Results stale (Ergebnisse veraltet) --- */
   --stale-border: #d99000;
   --stale-bg: rgba(240, 173, 78, 0.10);
@@ -246,6 +255,11 @@
 
   /* Status / Validation */
   --danger: #ff6b6b;
+
+  /* --- Warnung / Auto-Änderung (Dropdown Filter) --- */
+  --warn-border: #ffcf7a;
+  --warn-bg: rgba(240, 157, 41, 0.2);
+  --warn-fg: #ffb12c;
 
   /* --- Results stale (Ergebnisse veraltet) --- */
   --stale-border: #ffb12c;
@@ -362,6 +376,11 @@
   --danger: #ff3b6b;
   --warning: #ffb12c;
   --success: #2dff9a;
+
+  /* --- Warnung / Auto-Änderung (Dropdown Filter) --- */
+  --warn-border: rgba(255, 177, 44, 0.65);
+  --warn-bg: rgba(255, 177, 44, 0.18);
+  --warn-fg: #ffe1a8;
 
   /* Safety-Zellen (deutlich bunter) */
   --ok-bg: rgba(45, 255, 154, 0.18);
@@ -632,6 +651,23 @@ label.required::after {
 }
 
 .error-text[hidden] { display: none; }
+
+/* ====== Warnung (Auto-Änderung / Filter) ====== */
+.field.is-warn select,
+.field.is-warn input {
+  border-color: var(--warn-border);
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--warn-border) 20%, transparent);
+}
+
+.warn-text {
+  margin: 4px 0 0;
+  font-size: 0.875rem;
+  line-height: 1.2;
+  color: var(--warn-fg);
+}
+
+.warn-text[hidden] { display: none; }
 
 /* ====== Header / Footer / Sonstiges ====== */
 .header-title { display: flex; flex-direction: column; }
