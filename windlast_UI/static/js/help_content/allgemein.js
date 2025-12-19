@@ -20,6 +20,7 @@ export const GENERAL_HELP_PAGES = [
       <ul>
         <li>[[meldungen:haeufige_meldungen|Häufige Meldungen]]</li>
       </ul>
+      <p>[[app:changelog|Changelog]]</p>
     `
   },
   //FAQ für später
@@ -101,6 +102,17 @@ export const GENERAL_HELP_PAGES = [
       <p>
         Auf der linken Seite zeigt das [[app:vorschau|Vorschaufenster]] die Konstruktion und rechts können die entsprechenden Eingaben gemacht werden.
       </p>
+    `
+  },
+
+  {
+    id: "app:changelog",
+    title: "Changelog",
+    shortTitle: "Changelog",
+    body: `
+      <div id="help-changelog-content">
+        <p>Lade Changelog …</p>
+      </div>
     `
   }
 ];

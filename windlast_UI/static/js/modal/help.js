@@ -92,6 +92,107 @@ function resolveHelpLinks(html) {
   });
 }
 
+async function loadChangelogIntoHelp() {
+  const container = document.getElementById("help-changelog-content");
+  if (!container) return;
+
+  try {
+    const res = await fetch("/api/v1/meta/changelog", {
+      headers: { "Accept": "text/html" }
+    });
+    if (!res.ok) throw new Error(res.statusText);
+
+    const html = await res.text();
+    container.innerHTML = html;
+    transformChangelogForHelp(container);
+  } catch (e) {
+    container.innerHTML =
+      "<p><em>Changelog konnte nicht geladen werden.</em></p>";
+    console.error("Changelog load failed:", e);
+  }
+}
+
+function transformChangelogForHelp(container) {
+  // Wir erwarten HTML aus Markdown: h1, p, hr, h2 (Version), h3 (Added/Changed...), ul, etc.
+
+  // 0) Erste H1-Überschrift entfernen (z.B. "# Changelog")
+  const firstH1 = container.querySelector("h1");
+  if (firstH1) {
+    firstH1.remove();
+  }
+
+  // 1) h3 -> h4 (Added/Changed/Fixed/Known Issues etc.)
+  container.querySelectorAll("h3").forEach(h3 => {
+    const h4 = document.createElement("h4");
+    h4.innerHTML = h3.innerHTML;
+    h3.replaceWith(h4);
+  });
+
+  // 2) h2-Blöcke in <details> gruppieren
+  const children = Array.from(container.childNodes);
+  const frag = document.createDocumentFragment();
+
+  let i = 0;
+  let versionCount = 0;
+
+  while (i < children.length) {
+    const node = children[i];
+
+    // Nur Elemente mit tagName H2 als Version betrachten
+    if (node.nodeType === 1 && node.tagName === "H2") {
+      versionCount++;
+
+      const details = document.createElement("details");
+      details.className = "help-changelog-version";
+      if (versionCount === 1) details.open = true; // neueste oben offen
+
+      const summary = document.createElement("summary");
+      summary.className = "help-changelog-summary";
+      summary.textContent = formatChangelogVersionTitle(node.textContent || "");
+      details.appendChild(summary);
+
+      // Content bis zum nächsten H2 einsammeln
+      const contentWrap = document.createElement("div");
+      contentWrap.className = "help-changelog-body";
+
+      i++; // weiter nach dem H2
+      while (i < children.length) {
+        const n = children[i];
+        if (n.nodeType === 1 && n.tagName === "H2") break;
+        contentWrap.appendChild(n);
+        i++;
+      }
+
+      details.appendChild(contentWrap);
+      frag.appendChild(details);
+      continue;
+    }
+
+    // Alles vor dem ersten H2 (Titel, Intro) 그대로 lassen
+    frag.appendChild(node);
+    i++;
+  }
+
+  container.textContent = "";
+  container.appendChild(frag);
+
+  // Wrapper-Klasse für CSS (falls noch nicht vorhanden)
+  container.classList.add("help-changelog");
+}
+
+function formatChangelogVersionTitle(raw) {
+  // Erwartet z.B. "[2.0.0-alpha.1] – 2025-12-18" oder "2.0.0-alpha.1 – 2025-12-18"
+  const text = String(raw || "").trim();
+
+  // Version extrahieren (optional in [])
+  // Datum extrahieren (YYYY-MM-DD)
+  const m = text.match(/\[?([0-9]+\.[0-9]+\.[0-9A-Za-z.-]+)\]?\s*[–-]\s*([0-9]{4})-([0-9]{2})-([0-9]{2})/);
+  if (!m) return text;
+
+  const ver = m[1];
+  const yyyy = m[2], mm = m[3], dd = m[4];
+  return `${ver} - ${dd}.${mm}.${yyyy}`;
+}
 
 // --- Seitenzugriff ---
 function getPage(id) {
@@ -217,6 +318,10 @@ function navigateTo(id, { push = true } = {}) {
   }
 
   updateWikiNavState();
+
+  if (id === "app:changelog") {
+    loadChangelogIntoHelp();
+  }
 }
 
 // --- Modal-Rendering ---

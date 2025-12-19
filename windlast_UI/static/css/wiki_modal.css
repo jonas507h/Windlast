@@ -454,3 +454,50 @@ mark.help-search-hit {
 .wiki-resize-nw { top: -4px; left: -4px; width: 10px; height: 10px; cursor: nw-resize; }
 .wiki-resize-se { bottom: -4px; right: -4px; width: 10px; height: 10px; cursor: se-resize; }
 .wiki-resize-sw { bottom: -4px; left: -4px; width: 10px; height: 10px; cursor: sw-resize; }
+
+/* === Changelog in Hilfe ================================================ */
+
+.help-changelog-version {
+  border: 1px solid var(--wiki-include-border);
+  border-radius: 8px;
+  background: var(--panel);
+  margin: 8px 0;
+  overflow: hidden;
+}
+
+.help-changelog-summary {
+  cursor: pointer;
+  user-select: none;
+  padding: 8px 10px;
+  font-weight: 700;
+  background: var(--wiki-header-hover-bg);
+  color: var(--text);
+  list-style: none;
+}
+
+.help-changelog-summary::-webkit-details-marker {
+  display: none;
+}
+
+.help-changelog-summary::before {
+  content: "▶";
+  display: inline-block;
+  margin-right: 8px;
+  transition: transform 0.15s ease;
+  opacity: 0.8;
+}
+
+.help-changelog-version[open] > .help-changelog-summary::before {
+  transform: rotate(90deg);
+}
+
+.help-changelog-body {
+  padding: 8px 10px 10px;
+}
+
+/* Added/Changed/Known Issues als h4 */
+.help-changelog h4 {
+  margin: 10px 0 4px;
+  font-size: 0.9rem;
+  font-weight: 700;
+}

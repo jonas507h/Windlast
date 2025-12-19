@@ -6,3 +6,4 @@ from . import routes_config  # noqa: E402,F401
 from . import routes_catalog
 from . import routes_berechnung
 from . import routes_reibwert
+from . import routes_meta
