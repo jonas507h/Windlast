@@ -6,6 +6,7 @@
 - Changelog in Hilfe eingefügt
 
 ### Changed
+- Filterung bei Dropdowns für Gummimatte und Untergrund sichtbar gemacht
 
 ### Known Issues
 

@@ -1,5 +1,5 @@
 import { buildSteher } from '../build/build_steher.js';
-import { showFieldError } from '../utils/error.js';
+import { showFieldError, showFieldWarn, clearWarnOnInteract } from '../utils/error.js';
 import { showLoading, hideLoading } from "/static/js/utils/loading.js";
 import { fetchOptions } from "../utils/catalog.js";
 import { fillSelect } from "../utils/forms.js";
@@ -43,6 +43,10 @@ async function applyReibwertDropdownFilteringSteher({ rerunIfChanged = true } = 
 
     const prevGm = gmEl.value;
     fillSelect(gmEl, gmOptions, { defaultValue: gmEffective });
+    const warnGm = document.getElementById("warn-gummimatte");
+    if (prevGm && prevGm !== gmEl.value) {
+      showFieldWarn(gmEl, warnGm, true, "Achtung: Auswahl wurde automatisch angepasst.");
+    }
 
     // (2) Untergrund filtern
     const ugAll = window.Catalog.untergruende || [];
@@ -58,6 +62,10 @@ async function applyReibwertDropdownFilteringSteher({ rerunIfChanged = true } = 
       : (ugFiltered[0]?.value ?? "");
 
     fillSelect(ugEl, ugFiltered, { defaultValue: nextUg });
+    const warnUg = document.getElementById("warn-untergrund");
+    if (prevUg && prevUg !== ugEl.value) {
+      showFieldWarn(ugEl, warnUg, true, "Achtung: Auswahl wurde automatisch angepasst.");
+    }
 
     // Wenn GM durch effective umspringt: einmal nachziehen
     if (rerunIfChanged && prevGm !== gmEl.value) {
@@ -124,9 +132,13 @@ async function initSteherDropdowns() {
     bpEl?.addEventListener("change", triggerFilter);
     gmEl?.addEventListener("change", triggerFilter);
 
-    // extra robust (wie ihr es kennt), aber direkt am Element – nicht delegiert
+    // Fallback: blur
     bpEl?.addEventListener("blur", triggerFilter);
     gmEl?.addEventListener("blur", triggerFilter);
+
+    // Warnung verschwindet bei Interaktion
+    clearWarnOnInteract(document.getElementById("gummimatte"), document.getElementById("warn-gummimatte"));
+    clearWarnOnInteract(document.getElementById("untergrund_typ"), document.getElementById("warn-untergrund"));
   } catch (e) {
     console.error("Steher-Dropdowns konnten nicht geladen werden:", e);
   }

@@ -191,7 +191,7 @@ function formatChangelogVersionTitle(raw) {
 
   const ver = m[1];
   const yyyy = m[2], mm = m[3], dd = m[4];
-  return `${ver} - ${dd}.${mm}.${yyyy}`;
+  return `${ver} – ${dd}.${mm}.${yyyy}`;
 }
 
 // --- Seitenzugriff ---

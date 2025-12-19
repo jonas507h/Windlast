@@ -1,7 +1,6 @@
 import { buildTor } from '../build/build_tor.js';
-import { showFieldError } from '../utils/error.js';
+import { showFieldError, showFieldWarn, clearWarnOnInteract } from '../utils/error.js';
 import { showLoading, hideLoading } from "/static/js/utils/loading.js";
-
 import { fetchOptions } from "../utils/catalog.js";
 import { fillSelect } from "../utils/forms.js";
 import { fetchJSON } from "../utils/api.js";
@@ -45,6 +44,10 @@ async function applyReibwertDropdownFiltering({ rerunIfChanged = true } = {}) {
 
     const prevGm = gmEl.value;
     fillSelect(gmEl, gmOptions, { defaultValue: gmEffective });
+    const warnGm = document.getElementById("warn-gummimatte");
+    if (prevGm && prevGm !== gmEl.value) {
+      showFieldWarn(gmEl, warnGm, true, "Achtung: Auswahl wurde automatisch angepasst.");
+    }
 
     // --- (2) Untergrund filtern ---
     const ugAll = window.Catalog.untergruende || [];
@@ -61,6 +64,10 @@ async function applyReibwertDropdownFiltering({ rerunIfChanged = true } = {}) {
       : (ugFiltered[0]?.value ?? "");
 
     fillSelect(ugEl, ugFiltered, { defaultValue: nextUg });
+    const warnUg = document.getElementById("warn-untergrund");
+    if (prevUg && prevUg !== ugEl.value) {
+      showFieldWarn(ugEl, warnUg, true, "Achtung: Auswahl wurde automatisch angepasst.");
+    }
 
     // Wenn sich gm durch "effective" geändert hat, kann sich die Untergrund-Menge ändern.
     // Einmal sauber nachziehen (max. 1x), damit state konsistent ist.
@@ -133,9 +140,13 @@ async function initTorDropdowns() {
     bpEl?.addEventListener("change", triggerFilter);
     gmEl?.addEventListener("change", triggerFilter);
 
-    // Fallback: blur (weil ihr das schon öfter als zuverlässiger erlebt habt)
+    // Fallback: blur
     bpEl?.addEventListener("blur", triggerFilter);
     gmEl?.addEventListener("blur", triggerFilter);
+
+    // Warnung verschwindet bei Interaktion
+    clearWarnOnInteract(document.getElementById("gummimatte"), document.getElementById("warn-gummimatte"));
+    clearWarnOnInteract(document.getElementById("untergrund_typ"), document.getElementById("warn-untergrund"));
   } catch (e) {
     console.error("Tor-Dropdowns konnten nicht geladen werden:", e);
   }

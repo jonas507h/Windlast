@@ -83,7 +83,7 @@ export const STEHER_HELP_PAGES = [
         Gummimatten blau markiert.<br>
         Da die Gummimatte Einfluss auf den Reibwert hat und nicht für alle Materialpaarungen Reibwerte in den zugrunde gelegten Normen
         ([[norm:DIN_EN_13814_2005|DIN EN 13814:2005-06]] und [[norm:DIN_EN_17879_2024|DIN EN 17879:2024-08]]) angegeben sind, können die Auswahlmöglichkeiten in diesem Feld
-        je nach ausgewählter [[steher:bodenplatte|Bodenplatte]] eingeschränkt sein. Die Auswahl der Gummimatte kann auch Einfluss auf
+        je nach ausgewählter [[steher:bodenplatte|Bodenplatte]] eingeschränkt sein oder automatisch geändert werden. Die Auswahl der Gummimatte kann auch Einfluss auf
         auf die Auswahlmöglichkeiten im [[steher:untergrund|Untergrund-Feld]] haben.
       </p>
     `
@@ -99,7 +99,7 @@ export const STEHER_HELP_PAGES = [
         Wählt hier den Untergrund aus, auf dem die Konstruktion steht. Der Untergrund beeinflusst den Reibwert zwischen Bodenplatte und Untergrund. Dieser wird anhand der
         [[norm:DIN_EN_13814_2005|DIN EN 13814:2005-06]] bzw. [[norm:DIN_EN_17879_2024|DIN EN 17879:2024-08]] automatisch bestimmt.<br>
         Da der Reibwert nicht für alle Materialpaarungen in den zugrunde gelegten Normen angegeben ist, können die Auswahlmöglichkeiten in diesem Feld
-        je nach ausgewählter [[steher:bodenplatte|Bodenplatte]] und [[steher:gummimatte|Gummimatte]] eingeschränkt sein.
+        je nach ausgewählter [[steher:bodenplatte|Bodenplatte]] und [[steher:gummimatte|Gummimatte]] eingeschränkt sein oder automatisch geändert werden.
       </p>
     `
   },
