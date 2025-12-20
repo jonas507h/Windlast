@@ -197,29 +197,29 @@ export function setupMeldungenTriggers() {
   document.addEventListener("click", (ev) => {
     const t = ev.target;
 
-    // th mit data-norm-key (dein DOM)
-    const thHead = t.closest(".results-table thead th[data-norm-key]");
+    // ✅ Nur Klicks auf Count-Badges (oder deren Kinder)
+    const badge = t.closest(".results-table .count-badge");
+    if (!badge) return;
+
+    // ✅ Hauptberechnung: Badge im thead-th
+    const thHead = badge.closest(".results-table thead th[data-norm-key]");
     if (thHead) {
       const normKey = thHead.dataset.normKey;
       if (normKey) openMeldungenModal(normKey, null);
       return;
     }
 
-    // alt-title mit Szenario
-    const altNode = t.closest(".results-table .alt-title [data-norm-key][data-szenario]");
-    if (altNode) {
-      const { normKey, szenario } = altNode.dataset;
+    // ✅ Alternativen: Badge im alt-title-th mit szenario
+    const thAlt = badge.closest(".results-table .alt-title th[data-norm-key][data-szenario]");
+    if (thAlt) {
+      const { normKey, szenario } = thAlt.dataset;
       if (normKey && szenario) openMeldungenModal(normKey, szenario);
       return;
     }
 
-    // optionaler generischer Trigger
-    const generic = t.closest('[data-open="meldungen"]');
-    if (generic) {
-      const normKey = generic.dataset.normKey;
-      const szenario = generic.dataset.szenario || null;
-      if (normKey) openMeldungenModal(normKey, szenario);
-    }
+    // optional: generischer Trigger bleibt, aber nur wenn du ihn wirklich noch brauchst:
+    // const generic = t.closest('[data-open="meldungen"]');
+    // ...
   }, { passive: true });
 }
 

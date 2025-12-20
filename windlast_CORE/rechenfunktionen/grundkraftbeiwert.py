@@ -142,14 +142,6 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
         # Anströmrichtung
         if vektor_laenge(windrichtung_projiziert) < 1e-9:
             wert = 0.0
-
-            protokolliere_msg(
-                protokoll,
-                severity=Severity.INFO,
-                code="WIND/ANSTROEM_NULL",
-                text="Windvektor ist parallel zur Traversenachse; Grundkraftbeiwert wird auf 0 gesetzt.",
-                kontext=base_ctx,
-            )
         else:
             winkel = vektor_winkel(windrichtung_projiziert, orientierung)
             winkel = _angle_mod180(winkel)
@@ -231,14 +223,6 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
         rohr_achse = vektor_normieren(vektor_zwischen_punkten(punkte[0], punkte[1]))
         wind_proj = projektion_vektor_auf_ebene(windrichtung, rohr_achse)
         if vektor_laenge(wind_proj) < 1e-9:
-            # Wind läuft (nahezu) parallel zur Rohrachse → keine angeströmte Fläche → c_f,0 = 0
-            protokolliere_msg(
-                protokoll,
-                severity=Severity.INFO,
-                code="GRUNDKRAFT/WIND_PARALLEL_ROHR",
-                text="Windrichtung verläuft (nahezu) parallel zur Rohrachse – c_f,0 = 0.",
-                kontext=base_ctx,
-            )
             protokolliere_doc(
                 protokoll,
                 bundle=make_docbundle(titel="Grundkraftbeiwert c_f,0", wert=0.0),

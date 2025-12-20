@@ -468,35 +468,63 @@ function renderAlternativenBlocksVM(vm) {
   }
 }
 
-function attachNorminfoHandlers() {
-  // Titelzellen: Haupt + Alternativen
+function addHelpIconButtonsToNormHeaders() {
   const selector = `
     .results-table thead th[data-norm-key],
     .results-table .alt-title th[data-norm-key]
-  `.trim();
+  `;
 
   document.querySelectorAll(selector).forEach((th) => {
-    if (th.dataset.norminfoBound === "1") return;
-    th.dataset.norminfoBound = "1";
+    if (th.querySelector(".help-icon-btn")) return;
 
-    th.addEventListener("click", (ev) => {
-      // Badge-Klick weiterhin ignorieren
-      if (ev.target.closest(".count-badge")) return;
+    const normKey  = th.dataset.normKey;
+    const szenario = th.dataset.szenario || null;
+    if (!normKey) return;
 
-      const normKey  = th.dataset.normKey;
-      const szenario = th.dataset.szenario || null;
-      if (!normKey) return;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.tabIndex = -1;
+    btn.className = "help-icon-btn";
+    btn.textContent = "?";
+    btn.setAttribute("aria-label", "Hilfe zu dieser Norm");
+    btn.dataset.helpId = szenario
+      ? `norm:DIN_${normKey}:${szenario}`
+      : `norm:DIN_${normKey}`;
 
-      // NEU: direkt das Wiki aufrufen
-      if (window.HELP && typeof window.HELP.openNorm === "function") {
-        window.HELP.openNorm(normKey, szenario);
-      }
-
-      ev.preventDefault();
-      ev.stopImmediatePropagation();
-    });
+    th.classList.add("norminfo-header");
+    th.appendChild(btn);
   });
 }
+
+// function attachNorminfoHandlers() {
+//   // Titelzellen: Haupt + Alternativen
+//   const selector = `
+//     .results-table thead th[data-norm-key],
+//     .results-table .alt-title th[data-norm-key]
+//   `.trim();
+
+//   document.querySelectorAll(selector).forEach((th) => {
+//     if (th.dataset.norminfoBound === "1") return;
+//     th.dataset.norminfoBound = "1";
+
+//     th.addEventListener("click", (ev) => {
+//       // Badge-Klick weiterhin ignorieren
+//       if (ev.target.closest(".count-badge")) return;
+
+//       const normKey  = th.dataset.normKey;
+//       const szenario = th.dataset.szenario || null;
+//       if (!normKey) return;
+
+//       // NEU: direkt das Wiki aufrufen
+//       if (window.HELP && typeof window.HELP.openNorm === "function") {
+//         window.HELP.openNorm(normKey, szenario);
+//       }
+
+//       ev.preventDefault();
+//       ev.stopImmediatePropagation();
+//     });
+//   });
+// }
 
 // --- NEU: Direktfunktion anbieten (für tor.js Variante 1)
 window.updateFooterResults = function(payload){
@@ -531,7 +559,7 @@ function updateFooter(payload) {
 
   refreshHeaderBadges();
 
-  attachNorminfoHandlers();
+  addHelpIconButtonsToNormHeaders(); 
 
   configureMeldungen({
     vm: ResultsVM,
@@ -703,18 +731,6 @@ registerCountsTooltip('.results-table .alt-title th[data-szenario] .count-badge'
 (function(){
   const TT = window.Tooltip;
   if (!TT) return;
-
-  // Tooltip auf Titelzeilen: "Für Info klicken"
-  TT.register(
-    '.results-table thead th[data-norm-key], .results-table .alt-title th[data-norm-key]',
-    {
-      predicate: (el) => true,
-      content: () => "Für Info klicken",
-      className: () => "tt-info",
-      priority: 10,
-      delay: 200
-    }
-  );
 
   // Tooltip auf Ergebnis-Zellen: "Für Details klicken"
   TT.register('.results-table td.value[data-openable="ergebnisse"]', {

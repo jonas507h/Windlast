@@ -623,6 +623,7 @@ nav.tabs { display:flex; gap:8px; margin:0 0 10px; }
 /* Positionierung im Header */
 .results-table thead th.has-count-badge,
 .results-table .alt-title th.has-count-badge { position: relative; padding-right: 2.2rem; }
+.results-table .help-icon-btn { position: relative; margin-left: 8px; }
 
 /* ====== Footer: Ergebnisse veraltet ====== */
 #results-section.results-stale {
