@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from pathlib import Path
 import csv
 import sys
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple, List
 from windlast_CORE.datenstruktur.enums import MaterialTyp
 import warnings
 
@@ -21,6 +21,7 @@ class BodenplatteSpec:
     tiefe: float
     hoehe: float
     material: MaterialTyp
+    traversensysteme: List[str]
 
 @dataclass(frozen=True)
 class TraverseSpec:
@@ -43,6 +44,7 @@ class TraverseSpec:
     B_winkel: float
     B_abstand: float
     B_invert: bool
+    traversensystem: str
 
 @dataclass(frozen=True)
 class RohrSpec:
@@ -64,13 +66,27 @@ def _resource_path(rel: str) -> Path:
     base = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parents[1]))
     return (base / rel).resolve()
 
+# --- Helper ---------------------------------------------------------------
+
+def _parse_traversensysteme_cell(raw: str) -> List[str]:
+    s = (raw or "").strip()
+    if not s:
+        return []
+
+    # Sonderfall: Bedeutet in der UI "keine Filterung"
+    if s.upper() == "ALLE":
+        return ["ALLE"]
+
+    # normal: kommaseparierte Liste (DictReader hat Quotes schon entfernt)
+    return [p.strip() for p in s.split(",") if p.strip()]
+
 # --- Loader ---------------------------------------------------------------
 
 def _load_bodenplatten_csv(csv_path: Path) -> Dict[str, BodenplatteSpec]:
     bp_map: Dict[str, BodenplatteSpec] = {}
     with csv_path.open("r", encoding="utf-8-sig", newline="") as f:
         reader = csv.DictReader(f)
-        required = {"name_intern", "anzeige_name", "anzahl_ecken", "breite_m", "tiefe_m", "hoehe_m", "gewicht_kg", "material"}
+        required = {"name_intern", "anzeige_name", "anzahl_ecken", "breite_m", "tiefe_m", "hoehe_m", "gewicht_kg", "material", "traversensysteme"}
         missing = required - set(reader.fieldnames or [])
         if missing:
             raise ValueError(f"Fehlende Spalten in {csv_path.name}: {sorted(missing)}")
@@ -91,6 +107,7 @@ def _load_bodenplatten_csv(csv_path: Path) -> Dict[str, BodenplatteSpec]:
                     tiefe=float(row["tiefe_m"]),
                     hoehe=float(row["hoehe_m"]),
                     material=MaterialTyp[row["material"].strip()],
+                    traversensysteme=_parse_traversensysteme_cell(row["traversensysteme"]),
                 )
             except Exception as e:
                 raise ValueError(f"Ungültige Werte in Zeile mit name_intern='{key}': {e}") from e
@@ -108,7 +125,7 @@ def _load_traversen_csv(csv_path: Path) -> Dict[str, TraverseSpec]:
             "name_intern", "anzeige_name", "anzahl_gurtrohre", "gewicht_linear_kg_m",
             "d_gurt_m", "end_bool", "A_hoehe_m", "A_d_diagonalen_m", "A_winkel_deg",
             "A_abstand_m", "A_invert_bool", "B_hoehe_m", "B_d_diagonalen_m", "B_winkel_deg",
-            "B_abstand_m", "B_invert_bool"
+            "B_abstand_m", "B_invert_bool", "traversensystem"
         }
         missing = required - set(reader.fieldnames or [])
         if missing:
@@ -139,6 +156,7 @@ def _load_traversen_csv(csv_path: Path) -> Dict[str, TraverseSpec]:
                     B_winkel=float(row["B_winkel_deg"]),
                     B_abstand=float(row["B_abstand_m"]),
                     B_invert=row["B_invert_bool"].strip().lower() == "true",
+                    traversensystem=row["traversensystem"].strip(),
                 )
             except Exception as e:
                 raise ValueError(f"Ungültige Werte in Zeile mit name_intern='{key}': {e}") from e

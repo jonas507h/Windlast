@@ -32,6 +32,7 @@ export function validateSteherInputs({
   }
   if (!isFinite(H) || !isFinite(R_L) || !isFinite(R_H)) throw new Error('hoehe_m, rohr_laenge_m und rohr_hoehe_m müssen Zahlen sein.');
   if (H <= 0 || R_L <= 0 || R_H <= 0) throw new Error('Hoehe, Rohrlänge und Rohrhöhe müssen > 0 sein.');
+  if (R_H > H) throw new Error('rohr_hoehe_m muss kleiner als oder gleich hoehe_m sein.');
   if (H_F !== null && H_F > R_H) throw new Error('hoehe_flaeche_m darf nicht größer als rohr_hoehe_m sein.');
   if (!traverse_name_intern) throw new Error('traverse_name_intern fehlt.');
   if (!bodenplatte_name_intern) throw new Error('bodenplatte_name_intern fehlt.');

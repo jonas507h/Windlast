@@ -2,85 +2,10 @@ import { buildTor } from '../build/build_tor.js';
 import { showFieldError, showFieldWarn, clearWarnOnInteract } from '../utils/error.js';
 import { showLoading, hideLoading } from "/static/js/utils/loading.js";
 import { fetchOptions } from "../utils/catalog.js";
-import { fillSelect } from "../utils/forms.js";
+import { fillSelect, applyBodenplattenFilterByTraverse, applyReibwertDropdownFiltering } from "../utils/forms.js";
 import { fetchJSON } from "../utils/api.js";
 import { readHeaderValues } from "../utils/header.js";
 import { isPositiveNumber } from "../utils/number.js";
-import { fetchKompatibilitaet } from "../utils/reibwert.js";
-
-let _isApplyingReibwertFilter = false;
-
-async function applyReibwertDropdownFiltering({ rerunIfChanged = true } = {}) {
-  // verhindert Re-Entrancy/Loops
-  if (_isApplyingReibwertFilter) return;
-  _isApplyingReibwertFilter = true;
-
-  try {
-    const bpEl = document.getElementById("bodenplatte_name_intern");
-    const gmEl = document.getElementById("gummimatte");
-    const ugEl = document.getElementById("untergrund_typ");
-    if (!bpEl || !gmEl || !ugEl || !window.Catalog) return;
-
-    const bpVal = bpEl.value;
-    if (!bpVal) return;
-
-    const gmRequested = gmEl.value || "nein";
-
-    const data = await fetchKompatibilitaet({
-      bodenplatte: bpVal,
-      gummimatte: gmRequested
-    });
-
-    const gmAllowed = data?.gummimatte?.allowed || ["ja", "nein"];
-    const gmEffective = data?.gummimatte?.effective || gmRequested;
-    const ugAllowed = data?.untergruende?.allowed || [];
-
-    // --- (1) Gummimatte Optionen filtern ---
-    const gmOptionsAll = [
-      { value: "ja", label: "Ja" },
-      { value: "nein", label: "Nein" },
-    ];
-    const gmOptions = gmOptionsAll.filter(o => gmAllowed.includes(o.value));
-
-    const prevGm = gmEl.value;
-    fillSelect(gmEl, gmOptions, { defaultValue: gmEffective });
-    const warnGm = document.getElementById("warn-gummimatte");
-    if (prevGm && prevGm !== gmEl.value) {
-      showFieldWarn(gmEl, warnGm, true, "Achtung: Auswahl wurde automatisch angepasst.");
-    }
-
-    // --- (2) Untergrund filtern ---
-    const ugAll = window.Catalog.untergruende || [];
-    const allowedSet = new Set(ugAllowed);
-
-    // Wenn API leer liefert, lieber NICHT alles wegfiltern:
-    const ugFiltered = (ugAllowed.length > 0)
-      ? ugAll.filter(o => allowedSet.has(o.value))
-      : ugAll;
-
-    const prevUg = ugEl.value;
-    const nextUg = ugFiltered.some(o => o.value === prevUg)
-      ? prevUg
-      : (ugFiltered[0]?.value ?? "");
-
-    fillSelect(ugEl, ugFiltered, { defaultValue: nextUg });
-    const warnUg = document.getElementById("warn-untergrund");
-    if (prevUg && prevUg !== ugEl.value) {
-      showFieldWarn(ugEl, warnUg, true, "Achtung: Auswahl wurde automatisch angepasst.");
-    }
-
-    // Wenn sich gm durch "effective" geändert hat, kann sich die Untergrund-Menge ändern.
-    // Einmal sauber nachziehen (max. 1x), damit state konsistent ist.
-    if (rerunIfChanged && prevGm !== gmEl.value) {
-      _isApplyingReibwertFilter = false;
-      return applyReibwertDropdownFiltering({ rerunIfChanged: false });
-    }
-  } catch (e) {
-    console.error("Reibwert-Filterung fehlgeschlagen:", e);
-  } finally {
-    _isApplyingReibwertFilter = false;
-  }
-}
 
 async function initTorDropdowns() {
   // Initialisiert die Dropdowns für das Tor
@@ -127,6 +52,21 @@ async function initTorDropdowns() {
         return bps.find(b => b.value === nameIntern);
       }
     };
+
+    // --- Bodenplatten nach Traverse filtern (initial + Listener) ---
+    applyBodenplattenFilterByTraverse({ keepIfPossible: true });
+
+    const trEl = document.getElementById("traverse_name_intern");
+    const triggerBpFilter = () => {
+      applyBodenplattenFilterByTraverse({ keepIfPossible: true });
+      applyReibwertDropdownFiltering({ rerunIfChanged: true });
+    };
+
+    trEl?.addEventListener("change", triggerBpFilter);
+    trEl?.addEventListener("blur", triggerBpFilter);
+
+    // Warnung verschwindet bei Interaktion
+    clearWarnOnInteract(document.getElementById("bodenplatte_name_intern"), document.getElementById("warn-bodenplatte"));
 
     // --- Reibwert-Filterung initial + Listener ----------------------------
     await applyReibwertDropdownFiltering({ rerunIfChanged: true });

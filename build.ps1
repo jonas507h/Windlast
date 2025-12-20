@@ -1,4 +1,4 @@
-pyinstaller --onefile --windowed --name "Windlastrechner 2" `
+pyinstaller --onefile --windowed --name "N&M Windlastrechner 2" `
 --icon Logo\windlast.ico `
 --paths . `
 --paths windlast_CORE `

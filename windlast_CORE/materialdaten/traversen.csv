@@ -1,7 +1,7 @@
-name_intern,anzeige_name,anzahl_gurtrohre,gewicht_linear_kg_m,d_gurt_m,end_bool,A_hoehe_m,A_d_diagonalen_m,A_winkel_deg,A_abstand_m,A_invert_bool,B_hoehe_m,B_d_diagonalen_m,B_winkel_deg,B_abstand_m,B_invert_bool
-prolyte_h30v,Prolyte H30V,4,6.3,0.048,true,0.287,0.016,45.0,0.0,true,0.287,0.016,45.0,0.0,true
-prolyte_h40v,Prolyte H40V,4,6.9,0.048,true,0.387,0.020,45.0,0.0,true,0.387,0.020,45.0,0.0,true
-prolyte_h30d,Prolyte H30D,3,5.4,0.048,true,0.255,0.016,45.0,0.0,true,0.287,0.016,45.0,0.0,true
-test_Traverse,Test Traverse,4,4.5,0.048,false,0.5,0.02,30.0,0.0,false,0.3,0.014,90.0,0.4,true
-test_Traverse_2,Test Traverse 2,4,5.0,0.05,true,0.4,0.018,60.0,0.2,false,0.25,0.017,90.0,0.9,false
-test_Dreipunkt, Test Dreipunkt,3,4.0,0.04,true,0.6,0.025,45.0,0.1,false,0.4,0.02,30.0,0.3,false
+name_intern,anzeige_name,anzahl_gurtrohre,gewicht_linear_kg_m,d_gurt_m,end_bool,A_hoehe_m,A_d_diagonalen_m,A_winkel_deg,A_abstand_m,A_invert_bool,B_hoehe_m,B_d_diagonalen_m,B_winkel_deg,B_abstand_m,B_invert_bool,traversensystem
+prolyte_h30v,Prolyte H30V,4,6.3,0.048,true,0.287,0.016,45.0,0.0,true,0.287,0.016,45.0,0.0,true,prolyte_h30v
+prolyte_h40v,Prolyte H40V,4,6.9,0.048,true,0.387,0.020,45.0,0.0,true,0.387,0.020,45.0,0.0,true,prolyte_h40v
+prolyte_h30d,Prolyte H30D,3,5.4,0.048,true,0.255,0.016,45.0,0.0,true,0.287,0.016,45.0,0.0,true,prolyte_h30d
+test_Traverse,Test Traverse,4,4.5,0.048,false,0.5,0.02,30.0,0.0,false,0.3,0.014,90.0,0.4,true,test
+test_Traverse_2,Test Traverse 2,4,5.0,0.05,true,0.4,0.018,60.0,0.2,false,0.25,0.017,90.0,0.9,false,test
+test_Dreipunkt, Test Dreipunkt,3,4.0,0.04,true,0.6,0.025,45.0,0.1,false,0.4,0.02,30.0,0.3,false,test

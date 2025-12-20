@@ -6,9 +6,12 @@
 - Changelog in Hilfe eingefügt
 
 ### Changed
-- Filterung bei Dropdowns für Gummimatte und Untergrund sichtbar gemacht
+- Eingabevalidierung und -filterung verbessert
 
 ### Known Issues
+- Darstellung von Zwischenergebnissen ist noch im Aufbau
+- Benutzeroberfläche wird weiter verfeinert
+- Überprüfung der Rechenergebnisse steht noch aus
 
 ## [2.0.0-alpha.1] – 2025-12-18
 
