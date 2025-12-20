@@ -117,6 +117,24 @@
   --wiki-search-breadcrumb: var(--muted);
   --wiki-search-breadcrumb-size: 0.72rem;
   --wiki-search-hit-fg: var(--text);
+
+  /* --- Help Contact Popover --- */
+  --help-popover-bg: var(--panel);
+  --help-popover-border: var(--border);
+  --help-popover-head-bg: var(--wiki-header-bg);
+  --help-popover-close-hover-bg: var(--wiki-header-hover-bg);
+  --help-popover-muted: var(--muted);
+  --help-popover-shadow: 0 10px 30px rgba(0,0,0,0.25);
+
+  --help-popover-copy-hover-bg: var(--wiki-header-hover-bg);
+  --help-popover-copy-border: var(--border);
+  --help-popover-copy-text: var(--text);
+
+  --help-popover-copy-ok-bg: rgba(60, 179, 113, 0.18);
+  --help-popover-copy-ok-border: rgba(60, 179, 113, 0.55);
+
+  --help-popover-copy-err-bg: rgba(220, 20, 60, 0.18);
+  --help-popover-copy-err-border: rgba(220, 20, 60, 0.55);
 }
 
 /* ---------- 2. EXPLIZIT: Light-Theme (Angleich an :root) ---------- */
@@ -229,6 +247,24 @@
   --wiki-search-breadcrumb: var(--muted);
   --wiki-search-breadcrumb-size: 0.72rem;
   --wiki-search-hit-fg: var(--text);
+
+  /* --- Help Contact Popover --- */
+  --help-popover-bg: var(--panel);
+  --help-popover-border: var(--border);
+  --help-popover-head-bg: var(--wiki-header-bg);
+  --help-popover-close-hover-bg: var(--wiki-header-hover-bg);
+  --help-popover-muted: var(--muted);
+  --help-popover-shadow: 0 10px 30px rgba(0,0,0,0.25);
+
+  --help-popover-copy-hover-bg: var(--wiki-header-hover-bg);
+  --help-popover-copy-border: var(--border);
+  --help-popover-copy-text: var(--text);
+
+  --help-popover-copy-ok-bg: rgba(60, 179, 113, 0.18);
+  --help-popover-copy-ok-border: rgba(60, 179, 113, 0.55);
+
+  --help-popover-copy-err-bg: rgba(220, 20, 60, 0.18);
+  --help-popover-copy-err-border: rgba(220, 20, 60, 0.55);
 }
 
 /* ---------- 3. EXPLIZIT: Dark-Theme ---------- */
@@ -342,6 +378,24 @@
   --wiki-search-breadcrumb: var(--muted);
   --wiki-search-breadcrumb-size: 0.72rem;
   --wiki-search-hit-fg: var(--text);
+
+  /* --- Help Contact Popover --- */
+  --help-popover-bg: var(--panel);
+  --help-popover-border: var(--border);
+  --help-popover-head-bg: var(--wiki-header-bg);
+  --help-popover-close-hover-bg: var(--wiki-header-hover-bg);
+  --help-popover-muted: var(--muted);
+  --help-popover-shadow: 0 10px 30px rgba(0,0,0,0.25);
+
+  --help-popover-copy-hover-bg: var(--wiki-header-hover-bg);
+  --help-popover-copy-border: var(--border);
+  --help-popover-copy-text: var(--text);
+
+  --help-popover-copy-ok-bg: rgba(60, 179, 113, 0.18);
+  --help-popover-copy-ok-border: rgba(60, 179, 113, 0.55);
+
+  --help-popover-copy-err-bg: rgba(220, 20, 60, 0.18);
+  --help-popover-copy-err-border: rgba(220, 20, 60, 0.55);
 }
 
 /* ---------- 4. EXPLIZIT: Special-Theme ---------- */
@@ -461,6 +515,25 @@
   /* stale marker */
   --stale-border: #ff5cff;
   --stale-bg: rgba(255, 92, 255, 0.15);
+
+  /* --- Help Contact Popover --- */
+  --help-popover-bg: var(--panel);
+  --help-popover-border: var(--border);
+  --help-popover-head-bg: var(--wiki-header-bg);
+  --help-popover-close-hover-bg: var(--wiki-header-hover-bg);
+  --help-popover-muted: var(--muted);
+  --help-popover-shadow: 0 10px 30px rgba(0,0,0,0.25);
+
+  --help-popover-copy-bg: transparent;
+  --help-popover-copy-hover-bg: var(--wiki-header-hover-bg);
+  --help-popover-copy-border: var(--border);
+  --help-popover-copy-text: var(--text);
+
+  --help-popover-copy-ok-bg: rgba(60, 179, 113, 0.18);
+  --help-popover-copy-ok-border: rgba(60, 179, 113, 0.55);
+
+  --help-popover-copy-err-bg: rgba(220, 20, 60, 0.18);
+  --help-popover-copy-err-border: rgba(220, 20, 60, 0.55);
 }
 
 /* ====== Base ====== */

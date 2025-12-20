@@ -21,9 +21,9 @@ export const ERGEBNISSE_HELP_PAGES = [
         Die Ergebnisse dieser Berechnungen werden in den unteren Blöcken dargestellt. Details zu den einzelnen Normen findet ihr hier:
       </p>
       <ul>
-        <li>[[norm:DIN_EN_13814_2005|DIN EN 13814:2005-06]]</li>
-        <li>[[norm:DIN_EN_17879_2024|DIN EN 17879:2024-08]]</li>
-        <li>[[norm:DIN_EN_1991_1_4_2010|DIN EN 1991-1-4:2010-12]]</li>
+        <li>[[norm:DIN_EN_13814_2005|DIN EN 13814:2005-06 – Fliegende Bauten und Anlagen für Veranstaltungsplätze und Vergnügungsparks – Sicherheit]]</li>
+        <li>[[norm:DIN_EN_17879_2024|DIN EN 17879:2024-08 – Event-Strukturen – Sicherheit]]</li>
+        <li>[[norm:DIN_EN_1991_1_4_2010|DIN EN 1991-1-4:2010-12 – Eurocode 1: Einwirkungen auf Tragwerke – Teil 1-4: Windlasten]]</li>
       </ul>
       <p>
         In den Titelzellen erscheint nach einer Berechnung rechts eine farblich hinterlegte Zahl. Diese Zahl gibt die Anzahl der [[meldungen:allgemein|Meldungen]]

@@ -3,7 +3,7 @@
 ## [2.0.0-alpha.2] – 
 
 ### Added
-- Changelog in Hilfe eingefügt
+- Zusätzliche Einträge in der Hilfe
 
 ### Changed
 - Eingabevalidierung und -filterung verbessert

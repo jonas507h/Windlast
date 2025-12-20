@@ -20,7 +20,10 @@ export const GENERAL_HELP_PAGES = [
       <ul>
         <li>[[meldungen:haeufige_meldungen|Häufige Meldungen]]</li>
       </ul>
-      <p>[[app:changelog|Changelog]]</p>
+      <p>
+        Fragen oder Feedback gerne an [[contact:jonas.schmid|Jonas Schmid]] oder das [[contact:tg-rigging|TG-Rigging]].<br>
+        [[app:changelog|Changelog]]
+      </p>
     `
   },
   //FAQ für später

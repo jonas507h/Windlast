@@ -501,3 +501,130 @@ mark.help-search-hit {
   font-size: 0.9rem;
   font-weight: 700;
 }
+
+/* Kontakt-Link sieht aus wie normaler Link, bleibt aber Button */
+.help-contact-link {
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  color: var(--link);
+  text-decoration: underline;
+  cursor: pointer;
+  font: inherit;
+}
+
+.help-contact-link:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* Popover */
+.help-contact-popover {
+  position: fixed; /* viewport-basiert */
+  z-index: 1350;   /* über Suche (1300) */
+  min-width: 260px;
+  max-width: min(420px, calc(100vw - 24px));
+  background: var(--help-popover-bg);
+  color: var(--text);
+  border: 1px solid var(--help-popover-border);
+  border-radius: 10px;
+  box-shadow: var(--help-popover-shadow);
+  overflow: hidden;
+}
+
+.help-contact-popover[hidden] { display: none !important; }
+
+.help-contact-popover-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  background: var(--help-popover-head-bg);
+  border-bottom: 1px solid var(--help-popover-border);
+}
+
+.help-contact-title {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.help-contact-close {
+  border: none;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 1rem;
+  line-height: 1;
+}
+.help-contact-close:hover {
+  background: var(--help-popover-close-hover-bg);
+}
+
+.help-contact-popover-body {
+  padding: 8px 10px 10px;
+  font-size: 0.85rem;
+}
+
+.help-contact-row {
+  display: grid;
+  grid-template-columns: 84px 1fr;
+  gap: 10px;
+  padding: 4px 0;
+  align-items: baseline;
+}
+
+.help-contact-label {
+  color: var(--help-popover-muted);
+  font-size: 0.8rem;
+}
+
+.help-contact-value {
+  color: var(--link);
+  text-decoration: underline;
+}
+
+.help-contact-value:hover {
+  text-decoration-thickness: 2px;
+}
+
+.help-contact-empty {
+  color: var(--help-popover-muted);
+  font-style: italic;
+}
+
+.help-contact-valuewrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.help-contact-copy {
+  border: 1px solid var(--help-popover-copy-border);
+  background: var(--help-popover-copy-bg);
+  color: var(--help-popover-copy-text);
+  border-radius: 8px;
+  padding: 2px 8px;
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.help-contact-copy:hover {
+  background: var(--help-popover-copy-hover-bg);
+}
+
+.help-contact-copy[data-state="ok"] {
+  border-color: var(--help-popover-copy-ok-border);
+  background: var(--help-popover-copy-ok-bg);
+}
+
+.help-contact-copy[data-state="err"] {
+  border-color: var(--help-popover-copy-err-border);
+  background: var(--help-popover-copy-err-bg);
+}

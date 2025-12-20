@@ -10,6 +10,8 @@ import { TISCH_HELP_PAGES } from "../help_content/tisch.js";
 import { ERGEBNISSE_HELP_PAGES } from "../help_content/ergebnisse.js";
 import { ZWISCHENERGEBNISSE_HELP_PAGES } from "../help_content/zwischenergebnisse.js";
 
+import { HELP_CONTACTS } from "../help_content/help_contacts.js";
+
 // Welche Seite soll der globale "Hilfe"-Startpunkt sein?
 export const HELP_ROOT_ID = "app:start"; 
 
@@ -67,13 +69,16 @@ function normId(normKey, szenario = null) {
 // externe Links:
 // [[ext:https://example.com]]         → <a href="https://example.com" class="external">https://example.com</a>
 // [[ext:https://example.com|Label]]   → <a href="https://example.com" class="external">Label</a>
+// Kontakt-Popover:
+// [[contact:key]]             → <button data-contact-id="key">key</button>
+// [[contact:key|Label]]      → <button data-contact-id="key">Label</button>
 function resolveHelpLinks(html) {
   if (!html || typeof html !== "string") return html || "";
 
   return html.replace(/\[\[([^\]|]+)(\|([^\]]+))?\]\]/g, (_m, rawId, _rest, label) => {
     const id = String(rawId).trim();
 
-    // --- 1) EXTERNER LINK --- 
+    // --- 1a) EXTERNER LINK --- 
     // Syntax: [[ext:https://example.com | Label]]
     if (id.startsWith("ext:")) {
       const url = id.slice(4).trim();
@@ -81,6 +86,24 @@ function resolveHelpLinks(html) {
       const escapedText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
       return `<a href="${url}" class="help-link external" target="_blank" rel="noopener noreferrer">${escapedText}</a>`;
+    }
+    // --- 1b) KONTAKT-POPOVER LINK ---
+    // Syntax: [[contact:key]] oder [[contact:key|Label]]
+    if (id.startsWith("contact:")) {
+      const key = id.slice("contact:".length).trim();
+      const text = label || key;
+      const escapedText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+      // button statt <a>, damit es kein "Navigation" ist
+      return `
+        <button
+          type="button"
+          class="help-contact-link"
+          data-contact-id="${key}"
+          aria-haspopup="dialog"
+          aria-expanded="false"
+        >${escapedText}</button>
+      `;
     }
 
     // --- 2) INTERNE HÄLFTE (bestehender Code) ---
@@ -307,6 +330,8 @@ function navigateTo(id, { push = true } = {}) {
   });
 
   ensureHelpSearchInput();
+  ensureHelpSearchInput();
+  initContactPopoverOnce();
 
   if (push) {
     // Forward-History abschneiden, falls wir mitten in der History sind
@@ -322,6 +347,254 @@ function navigateTo(id, { push = true } = {}) {
   if (id === "app:changelog") {
     loadChangelogIntoHelp();
   }
+}
+
+// --- Kontakt-Popover Logik ---
+let _contactPopoverInited = false;
+
+function initContactPopoverOnce() {
+  if (_contactPopoverInited) return;
+  _contactPopoverInited = true;
+
+  const root = document.getElementById("wiki-modal-root");
+  if (!root) return;
+
+  const modal = root.querySelector(".wiki-modal");
+  const body = root.querySelector(".wiki-modal-body");
+  if (!modal || !body) return;
+
+  // Singleton Popover
+  const pop = document.createElement("div");
+  pop.className = "help-contact-popover";
+  pop.hidden = true;
+  pop.setAttribute("role", "dialog");
+  pop.setAttribute("aria-label", "Kontakt");
+  modal.appendChild(pop);
+
+  let currentKey = null;
+  let currentAnchor = null;
+
+  function closePopover() {
+    if (currentAnchor) currentAnchor.setAttribute("aria-expanded", "false");
+    pop.hidden = true;
+    pop.innerHTML = "";
+    currentKey = null;
+    currentAnchor = null;
+  }
+
+  function teamsChatUrlFromEmail(email) {
+    // gängiger Deep-Link; funktioniert in vielen M365-Tenants
+    // (wenn ihr etwas anderes nutzt, hier anpassen)
+    return `https://teams.microsoft.com/l/chat/0/0?users=${encodeURIComponent(email)}`;
+  }
+
+  async function copyToClipboard(text) {
+    // Modern (funktioniert in https / secure contexts)
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+    } catch (_) {}
+
+    // Fallback (auch ohne secure context)
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      ta.style.top = "-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      const ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+      return ok;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function flashCopyState(btn, ok) {
+    const original = btn.textContent;
+    btn.textContent = ok ? "Kopiert" : "Fehler";
+    btn.dataset.state = ok ? "ok" : "err";
+    window.setTimeout(() => {
+      btn.textContent = original;
+      delete btn.dataset.state;
+    }, 900);
+  }
+
+  function renderContact(key) {
+    const c = HELP_CONTACTS[key];
+    if (!c) {
+      pop.innerHTML = `<div class="help-contact-popover-body">
+        <div class="help-contact-title">${key}</div>
+        <div class="help-contact-row help-contact-empty">Keine Kontaktdaten hinterlegt.</div>
+      </div>`;
+      return;
+    }
+
+    const rows = [];
+
+    if (c.email) {
+      const safe = c.email;
+      rows.push(`
+        <div class="help-contact-row">
+          <span class="help-contact-label">E-Mail</span>
+          <span class="help-contact-valuewrap">
+            <a class="help-contact-value" href="mailto:${safe}">${safe}</a>
+            <button type="button" class="help-contact-copy" data-copy="${safe}" aria-label="E-Mail kopieren">Kopieren</button>
+          </span>
+        </div>
+      `);
+    }
+    if (c.teamsEmail) {
+      const url = teamsChatUrlFromEmail(c.teamsEmail);
+      rows.push(`
+        <div class="help-contact-row">
+          <span class="help-contact-label">Teams</span>
+          <a class="help-contact-value" href="${url}" target="_blank" rel="noopener noreferrer">
+            Chat öffnen
+          </a>
+        </div>
+      `);
+    }
+    if (c.mobile) {
+      const safe = c.mobile;
+      rows.push(`
+        <div class="help-contact-row">
+          <span class="help-contact-label">Mobil</span>
+          <span class="help-contact-valuewrap">
+            <a class="help-contact-value" href="tel:${safe}">${safe}</a>
+            <button type="button" class="help-contact-copy" data-copy="${safe}" aria-label="Mobilnummer kopieren">Kopieren</button>
+          </span>
+        </div>
+      `);
+    }
+    if (c.phone) {
+      const safe = c.phone;
+      rows.push(`
+        <div class="help-contact-row">
+          <span class="help-contact-label">Festnetz</span>
+            <span class="help-contact-valuewrap">
+              <a class="help-contact-value" href="tel:${safe}">${safe}</a>
+              <button type="button" class="help-contact-copy" data-copy="${safe}" aria-label="Festnetznummer kopieren">Kopieren</button>
+            </span>
+        </div>
+      `);
+    }
+
+    pop.innerHTML = `
+      <div class="help-contact-popover-head">
+        <div class="help-contact-title">${(c.name || key).replace(/</g,"&lt;").replace(/>/g,"&gt;")}</div>
+        <button type="button" class="help-contact-close" aria-label="Schließen">×</button>
+      </div>
+      <div class="help-contact-popover-body">
+        ${rows.join("") || `<div class="help-contact-row help-contact-empty">Keine Kontaktdaten vorhanden.</div>`}
+      </div>
+    `;
+
+    pop.querySelectorAll(".help-contact-copy").forEach((btn) => {
+      btn.addEventListener("click", async (ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
+
+        const text = btn.getAttribute("data-copy") || "";
+        if (!text) return;
+
+        const ok = await copyToClipboard(text);
+        flashCopyState(btn, ok);
+      });
+    });
+
+    pop.querySelector(".help-contact-close")?.addEventListener("click", (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      closePopover();
+    });
+  }
+
+  function positionPopover(anchorEl) {
+    const a = anchorEl.getBoundingClientRect();
+    const margin = 8;
+
+    // Popover erst sichtbar machen, damit Maße stimmen
+    pop.hidden = false;
+    pop.style.left = "0px";
+    pop.style.top = "0px";
+
+    const p = pop.getBoundingClientRect();
+    const vw = window.innerWidth || document.documentElement.clientWidth;
+    const vh = window.innerHeight || document.documentElement.clientHeight;
+
+    // Default: rechts unterhalb
+    let left = a.right + margin;
+    let top  = a.top;
+
+    // Wenn rechts kein Platz, links daneben
+    if (left + p.width > vw - margin) {
+      left = a.left - margin - p.width;
+    }
+    // Wenn immer noch kein Platz: clamp
+    left = Math.max(margin, Math.min(left, vw - margin - p.width));
+
+    // Vertikal clamp
+    if (top + p.height > vh - margin) {
+      top = vh - margin - p.height;
+    }
+    top = Math.max(margin, top);
+
+    pop.style.left = `${left}px`;
+    pop.style.top  = `${top}px`;
+  }
+
+  body.addEventListener("click", (ev) => {
+    const btn = ev.target.closest?.("[data-contact-id]");
+    if (!btn) return;
+
+    ev.preventDefault();
+    ev.stopPropagation();
+
+    const key = btn.getAttribute("data-contact-id");
+    if (!key) return;
+
+    // Toggle
+    if (!pop.hidden && currentKey === key) {
+      closePopover();
+      return;
+    }
+
+    if (currentAnchor) currentAnchor.setAttribute("aria-expanded", "false");
+    currentKey = key;
+    currentAnchor = btn;
+    currentAnchor.setAttribute("aria-expanded", "true");
+
+    renderContact(key);
+    positionPopover(btn);
+  });
+
+  // Click außerhalb schließt
+  document.addEventListener("mousedown", (ev) => {
+    if (pop.hidden) return;
+    const t = ev.target;
+    if (t === pop || pop.contains(t)) return;
+    if (currentAnchor && (t === currentAnchor || currentAnchor.contains(t))) return;
+    closePopover();
+  });
+
+  // ESC schließt
+  document.addEventListener("keydown", (ev) => {
+    if (ev.key === "Escape" && !pop.hidden) closePopover();
+  });
+
+  // Reposition bei Scroll/Resize (Modal-Body scrollt)
+  body.addEventListener("scroll", () => {
+    if (!pop.hidden && currentAnchor) positionPopover(currentAnchor);
+  });
+  window.addEventListener("resize", () => {
+    if (!pop.hidden && currentAnchor) positionPopover(currentAnchor);
+  });
 }
 
 // --- Modal-Rendering ---
