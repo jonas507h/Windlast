@@ -8,6 +8,9 @@
 
 /* ---------- 1. Light-Defaults (Fallback vor theme.js) ---------- */
 :root {
+  /* --- Logo --- */
+  --company-logo: url("/static/media/NM_Logo_hell.png"); 
+
   /* --- Surfaces & Text --- */
   --bg: #ffffff;
   --text: #111111;
@@ -17,11 +20,11 @@
   --link: #0066cc;
 
   /* --- Controls & Tabs --- */
-  --button-bg: #2d6cdf;
+  --button-bg: #fdc300;
   --button-text: #ffffff;
 
   --tab-bg: #f3f3f3;
-  --tab-active-border: #5577ff;
+  --tab-active-border: #fdc300;
 
   /* --- Tables & Fields --- */
   --table-head: #f3f3f3;
@@ -135,10 +138,18 @@
 
   --help-popover-copy-err-bg: rgba(220, 20, 60, 0.18);
   --help-popover-copy-err-border: rgba(220, 20, 60, 0.55);
+
+  /* --- Bilder --- */
+  --help-figure-border: var(--border);
+  --help-figure-bg: var(--panel);
+  --help-figure-muted: var(--muted);
 }
 
 /* ---------- 2. EXPLIZIT: Light-Theme (Angleich an :root) ---------- */
 [data-theme="light"] {
+  /* --- Logo --- */
+  --company-logo: url("/static/media/NM_Logo_hell.png"); 
+
   /* Surfaces & Text */
   --bg: #ffffff;
   --text: #111111;
@@ -148,11 +159,11 @@
   --link: #0066cc;
 
   /* Controls & Tabs */
-  --button-bg: #2d6cdf;
+  --button-bg: #fdc300;
   --button-text: #ffffff;
 
   --tab-bg: #f3f3f3;
-  --tab-active-border: #5577ff;
+  --tab-active-border: #fdc300;
 
   /* Tables & Fields */
   --table-head: #f3f3f3;
@@ -265,10 +276,18 @@
 
   --help-popover-copy-err-bg: rgba(220, 20, 60, 0.18);
   --help-popover-copy-err-border: rgba(220, 20, 60, 0.55);
+
+  /* --- Bilder --- */
+  --help-figure-border: var(--border);
+  --help-figure-bg: var(--panel);
+  --help-figure-muted: var(--muted);
 }
 
 /* ---------- 3. EXPLIZIT: Dark-Theme ---------- */
 [data-theme="dark"] {
+  /* --- Logo --- */
+  --company-logo: url("/static/media/NM_Logo_dunkel.png"); 
+
   /* Surfaces & Text */
   --bg: #0b0e13;
   --text: #e8eef9;
@@ -278,11 +297,11 @@
   --link: #6aa2ff;
 
   /* Controls & Tabs */
-  --button-bg: #6aa2ff;
+  --button-bg: #fdc300;
   --button-text: #0b0e13;
 
   --tab-bg: #0f141d;
-  --tab-active-border: #6aa2ff;
+  --tab-active-border: #fdc300;
 
   /* Tables & Fields */
   --table-head: #0f141d;
@@ -396,10 +415,18 @@
 
   --help-popover-copy-err-bg: rgba(220, 20, 60, 0.18);
   --help-popover-copy-err-border: rgba(220, 20, 60, 0.55);
+
+  /* --- Bilder --- */
+  --help-figure-border: var(--border);
+  --help-figure-bg: var(--panel);
+  --help-figure-muted: var(--muted);
 }
 
 /* ---------- 4. EXPLIZIT: Special-Theme ---------- */
 [data-theme="special"] {
+  /* --- Logo --- */
+  --company-logo: url("/static/media/NM_Logo_dunkel.png"); 
+
   /* Surfaces & Text */
   --bg: #07050e;
   --panel: rgba(25, 12, 45, 0.72);
@@ -534,6 +561,11 @@
 
   --help-popover-copy-err-bg: rgba(220, 20, 60, 0.18);
   --help-popover-copy-err-border: rgba(220, 20, 60, 0.55);
+
+  /* --- Bilder --- */
+  --help-figure-border: var(--border);
+  --help-figure-bg: var(--panel);
+  --help-figure-muted: var(--muted);
 }
 
 /* ====== Base ====== */
@@ -686,10 +718,11 @@ nav.tabs { display:flex; gap:8px; margin:0 0 10px; }
 
 /* ====== Header Controls ====== */
 .header-bar{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 16px;
+
+  align-items: start;
 }
 .header-controls{
   display:flex; align-items:center; gap:8px; flex-wrap:wrap;
@@ -752,6 +785,53 @@ label.required::after {
   margin-top:2px;
 }
 
+.header-left{
+  grid-column: 1;
+  grid-row: 1;
+  align-self: start;
+}
+.header-left h1{
+  margin: 0;
+  line-height: 1.15;
+}
+.author-label{
+  display: block;
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.2;
+  margin-top: 2px;
+}
+
+.header-center{
+  grid-column: 2;
+  grid-row: 1;
+  align-self: start;
+  justify-self: center; 
+}
+
+.header-right{
+  grid-column: 3;
+  grid-row: 1 / span 3;
+
+  display: grid;
+  grid-template-rows: auto auto auto;
+  row-gap: 10px;
+
+  justify-items: end;
+  align-items: start;
+}
+
+/* Logo-Box */
+.company-logo{
+  width: 180px;          /* breit, aber nicht riesig */
+  max-width: 28vw;       /* skaliert auf kleinen Screens runter */
+  aspect-ratio: 4 / 1;   /* grob "deutlich breiter als hoch" */
+  background-image: var(--company-logo);
+  background-repeat: no-repeat;
+  background-position: right top;
+  background-size: contain;
+}
+
 .footer-head {
   display: flex;
   align-items: baseline;
@@ -775,7 +855,9 @@ label.required::after {
 .role-label {
   font-size: 0.85rem;
   color: var(--muted);
-  margin-top: 4px;
+  margin-top: 0;
+  line-height: 1;
+  padding: 0;
   text-align: center;
 }
 

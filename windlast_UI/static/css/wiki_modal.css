@@ -12,7 +12,8 @@
   /* keine feste top/right hier, Position kommt aus JS */
   width: 800px;
   max-width: calc(100% - 32px);
-  max-height: 70%;
+  height: 70%;
+  max-height: 90%;
   background: var(--panel);
   color: var(--text);
   border-radius: 8px;
@@ -627,4 +628,36 @@ mark.help-search-hit {
 .help-contact-copy[data-state="err"] {
   border-color: var(--help-popover-copy-err-border);
   background: var(--help-popover-copy-err-bg);
+}
+
+/* Hilfe-Bilder */
+.help-figure { margin: 12px 0; }
+
+.help-figure-link {
+  display: block;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.help-figure-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--help-figure-border);
+  border-radius: 10px;
+  background: var(--help-figure-bg);
+}
+
+.help-figure-caption {
+  margin-top: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  font-size: 0.82rem;
+  color: var(--help-figure-muted);
+}
+
+.help-figure-caption a {
+  color: var(--link);
+  text-decoration: underline;
 }

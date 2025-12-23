@@ -23,14 +23,21 @@ export const HEADER_HELP_PAGES = [
     body: `
       <p>
         Hier wird die Windzone des Aufstellortes der Konstruktion ausgewählt. Die Windzone hat bei der Berechnung nach [[norm:DIN_EN_1991_1_4_2010|DIN EN 1991-1-4]]
-        Einfluss auf die verwendeten Staudrücke. Eine Karte mit den Windzonen in Deutschland ist im nationalen Anhand der DIN EN 1991-1-4 abgedruckt oder online zu finden.
-        Die [[ext:https://www.bauministerkonferenz.de|Bauministerkonferenz]] stellt außerdem eine Excel-Liste mit der
-        [[ext:https://www.is-argebau.de/IndexSearch.aspx?method=get&File=bya892ba82y1b9bbba8a4a8yb9bb92b8y9ya8ayyb9y884b992a2a0a1aba4a1494b88yb8388514gsjsurtpizrrzhlllyojo|Zuordnung der Windzonen nach Verwaltungsgrenzen der Länder]]
-        zur Verfügung.
+        Einfluss auf die verwendeten Staudrücke. Eine Karte mit den Windzonen in Deutschland ist im nationalen Anhand der DIN EN 1991-1-4 abgedruckt oder unten angehängt.
+        Beim [[ext:https://www.dibt.de/de/wir-bieten/technische-baubestimmungen|Deutschen Institut für Bautechnik]] ist außerdem eine Excel-Liste mit der
+        [[ext:https://www.dibt.de/fileadmin/dibt-website/Dokumente/Referat/P5/Technische_Bestimmungen/Windzonen_nach_Verwaltungsgrenzen.xlsx|Zuordnung der Windzonen nach Verwaltungsgrenzen der Länder]]
+        zu finden.
       </p>
       <p>
         Mit &bdquo;Küste&ldquo; meint die Norm einen 5km breiten Streifen entlang der Küste.
       </p>
+      <help-img
+        path="/static/media/Windzonenkarte.png"
+        link="https://de.wikipedia.org/wiki/Windlast#/media/Datei:Windzonenkarte.png"
+        date="2025-12-23"
+        alt="Windzonenkarte Deutschland"
+        source-label="Wikipedia"
+      ></help-img>
     `
   }
 ];

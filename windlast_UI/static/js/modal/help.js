@@ -460,6 +460,17 @@ function initContactPopoverOnce() {
         </div>
       `);
     }
+    if (c.teams) {
+      const url = c.teams;
+      rows.push(`
+        <div class="help-contact-row">
+          <span class="help-contact-label">Teams</span>
+          <a class="help-contact-value" href="${url}" target="_blank" rel="noopener noreferrer">
+            Chat öffnen
+          </a>
+        </div>
+      `);  
+    }
     if (c.mobile) {
       const safe = c.mobile;
       rows.push(`
@@ -619,6 +630,8 @@ function buildHelpContent(id, title, bodyHtml, stand) {
   transformIncludes(body);
   // 2. FAQ-Elemente in klickbare Blöcke umwandeln
   transformFAQ(body);
+  // 3. Hilfe-Bilder umwandeln
+  transformHelpImages(body);
 
   wrap.appendChild(body);
 
@@ -697,6 +710,93 @@ function transformFAQ(root) {
       wrapper.classList.toggle("open");
     });
   });
+}
+
+function transformHelpImages(root) {
+  const nodes = root.querySelectorAll("help-img[path], help-img[src]");
+  nodes.forEach((node) => {
+    const path = node.getAttribute("path") || node.getAttribute("src");
+    if (!path) {
+      node.remove();
+      return;
+    }
+
+    const link = node.getAttribute("link") || "";
+    const date = node.getAttribute("date") || "";
+    const alt  = node.getAttribute("alt") || "";
+    const sourceLabel = node.getAttribute("source-label") || link;
+
+    const figure = document.createElement("figure");
+    figure.className = "help-figure";
+
+    const img = document.createElement("img");
+    img.className = "help-figure-img";
+    img.src = path;
+    img.alt = alt;
+    img.loading = "lazy";
+
+    let imageNode = img;
+
+    // Wenn Link vorhanden: Bild klickbar machen
+    if (link) {
+      const a = document.createElement("a");
+      a.className = "help-figure-link";
+      a.href = link;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      a.appendChild(img);
+      imageNode = a;
+    }
+
+    figure.appendChild(imageNode);
+
+    // Caption bauen (nur wenn link oder date da ist)
+    if (link || date) {
+      const caption = document.createElement("figcaption");
+      caption.className = "help-figure-caption";
+
+      if (link) {
+        const span = document.createElement("span");
+        span.className = "help-figure-meta";
+
+        // “Quelle: <Linktext>”
+        const a = document.createElement("a");
+        a.href = link;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        a.textContent = sourceLabel || link;
+
+        span.append("Quelle: ");
+        span.appendChild(a);
+        caption.appendChild(span);
+      }
+
+      if (date) {
+        const span = document.createElement("span");
+        span.className = "help-figure-meta";
+
+        const time = document.createElement("time");
+        time.setAttribute("datetime", date);
+        time.textContent = formatHelpDate(date);
+
+        span.append("Entnommen am: ");
+        span.appendChild(time);
+        caption.appendChild(span);
+      }
+
+      figure.appendChild(caption);
+    }
+
+    node.replaceWith(figure);
+  });
+}
+
+function formatHelpDate(raw) {
+  // Erwartet YYYY-MM-DD, gibt DD.MM.YYYY zurück; sonst raw unverändert
+  const m = String(raw || "").trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return raw;
+  const yyyy = m[1], mm = m[2], dd = m[3];
+  return `${dd}.${mm}.${yyyy}`;
 }
 
 function transformIncludes(root, visited = new Set(), depth = 0) {

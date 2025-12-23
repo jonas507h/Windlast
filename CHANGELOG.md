@@ -3,10 +3,11 @@
 ## [2.0.0-alpha.2] – 
 
 ### Added
-- Zusätzliche Einträge in der Hilfe
+- Einträge in der Hilfe ergänzt
 
 ### Changed
 - Eingabevalidierung und -filterung verbessert
+- Benutzeroberfläche verbessert
 
 ### Known Issues
 - Darstellung von Zwischenergebnissen ist noch im Aufbau

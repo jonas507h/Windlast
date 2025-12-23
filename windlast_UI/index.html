@@ -58,42 +58,49 @@
 
   <!-- ========== HEADER ========== -->
   <header class="panel header-bar">
-    <div class="header-title">
-      <h1 style="margin:0;">N&M Windlastrechner 2</h1>
+    <div class="header-left">
+      <h1>N&M Windlastrechner 2</h1>
       <small id="program-version" class="version-label" hidden></small>
+      <small class="author-label">Entwicklung: Jonas Schmid</small>
     </div>
 
-    <form id="header-form" class="header-controls" onsubmit="return false;">
-      <label for="aufstelldauer_wert">Aufstelldauer</label>
-      <input id="aufstelldauer_wert" name="aufstelldauer_wert"
-             type="number" min="0" step="1" placeholder="z. B. 2" />
-      <select id="aufstelldauer_einheit"></select>
-      <button
-        type="button"
-        tabindex="-1"
-        class="help-icon-btn"
-        data-help-id="header:aufstelldauer"
-        aria-label="Hilfe zu diesem Bereich"
-      >
-        ?
-      </button>
+    <div class="header-center">
+      <form id="header-form" class="header-controls" onsubmit="return false;">
+        <label for="aufstelldauer_wert">Aufstelldauer</label>
+        <input id="aufstelldauer_wert" name="aufstelldauer_wert"
+              type="number" min="0" step="1" placeholder="z. B. 2" />
+        <select id="aufstelldauer_einheit"></select>
+        <button
+          type="button"
+          tabindex="-1"
+          class="help-icon-btn"
+          data-help-id="header:aufstelldauer"
+          aria-label="Hilfe zu diesem Bereich"
+        >
+          ?
+        </button>
 
-      <label for="windzone" class="required">Windzone</label>
-      <select id="windzone"></select>
-      <button
-        type="button"
-        tabindex="-1"
-        class="help-icon-btn"
-        data-help-id="header:windzone"
-        aria-label="Hilfe zu diesem Bereich"
-      >
-        ?
-      </button>
-    </form>
+        <label for="windzone" class="required">Windzone</label>
+        <select id="windzone"></select>
+        <button
+          type="button"
+          tabindex="-1"
+          class="help-icon-btn"
+          data-help-id="header:windzone"
+          aria-label="Hilfe zu diesem Bereich"
+        >
+          ?
+        </button>
+      </form>
+    </div>
 
-    <div class="actions" style="margin:0;">
-      <button type="button" tabindex="-1" class="btn" onclick="toggleTheme()">Dark / Light</button>
-      <button type="button" tabindex="-1" class="btn" onclick="window.HELP && window.HELP.open('app:start')">Hilfe</button>
+    <div class="header-right">
+      <div class="company-logo" aria-label="Firmenlogo"></div>
+
+      <div class="header-buttons">
+        <button type="button" tabindex="-1" class="btn" onclick="toggleTheme()">Dark / Light</button>
+        <button type="button" tabindex="-1" class="btn" onclick="window.HELP && window.HELP.open('app:start')">Hilfe</button>
+      </div>
       <div id="role-label" class="role-label" hidden></div>
     </div>
   </header>
@@ -101,7 +108,7 @@
   <!-- ========== MAIN (Konstruktionen) ========== -->
   <main class="wrap">
     <div style ="display:flex; align-items:center;">
-      <h2 style="margin:0 8px 8px;">Konstruktionen</h2>
+      <h2 style="margin: 0 8px 0 0">Konstruktionen</h2>
       <button
         type="button"
         tabindex="-1"
