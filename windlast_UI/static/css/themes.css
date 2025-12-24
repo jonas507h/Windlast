@@ -16,7 +16,7 @@
   /* Brand / Accent */
   --master-accent: #fdc300;
   --master-accent-2: #fdc300;
-  --master-on-accent: #000000;
+  --master-on-accent: #3c3c3b;
 
   --master-hit-bg: rgba(255, 215, 0, 0.35);
   --master-hit-border: rgba(180, 140, 0, 0.8);
@@ -212,7 +212,7 @@
   /* Brand / Accent */
   --master-accent: #fdc300;
   --master-accent-2: #fdc300;
-  --master-on-accent: #000000;
+  --master-on-accent: #3c3c3b;
 
   --master-hit-bg: rgba(255, 215, 0, 0.35);
   --master-hit-border: rgba(180, 140, 0, 0.8);
@@ -406,9 +406,9 @@
   --master-link: #6aa2ff;            /* war: --link */
 
   /* Brand / Accent */
-  --master-accent: #fdc300;
+  --master-accent: #fed462;
   --master-accent-2: #191919;
-  --master-on-accent: #fdc300;
+  --master-on-accent: #fed462;
 
   --master-hit-bg: rgba(255, 215, 0, 0.35);
   --master-hit-border: rgba(180, 140, 0, 0.8);
