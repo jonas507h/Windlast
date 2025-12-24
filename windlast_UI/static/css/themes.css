@@ -15,6 +15,7 @@
 
   /* Brand / Accent */
   --master-accent: #fdc300;
+  --master-accent-2: #fdc300;
   --master-on-accent: #000000;
 
   --master-hit-bg: rgba(255, 215, 0, 0.35);
@@ -77,7 +78,8 @@
   --link: var(--master-link);
 
   /* Controls & Tabs */
-  --button-bg: var(--master-accent);
+  --button-bg: var(--master-accent-2);
+  --button-border: var(--master-accent);
   --button-text: var(--master-on-accent);
   --tab-bg: var(--master-surface-2);
   --tab-active-border: var(--master-accent);
@@ -209,6 +211,7 @@
 
   /* Brand / Accent */
   --master-accent: #fdc300;
+  --master-accent-2: #fdc300;
   --master-on-accent: #000000;
 
   --master-hit-bg: rgba(255, 215, 0, 0.35);
@@ -271,7 +274,8 @@
   --link: var(--master-link);
 
   /* Controls & Tabs */
-  --button-bg: var(--master-accent);
+  --button-bg: var(--master-accent-2);
+  --button-border: var(--master-accent);
   --button-text: var(--master-on-accent);
   --tab-bg: var(--master-surface-2);
   --tab-active-border: var(--master-accent);
@@ -403,7 +407,8 @@
 
   /* Brand / Accent */
   --master-accent: #fdc300;
-  --master-on-accent: #000000;
+  --master-accent-2: #191919;
+  --master-on-accent: #fdc300;
 
   --master-hit-bg: rgba(255, 215, 0, 0.35);
   --master-hit-border: rgba(180, 140, 0, 0.8);
@@ -465,7 +470,8 @@
   --link: var(--master-link);
 
   /* Controls & Tabs */
-  --button-bg: var(--master-accent);
+  --button-bg: var(--master-accent-2);
+  --button-border: var(--master-accent);
   --button-text: var(--master-on-accent);
   --tab-bg: var(--master-surface-2);
   --tab-active-border: var(--master-accent);

@@ -37,11 +37,11 @@ input[type="number"], select, input[type="text"]{
 .btn{
   appearance: none;
   padding: 10px 14px;
-  border: 1px solid var(--button-bg);
+  border: 2px solid var(--button-border);
   border-radius: 10px;
   background: var(--button-bg);
   color: var(--button-text);
-  font-weight: 600;
+  font-weight: 1000;
   cursor: pointer;
 }
 .btn:hover{ filter: brightness(0.95); }

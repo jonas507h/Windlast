@@ -8,6 +8,7 @@
 ### Changed
 - Eingabevalidierung und -filterung verbessert
 - Benutzeroberfläche verbessert
+- App bleibt stabil offen
 
 ### Known Issues
 - Darstellung von Zwischenergebnissen ist noch im Aufbau
