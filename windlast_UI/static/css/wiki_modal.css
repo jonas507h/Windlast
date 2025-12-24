@@ -12,7 +12,6 @@
   /* keine feste top/right hier, Position kommt aus JS */
   width: 800px;
   max-width: calc(100% - 32px);
-  height: 70%;
   max-height: 90%;
   background: var(--panel);
   color: var(--text);
@@ -631,7 +630,7 @@ mark.help-search-hit {
 }
 
 /* Hilfe-Bilder */
-.help-figure { margin: 12px 0; }
+.help-figure { margin: 12px auto; }
 
 .help-figure-link {
   display: block;

@@ -56,28 +56,52 @@
 
       // Startposition setzen, falls noch nichts da ist
       if (!dialog.dataset.positioned) {
-        // kurz sichtbar machen, damit offsetWidth/Height richtig sind
+        dialog.dataset.positioned = "1";
+
+        // 1) sichtbar im DOM, aber unsichtbar (Layout läuft, Bilder laden)
         dialog.style.visibility = "hidden";
-        dialog.style.display = "flex";
+        dialog.hidden = false;
 
-        const vw = window.innerWidth || document.documentElement.clientWidth;
-        const vh = window.innerHeight || document.documentElement.clientHeight;
+        // 2) Warte auf Bilder (falls keine da: sofort)
+        const imgs = Array.from(bodyEl.querySelectorAll("img"));
+        const pending = imgs.filter(img => !img.complete);
 
-        // echte gemessene Größe
-        const rect = dialog.getBoundingClientRect();
-        const width  = Math.min(rect.width  || 420, vw - 32);
-        const height = Math.min(rect.height || 300, vh - 32);
+        const proceed = () => {
+          const vw = window.innerWidth || document.documentElement.clientWidth;
+          const vh = window.innerHeight || document.documentElement.clientHeight;
 
-        const left = Math.max(16, (vw - width) / 2);
-        const top  = Math.max(16, (vh - height) / 3);
+          const rect = dialog.getBoundingClientRect();
+          const width  = Math.min(rect.width  || 420, vw - 32);
+          const height = Math.min(rect.height || 300, vh - 32);
 
-        dialog.style.left = `${left}px`;
-        dialog.style.top  = `${top}px`;
-        dialog.style.right = "";
-        dialog.style.bottom = "";
+          const left = Math.max(16, (vw - width) / 2);
+          const topPref = Math.max(16, (vh - height) / 3);
+          const topMax  = Math.max(16, vh - height - 16);
+          const top = Math.min(topPref, topMax);
 
-        dialog.style.visibility = "";
-        dialog.dataset.positioned = "1"; // markiert als initial platziert
+          dialog.style.left = `${left}px`;
+          dialog.style.top  = `${top}px`;
+
+          // 3) jetzt anzeigen
+          dialog.style.visibility = "";
+        };
+
+        if (pending.length === 0) {
+          requestAnimationFrame(proceed);
+        } else {
+          let leftToLoad = pending.length;
+          const done = () => (--leftToLoad <= 0) && requestAnimationFrame(proceed);
+
+          pending.forEach(img => {
+            img.addEventListener("load", done, { once: true });
+            img.addEventListener("error", done, { once: true });
+          });
+
+          // Fallback: nicht ewig warten
+          setTimeout(() => requestAnimationFrame(proceed), 700);
+        }
+
+        return; // wichtig: nicht direkt "sichtbar" machen/weiterpositionieren
       }
     } else {
       dialog.hidden = true;

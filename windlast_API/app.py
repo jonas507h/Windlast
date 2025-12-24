@@ -28,10 +28,13 @@ PARTIALS_DIR = (UI_ROOT / "partials").resolve()
 _clients: dict[str, float] = {}   # {client_id: last_seen_ts}
 _lock = threading.Lock()
 
-HB_TIMEOUT = 8.0        # s ohne Heartbeat => Client gilt als weg
+HB_TIMEOUT = 900        # s ohne Heartbeat => Client gilt als weg
 HK_PERIOD  = 2.0        # s Housekeeper-Intervall
-GRACE      = 3.0        # s Gnadenfrist bevor wir wirklich beenden
+GRACE      = 10        # s Gnadenfrist bevor wir wirklich beenden
+STARTUP_GRACE = 300  # s Wartezeit nach Start, bevor wir beenden können
 
+_ever_had_client = False
+_start_ts = time.time()
 _shutdown_timer: threading.Timer | None = None
 _housekeeper_started = False
 
@@ -68,10 +71,15 @@ def _ensure_housekeeper():
     def _loop():
         while True:
             time.sleep(HK_PERIOD)
+            now = time.time()
             with _lock:
-                _reap_stale()
+                _reap_stale(now)
+
                 if not _clients:
-                    # kein Client mehr aktiv -> Shutdown planen (falls nicht schon geplant)
+                    # WICHTIG: beim Start NICHT beenden, bevor je ein Client da war
+                    if not _ever_had_client and (now - _start_ts) < STARTUP_GRACE:
+                        continue
+
                     if _shutdown_timer is None:
                         _schedule_shutdown()
     th = threading.Thread(target=_loop, daemon=True)
@@ -109,6 +117,7 @@ def create_app():
 
     @app.post("/__client_event")
     def __client_event():
+        global _ever_had_client
         if request.remote_addr not in ("127.0.0.1", "::1"):
             return jsonify({"ok": False, "reason": "forbidden"}), 403
 
@@ -121,6 +130,7 @@ def create_app():
         now = time.time()
         with _lock:
             if ev in ("open", "beat"):
+                _ever_had_client = True
                 _clients[cid] = now
                 _reap_stale(now)
                 _cancel_shutdown()             # Aktivität -> geplanten Exit abbrechen

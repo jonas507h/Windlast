@@ -37,6 +37,7 @@ export const HEADER_HELP_PAGES = [
         date="2025-12-23"
         alt="Windzonenkarte Deutschland"
         source-label="Wikipedia"
+        width="600px"
       ></help-img>
     `
   }

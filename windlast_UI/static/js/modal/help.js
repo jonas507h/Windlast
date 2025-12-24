@@ -721,6 +721,7 @@ function transformHelpImages(root) {
       return;
     }
 
+    const width = node.getAttribute("width") || null;
     const link = node.getAttribute("link") || "";
     const date = node.getAttribute("date") || "";
     const alt  = node.getAttribute("alt") || "";
@@ -728,6 +729,14 @@ function transformHelpImages(root) {
 
     const figure = document.createElement("figure");
     figure.className = "help-figure";
+
+    if (width) {
+      // erlaubt: 400px, 60%, 40rem, etc.
+      figure.style.width = width;
+
+      // Sicherheitsnetz: nie über Container hinaus
+      figure.style.maxWidth = "100%";
+    }
 
     const img = document.createElement("img");
     img.className = "help-figure-img";
