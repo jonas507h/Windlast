@@ -62,7 +62,7 @@ export const STEHER_HELP_PAGES = [
       <p>
         Wählt hier aus unseren Pool-Bodenplatten die entsprechende Bodenplatte aus.
         Bei der Berechnung werden Größe und Geometrie, Gewicht und Material der Bodenplatten berücksichtigt.
-        Eine blau markierte Bodenplatte im [[app:vorschau|Vorschaufenster]] zeigt an, dass unter der Bodenplatte
+        Eine gelb markierte Bodenplatte im [[app:vorschau|Vorschaufenster]] zeigt an, dass unter der Bodenplatte
         eine Gummimatte verwendet wird.<br>
         Da das Material der Bodenplatte Einfluss auf den Reibwert hat und nicht für alle Materialpaarungen Reibwerte in den zugrunde gelegten Normen
         ([[norm:DIN_EN_13814_2005|DIN EN 13814:2005-06]] und [[norm:DIN_EN_17879_2024|DIN EN 17879:2024-08]]) angegeben sind, kann die Auswahl der Bodenplatte Einfluss
@@ -80,7 +80,7 @@ export const STEHER_HELP_PAGES = [
       <p>
         Wählt hier aus, ob ihr Gummimatten unter der Bodenplatte verwendet. Gummimatten erhöhen in der Regel den Reibwert zwischen Bodenplatte und Untergrund
         und können sich positiv auf die Gleitsicherheit der Konstruktion auswirken. Im [[app:vorschau|Vorschaufenster]] werden Bodenplatten mit untergelegten
-        Gummimatten blau markiert.<br>
+        Gummimatten gelb markiert.<br>
         Da die Gummimatte Einfluss auf den Reibwert hat und nicht für alle Materialpaarungen Reibwerte in den zugrunde gelegten Normen
         ([[norm:DIN_EN_13814_2005|DIN EN 13814:2005-06]] und [[norm:DIN_EN_17879_2024|DIN EN 17879:2024-08]]) angegeben sind, können die Auswahlmöglichkeiten in diesem Feld
         je nach ausgewählter [[steher:bodenplatte|Bodenplatte]] eingeschränkt sein oder automatisch geändert werden. Die Auswahl der Gummimatte kann auch Einfluss auf

@@ -161,7 +161,22 @@ export function render_konstruktion(container, konstruktion, opts = {}) {
   const camera = new THREE.PerspectiveCamera(45, width / height, 0.01, 1000);
   camera.up.set(0, 0, 1);
   const renderer = new THREE.WebGLRenderer({ antialias: true });
+
+  // --- Color Management: CSS (sRGB) ≙ Three.js ---
+  if (THREE.ColorManagement) {
+    // Je nach three-Version evtl. default, aber explizit ist stabiler
+    THREE.ColorManagement.enabled = true;
+  }
+
+  // Neue three-Versionen (r152+)
+  if ('outputColorSpace' in renderer) {
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+  } else {
+    // Alte three-Versionen
+    renderer.outputEncoding = THREE.sRGBEncoding;
+  }
   renderer.setSize(width, height);
+  
   if (window.APP_STATE?.flags?.show_nullpunkt) {
     scene.add(new THREE.AxesHelper(1));
   }

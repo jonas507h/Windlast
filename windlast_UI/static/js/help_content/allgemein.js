@@ -73,7 +73,7 @@ export const GENERAL_HELP_PAGES = [
       <p>
         Links neben den Eingabefeldern befindet sich ein Vorschaufenster, das die aktuellen Eingaben grafisch darstellt. Es aktualisiert sich automatisch bei jeder Änderung der Eingaben.
         Visualisiert werden die Geometrie aller Bauteile (wobei Rohre als Linien dargestellt werden), deren Lage und Ausrichtung im Raum, die realen Abmessungen sowie die rechts eingegebenen Maße.<br>
-        Bodenplatten werden blau markiert, wenn unter ihnen Gummimatten verwendet werden.
+        Bodenplatten werden gelb markiert, wenn unter ihnen Gummimatten verwendet werden.
       </p>
       <p>
       Die Vorschau ist dreidimensional und unterstützt die Interaktion mit der Maus:

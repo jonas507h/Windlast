@@ -84,6 +84,12 @@ function makeTextSprite(
   // 6) Sprite bauen (immer im Vordergrund)
   const tex = new THREE.CanvasTexture(canvas);
   tex.needsUpdate = true;
+  // ✅ wichtig: Canvas ist sRGB wie CSS
+  if ('colorSpace' in tex) {
+    tex.colorSpace = THREE.SRGBColorSpace;     // neuere three-Versionen
+  } else {
+    tex.encoding = THREE.sRGBEncoding;         // ältere three-Versionen
+  }
   const mat = new THREE.SpriteMaterial({
     map: tex,
     transparent: true,

@@ -6,17 +6,19 @@
 
   /* Neutrals */
   --master-bg: #ffffff;              /* war: --bg */
-  --master-surface: #ffffff;         /* war: --panel */
-  --master-surface-2: #f3f3f3;       /* war: --tab-bg (gute "zweite Fläche") */
+  --master-surface: #ffffff;         /* hell */
+  --master-surface-2: #f3f3f3;       /* mittel */
+  --master-surface-3: #c6c6c6;       /* dunkel */
   --master-border: #dddddd;          /* war: --border */
   --master-text: #111111;            /* war: --text */
   --master-muted: #555555;           /* war: --muted */
   --master-link: #0066cc;            /* war: --link */
 
   /* Brand / Accent */
-  --master-accent: #fdc300;
-  --master-accent-2: #fdc300;
-  --master-on-accent: #3c3c3b;
+  --master-accent: #fdc300;          /* intensiver Akzent */
+  --master-accent-2: #fdc300;        /* etwas abgedunkelt für Flächen */
+  --master-accent-3: #575756;        /* für Linien, Konturen */
+  --master-on-accent: #3c3c3b;       /* Text auf Akzentflächen */
 
   --master-hit-bg: rgba(255, 215, 0, 0.35);
   --master-hit-border: rgba(180, 140, 0, 0.8);
@@ -192,6 +194,20 @@
   --help-figure-border: var(--master-border);
   --help-figure-bg: var(--master-surface);
   --help-figure-muted: var(--master-muted);
+
+  /* --- Preview (Three.js) --- */
+  --preview-bg: var(--master-bg);
+  
+  --preview-line-color: var(--master-accent-3);
+  --preview-plate-fill: var(--master-surface);
+  --preview-plate-fill-gummi: var(var(--master-accent));
+  --preview-wall-fill: var(--master-surface-3);
+
+  --preview-dimension-line: var(--master-accent);
+  --preview-dimension-text-fill: var(--master-on-accent);
+  --preview-dimension-text-outline: var(--master-accent-2);
+  --preview-dimension-text-bg: var(--master-accent-2);
+  --preview-dimension-text-border: var(--master-accent);
 }
 
 /* ---------- 2. EXPLIZIT: Light-Theme (Angleich an :root) ---------- */
@@ -202,17 +218,19 @@
 
   /* Neutrals */
   --master-bg: #ffffff;              /* war: --bg */
-  --master-surface: #ffffff;         /* war: --panel */
-  --master-surface-2: #f3f3f3;       /* war: --tab-bg (gute "zweite Fläche") */
+  --master-surface: #ffffff;         /* hell */
+  --master-surface-2: #f3f3f3;       /* mittel */
+  --master-surface-3: #c6c6c6;       /* dunkel */
   --master-border: #dddddd;          /* war: --border */
   --master-text: #111111;            /* war: --text */
   --master-muted: #555555;           /* war: --muted */
   --master-link: #0066cc;            /* war: --link */
 
   /* Brand / Accent */
-  --master-accent: #fdc300;
-  --master-accent-2: #fdc300;
-  --master-on-accent: #3c3c3b;
+  --master-accent: #fdc300;          /* intensiver Akzent */
+  --master-accent-2: #fdc300;        /* etwas abgedunkelt für Flächen */
+  --master-accent-3: #575756;        /* für Linien, Konturen */
+  --master-on-accent: #3c3c3b;       /* Text auf Akzentflächen */
 
   --master-hit-bg: rgba(255, 215, 0, 0.35);
   --master-hit-border: rgba(180, 140, 0, 0.8);
@@ -388,6 +406,20 @@
   --help-figure-border: var(--master-border);
   --help-figure-bg: var(--master-surface);
   --help-figure-muted: var(--master-muted);
+
+  /* --- Preview (Three.js) --- */
+  --preview-bg: var(--master-bg);
+  
+  --preview-line-color: var(--master-accent-3);
+  --preview-plate-fill: var(--master-surface);
+  --preview-plate-fill-gummi: var(var(--master-accent));
+  --preview-wall-fill: var(--master-surface-3);
+
+  --preview-dimension-line: var(--master-accent);
+  --preview-dimension-text-fill: var(--master-on-accent);
+  --preview-dimension-text-outline: var(--master-accent-2);
+  --preview-dimension-text-bg: var(--master-accent-2);
+  --preview-dimension-text-border: var(--master-accent);
 }
 
 /* ---------- 3. EXPLIZIT: Dark-Theme ---------- */
@@ -398,17 +430,19 @@
 
   /* Neutrals */
   --master-bg: #0b0e13;              /* war: --bg */
-  --master-surface: #191919;         /* war: --panel */
-  --master-surface-2: #333333;       /* war: --tab-bg */
+  --master-surface: #191919;         /* hell */
+  --master-surface-2: #333333;       /* mittel */
+  --master-surface-3: #706f6f;       /* dunkel */
   --master-border: #414141;          /* war: --border */
   --master-text: #e8eef9;            /* war: --text */
   --master-muted: #a6b1c2;           /* war: --muted */
   --master-link: #6aa2ff;            /* war: --link */
 
   /* Brand / Accent */
-  --master-accent: #fed462;
-  --master-accent-2: #191919;
-  --master-on-accent: #fed462;
+  --master-accent: #fed462;          /* intensiver Akzent */
+  --master-accent-2: #191919;        /* etwas abgedunkelt für Flächen */
+  --master-accent-3: #c6c6c6;        /* für Linien, Konturen */
+  --master-on-accent: #fed462;       /* Text auf Akzentflächen */
 
   --master-hit-bg: rgba(255, 215, 0, 0.35);
   --master-hit-border: rgba(180, 140, 0, 0.8);
@@ -584,6 +618,20 @@
   --help-figure-border: var(--master-border);
   --help-figure-bg: var(--master-surface);
   --help-figure-muted: var(--master-muted);
+
+  /* --- Preview (Three.js) --- */
+  --preview-bg: var(--master-bg);
+  
+  --preview-line-color: var(--master-accent-3);
+  --preview-plate-fill: var(--master-surface);
+  --preview-plate-fill-gummi: var(var(--master-accent));
+  --preview-wall-fill: var(--master-surface-3);
+
+  --preview-dimension-line: var(--master-accent);
+  --preview-dimension-text-fill: var(--master-on-accent);
+  --preview-dimension-text-outline: var(--master-accent-2);
+  --preview-dimension-text-bg: var(--master-accent-2);
+  --preview-dimension-text-border: var(--master-accent);
 }
 
 /* ---------- 4. EXPLIZIT: Special-Theme ---------- */
@@ -730,4 +778,18 @@
   --help-figure-border: var(--border);
   --help-figure-bg: var(--panel);
   --help-figure-muted: var(--muted);
+
+  /* --- Preview (Three.js) --- */
+  --preview-bg: #07050e;
+  
+  --preview-line-color: #d8c7ff;
+  --preview-plate-fill: #160a2a;
+  --preview-plate-fill-gummi: #38bdf8;
+  --preview-wall-fill: #24103f;
+
+  --preview-dimension-line: #ff5cff;
+  --preview-dimension-text-fill: #fff2ff;
+  --preview-dimension-text-outline: #07050e;
+  --preview-dimension-text-bg: #07050e;
+  --preview-dimension-text-border: #7fe7ff;
 }

@@ -1,9 +1,86 @@
 // preview_farben.js — zentrale Farbdefinitionen für die Preview (Light/Dark + erweiterbar)
 
+function cssVar(name, fallback = null) {
+  try {
+    const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    return v || fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+// Nimmt '#rrggbb' / 'rgb(...)' / 'rgba(...)' / Zahl 0x..
+// und gibt eine Zahl 0xRRGGBB zurück.
+function toHexNumber(c) {
+  if (typeof c === 'number') return c;
+
+  if (typeof c !== 'string') return 0xffffff;
+  const s = c.trim();
+
+  // #rgb / #rrggbb
+  if (s[0] === '#') {
+    let hex = s.slice(1);
+    if (hex.length === 3) hex = hex.split('').map(ch => ch + ch).join('');
+    const n = parseInt(hex, 16);
+    return Number.isFinite(n) ? n : 0xffffff;
+  }
+
+  // rgb/rgba
+  const m = s.match(/rgba?\(\s*([0-9.]+)\s*,\s*([0-9.]+)\s*,\s*([0-9.]+)/i);
+  if (m) {
+    const r = Math.max(0, Math.min(255, Number(m[1])));
+    const g = Math.max(0, Math.min(255, Number(m[2])));
+    const b = Math.max(0, Math.min(255, Number(m[3])));
+    return ((r & 255) << 16) | ((g & 255) << 8) | (b & 255);
+  }
+
+  // '0xrrggbb' als string
+  if (s.startsWith('0x')) {
+    const n = parseInt(s.slice(2), 16);
+    return Number.isFinite(n) ? n : 0xffffff;
+  }
+
+  // named colors (z.B. "white") -> über Canvas lösen
+  try {
+    const ctx = document.createElement('canvas').getContext('2d');
+    ctx.fillStyle = s;
+    const resolved = ctx.fillStyle; // wird zu rgb(...) normalisiert
+    return toHexNumber(resolved);
+  } catch {
+    return 0xffffff;
+  }
+}
+
+function buildThemeFromCSS() {
+  return {
+    name: 'css',
+
+    // Szene
+    background: toHexNumber(cssVar('--preview-bg', '#111111')),
+
+    // Konstruktion
+    lineColor: toHexNumber(cssVar('--preview-line-color', '#aaaaaa')),
+    plateFill: toHexNumber(cssVar('--preview-plate-fill', '#222222')),
+    plateFillGummi: toHexNumber(cssVar('--preview-plate-fill-gummi', '#fdc300')),
+    wallFill: toHexNumber(cssVar('--preview-wall-fill', '#333333')),
+
+    // Maße (aus euren semantischen Farben, wenn du willst)
+    dimensions: {
+      lineColor: toHexNumber(cssVar('--preview-dimension-line', '#fdc300')),
+      textFill: cssVar('--preview-dimension-text-fill', '#fdc300'),
+      textOutline: cssVar('--preview-dimension-text-outline', '#000000'),
+      textOutlineWidth: 4,
+      textBackground: cssVar('--preview-dimension-text-bg', '#000000'),
+      textBorder: cssVar('--preview-dimension-text-border', '#fdc300'),
+      textBorderWidth: 20,
+    },
+  };
+}
+
 // Farbschemata können später einfach erweitert werden (z.B. "high-contrast", "print", ...).
 export const PREVIEW_THEMES = {
   light: {
-    name: 'light',
+    name: 'light', //Fallback
 
     // Szene
     background: 0xffffff,
@@ -25,58 +102,6 @@ export const PREVIEW_THEMES = {
       // Textkasten
       textBackground: '#ffffff',
       textBorder: '#ff0000',
-      textBorderWidth: 20,
-    },
-  },
-
-  dark: {
-    name: 'dark',
-
-    // etwas dunkler Hintergrund, damit Linien gut sichtbar sind
-    background: 0x111111,
-
-    // Konstruktion
-    lineColor: 0xaaaaaa,
-    plateFill: 0x222222,
-    plateFillGummi: 0x003399, 
-    wallFill:  0x333333,
-
-    // Maße (leicht leuchtendes Rot mit dunkler Outline)
-    dimensions: {
-      lineColor: 0xff6b6b,
-
-      textFill: '#ff6b6b',
-      textOutline: '#000000',
-      textOutlineWidth: 4,
-
-      textBackground: '#000000',
-      textBorder: '#ff6b6b',
-      textBorderWidth: 20,
-    },
-  },
-
-  special: {
-    name: 'special',
-
-    // dunkler “cosmic” Hintergrund
-    background: 0x07050e,
-
-    // Konstruktion (bunter als dark, aber noch gut lesbar)
-    lineColor: 0xd8c7ff,       // hell-violett für Linien
-    plateFill: 0x160a2a,       // violetter Plate-Fill
-    plateFillGummi: 0x38bdf8,  // cyan (passt zum UI-Akzent)
-    wallFill: 0x24103f,        // etwas heller als plateFill
-
-    // Maße (neon-magenta mit dunkler Outline, gut sichtbar)
-    dimensions: {
-      lineColor: 0xff5cff,
-
-      textFill: '#fff2ff',
-      textOutline: '#07050e',
-      textOutlineWidth: 4,
-
-      textBackground: '#07050e',
-      textBorder: '#7fe7ff',
       textBorderWidth: 20,
     },
   },
@@ -118,8 +143,24 @@ export function getCurrentPreviewThemeName(explicitName) {
  * Liefert das aktuelle Theme-Objekt.
  */
 export function getPreviewTheme(explicitName) {
-  const name = getCurrentPreviewThemeName(explicitName);
-  return PREVIEW_THEMES[name] || PREVIEW_THEMES.light;
+  try {
+    const cssTheme = buildThemeFromCSS();
+
+    // Minimaler Validitätscheck
+    if (
+      cssTheme &&
+      Number.isFinite(cssTheme.background) &&
+      Number.isFinite(cssTheme.lineColor) &&
+      Number.isFinite(cssTheme.plateFill)
+    ) {
+      return cssTheme;
+    }
+  } catch (e) {
+    // bewusst leer – wir fallen zurück
+  }
+
+  // Fallback
+  return PREVIEW_THEMES.light;
 }
 
 /**
@@ -135,8 +176,12 @@ export function subscribePreviewTheme(cb) {
     const d = e && e.data;
     if (!d || d.type !== 'theme') return;
     const val = d.value === 'dark' ? 'dark' : 'light';
-    const theme = PREVIEW_THEMES[val] || PREVIEW_THEMES.light;
-    cb({ name: val, theme });
+
+    // 1 Frame warten, damit CSS (data-theme / Variablen) sicher “gezogen” ist
+    requestAnimationFrame(() => {
+      const theme = getPreviewTheme(val);   // <-- WICHTIG: neu berechnen
+      cb({ name: val, theme });
+    });
   };
 
   window.addEventListener('message', handler);
