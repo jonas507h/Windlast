@@ -8,6 +8,8 @@ export const DISPLAY_EPS = 1e-9;
 
 export const ALT_LABELS = {
   IN_BETRIEB: "mit Schutzmaßnahmen",
+  VERSTAERKEND: "mit verstärkenden Sicherungsmaßnahmen",
+  SCHUETZEND: "mit schützenden Sicherungsmaßnahmen",
 };
 
 export const SEVERITY_ORDER = ["error", "warn", "hint", "info"];
