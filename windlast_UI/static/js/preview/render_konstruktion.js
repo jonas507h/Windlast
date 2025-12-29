@@ -4,11 +4,14 @@
 
 import * as THREE from '/static/vendor/three.module.js';
 import { OrbitControls } from '/static/vendor/OrbitControls.js';
+import { LineSegments2 } from '/static/vendor/lines/LineSegments2.js';
+import { LineSegmentsGeometry } from '/static/vendor/lines/LineSegmentsGeometry.js';
+import { LineMaterial } from '/static/vendor/lines/LineMaterial.js';
 import { bodenplatte_linien } from './linien_bodenplatte.js';
 import { traversenstrecke_linien } from './linien_traverse.js';
 import { rohr_linien } from './linien_rohr.js';
 import { senkrechteFlaeche_linien } from './linien_senkrechteFlaeche.js';
-import { computeAABB, expandAABB, segmentsToThreeLineSegments, fitCameraToAABB } from './linien_helpers.js';
+import { computeAABB, expandAABB, segmentsToThreeLineSegments2, fitCameraToAABB } from './linien_helpers.js';
 import { render_dimensions, update_dimension_arrows } from './render_dimensions.js';
 import { getPreviewTheme, subscribePreviewTheme } from './preview_farben.js';
 
@@ -106,11 +109,19 @@ export function render_konstruktion(container, konstruktion, opts = {}) {
   const width = Math.max(1, opts.width || container.clientWidth || 800);
   const height = Math.max(1, opts.height || container.clientHeight || 600);
 
+  // === Line2 Liniendicken (in Pixeln) ===
+  const LW_KANTEN   = 1.0;
+  const LW_TRAVERSE = 1.5;
+  const LW_ROHR     = 5.0;
+
   let dimensionSpecs = null;
   let dimensionGroup = null;
 
   // 1) Linien sammeln
-  const allSegments = [];
+  const segKanten   = [];
+  const segTraverse = [];
+  const segRohre    = [];
+  const allSegments = []
   const plateMeshes = [];
   const flaecheMeshes = [];
   let lines = null;
@@ -118,7 +129,7 @@ export function render_konstruktion(container, konstruktion, opts = {}) {
   for (const el of konstruktion.bauelemente || []) {
     if (el.typ === 'Bodenplatte') {
       const data = bodenplatte_linien(el);
-      allSegments.push(...(data.segments || []));
+      segKanten.push(...(data.segments || []));
       if (data.polygon && data.frame) {
         const hasGummi = !!el.gummimatte;  // 'GUMMI' → true, null → false
 
@@ -140,20 +151,21 @@ export function render_konstruktion(container, konstruktion, opts = {}) {
       }
     } else if (el.typ === 'Traversenstrecke') {
       const { segments } = traversenstrecke_linien(el);
-      allSegments.push(...segments);
+      segTraverse.push(...segments);
     } else if (el.typ === 'Rohr') {
       const { segments } = rohr_linien(el);
-      allSegments.push(...segments);
+      segRohre.push(...segments);
     } else if (el.typ === 'senkrechteFlaeche') {
       const data = senkrechteFlaeche_linien(el);
-      allSegments.push(...(data.segments || []));
+      segKanten.push(...(data.segments || []));
       if (data.polygon && data.frame) {
         const m = createUnlitPlateMesh(THREE, data.polygon, data.frame, theme.wallFill, 0, null);
         flaecheMeshes.push(m);
       }
     }
   }
-  if (!allSegments.length) { console.warn('render_konstruktion: keine Segmente'); return null; }
+  allSegments.push(...segKanten, ...segTraverse, ...segRohre);
+if (!allSegments.length) { console.warn('render_konstruktion: keine Segmente'); return null; }
 
   // 2) Three.js Grundsetup
   const scene = new THREE.Scene();
@@ -185,10 +197,24 @@ export function render_konstruktion(container, konstruktion, opts = {}) {
   container.appendChild(renderer.domElement);
 
   // 3) Linien-Mesh bauen und Szene hinzufügen
-  if (allSegments.length) {
-    lines = segmentsToThreeLineSegments(allSegments, theme.lineColor);
-    lines.renderOrder = 1;
-    scene.add(lines);
+  let linesKanten = null;
+  let linesTraverse = null;
+  let linesRohre = null;
+
+  if (segKanten.length) {
+    linesKanten = segmentsToThreeLineSegments2(segKanten, theme.lineColor, LW_KANTEN, width, height);
+    linesKanten.renderOrder = 1;
+    scene.add(linesKanten);
+  }
+  if (segTraverse.length) {
+    linesTraverse = segmentsToThreeLineSegments2(segTraverse, theme.lineColor, LW_TRAVERSE, width, height);
+    linesTraverse.renderOrder = 2;
+    scene.add(linesTraverse);
+  }
+  if (segRohre.length) {
+    linesRohre = segmentsToThreeLineSegments2(segRohre, theme.lineColor, LW_ROHR, width, height);
+    linesRohre.renderOrder = 3;
+    scene.add(linesRohre);
   }
 
   for (const m of plateMeshes) scene.add(m);
@@ -232,6 +258,9 @@ export function render_konstruktion(container, konstruktion, opts = {}) {
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
     renderer.setSize(w, h);
+    if (linesKanten?.material?.resolution) linesKanten.material.resolution.set(w, h);
+    if (linesTraverse?.material?.resolution) linesTraverse.material.resolution.set(w, h);
+    if (linesRohre?.material?.resolution) linesRohre.material.resolution.set(w, h);
   }
   window.addEventListener('resize', onResize);
 
@@ -264,9 +293,9 @@ export function render_konstruktion(container, konstruktion, opts = {}) {
     if (!t) return;
     scene.background.set(t.background);
 
-    if (lines && lines.material && lines.material.color) {
-      lines.material.color.set(t.lineColor);
-    }
+    if (linesKanten?.material?.color)   linesKanten.material.color.setHex(t.lineColor);
+    if (linesTraverse?.material?.color) linesTraverse.material.color.setHex(t.lineColor);
+    if (linesRohre?.material?.color)    linesRohre.material.color.setHex(t.lineColor);
 
     for (const m of plateMeshes) {
       if (m.material && m.material.color) {
@@ -311,6 +340,12 @@ export function render_konstruktion(container, konstruktion, opts = {}) {
       disposed = true;
       window.removeEventListener('resize', onResize);
       unsubscribeTheme && unsubscribeTheme();
+      linesKanten?.geometry?.dispose?.();
+      linesKanten?.material?.dispose?.();
+      linesTraverse?.geometry?.dispose?.();
+      linesTraverse?.material?.dispose?.();
+      linesRohre?.geometry?.dispose?.();
+      linesRohre?.material?.dispose?.();
       renderer.dispose?.();
     }
   };

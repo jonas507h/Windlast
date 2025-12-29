@@ -1,5 +1,8 @@
 // linien_helpers.js — kleine Utilities für Linien-Rendering
 import * as THREE from '/static/vendor/three.module.js';
+import { LineSegments2 } from '/static/vendor/lines/LineSegments2.js';
+import { LineSegmentsGeometry } from '/static/vendor/lines/LineSegmentsGeometry.js';
+import { LineMaterial } from '/static/vendor/lines/LineMaterial.js';
 
 export function computeAABB(segments) {
   if (!segments.length) return { min: new THREE.Vector3(), max: new THREE.Vector3() };
@@ -32,6 +35,33 @@ export function segmentsToThreeLineSegments(segments, color = 0x111111) {
   geom.setAttribute('position', new THREE.Float32BufferAttribute(points, 3));
   const mat = new THREE.LineBasicMaterial({ linewidth: 1, color});
   return new THREE.LineSegments(geom, mat);
+}
+
+export function segmentsToThreeLineSegments2(segments, color, linewidthPx, width, height) {
+  const positions = new Float32Array(segments.length * 2 * 3);
+  let i = 0;
+
+  for (const [a, b] of segments) {
+    positions[i++] = a[0]; positions[i++] = a[1]; positions[i++] = a[2];
+    positions[i++] = b[0]; positions[i++] = b[1]; positions[i++] = b[2];
+  }
+
+  const geometry = new LineSegmentsGeometry();
+  geometry.setPositions(positions);
+
+  const material = new LineMaterial({
+    color,
+    linewidth: linewidthPx,  // Pixelbreite (weil worldUnits:false)
+    worldUnits: false,
+    depthTest: true,
+    depthWrite: true,
+  });
+
+  // extrem wichtig, sonst skaliert die Dicke komisch / gar nicht
+  material.resolution.set(width, height);
+
+  const line = new LineSegments2(geometry, material);
+  return line;
 }
 
 export function fitCameraToAABB(camera, aabb) {

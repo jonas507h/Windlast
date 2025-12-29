@@ -24,10 +24,12 @@ export function computeDimensionsSteher(konstruktion){
   const H_F = konstruktion.hoehe_flaeche_m;
   const traverse_name_intern = konstruktion.traverse_name_intern;
   const rohr_name_intern = konstruktion.rohr_name_intern;
+  const bodenplatte_name_intern = konstruktion.bodenplatte_name_intern;
   const els = konstruktion.bauelemente||[];
 
   const travSpec = window?.Catalog?.getTraverse?.(traverse_name_intern);
   const is3punkt = Number(travSpec.anzahl_gurtrohre) === 3;
+  const bpSpec = window?.Catalog?.getBodenplatte?.(bodenplatte_name_intern);
 
   let label_hoehe;
   let label_rohr_laenge;
@@ -59,10 +61,10 @@ export function computeDimensionsSteher(konstruktion){
     label_hoehe_flaeche = `Höhe Fläche`;
   }
 
-  trav_real_offset = trav_eff_offset * 2 + (Number(travSpec.B_hoehe ?? travSpec.A_hoehe ?? travSpec.hoehe) / 2) + (R_L / 2);
-  rh_real_offset = rh_eff_offset + R_L / 2;
+  trav_real_offset = trav_eff_offset * 2 + (Number(travSpec.B_hoehe ?? travSpec.A_hoehe ?? travSpec.hoehe) / 2) + (Math.max(bpSpec.breite ?? bpSpec.kantenlaenge, R_L) / 2);
+  rh_real_offset = rh_eff_offset + Math.max(bpSpec.breite ?? bpSpec.kantenlaenge, R_L) / 2;
   rohr_offset = rohr_eff_offset + H - R_H;
-  h_flaeche_real_offset = h_flaeche_eff_offset + R_L / 2;
+  h_flaeche_real_offset = h_flaeche_eff_offset + Math.max(bpSpec.breite ?? bpSpec.kantenlaenge, R_L) / 2;
 
   if (is3punkt) {
     rohr_offset_to_front = -1 * (Number(travSpec.A_hoehe ?? travSpec.hoehe) / 3);
