@@ -46,6 +46,22 @@ input[type="number"], select, input[type="text"]{
 }
 .btn:hover{ filter: brightness(0.95); }
 
+/* ====== Focus Styles (global) ====== */
+:where(a, button, input, select, textarea, [tabindex]):focus {
+  outline: none; /* Browser-Outline weg */
+}
+
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px var(--focus-ring-soft);
+}
+
+/* Optional: für Maus-Klick keinen Ring (nur Tastatur) – bleibt durch focus-visible ohnehin meist so */
+:where(a, button, input, select, textarea, [tabindex]):focus:not(:focus-visible) {
+  box-shadow: none;
+}
+
 /* ====== Tabs (Wrapper) ====== */
 nav.tabs { display:flex; gap:8px; margin:0 0 10px; }
 .tab{
