@@ -252,3 +252,32 @@
 #modal-root .group-card > details[open] > summary::before {
   content: "▾";
 }
+
+/* ==========================
+   Passwort-Modal
+   ========================== */
+
+#modal-root .pw-modal {
+  display: grid;
+  gap: 10px;
+}
+
+#modal-root .pw-title {
+  margin: 0;
+}
+
+#modal-root .pw-hint {
+  margin: 0;
+  opacity: 0.85;
+}
+
+#modal-root .pw-input {
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+#modal-root .pw-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}

@@ -4,44 +4,34 @@
 export function askAdminPassword() {
   return new Promise((resolve) => {
     const wrap = document.createElement("div");
+    wrap.className = "pw-modal";
 
     const title = document.createElement("h3");
     title.id = "modal-title";
+    title.className = "pw-title";
     title.textContent = "Admin-Passwort";
 
     const hint = document.createElement("div");
+    hint.className = "pw-hint";
     hint.textContent = "Bitte Admin-Passwort eingeben:";
-    hint.style.marginBottom = "10px";
-    hint.style.opacity = "0.85";
 
     const input = document.createElement("input");
+    input.className = "pw-input";
     input.type = "password";
     input.autocomplete = "current-password";
-    input.style.width = "100%";
-    input.style.boxSizing = "border-box";
-    input.style.padding = "10px 12px";
-    input.style.borderRadius = "10px";
-    input.style.border = "1px solid var(--master-border, #414141)";
-    input.style.background = "var(--master-bg, #0b0e13)";
-    input.style.color = "var(--master-text, #e8eef9)";
-    input.style.marginBottom = "14px";
 
     const actions = document.createElement("div");
-    actions.style.display = "flex";
-    actions.style.justifyContent = "flex-end";
-    actions.style.gap = "10px";
+    actions.className = "pw-actions";
 
     const cancel = document.createElement("button");
     cancel.type = "button";
+    cancel.className = "btn pw-btn-cancel";
     cancel.textContent = "Abbrechen";
 
     const ok = document.createElement("button");
     ok.type = "button";
+    ok.className = "btn pw-btn-ok";
     ok.textContent = "OK";
-    ok.style.background = "var(--master-accent, #fdc300)";
-    ok.style.color = "var(--master-on-accent, #000)";
-    ok.style.borderRadius = "10px";
-    ok.style.padding = "8px 12px";
 
     actions.appendChild(cancel);
     actions.appendChild(ok);
@@ -65,12 +55,10 @@ export function askAdminPassword() {
     });
 
     Modal.open(wrap, {
-      onOpen: () => {
-        setTimeout(() => input.focus(), 0);
-      }
+      onOpen: () => setTimeout(() => input.focus(), 0),
     });
   });
 }
 
-// zusätzlich global anbieten (für config.js / APP_STATE.requestAdmin)
+// zusätzlich global anbieten (für config.js)
 window.askAdminPassword = askAdminPassword;

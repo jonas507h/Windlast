@@ -3,48 +3,51 @@
   const VERSION = "2.0.0-alpha.2";
 
   // Echte Build-Rolle
-  const BUILD_ROLE = "user"; // "user" | "debug" | "admin" | "godmode"
+  const BUILD_ROLE = "godmode"; // "user" | "debug" | "admin" | "godmode"
 
   // 1) Flags pro Rolle definieren (dynamisch)
   // value: aktueller Zustand
   // lock:  true => nicht änderbar, false => änderbar (persistiert pro Rolle)
   const ROLE_FLAG_DEFS = {
     user: {
-      show_zwischenergebnisse_tooltip: { value: false, lock: true  },
-      show_nichtZertifiziert_warnung:  { value: true,  lock: true  },
+      show_zwischenergebnisse_tooltip: { value: false, lock: true },
+      show_nichtZertifiziert_warnung:  { value: true,  lock: true },
       show_doppelte_meldungen:         { value: false, lock: false },
-      show_meldungen_tooltip:          { value: false, lock: false },
-      show_real_kontext_keys:          { value: false, lock: true  },
+      show_meldungen_tooltip:          { value: false, lock: true },
+      show_real_kontext_keys:          { value: false, lock: true },
       show_nullpunkt:                  { value: false, lock: false },
-      show_suche_tooltip:              { value: false, lock: false },
-      show_test_options_dropdown:      { value: false, lock: true  },
-      use_eps_on_anzeige:              { value: true,  lock: true  },
+      show_suche_tooltip:              { value: false, lock: true },
+      show_test_options_dropdown:      { value: false, lock: true },
+      use_eps_on_anzeige:              { value: true,  lock: true },    // kleine Zahlen als 0 anzeigen
+      show_einstellungen_button:       { value: false, lock: true },
     },
     debug: {
-      show_zwischenergebnisse_tooltip: { value: true,  lock: true  },
-      show_nichtZertifiziert_warnung:  { value: true,  lock: true  },
+      show_zwischenergebnisse_tooltip: { value: true,  lock: false },
+      show_nichtZertifiziert_warnung:  { value: true,  lock: true },
       show_doppelte_meldungen:         { value: true,  lock: false },
       show_meldungen_tooltip:          { value: true,  lock: false },
-      show_real_kontext_keys:          { value: false, lock: true  },
+      show_real_kontext_keys:          { value: false, lock: false },
       show_nullpunkt:                  { value: true,  lock: false },
       show_suche_tooltip:              { value: true,  lock: false },
-      show_test_options_dropdown:      { value: false, lock: true  },
-      use_eps_on_anzeige:              { value: true,  lock: true  },
+      show_test_options_dropdown:      { value: false, lock: true },
+      use_eps_on_anzeige:              { value: true,  lock: false },
+      show_einstellungen_button:       { value: false, lock: true },
     },
     admin: {
-      show_zwischenergebnisse_tooltip: { value: true,  lock: true  },
-      show_nichtZertifiziert_warnung:  { value: false, lock: true  },
+      show_zwischenergebnisse_tooltip: { value: true,  lock: false },
+      show_nichtZertifiziert_warnung:  { value: false, lock: false },
       show_doppelte_meldungen:         { value: true,  lock: false },
       show_meldungen_tooltip:          { value: true,  lock: false },
-      show_real_kontext_keys:          { value: false, lock: true  },
+      show_real_kontext_keys:          { value: false, lock: false },
       show_nullpunkt:                  { value: true,  lock: false },
       show_suche_tooltip:              { value: true,  lock: false },
-      show_test_options_dropdown:      { value: false, lock: true  },
-      use_eps_on_anzeige:              { value: true,  lock: true  },
+      show_test_options_dropdown:      { value: false, lock: true },
+      use_eps_on_anzeige:              { value: true,  lock: false },
+      show_einstellungen_button:       { value: false, lock: true },
     },
     godmode: {
-      show_zwischenergebnisse_tooltip: { value: true,  lock: true  },
-      show_nichtZertifiziert_warnung:  { value: false, lock: true  },
+      show_zwischenergebnisse_tooltip: { value: true,  lock: false },
+      show_nichtZertifiziert_warnung:  { value: false, lock: false },
       show_doppelte_meldungen:         { value: true,  lock: false },
       show_meldungen_tooltip:          { value: true,  lock: false },
       show_real_kontext_keys:          { value: true,  lock: false },
@@ -52,6 +55,7 @@
       show_suche_tooltip:              { value: true,  lock: false },
       show_test_options_dropdown:      { value: true,  lock: false },
       use_eps_on_anzeige:              { value: false, lock: false },
+      show_einstellungen_button:       { value: true,  lock: true },
     },
   };
 

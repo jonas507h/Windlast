@@ -30,8 +30,8 @@
     return Array.isArray(roles) ? roles.includes(role) : role === roles;
   };
 
-  function show(el)  { el.style.removeProperty("display"); }
-  function hide(el)  { el.style.setProperty("display", "none"); }
+  function hide(el)  { el.hidden = true; }
+  function show(el)  { el.hidden = false; }
 
   /** UI.showIfFlag(selector, flagKey) / hideIfFlag(...) */
   function showIfFlag(selector, flagKey) {
