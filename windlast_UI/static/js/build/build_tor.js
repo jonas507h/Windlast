@@ -260,6 +260,7 @@ export function buildTor(inputs, catalog) {
     anzahl_steher: A_S,
     traverse_name_intern: traverse_name_intern,
     traversen_orientierung: orientierung,
+    bodenplatte_name_intern: bodenplatte_name_intern,
     bauelemente: bauelemente,
   };
 

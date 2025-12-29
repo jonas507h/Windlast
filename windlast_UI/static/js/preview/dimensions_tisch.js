@@ -9,6 +9,7 @@ const fmtDE = (x) => x.toLocaleString('de-DE', { minimumFractionDigits: 2, maxim
 const eff_offset = 0.2; // Versatz der Maßlinie von der Konstruktion in m
 let real_offset_a = eff_offset;
 let real_offset_b = eff_offset;
+let bp_offset = eff_offset;
 
 export function computeDimensionsTisch(konstruktion){
   const specs=[];
@@ -17,11 +18,13 @@ export function computeDimensionsTisch(konstruktion){
   const T = konstruktion.tiefe_m;
   const H_F = konstruktion.hoehe_flaeche_m;
   const traverse_name_intern = konstruktion.traverse_name_intern;
+  const bodenplatte_name_intern = konstruktion.bodenplatte_name_intern;
   const els = konstruktion.bauelemente||[];
 
   const travSpec = window?.Catalog?.getTraverse?.(traverse_name_intern);
   const is3punkt = Number(travSpec.anzahl_gurtrohre) === 3;
-
+  const bpSpec = window?.Catalog?.getBodenplatte?.(bodenplatte_name_intern);
+ 
   let label_breite;
   let label_hoehe;
   let label_tiefe;
@@ -59,6 +62,7 @@ export function computeDimensionsTisch(konstruktion){
     real_offset_a = eff_offset + (Number(travSpec.A_hoehe ?? travSpec.hoehe) / 2);
     real_offset_b = eff_offset + (Number(travSpec.B_hoehe ?? travSpec.hoehe) / 2);
   }
+  bp_offset = eff_offset + (Number(bpSpec.breite ?? bpSpec.tiefe ?? bpSpec.kantenlaenge) / 2);
 
   if (B != null && isFinite(B)) {
     // Breite entlang der oberen Traverse, Maßlinie leicht darüber (Z-up: +Z)
@@ -75,7 +79,7 @@ export function computeDimensionsTisch(konstruktion){
     // Linke Stütze steht bei x≈0 → quer nach -X raus bemaßen
     specs.push({
       kind:'linear', param_key:'hoehe_m', label: label_hoehe,
-      anchors:{ a, b, dir:[-1,0,0], offset: eff_offset, textSize:0.28 }
+      anchors:{ a, b, dir:[-1,0,0], offset: bp_offset, textSize:0.28 }
     });
   }
 

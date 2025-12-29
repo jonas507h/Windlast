@@ -8,6 +8,7 @@ const fmtDE = (x) => x.toLocaleString('de-DE', { minimumFractionDigits: 2, maxim
 
 const eff_offset = 0.2; // Versatz der Maßlinie von der Konstruktion in m
 let real_offset = eff_offset;
+let bp_offset = eff_offset;
 let flaeche_offset = 0;
 
 export function computeDimensionsTor(konstruktion){
@@ -17,10 +18,12 @@ export function computeDimensionsTor(konstruktion){
   const H_F = konstruktion.hoehe_flaeche_m;
   const traverse_name_intern = konstruktion.traverse_name_intern;
   const orientierung = konstruktion.traversen_orientierung;
+  const bodenplatte_name_intern = konstruktion.bodenplatte_name_intern;
   const els = konstruktion.bauelemente||[];
 
   const travSpec = window?.Catalog?.getTraverse?.(traverse_name_intern);
   const is3punkt = Number(travSpec.anzahl_gurtrohre) === 3;
+  const bpSpec = window?.Catalog?.getBodenplatte?.(bodenplatte_name_intern);
 
   let label_breite;
   let label_hoehe;
@@ -54,6 +57,7 @@ export function computeDimensionsTor(konstruktion){
         real_offset = eff_offset + (Number(travSpec.B_hoehe ?? travSpec.A_hoehe ?? travSpec.hoehe) / 2);
         flaeche_offset = Number(travSpec.A_hoehe ?? travSpec.B_hoehe ?? travSpec.hoehe) / 2;
       }
+      bp_offset = Math.max(real_offset, eff_offset + (Number(bpSpec.breite ?? bpSpec.kantenlaenge) / 2));
       break;
     case 'up':
       if (is3punkt) {
@@ -63,6 +67,7 @@ export function computeDimensionsTor(konstruktion){
         real_offset = eff_offset + (Number(travSpec.A_hoehe ?? travSpec.B_hoehe ?? travSpec.hoehe) / 2);
         flaeche_offset = Number(travSpec.A_hoehe ?? travSpec.B_hoehe ?? travSpec.hoehe) / 2;
       }
+      bp_offset = Math.max(real_offset, eff_offset + (Number(bpSpec.tiefe ?? bpSpec.kantenlaenge) / 2));
       break;
     case 'down':
       if (is3punkt) {
@@ -72,9 +77,11 @@ export function computeDimensionsTor(konstruktion){
         real_offset = eff_offset + (Number(travSpec.A_hoehe ?? travSpec.B_hoehe ?? travSpec.hoehe) / 2);
         flaeche_offset = Number(travSpec.A_hoehe ?? travSpec.B_hoehe ?? travSpec.hoehe) / 2;
       }
+      bp_offset = Math.max(real_offset, eff_offset + (Number(bpSpec.tiefe ?? bpSpec.kantenlaenge) / 2));
       break;
     default:
       real_offset = eff_offset + (Number(travSpec.A_hoehe ?? travSpec.B_hoehe ?? travSpec.hoehe));
+      bp_offset = Math.max(real_offset, eff_offset + (Number(bpSpec.breite ?? bpSpec.tiefe ?? bpSpec.kantenlaenge)));
       flaeche_offset = Number(travSpec.A_hoehe ?? travSpec.B_hoehe ?? travSpec.hoehe) / 2;
       break;
   }
@@ -91,10 +98,9 @@ export function computeDimensionsTor(konstruktion){
   if (H != null && isFinite(H)) {
     // Höhe entlang der linken Stütze, Maßlinie leicht links daneben
     const a = [0, 0, 0]; const b = [0, 0, H];
-    // Linke Stütze steht bei x≈0 → quer nach -X raus bemaßen
     specs.push({
       kind:'linear', param_key:'hoehe_m', label: label_hoehe,
-      anchors:{ a, b, dir:[-1,0,0], offset: eff_offset, textSize:0.28 }
+      anchors:{ a, b, dir:[-1,0,0], offset: bp_offset, textSize:0.28 }
     });
   }
 

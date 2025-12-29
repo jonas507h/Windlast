@@ -253,6 +253,7 @@ export function buildTisch(inputs, catalog) {
     tiefe_m: T,
     hoehe_flaeche_m: H_F,
     traverse_name_intern: traverse_name_intern,
+    bodenplatte_name_intern: bodenplatte_name_intern,
     bauelemente: bauelemente,
   };
 
