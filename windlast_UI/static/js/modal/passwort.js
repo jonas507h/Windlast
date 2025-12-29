@@ -71,3 +71,6 @@ export function askAdminPassword() {
     });
   });
 }
+
+// zusätzlich global anbieten (für config.js / APP_STATE.requestAdmin)
+window.askAdminPassword = askAdminPassword;

@@ -8,8 +8,10 @@
     "Windlast UI — Quick Help:",
     `• Build-Rolle:              ${window.APP_STATE?.buildRole}`,
     "• Aktuelle Rolle:           APP_STATE.role",
-    "• Aktuelle Flags:           APP_STATE.flags",
     "• Rolle setzen:             APP_STATE.setRole('debug')   // 'user' | 'debug' | 'admin'",
+    "• Aktuelle Flags:           APP_STATE.flags",
+    "• Flag setzen:              APP_STATE.setFlag('show_nullpunkt', true)",
+    "• Flag togglen:             APP_STATE.toggleFlag('show_nullpunkt')",
   ];
   if (typeof console !== "undefined") {
     console.log(lines.join("\n"));
@@ -80,8 +82,11 @@
     });
   }
 
-  /** Auf Rollenwechsel reagieren (alles neu anwenden) */
+  /** Auf Rollenwechsel & Flags-Änderungen reagieren (alles neu anwenden) */
   APP_STATE.onRoleChanged(() => {
+    applyAttributeVisibility();
+  });
+  document.addEventListener("ui:flags-changed", () => {
     applyAttributeVisibility();
   });
 

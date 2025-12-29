@@ -222,6 +222,22 @@ label.required::after {
 
 .warn-text[hidden] { display: none; }
 
+
+/* invalid / warn + Fokus */
+.field.is-invalid input:focus-visible,
+.field.is-warn input:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+
+  /* Kombinierter Shadow:
+     1. gelb (nah am Feld)
+     2. Fokus-Ring (weiter außen)
+  */
+  box-shadow:
+    0 0 0 2px var(--warn),
+    0 0 0 5px var(--focus-ring-soft);
+}
+
 /* ====== Header / Footer / Sonstiges ====== */
 .header-title { display: flex; flex-direction: column; }
 .version-label{

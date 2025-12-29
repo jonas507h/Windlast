@@ -1,0 +1,30 @@
+<label class="field">
+  <span>Nullpunkt anzeigen</span>
+  <input id="cb-nullpunkt" type="checkbox">
+</label>
+
+<script type="module">
+    const cb = document.getElementById("cb-nullpunkt");
+    const key = "show_nullpunkt";
+
+    function syncCheckbox() {
+    cb.checked = APP_STATE.getFlag(key);
+    cb.disabled = APP_STATE.getFlagLock(key); // lock=true => nicht editierbar
+    }
+
+    syncCheckbox();
+
+    // Änderung -> Flag setzen (persistiert pro Rolle)
+    cb.addEventListener("change", () => {
+    try {
+        APP_STATE.setFlag(key, cb.checked);
+    } catch (e) {
+        console.warn(e.message || e);
+        syncCheckbox(); // zurücksyncen, falls gesperrt
+    }
+    });
+
+    // Wenn Rolle/Flags extern wechseln, Checkbox aktuell halten
+    APP_STATE.onRoleChanged(syncCheckbox);
+    document.addEventListener("ui:flags-changed", syncCheckbox);
+</script>
