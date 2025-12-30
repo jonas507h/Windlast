@@ -99,7 +99,7 @@
       <div class="company-logo" aria-label="Firmenlogo"></div>
 
       <div class="header-buttons">
-        <button type="button" tabindex="-1" class="btn" hidden data-requires-flag="show_einstellungen_button" id="btn-open-einstellungen-modal">Einstellungen</button>
+        <button type="button" tabindex="-1" class="btn" onclick="openEinstellungenModal()" hidden data-requires-flag="show_einstellungen_button">Einstellungen</button>
         <button type="button" tabindex="-1" class="btn" onclick="toggleTheme()">Dark / Light</button>
         <button type="button" tabindex="-1" class="btn" onclick="window.HELP && window.HELP.open('app:start')">Hilfe</button>
       </div>
@@ -218,6 +218,7 @@
   <script src="/static/js/warnung.js"></script>
   <script type="module" src="/static/js/modal/passwort.js"></script>
   <script type="module" src="/static/js/modal/help.js"></script>
+  <script type="module" src="/static/js/modal/einstellungen.js"></script>
   <script src="/static/js/wiki_modal.js"></script>
   <!-- Preview -->
   <script type="module" src="/static/js/preview/tor_preview.js"></script>
