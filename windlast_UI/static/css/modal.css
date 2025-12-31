@@ -296,15 +296,8 @@
   box-sizing: border-box;
 }
 
-/* Panels */
-#modal-root .settings-panels {
+#modal-root .settings-content {
   min-width: 0;
-  max-width: 100%;
-}
-
-#modal-root .settings-panels > section {
-  min-width: 0;
-  overflow-x: auto;
 }
 
 /* Footer */
