@@ -2,101 +2,6 @@
 
 import { getFlagLabel } from "../utils/formatierung.js";
 
-function renderFlags(container) {
-  // Header
-  const head = document.createElement("div");
-  head.className = "settings-section-head";
-
-  // const h = document.createElement("h4");
-  // h.className = "settings-section-title";
-  // h.textContent = "Editierbare Flags";
-
-  // const sub = document.createElement("div");
-  // sub.className = "settings-section-hint";
-  // sub.textContent = "Diese Flags können in dieser Rolle angepasst und gespeichert werden.";
-
-  // head.appendChild(h);
-  // head.appendChild(sub);
-
-  const list = document.createElement("div");
-  list.className = "settings-flag-list";
-
-  container.appendChild(head);
-  container.appendChild(list);
-
-  const renderList = () => {
-    list.innerHTML = "";
-
-    const meta = window.APP_STATE?.flagsMeta || {};
-    const entries = Object.entries(meta).filter(([, v]) => v && v.lock === false);
-
-    if (entries.length === 0) {
-      const empty = document.createElement("div");
-      empty.className = "settings-placeholder";
-      empty.textContent = "In dieser Rolle sind keine Flags editierbar.";
-      list.appendChild(empty);
-      return;
-    }
-
-    entries.sort(([a], [b]) => a.localeCompare(b, "de"));
-
-    for (const [key, v] of entries) {
-      const row = document.createElement("label");
-      row.className = "settings-flag-row";
-
-      const cb = document.createElement("input");
-      cb.type = "checkbox";
-      cb.className = "checkbox";
-      cb.checked = !!v.value;
-
-      const left = document.createElement("div");
-      left.className = "settings-flag-left";
-
-      const text = document.createElement("span");
-      text.className = "settings-flag-label";
-      text.textContent = getFlagLabel(key);
-
-      const code = document.createElement("code");
-      code.className = "settings-flag-key";
-      code.textContent = key;
-
-      left.appendChild(text);
-      left.appendChild(code);
-
-      row.appendChild(cb);
-      row.appendChild(left);
-
-      cb.addEventListener("change", () => {
-        try {
-          window.APP_STATE.setFlag(key, cb.checked);
-        } catch (e) {
-          console.warn(e?.message || e);
-          // rollback
-          cb.checked = !!(window.APP_STATE?.getFlag ? window.APP_STATE.getFlag(key) : v.value);
-        }
-      });
-
-      list.appendChild(row);
-    }
-  };
-
-  // Listener merken, damit wir sie beim Tabwechsel entfernen können
-  const onFlagsChanged = () => renderList();
-  const onRoleChanged = () => renderList();
-
-  document.addEventListener("ui:flags-changed", onFlagsChanged);
-  window.APP_STATE?.onRoleChanged?.(onRoleChanged);
-
-  renderList();
-
-  // destroy() zurückgeben
-  return () => {
-    document.removeEventListener("ui:flags-changed", onFlagsChanged);
-    // onRoleChanged ist bei dir vermutlich ein Event-Wrapper → wenn du keinen "unsubscribe" hast,
-    // dann lassen wir den Listener weg und verlassen uns auf ui:role-changed:
-  };
-}
-
 function renderBerechnung(container) {
   // Hinweis "nicht implementiert"
   const info = document.createElement("div");
@@ -226,19 +131,128 @@ function renderBerechnung(container) {
   return () => {};
 }
 
-function renderAnzeige(container) {
+function renderFlags(container) {
+  // Header
   const head = document.createElement("div");
   head.className = "settings-section-head";
 
+  // const h = document.createElement("h4");
+  // h.className = "settings-section-title";
+  // h.textContent = "Editierbare Flags";
+
+  // const sub = document.createElement("div");
+  // sub.className = "settings-section-hint";
+  // sub.textContent = "Diese Flags können in dieser Rolle angepasst und gespeichert werden.";
+
+  // head.appendChild(h);
+  // head.appendChild(sub);
+
+  const list = document.createElement("div");
+  list.className = "settings-check-list";
+
+  container.appendChild(head);
+  container.appendChild(list);
+
+  const renderList = () => {
+    list.innerHTML = "";
+
+    const meta = window.APP_STATE?.flagsMeta || {};
+    const entries = Object.entries(meta).filter(([, v]) => v && v.lock === false);
+
+    if (entries.length === 0) {
+      const empty = document.createElement("div");
+      empty.className = "settings-placeholder";
+      empty.textContent = "In dieser Rolle sind keine Flags editierbar.";
+      list.appendChild(empty);
+      return;
+    }
+
+    entries.sort(([a], [b]) => a.localeCompare(b, "de"));
+
+    for (const [key, v] of entries) {
+      const row = document.createElement("label");
+      row.className = "settings-check-row";
+
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.checked = !!v.value;
+      cb.className = "checkbox"; // falls du opt-in Styling nutzt, sonst weglassen
+
+      const right = document.createElement("div");
+      right.className = "settings-check-right";
+
+      const text = document.createElement("span");
+      text.className = "settings-check-label";
+      text.textContent = getFlagLabel(key); // dein import aus formatierung.js
+
+      const code = document.createElement("code");
+      code.className = "settings-check-sub";
+      code.textContent = key;
+
+      right.appendChild(text);
+      right.appendChild(code);
+
+      row.appendChild(cb);
+      row.appendChild(right);
+
+      cb.addEventListener("change", () => {
+        try {
+          window.APP_STATE.setFlag(key, cb.checked);
+        } catch (e) {
+          console.warn(e?.message || e);
+          // rollback
+          try { cb.checked = !!window.APP_STATE.getFlag(key); } catch {}
+        }
+      });
+
+      list.appendChild(row);
+    }
+  };
+
+  // Listener merken, damit wir sie beim Tabwechsel entfernen können
+  const onFlagsChanged = () => renderList();
+  const onRoleChanged = () => renderList();
+
+  document.addEventListener("ui:flags-changed", onFlagsChanged);
+  window.APP_STATE?.onRoleChanged?.(onRoleChanged);
+
+  renderList();
+
+  // destroy() zurückgeben
+  return () => {
+    document.removeEventListener("ui:flags-changed", onFlagsChanged);
+    // onRoleChanged ist bei dir vermutlich ein Event-Wrapper → wenn du keinen "unsubscribe" hast,
+    // dann lassen wir den Listener weg und verlassen uns auf ui:role-changed:
+  };
+}
+
+function renderAnzeige(container) {
+  const card = document.createElement("div");
+  card.className = "panel";
+
+  const head = document.createElement("div");
+  head.className = "settings-section-head";
+
+  const h = document.createElement("h4");
+  h.className = "settings-section-title";
+  h.textContent = "Anzeige";
+
+  head.appendChild(h);
+  card.appendChild(head);
+
+  // Wie "Anzahl Windrichtungen"
   const row = document.createElement("div");
-  row.className = "settings-row";
+  row.className = "row row-1";
+
+  const field = document.createElement("div");
+  field.className = "field";
 
   const label = document.createElement("label");
-  label.className = "settings-label";
+  label.setAttribute("for", "settings-theme-select");
   label.textContent = "Theme";
 
   const select = document.createElement("select");
-  select.className = "settings-select";
+  select.id = "settings-theme-select";
   select.innerHTML = `
     <option value="dark">Dark</option>
     <option value="light">Light</option>
@@ -256,18 +270,18 @@ function renderAnzeige(container) {
 
   select.addEventListener("change", () => {
     const v = select.value;
-    if (v === "dark" || v === "light") {
-      window.__setTheme?.(v); // nutzt deinen bestehenden Setter :contentReference[oaicite:1]{index=1}
-    }
+    if (v === "dark" || v === "light") window.__setTheme?.(v);
   });
 
-  row.appendChild(label);
-  row.appendChild(select);
+  field.appendChild(label);
+  field.appendChild(select);
 
-  container.appendChild(head);
-  container.appendChild(row);
+  row.appendChild(field);
+  card.appendChild(row);
 
-  // optional: wenn Theme von außen geändert wird (z.B. header toggle), Dropdown synchron halten
+  container.appendChild(card);
+
+  // optional sync bei externem Theme-Change
   const onMsg = (e) => {
     const d = e?.data;
     if (!d || d.type !== "theme") return;
