@@ -98,10 +98,131 @@ function renderFlags(container) {
 }
 
 function renderBerechnung(container) {
-  const ph = document.createElement("div");
-  ph.className = "settings-placeholder";
-  ph.textContent = "Inhalt folgt…";
-  container.appendChild(ph);
+  // Hinweis "nicht implementiert"
+  const info = document.createElement("div");
+  info.className = "tt-line info";
+  info.textContent = "Hinweis: Diese Einstellungen sind noch nicht implementiert.";
+  container.appendChild(info);
+
+  // Abschnitt 1: Basis
+  const cardBase = document.createElement("div");
+  cardBase.className = "panel";
+
+  const head1 = document.createElement("div");
+  head1.className = "settings-section-head";
+
+  const h1 = document.createElement("h4");
+  h1.className = "settings-section-title";
+  h1.textContent = "Basis";
+
+  head1.appendChild(h1);
+  cardBase.appendChild(head1);
+
+  const row1 = document.createElement("div");
+  row1.className = "row row-1";
+
+  const fWind = document.createElement("div");
+  fWind.className = "field";
+
+  const lWind = document.createElement("label");
+  lWind.setAttribute("for", "settings-windrichtungen-count");
+  lWind.textContent = "Anzahl Windrichtungen";
+
+  const iWind = document.createElement("input");
+  iWind.id = "settings-windrichtungen-count";
+  iWind.type = "number";
+  iWind.min = "1";
+  iWind.step = "1";
+  iWind.placeholder = "z. B. 12";
+
+  fWind.appendChild(lWind);
+  fWind.appendChild(iWind);
+
+  row1.appendChild(fWind);
+  cardBase.appendChild(row1);
+
+  // Abschnitt 2: Vereinfachen
+  const cardSimplify = document.createElement("div");
+  cardSimplify.className = "panel";
+
+  const head2 = document.createElement("div");
+  head2.className = "settings-section-head";
+
+  const h2 = document.createElement("h4");
+  h2.className = "settings-section-title";
+  h2.textContent = "Berechnung vereinfachen";
+
+  head2.appendChild(h2);
+  cardSimplify.appendChild(head2);
+
+  const simplifyList = document.createElement("div");
+  simplifyList.className = "settings-check-list";
+
+  const mkCheck = (id, text) => {
+    const row = document.createElement("label");
+    row.className = "settings-check-row";
+
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.className = "checkbox";
+    cb.id = id;
+
+    const span = document.createElement("span");
+    span.className = "settings-check-label";
+    span.textContent = text;
+
+    row.appendChild(cb);
+    row.appendChild(span);
+    return row;
+  };
+
+  simplifyList.appendChild(
+    mkCheck(
+      "settings-reduce-by-symmetry",
+      "Windrichtungen durch Symmetrie der Konstruktion reduzieren"
+    )
+  );
+
+  simplifyList.appendChild(
+    mkCheck(
+      "settings-calc-identical-once",
+      "Gleiche Bauteile nur einmal berechnen"
+    )
+  );
+
+  cardSimplify.appendChild(simplifyList);
+
+  // Abschnitt 3: Protokoll
+  const cardLog = document.createElement("div");
+  cardLog.className = "panel";
+
+  const head3 = document.createElement("div");
+  head3.className = "settings-section-head";
+
+  const h3 = document.createElement("h4");
+  h3.className = "settings-section-title";
+  h3.textContent = "Protokoll";
+
+  head3.appendChild(h3);
+  cardLog.appendChild(head3);
+
+  const logList = document.createElement("div");
+  logList.className = "settings-check-list";
+
+  logList.appendChild(
+    mkCheck(
+      "settings-log-all-intermediate",
+      "Alle Zwischenergebnisse protokollieren"
+    )
+  );
+
+  cardLog.appendChild(logList);
+
+  // Compose in Container
+  container.appendChild(cardBase);
+  container.appendChild(cardSimplify);
+  container.appendChild(cardLog);
+
   return () => {};
 }
 

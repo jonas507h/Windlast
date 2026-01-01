@@ -373,3 +373,27 @@
 #modal-root .settings-select {
   width: 100%;
 }
+
+/* Settings: generische Checkbox-Liste (für Berechnung / später mehr) */
+#modal-root .settings-check-list {
+  display: grid;
+  gap: 8px;
+}
+
+/* Eine Checkbox-Zeile: möglichst neutral */
+#modal-root .settings-check-row {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 10px;
+  align-items: start;
+
+  padding: 10px 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel);
+}
+
+#modal-root .settings-check-label {
+  color: var(--text);
+  font-weight: 600;
+}
