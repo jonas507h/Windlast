@@ -105,6 +105,59 @@ function renderBerechnung(container) {
   return () => {};
 }
 
+function renderAnzeige(container) {
+  const head = document.createElement("div");
+  head.className = "settings-section-head";
+
+  const row = document.createElement("div");
+  row.className = "settings-row";
+
+  const label = document.createElement("label");
+  label.className = "settings-label";
+  label.textContent = "Theme";
+
+  const select = document.createElement("select");
+  select.className = "settings-select";
+  select.innerHTML = `
+    <option value="dark">Dark</option>
+    <option value="light">Light</option>
+  `;
+
+  // initialer Wert: localStorage('theme') oder data-theme
+  const stored = localStorage.getItem("theme");
+  const currentAttr = document.documentElement.getAttribute("data-theme");
+  const initial =
+    (stored === "dark" || stored === "light") ? stored :
+    (currentAttr === "dark" || currentAttr === "light") ? currentAttr :
+    "light";
+
+  select.value = initial;
+
+  select.addEventListener("change", () => {
+    const v = select.value;
+    if (v === "dark" || v === "light") {
+      window.__setTheme?.(v); // nutzt deinen bestehenden Setter :contentReference[oaicite:1]{index=1}
+    }
+  });
+
+  row.appendChild(label);
+  row.appendChild(select);
+
+  container.appendChild(head);
+  container.appendChild(row);
+
+  // optional: wenn Theme von außen geändert wird (z.B. header toggle), Dropdown synchron halten
+  const onMsg = (e) => {
+    const d = e?.data;
+    if (!d || d.type !== "theme") return;
+    const v = d.value;
+    if (v === "dark" || v === "light") select.value = v;
+  };
+  window.addEventListener("message", onMsg);
+
+  return () => window.removeEventListener("message", onMsg);
+}
+
 export function openEinstellungenModal({ initialTab = "berechnung" } = {}) {
   const wrap = document.createElement("div");
   wrap.className = "settings-modal";
@@ -120,6 +173,7 @@ export function openEinstellungenModal({ initialTab = "berechnung" } = {}) {
   const tabDefs = [
     { id: "berechnung", label: "Berechnung" },
     { id: "flags", label: "Flags" },
+    { id: "anzeige", label: "Anzeige" },
   ];
 
   tabDefs.forEach(({ id, label }) => {
@@ -156,6 +210,7 @@ export function openEinstellungenModal({ initialTab = "berechnung" } = {}) {
   const tabRenderers = {
     berechnung: renderBerechnung,
     flags: renderFlags,
+    anzeige: renderAnzeige,
   };
 
   let activeTab = null;

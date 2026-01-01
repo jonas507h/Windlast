@@ -357,3 +357,19 @@
   color: var(--muted);
   font-size: 0.85rem;
 }
+
+#modal-root .settings-row {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+#modal-root .settings-label {
+  color: var(--text);
+  font-weight: 600;
+}
+
+#modal-root .settings-select {
+  width: 100%;
+}
