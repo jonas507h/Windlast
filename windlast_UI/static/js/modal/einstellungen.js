@@ -1,26 +1,22 @@
 // modal/einstellungen.js
 
-function labelFromKey(key) {
-  return key
-    .replaceAll("_", " ")
-    .replace(/\b\w/g, (m) => m.toUpperCase());
-}
+import { getFlagLabel } from "../utils/formatierung.js";
 
 function renderFlags(container) {
   // Header
   const head = document.createElement("div");
   head.className = "settings-section-head";
 
-  const h = document.createElement("h4");
-  h.className = "settings-section-title";
-  h.textContent = "Editierbare Flags";
+  // const h = document.createElement("h4");
+  // h.className = "settings-section-title";
+  // h.textContent = "Editierbare Flags";
 
-  const sub = document.createElement("div");
-  sub.className = "settings-section-hint";
-  sub.textContent = "Diese Flags können in dieser Rolle angepasst und gespeichert werden.";
+  // const sub = document.createElement("div");
+  // sub.className = "settings-section-hint";
+  // sub.textContent = "Diese Flags können in dieser Rolle angepasst und gespeichert werden.";
 
-  head.appendChild(h);
-  head.appendChild(sub);
+  // head.appendChild(h);
+  // head.appendChild(sub);
 
   const list = document.createElement("div");
   list.className = "settings-flag-list";
@@ -50,6 +46,7 @@ function renderFlags(container) {
 
       const cb = document.createElement("input");
       cb.type = "checkbox";
+      cb.className = "checkbox";
       cb.checked = !!v.value;
 
       const left = document.createElement("div");
@@ -57,7 +54,7 @@ function renderFlags(container) {
 
       const text = document.createElement("span");
       text.className = "settings-flag-label";
-      text.textContent = labelFromKey(key);
+      text.textContent = getFlagLabel(key);
 
       const code = document.createElement("code");
       code.className = "settings-flag-key";

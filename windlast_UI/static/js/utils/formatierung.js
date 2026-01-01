@@ -6,6 +6,19 @@
 // ------------------------------------
 export const DISPLAY_EPS = 1e-9;
 
+const FLAG_LABELS = {
+  show_zwischenergebnisse_tooltip: "Debug-Tooltip für Zwischenergebnisse anzeigen",
+  show_nichtZertifiziert_warnung: '"Berechnung nicht zertifiziert"-Warnung anzeigen',
+  show_doppelte_meldungen: "Doppelte Meldungen anzeigen",
+  show_meldungen_tooltip: "Debug-Tooltips für Meldungen anzeigen",
+  show_real_kontext_keys: "Interne Kontext-Schlüssel anzeigen",
+  show_nullpunkt: "Nullpunkt anzeigen",
+  show_suche_tooltip: "Debug-Tooltip für Suche anzeigen",
+  show_test_options_dropdown: "Test-Optionen in den Dropdowns anzeigen",
+  use_eps_on_anzeige: "Kleine Werte als Null anzeigen",
+  show_einstellungen_button: "Einstellungen-Button anzeigen",
+};
+
 export const ALT_LABELS = {
   IN_BETRIEB: "mit Schutzmaßnahmen",
   VERSTAERKEND: "mit verstärkenden Sicherungsmaßnahmen",
@@ -92,6 +105,16 @@ function useDisplayEps() {
   } catch {
     return false;
   }
+}
+
+export function getFlagLabel(flagKey) {
+  if (FLAG_LABELS[flagKey]) return FLAG_LABELS[flagKey];
+
+  // Fallback: show_nullpunkt -> Show Nullpunkt
+  return flagKey
+    .replace(/^show_/, "")
+    .replaceAll("_", " ")
+    .replace(/\b\w/g, (m) => m.toUpperCase());
 }
 
 export function displayAltName(name) {

@@ -46,6 +46,63 @@ input[type="number"], select, input[type="text"], input[type="password"]{
 }
 .btn:hover{ filter: brightness(0.95); }
 
+/* ====== Checkboxen ====== */
+
+input[type="checkbox"].checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+
+  width: 16px;
+  height: 16px;
+  margin: 0;
+
+  border-radius: 4px;
+  border: 1px solid var(--checkbox-border);
+  background: var(--checkbox-bg);
+
+  display: inline-grid;
+  place-content: center;
+
+  cursor: pointer;
+}
+
+/* Checkmark */
+input[type="checkbox"].checkbox::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+
+  transform: scale(0);
+  transition: transform 120ms ease-in-out;
+
+  background: var(--checkbox-check);
+  border-radius: 2px;
+}
+
+/* Checked */
+input[type="checkbox"].checkbox:checked::before {
+  transform: scale(1);
+}
+
+/* Focus */
+input[type="checkbox"].checkbox:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Disabled */
+input[type="checkbox"].checkbox:disabled {
+  cursor: not-allowed;
+  background: var(--checkbox-disabled-bg);
+  border-color: var(--checkbox-disabled-border);
+  opacity: 0.7;
+}
+
+/* Disabled + checked */
+input[type="checkbox"].checkbox:disabled::before {
+  background: var(--checkbox-disabled-border);
+}
+
 /* ====== Focus Styles (global) ====== */
 :where(a, button, input, select, textarea, [tabindex]):focus {
   outline: none; /* Browser-Outline weg */
