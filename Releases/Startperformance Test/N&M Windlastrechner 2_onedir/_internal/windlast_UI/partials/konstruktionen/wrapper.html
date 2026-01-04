@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <title>Konstruktionen · Wrapper</title>
+  <link rel="stylesheet" href="../../static/css/style.css">
+  <script src="../../static/js/theme.js"></script>
+</head>
+<body>
+  <section class="wrap">
+    <h2 style="margin:0 0 8px;">Konstruktionen</h2>
+
+    <nav class="tabs">
+      <button type="button" class="tab" data-view="tor" aria-current="page"
+              onclick="switch_konstruktion('tor')">Tor</button>
+      <button type="button" class="tab" data-view="steher"
+              onclick="switch_konstruktion('steher')">Steher</button>
+      <button type="button" class="tab" data-view="tisch"
+              onclick="switch_konstruktion('tisch')">Tisch</button>
+    </nav>
+
+    <iframe id="konstruktions_iframe" src="./tor.html" title="Konstruktion" data-theme-sync></iframe>
+  </section>
+
+  <script src="../../static/js/konstruktionen/wrapper.js"></script>
+</body>
+</html>

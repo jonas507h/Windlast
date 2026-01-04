@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <title>Header</title>
+  <link rel="stylesheet" href="../static/css/style.css">
+  <script src="../static/js/theme.js"></script>
+  <script>
+    function toggleTheme(){
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      window.__setTheme(isDark ? 'light' : 'dark');
+    }
+  </script>
+</head>
+<body class="wrap">
+  <header class="panel header-bar">
+    <!-- Linke Seite: Titel -->
+    <h1 style="margin:0;">Windlastrechner 2.0</h1>
+
+    <!-- Mitte: neue Eingaben -->
+    <form id="header-form" class="header-controls" onsubmit="return false;">
+      <!-- Aufstelldauer -->
+      <label for="aufstelldauer_wert">Aufstelldauer</label>
+      <input id="aufstelldauer_wert" name="aufstelldauer_wert"
+             type="number" min="0" step="1" placeholder="z. B. 30" />
+      <select id="aufstelldauer_einheit"></select>
+
+      <!-- Windzone -->
+      <label for="windzone">Windzone</label>
+      <select id="windzone"></select>
+    </form>
+
+    <!-- Rechte Seite: Theme -->
+    <div class="actions" style="margin:0;">
+      <button type="button" class="btn" onclick="toggleTheme()">Dark / Light</button>
+    </div>
+  </header>
+
+  <script src="/static/js/header.js"></script>
+</body>
+</html>

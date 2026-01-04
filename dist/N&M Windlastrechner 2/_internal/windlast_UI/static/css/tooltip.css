@@ -1,0 +1,78 @@
+/* Root-Container: ein einziges, globales Element */
+#tt-root {
+  position: fixed;
+  left: 0; top: 0;
+  z-index: 2147483647;
+  pointer-events: none;
+  display: none;
+  transform: translate3d(0,0,0);
+}
+
+#tt-root .tt-bubble {
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 12px;
+  line-height: 1.25;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  max-width: 360px;
+  white-space: pre; /* respektiert \n und verhindert Auto-Wrap */
+}
+
+/* Optional: kleine Lade-Optik für async Inhalte */
+#tt-root .tt-loading::after {
+  content: " …";
+  opacity: .6;
+}
+
+/* Modifier-Klassen, die du per Options setzen kannst */
+#tt-root.is-visible { display: block; }
+#tt-root.tt-error  .tt-bubble { border-color: var(--badge-error-border); }
+#tt-root.tt-warn   .tt-bubble { border-color: var(--badge-warn-border); }
+#tt-root.tt-hint   .tt-bubble { border-color: var(--badge-hint-border); }
+#tt-root.tt-info   .tt-bubble { border-color: var(--badge-info-border); }
+
+/* ===== Meldungstypen innerhalb des Tooltips ===== */
+#tt-root .tt-line {
+  margin: 2px 0;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+/* Fehler */
+#tt-root .tt-line.error {
+  background-color: var(--msg-error-bg);
+  color: var(--msg-error-fg);
+  font-weight: 600;
+}
+
+/* Warnung */
+#tt-root .tt-line.warn {
+  background-color: var(--msg-warn-bg);
+  color: var(--msg-warn-fg);
+  font-weight: 600;
+}
+
+/* Hinweis */
+#tt-root .tt-line.hint {
+  background-color: var(--msg-hint-bg);
+  color: var(--msg-hint-fg);
+}
+
+/* Info */
+#tt-root .tt-line.info {
+  background-color: var(--msg-info-bg);
+  color: var(--msg-info-fg);
+}
+
+/* Divider zwischen Formel/Quelle und Kontext im Tooltip */
+.ctx-tooltip .tt-divider,
+#modal-root .ctx-tooltip .tt-divider {
+  height: 1px;
+  width: 100%;
+  background: var(--border);
+  margin: 4px 0;
+  display: block;
+}

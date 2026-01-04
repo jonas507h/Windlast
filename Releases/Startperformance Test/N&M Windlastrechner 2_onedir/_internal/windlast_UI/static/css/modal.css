@@ -1,0 +1,377 @@
+/* ===== MODAL GRUNDLAYOUT ===== */
+.modal-root {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: none;
+  place-items: center;
+}
+.modal-root.is-open { display: grid; }
+.modal-open { overflow: hidden; }
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+}
+
+.modal-dialog {
+  position: relative;
+  max-width: min(720px, 90vw);
+  max-height: min(80vh, 1000px);
+  overflow: hidden; /* Scrollbar bleibt innerhalb der Rundung */
+  background: var(--panel);
+  color: var(--text);
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+  padding: 20px 24px 24px;
+}
+
+.modal-close {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-size: 22px;
+  line-height: 1;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
+  outline: none;
+}
+.modal-close:focus,
+.modal-close:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+.modal-close::-moz-focus-inner { border: 0; }
+
+.modal-content {
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 1.5;
+  max-height: 70vh;
+  overflow-y: auto;
+  border-radius: inherit;
+  padding-right: 12px;
+  box-sizing: border-box;
+}
+
+/* ===== Meldungszeilen im MODAL (gleiche Optik wie Tooltip) ===== */
+#modal-root .tt-line {
+  margin: 2px 0;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+/* Fehler */
+#modal-root .tt-line.error {
+  background-color: var(--msg-error-bg);
+  color: var(--msg-error-fg);
+  font-weight: 600;
+}
+
+/* Warnung */
+#modal-root .tt-line.warn {
+  background-color: var(--msg-warn-bg);
+  color: var(--msg-warn-fg);
+  font-weight: 600;
+}
+
+/* Hinweis */
+#modal-root .tt-line.hint {
+  background-color: var(--msg-hint-bg);
+  color: var(--msg-hint-fg);
+}
+
+/* Info */
+#modal-root .tt-line.info {
+  background-color: var(--msg-info-bg);
+  color: var(--msg-info-fg);
+}
+
+/* ===========================================
+   ZWISCHENERGEBNIS-MODAL – KOMPAKTE VERSION
+   =========================================== */
+
+/* Card-Wrapper je Ebene */
+#modal-root .group-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel);
+  overflow: hidden;
+  margin: 6px 4px;        /* mehr vertikaler Abstand + ein Tick horizontal */
+}
+
+/* erste Ebene darf ruhig ein bisschen "luftiger" sein */
+#modal-root .doc-groups > .group-card {
+  margin: 8px 0;
+}
+
+/* verschachtelte Cards leicht eingerückt,
+   damit sich die Rahmen nicht direkt berühren */
+#modal-root .group-card .group-card {
+  margin: 6px 8px;
+}
+
+/* leichte optische Unterschiede je Ebene (optional) */
+#modal-root .axis-card { border-radius: 8px; }
+#modal-root .elem-card { border-style: solid; }
+#modal-root .axis-card { border-style: solid; }
+
+/* Details selbst ohne eigenen Border/Hintergrund */
+#modal-root .dir-group,
+#modal-root .elem-group,
+#modal-root .axis-group {
+  border: none;
+  background: transparent;
+  border-radius: 0;
+}
+
+/* Zähler (z. B. (13)) – Standard im Modal */
+#modal-root .muted {
+  font-size: .9em;
+  margin-left: .4rem;
+  color: var(--muted);
+}
+
+/* Unterelemente in der Card leicht eingerückt (historische Klassen) */
+#modal-root .dir-card   .elem-groups   { padding: 4px 14px 4px 14px; }
+#modal-root .elem-card  .axis-groups   { padding: 4px 12px 4px 12px; }
+#modal-root .axis-card  .doc-list      { padding: 4px 12px 4px 12px; }
+
+/* === Listeneinträge innerhalb der Achsen === */
+#modal-root .doc-list {
+  list-style: none;
+  margin: 4px 0 8px 0;
+  padding: 0;
+}
+
+#modal-root .doc-list .doc-li {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: baseline;
+  column-gap: .4rem;
+  padding: 2px 4px;
+  line-height: 1.3;
+  position: relative;
+  border-radius: 4px;
+  margin-bottom: 1px;
+}
+
+/* 1. Kind = Label, 2. Kind = "=", 3. Kind = Wert */
+#modal-root .doc-list .doc-li > :nth-child(1) { justify-self: start; white-space: nowrap; }
+#modal-root .doc-list .doc-li > :nth-child(2) { justify-self: start; opacity: .85; white-space: nowrap; }
+#modal-root .doc-list .doc-li > :nth-child(3) { justify-self: end;   white-space: nowrap; }
+
+/* ===== Nachweis-Filter / Chips ===== */
+#modal-root .nachweis-filter {
+  display: flex;
+  gap: .5rem;
+  margin: .5rem 0 .75rem;
+}
+
+#modal-root .nachweis-filter .nf-chip {
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: .25rem .6rem;
+  font-size: .9rem;
+  line-height: 1;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+}
+
+#modal-root .nachweis-filter .nf-chip:hover {
+  filter: brightness(0.97);
+}
+
+#modal-root .nachweis-filter .nf-chip:focus-visible {
+  box-shadow: 0 0 0 2px var(--tab-active-border);
+}
+
+#modal-root .nachweis-filter .nf-chip.active {
+  background: var(--tab-bg);
+  border-color: var(--tab-active-border);
+  color: var(--text);
+}
+
+/* Badge im Chip */
+#modal-root .nachweis-filter .nf-chip .muted {
+  color: var(--muted);
+}
+
+/* ===== Rollen-Highlighting für Zwischenergebnisse ===== */
+#modal-root .doc-list .doc-li.role-key {
+  background-color: var(--role-key-bg);
+  color: var(--role-key-fg);
+}
+#modal-root .doc-list .doc-li.role-rel {
+  background-color: var(--role-rel-bg);
+  color: var(--role-rel-fg);
+}
+#modal-root .doc-list .doc-li.role-irr {
+  background-color: var(--role-irr-bg);
+  color: var(--role-irr-fg);
+}
+
+/* ===== Generisches Summary-Styling für alle Gruppen ===== */
+#modal-root .group-card > details > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  font-weight: 600;
+  position: relative;
+  padding-left: 1.2em; /* Platz für den Pfeil */
+  cursor: pointer;
+  user-select: none;
+  border-bottom: 1px solid var(--border); /* Trennlinie unter jedem Titel */
+}
+
+/* native Marker ausblenden */
+#modal-root .group-card > details > summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Pfeil vor jedem Summary */
+#modal-root .group-card > details > summary::before {
+  content: "▸";
+  position: absolute;
+  left: 0.3em;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.8;
+  font-size: 0.9em;
+}
+
+/* Geöffnet: Pfeil nach unten */
+#modal-root .group-card > details[open] > summary::before {
+  content: "▾";
+}
+
+/* ==========================
+   Passwort-Modal
+   ========================== */
+
+#modal-root .pw-modal {
+  display: grid;
+  gap: 10px;
+}
+
+#modal-root .pw-title {
+  margin: 0;
+}
+
+#modal-root .pw-hint {
+  margin: 0;
+  opacity: 0.85;
+}
+
+#modal-root .pw-input {
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+#modal-root .pw-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* ==========================
+   Einstellungen-Modal
+   ========================== */
+
+#modal-root .settings-modal {
+  display: grid;
+  gap: 12px;
+
+  width: 720px;
+  max-width: 100%;
+
+  box-sizing: border-box;
+}
+
+#modal-root .settings-content {
+  min-width: 0;
+}
+
+/* Footer */
+#modal-root .settings-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 0;
+  border-top: none;
+}
+
+/* Flags-Tab */
+#modal-root .settings-section-head {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+#modal-root .settings-section-title {
+  margin: 0;
+}
+
+#modal-root .settings-section-hint {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+#modal-root .settings-row {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+#modal-root .settings-label {
+  color: var(--text);
+  font-weight: 600;
+}
+
+#modal-root .settings-select {
+  width: 100%;
+}
+
+/* Settings: generische Checkbox-Liste (für Berechnung / später mehr) */
+#modal-root .settings-check-list {
+  display: grid;
+  gap: 8px;
+}
+
+/* Eine Checkbox-Zeile: möglichst neutral */
+#modal-root .settings-check-row {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 10px;
+  align-items: start;
+
+  padding: 10px 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel);
+}
+
+#modal-root .settings-check-label {
+  color: var(--text);
+  font-weight: 600;
+}
+
+#modal-root .settings-check-right {
+  display: grid;
+  gap: 2px;
+}
+
+#modal-root .settings-check-sub {
+  color: var(--muted);
+  font-size: 0.85rem;
+}

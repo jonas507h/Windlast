@@ -3,7 +3,7 @@
   const VERSION = "2.0.0-alpha.2";
 
   // Echte Build-Rolle
-  const BUILD_ROLE = "godmode"; // "user" | "debug" | "admin" | "godmode"
+  const BUILD_ROLE = "user"; // "user" | "debug" | "admin" | "godmode"
 
   // 1) Flags pro Rolle definieren (dynamisch)
   // value: aktueller Zustand

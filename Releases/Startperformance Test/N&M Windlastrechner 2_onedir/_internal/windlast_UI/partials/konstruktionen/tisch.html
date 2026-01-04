@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <title>Konstruktion · Tisch</title>
+  <link rel="stylesheet" href="../../static/css/style.css">
+  <script src="../../static/js/theme.js"></script>
+</head>
+<body class="wrap">
+  <section>
+    <form id="tisch-form" onsubmit="return false;">
+      <div class="row row-1">
+        <div class="field">
+          <div class="label-row">
+            <label for="traverse" class="required">Traverse</label>
+            <button
+              type="button"
+              tabindex="-1"
+              class="help-icon-btn"
+              data-help-id="tisch:traverse"
+              aria-label="Hilfe zu diesem Bereich"
+            >?</button>
+          </div>
+          <select id="traverse_name_intern">
+            <option value="">Bitte wählen …</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row row-3">
+        <div class="field">
+          <div class="label-row">
+            <label for="bodenplatte" class="required">Bodenplatte</label>
+            <button
+              type="button"
+              tabindex="-1"
+              class="help-icon-btn"
+              data-help-id="tisch:bodenplatte"
+              aria-label="Hilfe zu diesem Bereich"
+            >?</button>
+          </div>
+          <select id="bodenplatte_name_intern">
+            <option value="">Bitte wählen …</option>
+          </select>
+          <p class="warn-text" id="warn-bodenplatte" hidden>Achtung: Auswahl wurde automatisch angepasst.</p>
+        </div>
+
+        <div class="field">
+          <div class="label-row">
+            <label for="gummimatte" class="required">Gummimatte</label>
+            <button
+              type="button"
+              tabindex="-1"
+              class="help-icon-btn"
+              data-help-id="tisch:gummimatte"
+              aria-label="Hilfe zu diesem Bereich"
+            >?</button>
+          </div>
+          <select id="gummimatte">
+            <option value="">Bitte wählen …</option>
+          </select>
+          <p class="warn-text" id="warn-gummimatte" hidden>Achtung: Auswahl wurde automatisch angepasst.</p>
+        </div>
+
+        <div class="field">
+          <div class="label-row">
+            <label for="untergrund" class="required">Untergrund</label>
+            <button
+              type="button"
+              tabindex="-1"
+              class="help-icon-btn"
+              data-help-id="tisch:untergrund"
+              aria-label="Hilfe zu diesem Bereich"
+            >?</button>
+          </div>
+          <select id="untergrund_typ">
+            <option value="">Bitte wählen …</option>
+          </select>
+          <p class="warn-text" id="warn-untergrund" hidden>Achtung: Auswahl wurde automatisch angepasst.</p>
+        </div>
+      </div>
+
+      <div class="row row-3">
+        <div class="field">
+          <div class="label-row">
+            <label for="hoehe" class="required">Höhe [m]</label>
+            <button
+              type="button"
+              tabindex="-1"
+              class="help-icon-btn"
+              data-help-id="tisch:hoehe"
+              aria-label="Hilfe zu diesem Bereich"
+            >?</button>
+          </div>
+          <input id="hoehe_m" name="hoehe_m" type="number" step="0.01" min="0" placeholder="z. B. 4,00" />
+          <p class="error-text" id="err-hoehe" hidden>Bitte eine gültige Höhe &gt; 0 angeben.</p>
+        </div>
+
+        <div class="field">
+          <div class="label-row">
+            <label for="breite" class="required">Breite [m]</label>
+            <button
+              type="button"
+              tabindex="-1"
+              class="help-icon-btn"
+              data-help-id="tisch:breite"
+              aria-label="Hilfe zu diesem Bereich"
+            >?</button>
+          </div>
+          <input id="breite_m" name="breite_m" type="number" step="0.01" min="0" placeholder="z. B. 8,00" />
+          <p class="error-text" id="err-breite" hidden>Bitte eine gültige Breite &gt; 0 angeben.</p>
+        </div>
+
+        <div class="field">
+          <div class="label-row">
+            <label for="tiefe" class="required">Tiefe [m]</label>
+            <button
+              type="button"
+              tabindex="-1"
+              class="help-icon-btn"
+              data-help-id="tisch:tiefe"
+              aria-label="Hilfe zu diesem Bereich"
+            >?</button>
+          </div>
+          <input id="tiefe_m" name="tiefe_m" type="number" step="0.01" min="0" placeholder="z. B. 6,00" />
+          <p class="error-text" id="err-tiefe" hidden>Bitte eine gültige Tiefe &gt; 0 angeben.</p>
+        </div>
+      </div>
+
+      <div class="row row-3">
+        <div class="field">
+          <div class="label-row">
+            <label for="hoehe_flaeche">Höhe Fläche [m]</label>
+            <button
+              type="button"
+              tabindex="-1"
+              class="help-icon-btn"
+              data-help-id="tisch:hoehe_flaeche"
+              aria-label="Hilfe zu diesem Bereich"
+            >?</button>
+          </div>
+          <input id="hoehe_flaeche_m" name="hoehe_flaeche_m" type="number" step="0.01" min="0" placeholder="z. B. 6,00" />
+          <p class="error-text" id="err-hoehe_flaeche" hidden>Bitte eine gültige Höhe > 0 angeben.</p>
+        </div>
+        <div class="field">
+          <div class="label-row">
+            <label for="anzahl_steher_breite" class="required">Anzahl Steher (Breite)</label>
+            <button
+              type="button"
+              tabindex="-1"
+              class="help-icon-btn"
+              data-help-id="tisch:anzahl_steher_breite"
+              aria-label="Hilfe zu diesem Bereich"
+            >?</button>
+          </div>
+          <input id="anzahl_steher_breite" name="anzahl_steher_breite" type="number" step="1" min="2" value="2" />
+          <p class="error-text" id="err-anzahl_steher_breite" hidden>Bitte eine gültige Anzahl ≥ 2 angeben.</p>
+        </div>
+        <div class="field">
+          <div class="label-row">
+            <label for="anzahl_steher_tiefe" class="required">Anzahl Steher (Tiefe)</label>
+            <button
+              type="button"
+              tabindex="-1"
+              class="help-icon-btn"
+              data-help-id="tisch:anzahl_steher_tiefe"
+              aria-label="Hilfe zu diesem Bereich"
+            >?</button>
+          </div>
+          <input id="anzahl_steher_tiefe" name="anzahl_steher_tiefe" type="number" step="1" min="2" value="2" />
+          <p class="error-text" id="err-anzahl_steher_tiefe" hidden>Bitte eine gültige Anzahl ≥ 2 angeben.</p>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="btn" id="btn-berechnen">Berechnen</button>
+      </div>
+    </form>
+  </section>
+  <script src="/static/js/konstruktionen/tisch.js"></script>
+</body>
+</html>

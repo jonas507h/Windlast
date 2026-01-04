@@ -17,7 +17,9 @@ pyinstaller --onefile --windowed --name "Windlastrechner 2" --icon Logo\windlast
 
 oder
 
-.\build.ps1
+.\build-onefile.ps1
+.\build-onedir.ps1
+.\build-installer.ps1
 
 In Struktur aufwärts cd..
 Abwärts: cd Ordnername
