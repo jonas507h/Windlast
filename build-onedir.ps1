@@ -1,6 +1,6 @@
 $ErrorActionPreference = "Stop"
 
-pyinstaller `
+python -m PyInstaller `
   --onedir `
   --windowed `
   --name "N&M Windlastrechner 2" `
@@ -10,4 +10,5 @@ pyinstaller `
   --add-data "windlast_UI;windlast_UI" `
   --add-data "windlast_CORE/materialdaten/*.csv;windlast_CORE/materialdaten" `
   --add-data "THIRD_PARTY_NOTICES.txt;." `
+  --add-data "CHANGELOG.md;." `
   windlast_API\app.py
