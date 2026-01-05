@@ -3,7 +3,7 @@
   const VERSION = "2.0.0-alpha.2";
 
   // Echte Build-Rolle
-  const BUILD_ROLE = "user"; // "user" | "debug" | "admin" | "godmode"
+  const BUILD_ROLE = "dev"; // "user" | "debug" | "admin" | "dev"
 
   // 1) Flags pro Rolle definieren (dynamisch)
   // value: aktueller Zustand
@@ -45,7 +45,7 @@
       use_eps_on_anzeige:              { value: true,  lock: false },
       show_einstellungen_button:       { value: false, lock: true },
     },
-    godmode: {
+    dev: {
       show_zwischenergebnisse_tooltip: { value: true,  lock: false },
       show_nichtZertifiziert_warnung:  { value: false, lock: false },
       show_doppelte_meldungen:         { value: true,  lock: false },
@@ -122,7 +122,7 @@
   // 3) Admin-Passwort
   const ADMIN_PWD_MASK = 37;
   const ADMIN_PWD_BYTES = [
-    20, 23, 22, 17
+    100, 67, 100, 99, 83, 107, 17, 74, 105, 81
   ];
 
   function checkAdminPassword(input) {
@@ -164,7 +164,7 @@
 
     if (!fromStorage || !roleFlagState[fromStorage]) return;
 
-    if (fromStorage === "godmode" && activeBuildRole !== "godmode") {
+    if (fromStorage === "dev" && activeBuildRole !== "dev") {
       try { localStorage.removeItem(LS_KEY); } catch (_) {}
       return;
     }
@@ -227,13 +227,13 @@
         throw new Error(`Unknown role: ${nextRole}`);
       }
 
-      if (nextRole === "godmode" && activeBuildRole !== "godmode") {
+      if (nextRole === "dev" && activeBuildRole !== "dev") {
         throw new Error(`Unknown role: ${nextRole}`);
       }
 
       const goingToAdmin = nextRole === "admin" && currentRole !== "admin";
       if (goingToAdmin) {
-        const buildIsFreeAdmin = (activeBuildRole === "admin" || activeBuildRole === "godmode");
+        const buildIsFreeAdmin = (activeBuildRole === "admin" || activeBuildRole === "dev");
 
         if (!buildIsFreeAdmin) {
           if (roleChangeInFlight) return; // kein Chaos bei Doppelaufruf
@@ -256,9 +256,9 @@
 
     async requestAdmin({ persist = true, ttlMs = 30_000 } = {}) {
       const buildIsFreeAdmin =
-        (activeBuildRole === "admin" || activeBuildRole === "godmode");
+        (activeBuildRole === "admin" || activeBuildRole === "dev");
 
-      // Wenn Build schon admin/godmode: kein Passwort nötig
+      // Wenn Build schon admin/dev: kein Passwort nötig
       if (buildIsFreeAdmin) {
         state.setRole("admin", { persist });
         return true;
@@ -284,7 +284,7 @@
     },
 
     setBuild(nextBuildRole) {
-      if (BUILD_ROLE !== "godmode") {
+      if (BUILD_ROLE !== "dev") {
         throw new Error("APP_STATE.setBuild ist nicht verfügbar.");
       }
       if (!roleFlagState[nextBuildRole]) {
@@ -363,7 +363,7 @@
     },
   };
 
-  if (BUILD_ROLE === "godmode") {
+  if (BUILD_ROLE === "dev") {
     api.setBuild = function(nextBuildRole) {
       state.setBuild(nextBuildRole);
     };

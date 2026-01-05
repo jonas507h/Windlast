@@ -59,11 +59,11 @@ function updateRoleLabel() {
   if (!el || !app) return;
 
   const role       = app.role;
-  const buildRole  = app.buildRole;              // echter Build (z.B. "user", "debug", "admin", "godmode")
+  const buildRole  = app.buildRole;              // echter Build (z.B. "user", "debug", "admin", "dev")
   const activeBuild = app.activeBuild || buildRole; // simulierter Build (falls vorhanden)
 
-  if (buildRole === "godmode") {
-    // Im echten godmode-Build immer anzeigen, inkl. simuliertem Build
+  if (buildRole === "dev") {
+    // Im echten dev-Build immer anzeigen, inkl. simuliertem Build
     el.textContent = `Rolle: ${role} (Build: ${activeBuild})`;
     el.hidden = false;
   } else {
@@ -87,7 +87,7 @@ document.addEventListener("ui:role-changed", () => {
   updateRoleLabel();
 });
 
-// Auf Build-Wechsel (setBuild) reagieren – nur im godmode-Build vorhanden
+// Auf Build-Wechsel (setBuild) reagieren – nur im dev-Build vorhanden
 document.addEventListener("ui:build-changed", () => {
   updateRoleLabel();
 });
