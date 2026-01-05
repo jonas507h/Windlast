@@ -263,17 +263,18 @@ def _gleitsicherheit_DinEn13814_2005_06(
             if horizontal_betrag > _EPS:
                 sicherheit = reibkraft / horizontal_betrag
                 dir_min_sicherheit = min(dir_min_sicherheit, sicherheit)
-                protokolliere_doc(
-                    sub_prot,
-                    bundle=make_docbundle(
-                        titel=f"Richtungs-Sicherheit S_gleit,{int(winkel)}°",
-                        wert=sicherheit,
-                        formel="S = R / T",
-                        formelzeichen=["R", "T"],
-                        quelle_formel="---",
-                    ),
-                    kontext={"nachweis": "GLEIT", "doc_type": "dir_sicherheit", "windrichtung_deg": f"{winkel}°"},
-                )
+                
+            protokolliere_doc(
+                sub_prot,
+                bundle=make_docbundle(
+                    titel=f"Richtungs-Sicherheit S_gleit,{int(winkel)}°",
+                    wert=sicherheit,
+                    formel="S = R / T",
+                    formelzeichen=["R", "T"],
+                    quelle_formel="---",
+                ),
+                kontext={"nachweis": "GLEIT", "doc_type": "dir_sicherheit", "windrichtung_deg": f"{winkel}°"},
+            )
 
             if reibwert_min <= _EPS:
                 if horizontal_betrag > _EPS:
