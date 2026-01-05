@@ -9,19 +9,24 @@
 /* Das Wiki-Panel selbst ist klickbar */
 .wiki-modal {
   position: fixed;
-  /* keine feste top/right hier, Position kommt aus JS */
   width: 800px;
   max-width: calc(100% - 32px);
   max-height: 90%;
   background: var(--panel);
   color: var(--text);
   border-radius: 8px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-  display: none;          /* Start: unsichtbar */
+  box-shadow: var(--wiki-modal-shadow);
+  display: none;
   flex-direction: column;
   pointer-events: auto;
   overflow: hidden;
   outline: none;
+}
+
+.wiki-modal:focus,
+.wiki-modal:focus-visible,
+.wiki-modal:focus-within {
+  box-shadow: var(--wiki-modal-shadow);
 }
 
 /* Wenn hidden-Attribut gesetzt ist → sicherheitshalber auch ausblenden */
