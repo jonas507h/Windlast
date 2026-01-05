@@ -6,39 +6,39 @@ class DauerInput(BaseModel):
     wert: int = Field(gt=0)
     einheit: Literal["TAG", "MONAT", "JAHR"]  # Enum-Name
 
-class TorInput(BaseModel):
-    breite_m: PositiveFloat
-    hoehe_m: PositiveFloat
-    traverse_name_intern: str
-    bodenplatte_name_intern: str
-    orientierung: str
-    untergrund_typ: str  # MaterialTyp.value (z.B. "beton")
-    gummimatte: bool = True
-    aufstelldauer: DauerInput | None = None
-    windzone: str  # Windzone Enum-Name (z.B. "III_Binnenland")
+# class TorInput(BaseModel):
+#     breite_m: PositiveFloat
+#     hoehe_m: PositiveFloat
+#     traverse_name_intern: str
+#     bodenplatte_name_intern: str
+#     orientierung: str
+#     untergrund_typ: str  # MaterialTyp.value (z.B. "beton")
+#     gummimatte: bool = True
+#     aufstelldauer: DauerInput | None = None
+#     windzone: str  # Windzone Enum-Name (z.B. "III_Binnenland")
 
-class SteherInput(BaseModel):
-    hoehe_m: PositiveFloat
-    rohr_laenge_m: PositiveFloat
-    rohr_hoehe_m: PositiveFloat
-    traverse_name_intern: str
-    bodenplatte_name_intern: str
-    rohr_name_intern: str
-    untergrund_typ: str  # MaterialTyp.value (z.B. "beton")
-    gummimatte: bool = True
-    aufstelldauer: DauerInput | None = None
-    windzone: str  # Windzone Enum-Name (z.B. "III_Binnenland")
+# class SteherInput(BaseModel):
+#     hoehe_m: PositiveFloat
+#     rohr_laenge_m: PositiveFloat
+#     rohr_hoehe_m: PositiveFloat
+#     traverse_name_intern: str
+#     bodenplatte_name_intern: str
+#     rohr_name_intern: str
+#     untergrund_typ: str  # MaterialTyp.value (z.B. "beton")
+#     gummimatte: bool = True
+#     aufstelldauer: DauerInput | None = None
+#     windzone: str  # Windzone Enum-Name (z.B. "III_Binnenland")
 
-class TischInput(BaseModel):
-    breite_m: PositiveFloat
-    hoehe_m: PositiveFloat
-    tiefe_m: PositiveFloat
-    traverse_name_intern: str
-    bodenplatte_name_intern: str
-    untergrund_typ: str  # MaterialTyp.value (z.B. "beton")
-    gummimatte: bool = True
-    aufstelldauer: DauerInput | None = None
-    windzone: str  # Windzone Enum-Name (z.B. "III_Binnenland")
+# class TischInput(BaseModel):
+#     breite_m: PositiveFloat
+#     hoehe_m: PositiveFloat
+#     tiefe_m: PositiveFloat
+#     traverse_name_intern: str
+#     bodenplatte_name_intern: str
+#     untergrund_typ: str  # MaterialTyp.value (z.B. "beton")
+#     gummimatte: bool = True
+#     aufstelldauer: DauerInput | None = None
+#     windzone: str  # Windzone Enum-Name (z.B. "III_Binnenland")
 
 class KonstruktionInput(BaseModel):
     konstruktion: Dict[str, Any]  # Platzhalter für beliebige Konstruktion-Daten aus UI-Build
