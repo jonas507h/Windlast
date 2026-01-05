@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from windlast_CORE.materialdaten.catalog import catalog
 from windlast_CORE.datenstruktur.konstanten import PhysikKonstanten, aktuelle_konstanten
-from windlast_CORE.datenstruktur.zwischenergebnis import Protokoll, merge_kontext, protokolliere_msg
+from windlast_CORE.datenstruktur.zwischenergebnis import Protokoll, merge_kontext, protokolliere_msg, protokolliere_doc, make_docbundle
 from typing import List, Optional
 from windlast_CORE.rechenfunktionen import (
     Vec3,
@@ -79,6 +79,17 @@ class Bodenplatte:
 
         einzelkraefte_vektoren: list[Vec3] = [(0.0, 0.0, gewichtskraft)]
         angriffsbereiche: list[list[Vec3]] = [ecken]
+
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(
+                titel="Gewichtskraft F_G",
+                wert= -1 * gewichtskraft,
+                formel="F_G = m · g",
+                einheit="N",
+            ),
+            kontext=base_ctx,
+        )
 
         return [Kraefte(
             element_id_intern=self.element_id_intern,

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Tuple, List, Sequence, Optional
 from windlast_CORE.datenstruktur.konstanten import PhysikKonstanten, aktuelle_konstanten
-from windlast_CORE.datenstruktur.zwischenergebnis import Protokoll, merge_kontext, protokolliere_msg
+from windlast_CORE.datenstruktur.zwischenergebnis import Protokoll, merge_kontext, protokolliere_msg, protokolliere_doc, make_docbundle
 from windlast_CORE.materialdaten.catalog import catalog
 from windlast_CORE.rechenfunktionen import (
     Vec3,
@@ -53,6 +53,17 @@ class Traversenstrecke:
         angriffsbereiche: list[list[Vec3]] = [[self.start, self.ende]]
 
         schwerpunkt = flaechenschwerpunkt([self.start, self.ende])
+
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(
+                titel="Gewichtskraft F_G",
+                wert= -1 * Fz,
+                formel="F_G = m · L · g",
+                einheit="N",
+            ),
+            kontext=base_ctx,
+        )
 
         return [Kraefte(
             element_id_intern=self.element_id_intern,
