@@ -20,6 +20,7 @@ DEDUP_FIELDS = [
     "achse_index",
     "element_id",
     "segment_index",
+    "lastfall_index",
     "zone",
     "ref_nachweis",
 ]

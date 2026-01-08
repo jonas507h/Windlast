@@ -277,6 +277,13 @@ class senkrechteFlaeche:
                 )
                 zonen = [Zone.A, Zone.B, Zone.C, Zone.D]
 
+                if 90.0-_EPS < winkel <= 90.0+_EPS:
+                    lastfall_ctx = merge_kontext(wand_ctx, {
+                        "lastfall_index": 0,
+                    })
+                else:
+                    lastfall_ctx = wand_ctx
+
                 # Iteration über horizontale Zonen
                 for i in range(len(trennpunkte_unterkante)-1):
                     unten_start = trennpunkte_unterkante[i]
@@ -285,7 +292,7 @@ class senkrechteFlaeche:
                     teilvektor_unterkante = vektor_zwischen_punkten(unten_start, unten_ende)
                     zone = zonen[i]
 
-                    zonen_ctx = merge_kontext(wand_ctx, {
+                    zonen_ctx = merge_kontext(lastfall_ctx, {
                         "zone": zone.value,
                     })
 
@@ -367,6 +374,13 @@ class senkrechteFlaeche:
                 )
                 zonen = [Zone.A, Zone.B, Zone.C, Zone.D]
 
+                if 90.0-_EPS < winkel <= 90.0+_EPS:
+                    lastfall_ctx = merge_kontext(wand_ctx, {
+                        "lastfall_index": 1,
+                    })
+                else:
+                    lastfall_ctx = wand_ctx
+
                 # Iteration über horizontale Zonen
                 for i in range(len(trennpunkte_unterkante)-1):
                     unten_start = trennpunkte_unterkante[i]
@@ -375,7 +389,7 @@ class senkrechteFlaeche:
                     teilvektor_unterkante = vektor_zwischen_punkten(unten_start, unten_ende)
                     zone = zonen[i]
 
-                    zonen_ctx = merge_kontext(wand_ctx, {
+                    zonen_ctx = merge_kontext(lastfall_ctx, {
                         "zone": zone.value,
                     })
 

@@ -18,6 +18,7 @@ const DOC_GROUP_CONFIG = [
   ["windrichtung_deg", "ohne Richtung"],
   ["element_id",       "allgemein"],
   ["achse_index",      "ohne Achse"],
+  ["lastfall_index",   "ohne Lastfall"],
   ["zone",             "ohne Zone"],
   ["segment_index",    "kein Segment"],
 ];
