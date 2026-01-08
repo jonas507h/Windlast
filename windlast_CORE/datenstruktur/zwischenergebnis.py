@@ -11,6 +11,13 @@ else:
     # Laufzeit-Placeholder – reicht für Typannotationen und Dataklassen
     Vec3 = Tuple[float, float, float]
 
+@dataclass(frozen=True)
+class Decision:
+    key: str                # z.B. "windrichtung_deg" oder "lastfall_index"
+    value: Any              # z.B. 270 oder 3
+    scope: Dict[str, Any]   # z.B. {"nachweis":"GLEIT", "element_id":"Traverse_1", ...}
+    meta: Optional[Dict[str, Any]] = None  # optional
+
 # ========= Protokoll-Schnittstelle =========
 
 @runtime_checkable
@@ -34,6 +41,10 @@ class Protokoll(Protocol):
         kontext: Optional[dict] = None,
     ) -> None: ...
 
+@runtime_checkable
+class DecisionProtokoll(Protocol):
+    def add_decision(self, *, decision: "Decision") -> None: ...
+
 # ========== Runtime-Implementierung des Protokolls ==========
 
 class ListProtokoll:
@@ -45,6 +56,7 @@ class ListProtokoll:
     def __init__(self) -> None:
         self.messages: List[Message] = []
         self.docs: List[Tuple[Mapping[str, Any], dict]] = []
+        self.decisions: List[Decision] = []
 
     def add_message(
         self,
@@ -67,6 +79,8 @@ class ListProtokoll:
     ) -> None:
         self.docs.append( (dict(bundle), dict(kontext or {})) )
 
+    def add_decision(self, *, decision: Decision) -> None:
+        self.decisions.append(decision)
 
 def make_protokoll() -> Protokoll:
     """Factory für ein nutzbares Protokoll-Objekt (kein typing.Protocol!)."""
@@ -81,6 +95,9 @@ def collect_messages(protokoll: Optional[Protokoll]) -> List[Message]:
 def collect_docs(protokoll: Optional[Protokoll]) -> List[Tuple[Mapping[str, Any], dict]]:
     """Helper, um DocBundles generisch aus einem Protokoll zu ziehen (oder [])."""
     return list(getattr(protokoll, "docs", []) or [])
+
+def collect_decisions(protokoll: Optional[Protokoll]) -> List[Decision]:
+    return list(getattr(protokoll, "decisions", []) or [])
 
 # ========= Kontext-/Doc-Helfer =========
 
@@ -156,6 +173,20 @@ def merge_protokoll(src, dst, *, only_errors: bool = False):
         if only_errors and getattr(m, "severity", None) != Severity.ERROR:
             continue
         protokolliere_msg(dst, severity=m.severity, code=m.code, text=m.text, kontext=m.context)
+
+def protokolliere_decision(
+    protokoll: Optional[Protokoll],
+    *,
+    key: str,
+    value: Any,
+    scope: Optional[dict] = None,
+    meta: Optional[dict] = None,
+) -> None:
+    if protokoll is None:
+        return
+    if hasattr(protokoll, "add_decision"):
+        decision = Decision(key=key, value=value, scope=dict(scope or {}), meta=dict(meta) if meta else None)
+        protokoll.add_decision(decision=decision)
 
 # ========= Verschlankte Ergebnis-Typen =========
 # Ab jetzt tragen die Hilfsfunktionen die Dokumentationsinfos (Formeln/Quellen/Einzelwerte)
