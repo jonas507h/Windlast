@@ -4,7 +4,7 @@ from math import inf
 from typing import Dict, Callable, Sequence, List, Optional
 from collections.abc import Sequence as _SeqABC
 
-from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_kontext, protokolliere_msg, protokolliere_doc, make_docbundle, make_protokoll, merge_protokoll, collect_docs
+from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_kontext, protokolliere_msg, protokolliere_doc, protokolliere_decision, make_docbundle, make_protokoll, merge_protokoll, collect_docs
 from windlast_CORE.datenstruktur.enums import Norm, RechenmethodeGleiten, VereinfachungKonstruktion, Lasttyp, Variabilitaet, Severity
 from windlast_CORE.datenstruktur.konstanten import _EPS, aktuelle_konstanten
 from windlast_CORE.rechenfunktionen.sicherheitsbeiwert import sicherheitsbeiwert
@@ -365,6 +365,14 @@ def _gleitsicherheit_DinEn13814_2005_06(
             kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "rolle": "relevant"}),
         )
 
+        #Entscheidung protokollieren
+        protokolliere_decision(
+            protokoll,
+            key="windrichtung_deg",
+            value=dir_records[winner_idx]["windrichtung_deg"],
+            scope={"nachweis": "GLEIT"},
+        )
+
         return [Zwischenergebnis(wert=sicherheit_min_global), Zwischenergebnis(wert=ballast_kg)]
 
     else:
@@ -651,6 +659,14 @@ def _gleitsicherheit_DinEn17879_2024_08(
                 quelle_formel="---",
             ),
             kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "rolle": "relevant"}),
+        )
+
+        #Entscheidung protokollieren
+        protokolliere_decision(
+            protokoll,
+            key="windrichtung_deg",
+            value=dir_records[winner_idx]["windrichtung_deg"],
+            scope={"nachweis": "GLEIT"},
         )
 
         return [Zwischenergebnis(wert=sicherheit_min_global), Zwischenergebnis(wert=ballast_kg)]

@@ -4,7 +4,7 @@ from math import inf
 from typing import Dict, Callable, Sequence, List, Optional, Tuple, Iterable
 from collections.abc import Sequence as _SeqABC
 
-from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_kontext, protokolliere_msg, protokolliere_doc, make_docbundle, merge_protokoll, make_protokoll, collect_docs
+from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_kontext, protokolliere_msg, protokolliere_doc, protokolliere_decision, make_docbundle, merge_protokoll, make_protokoll, collect_docs
 from windlast_CORE.datenstruktur.enums import Norm, RechenmethodeKippen, VereinfachungKonstruktion, Lasttyp, Variabilitaet, Severity
 from windlast_CORE.datenstruktur.konstanten import _EPS, aktuelle_konstanten
 from windlast_CORE.datenstruktur.kraefte import Kraefte
@@ -345,6 +345,14 @@ def _kippsicherheit_DinEn13814_2005_06(
                 "sub_prot": sub_prot,             # nur für Messages
             })
 
+            #Entscheidung protokollieren
+            protokolliere_decision(
+                protokoll,
+                key="achse_index",
+                value=dir_records[winner_idx]["best_achse_idx"],
+                scope={"windrichtung_deg": f"{winkel}°"},
+            )
+
         # --- Globale Entscheidung & Rollenvergabe ---
         if not dir_records:
             # defensive: nichts gerechnet → Exit wie bisher
@@ -402,6 +410,14 @@ def _kippsicherheit_DinEn13814_2005_06(
                 quelle_formelzeichen=["---"],
             ),
             kontext=merge_kontext(base_ctx, {"nachweis": "KIPP", "rolle": "relevant"}),
+        )
+
+        #Entscheidung protokollieren
+        protokolliere_decision(
+            protokoll,
+            key="windrichtung_deg",
+            value=dir_records[winner_idx]["windrichtung_deg"],
+            scope={"nachweis": "KIPP"},
         )
 
         return [Zwischenergebnis(wert=sicherheit_min_global), Zwischenergebnis(wert=ballast_kg)]
@@ -659,6 +675,13 @@ def _kippsicherheit_DinEn17879_2024_08(
                 "sub_prot": sub_prot,             # nur für Messages
             })
 
+            #Entscheidung protokollieren
+            protokolliere_decision(
+                protokoll,
+                key="achse_index",
+                value=dir_records[winner_idx]["best_achse_idx"],
+                scope={"windrichtung_deg": f"{winkel}°"},
+            )
 
         # --- Globale Entscheidung & Rollenvergabe ---
         if not dir_records:
@@ -717,6 +740,14 @@ def _kippsicherheit_DinEn17879_2024_08(
                 quelle_formelzeichen=["---"],
             ),
             kontext=merge_kontext(base_ctx, {"nachweis": "KIPP", "rolle": "relevant"}),
+        )
+
+        #Entscheidung protokollieren
+        protokolliere_decision(
+            protokoll,
+            key="windrichtung_deg",
+            value=dir_records[winner_idx]["windrichtung_deg"],
+            scope={"nachweis": "KIPP"},
         )
 
         return [Zwischenergebnis(wert=sicherheit_min_global), Zwischenergebnis(wert=ballast_kg)]
