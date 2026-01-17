@@ -4,7 +4,7 @@ from windlast_CORE.rechenfunktionen.geom3d import Vec3, vektor_zwischen_punkten,
 from windlast_CORE.datenstruktur.objekte3d import Achse
 from windlast_CORE.datenstruktur.kraefte import Kraefte
 from windlast_CORE.datenstruktur.enums import Norm, Lasttyp, Variabilitaet, Severity
-from windlast_CORE.datenstruktur.zwischenergebnis import Protokoll, merge_kontext, protokolliere_msg, protokolliere_doc, make_docbundle
+from windlast_CORE.datenstruktur.zwischenergebnis import Protokoll, merge_kontext, protokolliere_msg, protokolliere_doc, protokolliere_decision, make_docbundle
 from windlast_CORE.rechenfunktionen.sicherheitsbeiwert import sicherheitsbeiwert
 from windlast_CORE.datenstruktur.lastpool import LastPool, LastSet
 from windlast_CORE.datenstruktur.konstanten import _EPS
@@ -298,58 +298,121 @@ def kipp_envelope_pro_bauelement(
     kontext: Optional[dict] = None
 ) -> Tuple[float, float]:
     base_ctx = merge_kontext(kontext, {"funktion": "kipp_envelope_pro_bauelement"})
-    """
-    Bildet je Bauelement den ungünstigen „Envelope“ über seine Lastfälle.
 
-    Regeln:
-      - WIND:    wähle den Lastfall mit maximalem kippenden Anteil (kipp_sum).
-                 (stabilisierende Windanteile haben γ=0 → werden nicht gutgeschrieben)
-      - GEWICHT: wähle den Lastfall mit maximalem (kipp_sum - stand_sum)
-                 (= „am wenigsten günstig“; berücksichtigt, dass nur günstige & ständige
-                    Eigenlast mit γ>0 stabilisierend wirken darf)
-      - Sonstiges (z. B. REIBUNG): konservativ wie WIND → max. kipp_sum.
+    wind_lastfall_index = -1
+    best_wind_index = None
+    gewicht_lastfall_index = -1
+    best_gewicht_index = None
+    other_lastfall_index = -1
+    best_other_index = None
 
-    Rückgabe:
-      (kipp_sum_bauteil, stand_sum_bauteil) — die Beiträge des Bauteils zum globalen Nachweis.
-    """
-    # Sammle bewertete Lastfälle pro Typ
-    wind_kipp: List[float] = []
-    gewicht_pairs: List[Tuple[float, float]] = []
-    other_pairs: List[Tuple[float, float]] = []
+    best_wind_kipp = -math.inf
+    best_wind_stand = 0.0
+    best_gew_kipp = -math.inf
+    best_gew_stand = 0.0
+    best_other_kipp = -math.inf
+    best_other_stand = 0.0
 
     for k in lastfaelle:
         kipp, stand = bewerte_lastfall_fuer_achse(norm, achse, k, protokoll=protokoll, kontext=base_ctx)
+
         if k.typ == Lasttyp.WIND:
-            wind_kipp.append(kipp)
+            wind_lastfall_index += 1
+            if (kipp - stand) > (best_wind_kipp - best_wind_stand):
+                best_wind_kipp = kipp
+                best_wind_stand = stand
+                best_wind_index = wind_lastfall_index
+                lasttyp = "WIND"
+                lastfall_index = wind_lastfall_index
         elif k.typ == Lasttyp.GEWICHT:
-            gewicht_pairs.append((kipp, stand))
+            gewicht_lastfall_index += 1
+            if (kipp - stand) > (best_gew_kipp - best_gew_stand):
+                best_gew_kipp = kipp
+                best_gew_stand = stand
+                best_gewicht_index = gewicht_lastfall_index
+                lasttyp = "GEWICHT"
+                lastfall_index = gewicht_lastfall_index
         else:
-            other_pairs.append((kipp, stand))
+            other_lastfall_index += 1
+            if (kipp - stand) > (best_other_kipp - best_other_stand):
+                best_other_kipp = kipp
+                best_other_stand = stand
+                best_other_index = other_lastfall_index
+                lasttyp = "ANDERE"
+                lastfall_index = other_lastfall_index
 
-    # Envelopebildung je Typ
-    best_wind_kipp = max(wind_kipp) if wind_kipp else 0.0
+        lastfall_ctx = merge_kontext(base_ctx, {"lasttyp": lasttyp, "lastfall_index": lastfall_index})
 
-    best_gew_kipp = 0.0
-    best_gew_stand = 0.0
-    if gewicht_pairs:
-        # „ungünstigster“ Gewichts-Lastfall
-        best_gew_kipp, best_gew_stand = max(
-            gewicht_pairs,
-            key=lambda pair: pair[0] - pair[1]
+        # --- Pro Lastfall protokollieren: Kipp/Stand (untergeordnet) ---
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(
+                titel=f"Lastfall {lasttyp} #{lastfall_index}: Kippmoment M_K",
+                wert=kipp,
+                einheit="Nm",
+            ),
+            kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_momente"}),
+        )
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(
+                titel=f"Lastfall {lasttyp} #{lastfall_index}: Standmoment M_St",
+                wert=stand,
+                einheit="Nm",
+            ),
+            kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_momente"}),
         )
 
-    best_other_kipp = 0.0
-    best_other_stand = 0.0
-    if other_pairs:
-        # konservativ: max kippend
-        best_other_kipp, best_other_stand = max(
-            other_pairs,
-            key=lambda pair: pair[0]
+        # --- Toplevel-Kriterium ---
+        kriterium = kipp - stand  # "umwerfend": groß = schlecht
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(
+                titel=f"Lastfall {lasttyp} #{lastfall_index}: Kriterium (M_K − M_St)",
+                wert=kriterium,
+                einheit="Nm",
+                formel="K = M_K − M_St",
+                formelzeichen=["M_K", "M_St"],
+            ),
+            kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_kipp_kriterium"}),
+        )
+
+    if best_wind_kipp == -math.inf:
+        best_wind_kipp, best_wind_stand = 0.0, 0.0
+    if best_gew_kipp == -math.inf:
+        best_gew_kipp, best_gew_stand = 0.0, 0.0
+    if best_other_kipp == -math.inf:
+        best_other_kipp, best_other_stand = 0.0, 0.0
+
+
+    if base_ctx.get("achse_index") is not None:
+        achse_index = base_ctx.get("achse_index")
+
+    if best_wind_index is not None:
+        protokolliere_decision(
+            protokoll,
+            key="lastfall_index",
+            value=best_wind_index,
+            scope={"achse_index": achse_index},
+        )
+    if best_gewicht_index is not None:
+        protokolliere_decision(
+            protokoll,
+            key="lastfall_index",
+            value=best_gewicht_index,
+            scope={"achse_index": achse_index},
+        )
+    if best_other_index is not None:
+        protokolliere_decision(
+            protokoll,
+            key="lastfall_index",
+            value=best_other_index,
+            scope={"achse_index": achse_index},
         )
 
     # Ergebnis für das Bauelement
     kipp_sum_bauteil = best_wind_kipp + best_gew_kipp + best_other_kipp
-    stand_sum_bauteil = best_gew_stand + best_other_stand
+    stand_sum_bauteil = best_wind_stand + best_gew_stand + best_other_stand
     return kipp_sum_bauteil, stand_sum_bauteil
 
 # Gleitsicherheit Utils ------------------------------
