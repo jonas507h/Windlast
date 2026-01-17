@@ -364,7 +364,7 @@ def kipp_envelope_pro_bauelement(
         )
 
         # --- Toplevel-Kriterium ---
-        kriterium = kipp - stand  # "umwerfend": groß = schlecht
+        kriterium = kipp - stand
         protokolliere_doc(
             protokoll,
             bundle=make_docbundle(
@@ -662,25 +662,104 @@ def abhebe_envelope_pro_bauelement(
     protokoll: Optional[Protokoll] = None, kontext: Optional[dict] = None
 ) -> Tuple[float, float]:
     base_ctx = merge_kontext(kontext, {"funktion": "abhebe_envelope_pro_bauelement"})
-    """
-    Element-konsistent:
-      - N_up_bauteil = max (Auftrieb) über ALLE Lastfälle.
-      - N_down_bauteil = min (Auflast) über GEWICHT-Lastfälle (ungünstig kleinster Wert).
-    Rückgabe: (N_down_bauteil, N_up_bauteil)
-    """
-    best_N_up = 0.0
-    best_N_down = None  # min über GEWICHT
+
+    wind_lastfall_index = -1
+    best_wind_index = None
+    best_wind_N_up = -math.inf
+    best_wind_N_down = 0.0
+
+    gewicht_lastfall_index = -1
+    best_gewicht_index = None
+    best_gewicht_N_up = -math.inf
+    best_gewicht_N_down = 0.0
 
     for k in lastfaelle:
         N_down, N_up = bewerte_lastfall_fuer_abheben(norm, k, protokoll=protokoll, kontext=base_ctx)
 
-        if N_up > best_N_up:
-            best_N_up = N_up
+        if k.typ == Lasttyp.WIND:
+            wind_lastfall_index += 1
+            lastfall_index = wind_lastfall_index
+            lasttyp = "WIND"
+
+            if (N_up - N_down) > (best_wind_N_up - best_wind_N_down):
+                best_wind_N_up = N_up
+                best_wind_N_down = N_down
+                best_wind_index = wind_lastfall_index
 
         if k.typ == Lasttyp.GEWICHT:
-            best_N_down = N_down if best_N_down is None else min(best_N_down, N_down)
+            gewicht_lastfall_index += 1
+            lastfall_index = gewicht_lastfall_index
+            lasttyp = "GEWICHT"
 
-    if best_N_down is None:
-        best_N_down = 0.0
+            if (N_up - N_down) > (best_gewicht_N_up - best_gewicht_N_down):
+                best_gewicht_N_up = N_up
+                best_gewicht_N_down = N_down
+                best_gewicht_index = gewicht_lastfall_index
+
+        lastfall_ctx = merge_kontext(base_ctx, {"lasttyp": lasttyp, "lastfall_index": lastfall_index})
+
+        protokolliere_doc(
+                protokoll,
+                bundle=make_docbundle(
+                    titel="Normalkraft N_down",
+                    wert=N_down,
+                    einheit="N",
+                ),
+                kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_abhebe_normal_down"}),
+            )
+
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(
+                titel="Normalkraft N_up",
+                wert=N_up,
+                einheit="N",
+            ),
+            kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_abhebe_normal_up"}),
+        )
+
+        # --- Toplevel-Kriterium ---
+        kriterium = N_up - N_down
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(
+                titel="Kriterium Lastfall (N_up − N_down)",
+                wert=kriterium,
+                einheit="N",
+                formel="K = N_up − N_down",
+                formelzeichen=["N_up", "N_down"],
+            ),
+            kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_gleit_kriterium"}),
+        )
+
+    else:
+        pass
+
+    if best_wind_N_up == -math.inf:
+        best_wind_N_up, best_wind_N_down = 0.0, 0.0
+    if best_gewicht_N_up == -math.inf:
+        best_gewicht_N_down, best_gewicht_N_up = 0.0, 0.0
+
+    best_N_up = max(best_wind_N_up, best_gewicht_N_up)
+    best_N_down = min(best_wind_N_down, best_gewicht_N_down)
+
+
+    if base_ctx.get("element_id") is not None:
+        element_id = base_ctx.get("element_id")
+
+    if best_wind_index is not None:
+        protokolliere_decision(
+            protokoll,
+            key="lastfall_index",
+            value=best_wind_index,
+            scope={"element_id": element_id},
+        )
+    if best_gewicht_index is not None:
+        protokolliere_decision(
+            protokoll,
+            key="lastfall_index",
+            value=best_gewicht_index,
+            scope={"element_id": element_id},
+        )
 
     return best_N_down, best_N_up
