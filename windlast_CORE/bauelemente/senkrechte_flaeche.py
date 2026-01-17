@@ -323,7 +323,7 @@ class senkrechteFlaeche:
 
                         _kraftbeiwert = kraftbeiwert(
                             norm, objekttyp=self.objekttyp, windrichtung=windrichtung, senkrechte_flaeche_typ=self.flaeche_typ, zone=zone,
-                            punkte=eckpunkte_lokal,
+                            punkte=self.eckpunkte,
                             protokoll=protokoll, kontext=seg_ctx
                         )
                         _bezugsflaeche = projizierte_flaeche(
@@ -420,7 +420,7 @@ class senkrechteFlaeche:
 
                         _kraftbeiwert = kraftbeiwert(
                             norm, objekttyp=self.objekttyp, windrichtung=windrichtung, senkrechte_flaeche_typ=self.flaeche_typ, zone=zone,
-                            punkte=eckpunkte_lokal,
+                            punkte=self.eckpunkte,
                             protokoll=protokoll, kontext=seg_ctx
                         )
                         _bezugsflaeche = projizierte_flaeche(

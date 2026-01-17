@@ -349,7 +349,7 @@ def _kippsicherheit_DinEn13814_2005_06(
             protokolliere_decision(
                 protokoll,
                 key="achse_index",
-                value=dir_records[winner_idx]["best_achse_idx"],
+                value=best_achse_idx,
                 scope={"windrichtung_deg": f"{winkel}°"},
             )
 
@@ -679,7 +679,7 @@ def _kippsicherheit_DinEn17879_2024_08(
             protokolliere_decision(
                 protokoll,
                 key="achse_index",
-                value=dir_records[winner_idx]["best_achse_idx"],
+                value=best_achse_idx,
                 scope={"windrichtung_deg": f"{winkel}°"},
             )
 
