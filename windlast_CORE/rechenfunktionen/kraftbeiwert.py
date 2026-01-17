@@ -13,6 +13,7 @@ from windlast_CORE.datenstruktur.zwischenergebnis import (
     protokolliere_doc,
 )
 from windlast_CORE.rechenfunktionen.geom3d import Vec3, vektor_laenge, is_parallel, vektor_zwischen_punkten, vektoren_addieren
+from windlast_CORE.rechenfunktionen.interpolation import interpol_2D
 from windlast_CORE.datenstruktur.konstanten import _EPS
 
 # Druckbeiwerte für Wände in Abhängigkeit von der Zone und dem Höhen-/Breitenverhältnis
@@ -42,11 +43,11 @@ ZONE_DRUCKBEIWERT = {
 def druckbeiwert_zone(zone: Zone, ratio: float) -> float:
     """Gibt den Druckbeiwert für eine Zone (A-D) und ein Verhältnis l/h zurück."""
     eintraege = ZONE_DRUCKBEIWERT[zone]
-    for e in eintraege:
-        if ratio <= e["max_ratio"]:
-            return e["Druckbeiwert"]
-    return eintraege[-1]["Druckbeiwert"]  # Fallback (sollte nicht passieren)
+    ratios = [e["max_ratio"] for e in eintraege]
+    beiwerte = [e["Druckbeiwert"] for e in eintraege]
 
+    druckbeiwert = interpol_2D(ratios, beiwerte, ratio)
+    return druckbeiwert
 
 def _validate_inputs(
     objekttyp: ObjektTyp,
