@@ -368,7 +368,7 @@ def kipp_envelope_pro_bauelement(
         protokolliere_doc(
             protokoll,
             bundle=make_docbundle(
-                titel=f"Lastfall {lasttyp} #{lastfall_index}: Kriterium (M_K − M_St)",
+                titel="Kriterium Lastfall (M_K − M_St)",
                 wert=kriterium,
                 einheit="Nm",
                 formel="K = M_K − M_St",
@@ -505,31 +505,124 @@ def gleit_envelope_pro_bauelement(
     *, protokoll: Optional[Protokoll] = None, kontext: Optional[dict] = None
 ) -> Tuple[Vec3, float, float]:
     base_ctx = merge_kontext(kontext, {"funktion": "gleit_envelope_pro_bauelement"})
-    """
-    Element-konsistent:
-      - Wähle den Lastfall mit maximaler ||H_vec|| ⇒ dessen H_vec und N_up zählen.
-      - N_down kommt aus den GEWICHT-Lastfällen: kleinster (ungünstigster) Wert.
-    Rückgabe: (H_vec_bauteil, N_down_bauteil, N_up_bauteil)
-    """
+
+    wind_lastfall_index = -1
+    best_wind_index = None
+    gewicht_lastfall_index = -1
+    best_gewicht_index = None
+
     best_H_vec: Vec3 = (0.0, 0.0, 0.0)
-    best_H_betrag = -1.0
-    best_N_down = None
+    best_H_betrag = -math.inf
     best_N_up = 0.0
+    best_N_down = None
+    best_Ndown_minus_Nup = None
 
     for k in lastfaelle:
         H_vec, N_down, N_up = bewerte_lastfall_fuer_gleiten(norm, k, protokoll=protokoll, kontext=base_ctx)
         H_betrag = vektor_laenge(H_vec)
+
         if k.typ == Lasttyp.WIND:
+            wind_lastfall_index += 1
+            lastfall_index = wind_lastfall_index
+            lasttyp = "WIND"
+
+            lastfall_ctx = merge_kontext(base_ctx, {"lasttyp": lasttyp, "lastfall_index": lastfall_index})
+
             if H_betrag > best_H_betrag:
                 best_H_betrag = H_betrag
                 best_H_vec = H_vec
                 best_N_up = N_up
+                best_wind_index = wind_lastfall_index
 
         if k.typ == Lasttyp.GEWICHT:
-            best_N_down = N_down if best_N_down is None else min(best_N_down, N_down)
+            gewicht_lastfall_index += 1
+            lastfall_index = gewicht_lastfall_index
+            lasttyp = "GEWICHT"
+
+            lastfall_ctx = merge_kontext(base_ctx, {"lasttyp": lasttyp, "lastfall_index": lastfall_index})
+
+            n_eff = N_down - N_up
+            if best_Ndown_minus_Nup is None or n_eff < best_Ndown_minus_Nup:
+                best_Ndown_minus_Nup = n_eff
+                best_N_down = N_down
+                best_gewicht_index = gewicht_lastfall_index
+
+
+        protokolliere_doc(
+                protokoll,
+                bundle=make_docbundle(
+                    titel="Horizontalkraft-Vektor H",
+                    wert=H_vec,
+                    einheit="N",
+                ),
+                kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_gleit_horizontal"}),
+            )
+
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(
+                titel="Horizontalkraft H",
+                wert=H_betrag,
+                einheit="N",
+            ),
+            kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_gleit_horizontal"}),
+        )
+
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(
+                titel="Normalkraft N_down",
+                wert=N_down,
+                einheit="N",
+            ),
+            kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_gleit_normal_down"}),
+        )
+
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(
+                titel="Normalkraft N_up",
+                wert=N_up,
+                einheit="N",
+            ),
+            kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_gleit_normal_up"}),
+        )
+
+        protokolliere_doc(
+            protokoll,
+            bundle=make_docbundle(
+                titel="Effektive Normalkraft N_down - N_up",
+                wert=N_down - N_up,
+                einheit="N",
+                formel="N_eff = N_down - N_up",
+                formelzeichen=["N_down", "N_up"],
+            ),
+            kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_gleit_normal_effektiv"}),
+        )
+
+    else:
+        pass
 
     if best_N_down is None:
         best_N_down = 0.0
+
+    if base_ctx.get("element_id") is not None:
+        element_id = base_ctx.get("element_id")
+
+    if best_wind_index is not None:
+        protokolliere_decision(
+            protokoll,
+            key="lastfall_index",
+            value=best_wind_index,
+            scope={"element_id": element_id},
+        )
+    if best_gewicht_index is not None:
+        protokolliere_decision(
+            protokoll,
+            key="lastfall_index",
+            value=best_gewicht_index,
+            scope={"element_id": element_id},
+        )
 
     return best_H_vec, best_N_down, best_N_up
 
