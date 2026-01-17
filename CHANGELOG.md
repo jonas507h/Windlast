@@ -1,9 +1,22 @@
 # Changelog
 
-## [2.0.0-alpha.2] – 
+## [2.0.0-alpha.3] – 
+
+### Added
+
+
+### Changed
+
+
+### Known Issues
+- Darstellung von Zwischenergebnissen ist noch im Aufbau
+- Benutzeroberfläche wird weiter verfeinert
+
+## [2.0.0-alpha.2] – 2026-01-17
 
 ### Added
 - Einträge in der Hilfe ergänzt
+- Rechenergebnisse geprüft
 
 ### Changed
 - Eingabevalidierung und -filterung verbessert
@@ -13,7 +26,6 @@
 ### Known Issues
 - Darstellung von Zwischenergebnissen ist noch im Aufbau
 - Benutzeroberfläche wird weiter verfeinert
-- Überprüfung der Rechenergebnisse steht noch aus
 
 ## [2.0.0-alpha.1] – 2025-12-18
 
