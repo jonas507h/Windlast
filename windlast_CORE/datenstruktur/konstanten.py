@@ -13,7 +13,7 @@ _EPS = 1e-9
 class PhysikKonstanten:
     luftdichte: float = 1.25        # kg/m^3
     zaehigkeit_kin: float = 15.32e-6  # m^2/s
-    erdbeschleunigung: float = 9.80665              # m/s^2
+    erdbeschleunigung: float = 9.81            # m/s^2
 
 __konst_var = contextvars.ContextVar("physik_konstanten", default=PhysikKonstanten())
 

@@ -55,7 +55,7 @@ def _schlankheit_DinEn1991_1_4_2010_12(
         laenge = abstand_punkte(start, ende)
 
         traverse = catalog.get_traverse(objekt_name_intern)
-        hoehe = traverse.hoehe
+        hoehe = min(traverse.A_hoehe, traverse.B_hoehe)  # TODO: Abhängig von Ausrichtung machen
         if hoehe is None or hoehe <= 0:
             local_ctx = merge_kontext(kontext, {
                 "phase": "Zwischenwerte",
@@ -135,7 +135,7 @@ def _schlankheit_DinEn1991_1_4_2010_12(
             )
             return Zwischenergebnis(wert=float("nan"))
 
-        faktor = interpol_2D([15.0, 50.0], [2.0, 1.4], laenge)
+        faktor = interpol_2D([15.0, 50.0], [1.0, 0.7], laenge)
 
         rechenwert = faktor * (laenge / d_aussen)
         wert = min(rechenwert, 70.0)
