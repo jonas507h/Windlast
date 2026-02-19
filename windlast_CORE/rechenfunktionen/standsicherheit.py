@@ -24,6 +24,7 @@ from windlast_CORE.datenstruktur.zwischenergebnis import (
     Protokoll,
     collect_docs,
     protokolliere_doc,
+    protokolliere_decision,
     make_docbundle,
 )
 
@@ -244,6 +245,12 @@ def _rechne_drei_nachweise(
                 # Wichtig für den nächsten Schritt: welcher Nachweis bestimmt den Ballast?
                 "quelle_nachweis": ballast_quelle.name if ballast_quelle is not None else None,
             }),
+        )
+        protokolliere_decision(
+            protokoll,
+            key="quelle_nachweis",
+            value=ballast_quelle.name,
+            scope={"nachweis": "BALLAST"},
         )
 
     return out, (v_kipp, v_gleit, v_abhebe)

@@ -362,7 +362,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
                 formelzeichen=["T", "μ", "N_up", "N_down"],
                 quelle_formel="---",
             ),
-            kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "rolle": "relevant"}),
+            kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "ballast_pro_sicherheit", "quelle_nachweis": "GLEIT", "rolle": "relevant"}),
         )
 
         #Entscheidung protokollieren

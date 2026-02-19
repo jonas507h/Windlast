@@ -499,7 +499,7 @@ def _abhebesicherheit_DinEn17879_2024_08(
                 quelle_formel="---",
                 quelle_formelzeichen=["---"],
             ),
-            kontext=merge_kontext(base_ctx, {"nachweis": "ABHEBE", "rolle": "relevant"}),
+            kontext=merge_kontext(base_ctx, {"nachweis": "ABHEBE", "doc_type": "ballast_pro_sicherheit", "quelle_nachweis": "ABHEBE", "rolle": "relevant"}),
         )
 
         #Entscheidung protokollieren

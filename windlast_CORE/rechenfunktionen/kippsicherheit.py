@@ -409,7 +409,7 @@ def _kippsicherheit_DinEn13814_2005_06(
                 formelzeichen=["M_K", "M_St", "γ_g", "m_stand,1N", "g"],
                 quelle_formelzeichen=["---"],
             ),
-            kontext=merge_kontext(base_ctx, {"nachweis": "KIPP", "rolle": "relevant"}),
+            kontext=merge_kontext(base_ctx, {"nachweis": "KIPP", "doc_type": "ballast_pro_sicherheit", "quelle_nachweis": "KIPP", "rolle": "relevant"}),
         )
 
         #Entscheidung protokollieren
