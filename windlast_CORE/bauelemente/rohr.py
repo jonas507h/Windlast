@@ -138,7 +138,7 @@ class Rohr:
                 norm, self.objekttyp, self.rohr_name_intern, staudruck, _zaehigkeit, _luftdichte,
                 protokoll=protokoll, kontext=seg_ctx,
             )
-            _projizierte_Flaeche = projizierte_flaeche(
+            _bezugsflaeche = projizierte_flaeche(
                 norm, self.objekttyp, [start_lokal, ende_lokal],
                 self.rohr_name_intern, windrichtung,
                 protokoll=protokoll, kontext=seg_ctx,
@@ -148,7 +148,7 @@ class Rohr:
                 protokoll=protokoll, kontext=seg_ctx,
             )
             _voelligkeitsgrad = voelligkeitsgrad(
-                norm, _projizierte_Flaeche.wert, _eingeschlossene_Flaeche.wert,
+                norm, _bezugsflaeche.wert, _eingeschlossene_Flaeche.wert,
                 protokoll=protokoll, kontext=seg_ctx,
             )
             _grundkraftbeiwert = grundkraftbeiwert(
@@ -168,7 +168,7 @@ class Rohr:
                 protokoll=protokoll, kontext=seg_ctx,
             )
             _windkraft = windkraft(
-                norm, self.objekttyp, _kraftbeiwert.wert, staudruck, _projizierte_Flaeche.wert,
+                norm, self.objekttyp, _kraftbeiwert.wert, staudruck, _bezugsflaeche.wert,
                 protokoll=protokoll, kontext=seg_ctx,
             )
             _windkraft_vec = windkraft_zu_vektor(

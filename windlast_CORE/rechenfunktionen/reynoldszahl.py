@@ -120,7 +120,7 @@ def _reynoldszahl_DinEn1991_1_4_2010_12(
             # )
             return Zwischenergebnis(wert=float("nan"))
 
-        wert = geschwindigkeit * charak_Laenge / zaehigkeit
+        wert = (geschwindigkeit * charak_Laenge) / zaehigkeit
 
         # protokolliere_doc(
         #     protokoll,

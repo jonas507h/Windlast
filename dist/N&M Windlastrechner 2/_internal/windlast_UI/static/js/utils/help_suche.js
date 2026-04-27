@@ -48,39 +48,12 @@ const SYNONYMS = {
 };
 
 // -----------------------------------------------------------------------------
-// Help-Content registrieren (eigene Registry, um Zyklus mit help.js zu vermeiden)
+// Help-Content aus zentraler Registry.
 // -----------------------------------------------------------------------------
 
-import { NORM_HELP_PAGES } from "../help_content/norminfo.js";
-import { GENERAL_HELP_PAGES } from "../help_content/allgemein.js";
-import { MELDUNGEN_HELP_PAGES } from "../help_content/meldungen.js";
-import { HEADER_HELP_PAGES } from "../help_content/header.js";
-import { TOR_HELP_PAGES } from "../help_content/tor.js";
-import { STEHER_HELP_PAGES } from "../help_content/steher.js";
-import { TISCH_HELP_PAGES } from "../help_content/tisch.js";
-import { ERGEBNISSE_HELP_PAGES } from "../help_content/ergebnisse.js";
-import { ZWISCHENERGEBNISSE_HELP_PAGES } from "../help_content/zwischenergebnisse.js";
+import { HELP_PAGES } from "../help_content/index.js";
 
-const PAGES_BY_ID = Object.create(null);
-const ALL_PAGES   = [];
-
-function registerPages(list) {
-  for (const p of list || []) {
-    if (!p || !p.id) continue;
-    PAGES_BY_ID[p.id] = p;
-    ALL_PAGES.push(p);
-  }
-}
-
-registerPages(NORM_HELP_PAGES);
-registerPages(GENERAL_HELP_PAGES);
-registerPages(MELDUNGEN_HELP_PAGES);
-registerPages(HEADER_HELP_PAGES);
-registerPages(TOR_HELP_PAGES);
-registerPages(STEHER_HELP_PAGES);
-registerPages(TISCH_HELP_PAGES);
-registerPages(ERGEBNISSE_HELP_PAGES);
-registerPages(ZWISCHENERGEBNISSE_HELP_PAGES);
+const ALL_PAGES = HELP_PAGES;
 
 // -----------------------------------------------------------------------------
 // Utility: Normalisierung, Textaufbereitung

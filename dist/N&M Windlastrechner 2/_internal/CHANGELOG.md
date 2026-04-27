@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.0.0-beta.2] –
+
+### Added
+
+
+### Changed
+
+
+### Known Issues
+- Ausmitte bei Anzeigetafeln wird nicht berücksichtigt
+
+## [2.0.0-alpha.2] – 2026-01-17
+
 ## [2.0.0-beta.1] – 2026-04-27
 
 ### Added

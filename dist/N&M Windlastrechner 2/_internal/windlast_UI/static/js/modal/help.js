@@ -1,14 +1,9 @@
 // static/js/modal/help.js
 
-import { NORM_HELP_PAGES } from "../help_content/norminfo.js";
-import { GENERAL_HELP_PAGES } from "../help_content/allgemein.js";
-import { MELDUNGEN_HELP_PAGES } from "../help_content/meldungen.js";
-import { HEADER_HELP_PAGES } from "../help_content/header.js";
-import { TOR_HELP_PAGES } from "../help_content/tor.js";
-import { STEHER_HELP_PAGES } from "../help_content/steher.js";
-import { TISCH_HELP_PAGES } from "../help_content/tisch.js";
-import { ERGEBNISSE_HELP_PAGES } from "../help_content/ergebnisse.js";
-import { ZWISCHENERGEBNISSE_HELP_PAGES } from "../help_content/zwischenergebnisse.js";
+import {
+  HELP_PAGES_BY_ID,
+  getHelpPage
+} from "../help_content/index.js";
 
 import { HELP_CONTACTS } from "../help_content/help_contacts.js";
 
@@ -23,26 +18,6 @@ import {
   openHelpSearchResults,
   closeHelpSearchResults
 } from "./suchergebnisse.js";
-
-const PAGES_BY_ID = Object.create(null);
-
-// --- Content registrieren ---
-function registerPages(list) {
-  for (const p of list || []) {
-    if (!p.id) continue;
-    PAGES_BY_ID[p.id] = p;
-  }
-}
-
-registerPages(NORM_HELP_PAGES);
-registerPages(GENERAL_HELP_PAGES);
-registerPages(MELDUNGEN_HELP_PAGES);
-registerPages(HEADER_HELP_PAGES);
-registerPages(TOR_HELP_PAGES);
-registerPages(STEHER_HELP_PAGES);
-registerPages(TISCH_HELP_PAGES);
-registerPages(ERGEBNISSE_HELP_PAGES);
-// registerPages(ZWISCHENERGEBNISSE_HELP_PAGES);
 
 // --- History-Stack für Vor / Zurück ---------------------------------------
 const history = [];
@@ -107,7 +82,7 @@ function resolveHelpLinks(html) {
     }
 
     // --- 2) INTERNE HÄLFTE (bestehender Code) ---
-    const page = PAGES_BY_ID[id];
+    const page = HELP_PAGES_BY_ID[id];
     const text = label || page?.shortTitle || page?.title || id;
     const escapedText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
@@ -219,7 +194,7 @@ function formatChangelogVersionTitle(raw) {
 
 // --- Seitenzugriff ---
 function getPage(id) {
-  return PAGES_BY_ID[id] || null;
+   return getHelpPage(id);
 }
 
 function getRenderedPage(id) {

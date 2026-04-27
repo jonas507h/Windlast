@@ -1,6 +1,6 @@
 // config.js
 (function () {
-  const VERSION = "2.0.0-beta.1";
+  const VERSION = "2.0.0-beta.2";
 
   // Echte Build-Rolle
   const BUILD_ROLE = "dev"; // "user" | "debug" | "admin" | "dev"

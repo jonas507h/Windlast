@@ -2,35 +2,9 @@
 import { runHelpSearch } from "../utils/help_suche.js";
 
 // Help-Content, um Breadcrumb & Body-Text zu kennen
-import { NORM_HELP_PAGES } from "../help_content/norminfo.js";
-import { GENERAL_HELP_PAGES } from "../help_content/allgemein.js";
-import { MELDUNGEN_HELP_PAGES } from "../help_content/meldungen.js";
-import { HEADER_HELP_PAGES } from "../help_content/header.js";
-import { TOR_HELP_PAGES } from "../help_content/tor.js";
-import { STEHER_HELP_PAGES } from "../help_content/steher.js";
-import { TISCH_HELP_PAGES } from "../help_content/tisch.js";
-import { ERGEBNISSE_HELP_PAGES } from "../help_content/ergebnisse.js";
-import { ZWISCHENERGEBNISSE_HELP_PAGES } from "../help_content/zwischenergebnisse.js";
-
-// interne Registry, analog zu help.js
-const PAGES_BY_ID = Object.create(null);
-
-function registerPages(list) {
-  for (const p of list || []) {
-    if (!p || !p.id) continue;
-    PAGES_BY_ID[p.id] = p;
-  }
-}
-
-registerPages(NORM_HELP_PAGES);
-registerPages(GENERAL_HELP_PAGES);
-registerPages(MELDUNGEN_HELP_PAGES);
-registerPages(HEADER_HELP_PAGES);
-registerPages(TOR_HELP_PAGES);
-registerPages(STEHER_HELP_PAGES);
-registerPages(TISCH_HELP_PAGES);
-registerPages(ERGEBNISSE_HELP_PAGES);
-registerPages(ZWISCHENERGEBNISSE_HELP_PAGES);
+import {
+  HELP_PAGES_BY_ID
+} from "../help_content/index.js";
 
 /**
  * Kleiner interner State
@@ -267,12 +241,12 @@ function buildHighlightedSnippetFromStart(text, query) {
 
 // Breadcrumb für eine Seite als Array von Labels
 function getBreadcrumbLabels(pageId) {
-  const page = PAGES_BY_ID[pageId];
+  const page = HELP_PAGES_BY_ID[pageId];
   const labels = ["Hilfe"];
 
   const pathIds = Array.isArray(page?.pfad) ? page.pfad : [];
   for (const pid of pathIds) {
-    const pPage = PAGES_BY_ID[pid];
+    const pPage = HELP_PAGES_BY_ID[pid];
     labels.push(pPage?.shortTitle || pPage?.title || pid);
   }
 
@@ -329,7 +303,7 @@ function renderResults(query, searchResult) {
     btn.setAttribute("data-search-score", String(r.score ?? ""));
     btn.setAttribute("data-search-field", r.field || "");
 
-    const page = PAGES_BY_ID[r.id] || null;
+    const page = HELP_PAGES_BY_ID[r.id] || null;
     const titleText = (page && page.title) || r.title || r.id || "Ohne Titel";
     const bodyTextRaw = page ? extractSearchableText(page.body || "") : "";
     const breadcrumbLabels = getBreadcrumbLabels(r.id);

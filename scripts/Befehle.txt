@@ -19,7 +19,6 @@ oder
 
 .\build-onefile.ps1
 .\build-onedir.ps1
-.\build-installer.ps1
 
 In Struktur aufwärts cd..
 Abwärts: cd Ordnername
