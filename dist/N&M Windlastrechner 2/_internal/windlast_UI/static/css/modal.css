@@ -23,7 +23,7 @@
   background: var(--panel);
   color: var(--text);
   border-radius: 16px;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+  box-shadow: var(--modal-shadow);
   padding: 20px 24px 24px;
 }
 

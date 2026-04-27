@@ -82,6 +82,7 @@ export const CONTEXT_ALIASES = {
   paarung: "Materialpaarung",
   norm_used: "Verwendete Norm",
   segment_index: "Segment",
+  lastfall_index: "Lastfall",
 };
 
 export const CONTEXT_BLACKLIST = new Set([

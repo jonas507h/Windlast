@@ -3,7 +3,7 @@
   const VERSION = "2.0.0-beta.1";
 
   // Echte Build-Rolle
-  const BUILD_ROLE = "user"; // "user" | "debug" | "admin" | "dev"
+  const BUILD_ROLE = "dev"; // "user" | "debug" | "admin" | "dev"
 
   // 1) Flags pro Rolle definieren (dynamisch)
   // value: aktueller Zustand

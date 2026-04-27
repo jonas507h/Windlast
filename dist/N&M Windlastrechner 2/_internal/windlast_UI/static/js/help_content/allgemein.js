@@ -21,7 +21,8 @@ export const GENERAL_HELP_PAGES = [
         <li>[[meldungen:haeufige_meldungen|Häufige Meldungen]]</li>
       </ul>
       <p>
-        Fragen oder Feedback gerne an [[contact:jonas.schmid|Jonas Schmid]] oder das [[contact:tg-rigging|TG-Rigging]].<br>
+        Fragen oder Feedback gerne an [[contact:jonas.schmid|Jonas Schmid]] oder das TG-Rigging.<br>
+        <br>
         [[app:changelog|Changelog]]
       </p>
     `
@@ -59,10 +60,10 @@ export const GENERAL_HELP_PAGES = [
 
   {
     id: "app:faq",
-    title: "FAQ – Häufige Fragen",
+    title: "FAQ",
     shortTitle: "FAQ",
     body: `
-      <p>TODO: FAQ</p>
+      <p>FAQ folgt</p>
     `
   },
 

@@ -11,11 +11,6 @@ export const HELP_CONTACTS = {
     name: "Jonas Schmid",
     email: "jonas.schmid@neumannmueller.com",
     teams: "https://teams.microsoft.com/l/chat/0/0?users=jonas.schmid@neumannmueller.com",
-    mobile: "+49 160 93367944",
     phone: "+49 30 367512925"
-  },
-  "tg-rigging": {
-    name: "TG-Rigging",
-    email: "tg-rigging@firma.de",
   },
 };
