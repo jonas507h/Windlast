@@ -20,7 +20,7 @@
       show_test_options_dropdown:      { value: false, lock: true },
       use_eps_on_anzeige:              { value: true,  lock: true },    // kleine Zahlen als 0 anzeigen
       show_einstellungen_button:       { value: false, lock: true },
-      open_zwischenergbnis_modal:      { value: false, lock: true },
+      open_zwischenergebnis_modal:     { value: false, lock: true },
     },
     debug: {
       show_zwischenergebnisse_tooltip: { value: true,  lock: false },
@@ -33,7 +33,7 @@
       show_test_options_dropdown:      { value: false, lock: true },
       use_eps_on_anzeige:              { value: true,  lock: false },
       show_einstellungen_button:       { value: false, lock: true },
-      open_zwischenergbnis_modal:      { value: false, lock: false },
+      open_zwischenergebnis_modal:     { value: false, lock: false },
     },
     admin: {
       show_zwischenergebnisse_tooltip: { value: true,  lock: false },
@@ -46,7 +46,7 @@
       show_test_options_dropdown:      { value: false, lock: true },
       use_eps_on_anzeige:              { value: true,  lock: false },
       show_einstellungen_button:       { value: false, lock: true },
-      open_zwischenergbnis_modal:      { value: false, lock: false },
+      open_zwischenergebnis_modal:     { value: false, lock: false },
     },
     dev: {
       show_zwischenergebnisse_tooltip: { value: true,  lock: false },
@@ -59,7 +59,7 @@
       show_test_options_dropdown:      { value: true,  lock: false },
       use_eps_on_anzeige:              { value: false, lock: false },
       show_einstellungen_button:       { value: true,  lock: true },
-      open_zwischenergbnis_modal:      { value: false, lock: false },
+      open_zwischenergebnis_modal:     { value: true, lock: false },
     },
   };
 

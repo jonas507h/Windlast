@@ -45,8 +45,7 @@ export const GENERAL_HELP_PAGES = [
         der Button zur Berechnung der Windlasten.
       </p>
       <p>
-        Unten werden die [[ergebnisse:allgemein|Ergebnisse]] der Berechnung angezeigt. Hier können auch die Fenster für die [[meldungen:allgemein|Meldungen]]
-        und die [[zwischenergebnis:allgemein|Zwischenergebnisse]] geöffnet werden.
+        Unten werden die [[ergebnisse:allgemein|Ergebnisse]] der Berechnung und mögliche [[meldungen:allgemein|Meldungen]] angezeigt.
       </p>
       <p>
         Überall im Programm sind kleine Fragezeichen-Buttons zu finden. Ein Klick darauf öffnet die zugehörige Hilfe-Seite.
