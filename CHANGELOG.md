@@ -1,16 +1,16 @@
 # Changelog
 
-## [2.0.0-alpha.3] – 
+## [2.0.0-beta.1] – 2026-04-27
 
 ### Added
 
 
 ### Changed
-
+- Falsche Rechenmethoden der Standsicherheit geändert
+- Darstellung der Zwischenergebnisse versteckt
 
 ### Known Issues
-- Darstellung von Zwischenergebnissen ist noch im Aufbau
-- Benutzeroberfläche wird weiter verfeinert
+- Ausmitte bei Anzeigetafeln wird nicht berücksichtigt
 
 ## [2.0.0-alpha.2] – 2026-01-17
 

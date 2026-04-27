@@ -185,34 +185,34 @@ def _kippsicherheit_DinEn13814_2005_06(
 
                 for element, lastfaelle_elem in kraefte_nach_element.items():
                     kipp_b, stand_b = kipp_envelope_pro_bauelement(norm, achse, lastfaelle_elem, protokoll=sub_prot, kontext=merge_kontext(achse_ctx, {"element_id": str(element)}))
-                    protokolliere_doc(
-                        sub_prot,
-                        bundle=make_docbundle(
-                            titel="Kippmoment M_K",
-                            wert=kipp_b,
-                            einheit="Nm",
-                        ),
-                        kontext=merge_kontext(base_ctx, {
-                            "nachweis": "KIPP",
-                            "doc_type": "axis_momente",
-                            "achse_index": achse_idx,
-                            "element_id": str(element),
-                        }),
-                    )
-                    protokolliere_doc(
-                        sub_prot,
-                        bundle=make_docbundle(
-                            titel="Standmoment M_St",
-                            wert=stand_b,
-                            einheit="Nm",
-                        ),
-                        kontext=merge_kontext(base_ctx, {
-                            "nachweis": "KIPP",
-                            "doc_type": "axis_momente",
-                            "achse_index": achse_idx,
-                            "element_id": str(element),
-                        }),
-                    )
+                    # protokolliere_doc(
+                    #     sub_prot,
+                    #     bundle=make_docbundle(
+                    #         titel="Kippmoment M_K",
+                    #         wert=kipp_b,
+                    #         einheit="Nm",
+                    #     ),
+                    #     kontext=merge_kontext(base_ctx, {
+                    #         "nachweis": "KIPP",
+                    #         "doc_type": "axis_momente",
+                    #         "achse_index": achse_idx,
+                    #         "element_id": str(element),
+                    #     }),
+                    # )
+                    # protokolliere_doc(
+                    #     sub_prot,
+                    #     bundle=make_docbundle(
+                    #         titel="Standmoment M_St",
+                    #         wert=stand_b,
+                    #         einheit="Nm",
+                    #     ),
+                    #     kontext=merge_kontext(base_ctx, {
+                    #         "nachweis": "KIPP",
+                    #         "doc_type": "axis_momente",
+                    #         "achse_index": achse_idx,
+                    #         "element_id": str(element),
+                    #     }),
+                    # )
                     total_kipp += kipp_b
                     total_stand += stand_b
 
@@ -222,48 +222,48 @@ def _kippsicherheit_DinEn13814_2005_06(
                 else:
                     sicherheit = total_stand / total_kipp
 
-                protokolliere_doc(
-                    sub_prot,
-                    bundle=make_docbundle(
-                        titel="Summe Kippmoment ΣM_K",
-                        wert=total_kipp,
-                        formel="ΣM_K = ΣM_K,Bauelement",
-                        einheit="Nm",
-                    ),
-                    kontext=merge_kontext(base_ctx, {
-                        "nachweis": "KIPP",
-                        "doc_type": "axis_momente",
-                        "achse_index": achse_idx,
-                    }),
-                )
-                protokolliere_doc(
-                    sub_prot,
-                    bundle=make_docbundle(
-                        titel="Summe Standmoment ΣM_St",
-                        wert=total_stand,
-                        formel="ΣM_St = ΣM_St,Bauelement",
-                        einheit="Nm",
-                    ),
-                    kontext=merge_kontext(base_ctx, {
-                        "nachweis": "KIPP",
-                        "doc_type": "axis_momente",
-                        "achse_index": achse_idx,
-                    }),
-                )
-                protokolliere_doc(
-                    sub_prot,
-                    bundle=make_docbundle(
-                        titel=f"Achs-Sicherheit S_kipp,Achse{achse_idx}",
-                        wert=sicherheit,
-                        formel=f"S_kipp,Achse{achse_idx} = ΣM_St / ΣM_K",
-                        formelzeichen=["M_St", "M_K"],
-                    ),
-                    kontext=merge_kontext(base_ctx, {
-                        "nachweis": "KIPP",
-                        "doc_type": "axis_sicherheit",
-                        "achse_index": achse_idx,
-                    }),
-                )
+                # protokolliere_doc(
+                #     sub_prot,
+                #     bundle=make_docbundle(
+                #         titel="Summe Kippmoment ΣM_K",
+                #         wert=total_kipp,
+                #         formel="ΣM_K = ΣM_K,Bauelement",
+                #         einheit="Nm",
+                #     ),
+                #     kontext=merge_kontext(base_ctx, {
+                #         "nachweis": "KIPP",
+                #         "doc_type": "axis_momente",
+                #         "achse_index": achse_idx,
+                #     }),
+                # )
+                # protokolliere_doc(
+                #     sub_prot,
+                #     bundle=make_docbundle(
+                #         titel="Summe Standmoment ΣM_St",
+                #         wert=total_stand,
+                #         formel="ΣM_St = ΣM_St,Bauelement",
+                #         einheit="Nm",
+                #     ),
+                #     kontext=merge_kontext(base_ctx, {
+                #         "nachweis": "KIPP",
+                #         "doc_type": "axis_momente",
+                #         "achse_index": achse_idx,
+                #     }),
+                # )
+                # protokolliere_doc(
+                #     sub_prot,
+                #     bundle=make_docbundle(
+                #         titel=f"Achs-Sicherheit S_kipp,Achse{achse_idx}",
+                #         wert=sicherheit,
+                #         formel=f"S_kipp,Achse{achse_idx} = ΣM_St / ΣM_K",
+                #         formelzeichen=["M_St", "M_K"],
+                #     ),
+                #     kontext=merge_kontext(base_ctx, {
+                #         "nachweis": "KIPP",
+                #         "doc_type": "axis_sicherheit",
+                #         "achse_index": achse_idx,
+                #     }),
+                # )
 
                 if sicherheit < dir_min_sicherheit:
                     dir_min_sicherheit = sicherheit
@@ -290,51 +290,51 @@ def _kippsicherheit_DinEn13814_2005_06(
                 if ballastkraft > dir_ballast_max:
                     dir_ballast_max = ballastkraft
 
-                protokolliere_doc(
-                    sub_prot,
-                    bundle=make_docbundle(
-                        titel=f"Achs-Ballast m_Ballast,kipp,Achse{achse_idx}",
-                        wert=ballastkraft / aktuelle_konstanten().erdbeschleunigung,  # kg
-                        formel="m_Ballast,kipp,Achse = max(0, ΣM_K − ΣM_St) / (γ_g · m_stand,1N)",
-                        formelzeichen=["M_K", "M_St", "γ_g", "m_stand,1N", "g"],
-                        einheit="kg",
-                    ),
-                    kontext=merge_kontext(base_ctx, {
-                        "nachweis": "KIPP",
-                        "doc_type": "axis_ballast",
-                        "achse_index": achse_idx,
-                    }),
-                )
+                # protokolliere_doc(
+                #     sub_prot,
+                #     bundle=make_docbundle(
+                #         titel=f"Achs-Ballast m_Ballast,kipp,Achse{achse_idx}",
+                #         wert=ballastkraft / aktuelle_konstanten().erdbeschleunigung,  # kg
+                #         formel="m_Ballast,kipp,Achse = max(0, ΣM_K − ΣM_St) / (γ_g · m_stand,1N)",
+                #         formelzeichen=["M_K", "M_St", "γ_g", "m_stand,1N", "g"],
+                #         einheit="kg",
+                #     ),
+                #     kontext=merge_kontext(base_ctx, {
+                #         "nachweis": "KIPP",
+                #         "doc_type": "axis_ballast",
+                #         "achse_index": achse_idx,
+                #     }),
+                # )
 
-            protokolliere_doc(
-                sub_prot,
-                bundle=make_docbundle(
-                    titel=f"Richtungs-Sicherheit S_kipp,{winkel}°",
-                    wert=dir_min_sicherheit,
-                    formel="S_kipp = ΣM_St / ΣM_K",
-                    formelzeichen=["M_St", "M_K"],
-                ),
-                kontext=merge_kontext(base_ctx, {
-                    "nachweis": "KIPP",
-                    "doc_type": "dir_min_sicherheit",
-                    "windrichtung_deg": f"{winkel}°",
-                }),
-            )
-            protokolliere_doc(
-                sub_prot,
-                bundle=make_docbundle(
-                    titel=f"Richtungs-Ballast m_Ballast,kipp,{winkel}°",
-                    wert=dir_ballast_max / aktuelle_konstanten().erdbeschleunigung,
-                    einheit="kg",
-                    formel="m_Ballast,kipp = max(0, ΣM_K − ΣM_St) / (γ_g · m_stand,1N)",
-                    formelzeichen=["M_K", "M_St", "γ_g", "m_stand,1N", "g"],
-                ),
-                kontext=merge_kontext(base_ctx, {
-                    "nachweis": "KIPP",
-                    "doc_type": "dir_ballast",
-                    "windrichtung_deg": f"{winkel}°",
-                }),
-            )
+            # protokolliere_doc(
+            #     sub_prot,
+            #     bundle=make_docbundle(
+            #         titel=f"Richtungs-Sicherheit S_kipp,{winkel}°",
+            #         wert=dir_min_sicherheit,
+            #         formel="S_kipp = ΣM_St / ΣM_K",
+            #         formelzeichen=["M_St", "M_K"],
+            #     ),
+            #     kontext=merge_kontext(base_ctx, {
+            #         "nachweis": "KIPP",
+            #         "doc_type": "dir_min_sicherheit",
+            #         "windrichtung_deg": f"{winkel}°",
+            #     }),
+            # )
+            # protokolliere_doc(
+            #     sub_prot,
+            #     bundle=make_docbundle(
+            #         titel=f"Richtungs-Ballast m_Ballast,kipp,{winkel}°",
+            #         wert=dir_ballast_max / aktuelle_konstanten().erdbeschleunigung,
+            #         einheit="kg",
+            #         formel="m_Ballast,kipp = max(0, ΣM_K − ΣM_St) / (γ_g · m_stand,1N)",
+            #         formelzeichen=["M_K", "M_St", "γ_g", "m_stand,1N", "g"],
+            #     ),
+            #     kontext=merge_kontext(base_ctx, {
+            #         "nachweis": "KIPP",
+            #         "doc_type": "dir_ballast",
+            #         "windrichtung_deg": f"{winkel}°",
+            #     }),
+            # )
 
             dir_records.append({
                 "windrichtung_deg": f"{winkel}°",
@@ -386,31 +386,31 @@ def _kippsicherheit_DinEn13814_2005_06(
         erdbeschleunigung = aktuelle_konstanten().erdbeschleunigung
         ballast_kg = ballast_erforderlich_max / erdbeschleunigung
 
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Kippsicherheit S_kipp",
-                wert=sicherheit_min_global,
-                formel="S_kipp = ΣM_St / ΣM_K",
-                quelle_formel="---",
-                formelzeichen=["M_St", "M_K"],
-                quelle_formelzeichen=["---"],
-            ),
-            kontext=merge_kontext(base_ctx, {"nachweis": "KIPP", "rolle": "relevant"}),
-        )
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Erforderlicher Ballast m_Ballast,kipp",
-                wert=ballast_kg,
-                einheit="kg",
-                formel="m_Ballast,kipp = max(0, ΣM_K − ΣM_St) / (γ_g · m_stand,1N)",
-                quelle_formel="---",
-                formelzeichen=["M_K", "M_St", "γ_g", "m_stand,1N", "g"],
-                quelle_formelzeichen=["---"],
-            ),
-            kontext=merge_kontext(base_ctx, {"nachweis": "KIPP", "doc_type": "ballast_pro_sicherheit", "quelle_nachweis": "KIPP", "rolle": "relevant"}),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Kippsicherheit S_kipp",
+        #         wert=sicherheit_min_global,
+        #         formel="S_kipp = ΣM_St / ΣM_K",
+        #         quelle_formel="---",
+        #         formelzeichen=["M_St", "M_K"],
+        #         quelle_formelzeichen=["---"],
+        #     ),
+        #     kontext=merge_kontext(base_ctx, {"nachweis": "KIPP", "rolle": "relevant"}),
+        # )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Erforderlicher Ballast m_Ballast,kipp",
+        #         wert=ballast_kg,
+        #         einheit="kg",
+        #         formel="m_Ballast,kipp = max(0, ΣM_K − ΣM_St) / (γ_g · m_stand,1N)",
+        #         quelle_formel="---",
+        #         formelzeichen=["M_K", "M_St", "γ_g", "m_stand,1N", "g"],
+        #         quelle_formelzeichen=["---"],
+        #     ),
+        #     kontext=merge_kontext(base_ctx, {"nachweis": "KIPP", "doc_type": "ballast_pro_sicherheit", "quelle_nachweis": "KIPP", "rolle": "relevant"}),
+        # )
 
         #Entscheidung protokollieren
         protokolliere_decision(
@@ -514,34 +514,34 @@ def _kippsicherheit_DinEn17879_2024_08(
 
                 for element, lastfaelle_elem in kraefte_nach_element.items():
                     kipp_b, stand_b = kipp_envelope_pro_bauelement(norm, achse, lastfaelle_elem, protokoll=sub_prot, kontext=merge_kontext(achse_ctx, {"element_id": str(element)}))
-                    protokolliere_doc(
-                        sub_prot,
-                        bundle=make_docbundle(
-                            titel="Kippmoment M_K",
-                            wert=kipp_b,
-                            einheit="Nm",
-                        ),
-                        kontext=merge_kontext(base_ctx, {
-                            "nachweis": "KIPP",
-                            "doc_type": "axis_momente",
-                            "achse_index": achse_idx,
-                            "element_id": str(element),
-                        }),
-                    )
-                    protokolliere_doc(
-                        sub_prot,
-                        bundle=make_docbundle(
-                            titel="Standmoment M_St",
-                            wert=stand_b,
-                            einheit="Nm",
-                        ),
-                        kontext=merge_kontext(base_ctx, {
-                            "nachweis": "KIPP",
-                            "doc_type": "axis_momente",
-                            "achse_index": achse_idx,
-                            "element_id": str(element),
-                        }),
-                    )
+                    # protokolliere_doc(
+                    #     sub_prot,
+                    #     bundle=make_docbundle(
+                    #         titel="Kippmoment M_K",
+                    #         wert=kipp_b,
+                    #         einheit="Nm",
+                    #     ),
+                    #     kontext=merge_kontext(base_ctx, {
+                    #         "nachweis": "KIPP",
+                    #         "doc_type": "axis_momente",
+                    #         "achse_index": achse_idx,
+                    #         "element_id": str(element),
+                    #     }),
+                    # )
+                    # protokolliere_doc(
+                    #     sub_prot,
+                    #     bundle=make_docbundle(
+                    #         titel="Standmoment M_St",
+                    #         wert=stand_b,
+                    #         einheit="Nm",
+                    #     ),
+                    #     kontext=merge_kontext(base_ctx, {
+                    #         "nachweis": "KIPP",
+                    #         "doc_type": "axis_momente",
+                    #         "achse_index": achse_idx,
+                    #         "element_id": str(element),
+                    #     }),
+                    # )
                     total_kipp += kipp_b
                     total_stand += stand_b
 
@@ -551,48 +551,48 @@ def _kippsicherheit_DinEn17879_2024_08(
                 else:
                     sicherheit = total_stand / total_kipp
 
-                protokolliere_doc(
-                    sub_prot,
-                    bundle=make_docbundle(
-                        titel="Summe Kippmoment ΣM_K",
-                        wert=total_kipp,
-                        formel="ΣM_K = ΣM_K,Bauelement",
-                        einheit="Nm",
-                    ),
-                    kontext=merge_kontext(base_ctx, {
-                        "nachweis": "KIPP",
-                        "doc_type": "axis_momente",
-                        "achse_index": achse_idx,
-                    }),
-                )
-                protokolliere_doc(
-                    sub_prot,
-                    bundle=make_docbundle(
-                        titel="Summe Standmoment ΣM_St",
-                        wert=total_stand,
-                        formel="ΣM_St = ΣM_St,Bauelement",
-                        einheit="Nm",
-                    ),
-                    kontext=merge_kontext(base_ctx, {
-                        "nachweis": "KIPP",
-                        "doc_type": "axis_momente",
-                        "achse_index": achse_idx,
-                    }),
-                )
-                protokolliere_doc(
-                    sub_prot,
-                    bundle=make_docbundle(
-                        titel=f"Achs-Sicherheit S_kipp,Achse{achse_idx}",
-                        wert=sicherheit,
-                        formel=f"S_kipp,Achse{achse_idx} = ΣM_St / ΣM_K",
-                        formelzeichen=["M_St", "M_K"],
-                    ),
-                    kontext=merge_kontext(base_ctx, {
-                        "nachweis": "KIPP",
-                        "doc_type": "axis_sicherheit",
-                        "achse_index": achse_idx,
-                    }),
-                )
+                # protokolliere_doc(
+                #     sub_prot,
+                #     bundle=make_docbundle(
+                #         titel="Summe Kippmoment ΣM_K",
+                #         wert=total_kipp,
+                #         formel="ΣM_K = ΣM_K,Bauelement",
+                #         einheit="Nm",
+                #     ),
+                #     kontext=merge_kontext(base_ctx, {
+                #         "nachweis": "KIPP",
+                #         "doc_type": "axis_momente",
+                #         "achse_index": achse_idx,
+                #     }),
+                # )
+                # protokolliere_doc(
+                #     sub_prot,
+                #     bundle=make_docbundle(
+                #         titel="Summe Standmoment ΣM_St",
+                #         wert=total_stand,
+                #         formel="ΣM_St = ΣM_St,Bauelement",
+                #         einheit="Nm",
+                #     ),
+                #     kontext=merge_kontext(base_ctx, {
+                #         "nachweis": "KIPP",
+                #         "doc_type": "axis_momente",
+                #         "achse_index": achse_idx,
+                #     }),
+                # )
+                # protokolliere_doc(
+                #     sub_prot,
+                #     bundle=make_docbundle(
+                #         titel=f"Achs-Sicherheit S_kipp,Achse{achse_idx}",
+                #         wert=sicherheit,
+                #         formel=f"S_kipp,Achse{achse_idx} = ΣM_St / ΣM_K",
+                #         formelzeichen=["M_St", "M_K"],
+                #     ),
+                #     kontext=merge_kontext(base_ctx, {
+                #         "nachweis": "KIPP",
+                #         "doc_type": "axis_sicherheit",
+                #         "achse_index": achse_idx,
+                #     }),
+                # )
 
                 # Richtungs-Minimum aktualisieren
                 if sicherheit < dir_min_sicherheit:
@@ -620,51 +620,51 @@ def _kippsicherheit_DinEn17879_2024_08(
                 if ballastkraft > dir_ballast_max:
                     dir_ballast_max = ballastkraft
 
-                protokolliere_doc(
-                    sub_prot,
-                    bundle=make_docbundle(
-                        titel=f"Achs-Ballast m_Ballast,kipp,Achse{achse_idx}",
-                        wert=ballastkraft / aktuelle_konstanten().erdbeschleunigung,  # kg
-                        einheit= "kg",
-                        formel="m_Ballast,kipp,Achse = max(0, ΣM_K − ΣM_St) / (γ_g · m_stand,1N)",
-                        formelzeichen=["M_K", "M_St", "γ_g", "m_stand,1N", "g"],
-                    ),
-                    kontext=merge_kontext(base_ctx, {
-                        "nachweis": "KIPP",
-                        "doc_type": "axis_ballast",
-                        "achse_index": achse_idx,
-                    }),
-                )
+                # protokolliere_doc(
+                #     sub_prot,
+                #     bundle=make_docbundle(
+                #         titel=f"Achs-Ballast m_Ballast,kipp,Achse{achse_idx}",
+                #         wert=ballastkraft / aktuelle_konstanten().erdbeschleunigung,  # kg
+                #         einheit= "kg",
+                #         formel="m_Ballast,kipp,Achse = max(0, ΣM_K − ΣM_St) / (γ_g · m_stand,1N)",
+                #         formelzeichen=["M_K", "M_St", "γ_g", "m_stand,1N", "g"],
+                #     ),
+                #     kontext=merge_kontext(base_ctx, {
+                #         "nachweis": "KIPP",
+                #         "doc_type": "axis_ballast",
+                #         "achse_index": achse_idx,
+                #     }),
+                # )
 
-            protokolliere_doc(
-                sub_prot,
-                bundle=make_docbundle(
-                    titel=f"Richtungs-Sicherheit S_kipp,{winkel}°",
-                    wert=dir_min_sicherheit,
-                    formel="S_kipp = ΣM_St / ΣM_K",
-                    formelzeichen=["M_St", "M_K"],
-                ),
-                kontext=merge_kontext(base_ctx, {
-                    "nachweis": "KIPP",
-                    "doc_type": "dir_min_sicherheit",
-                    "windrichtung_deg": f"{winkel}°",
-                }),
-            )
-            protokolliere_doc(
-                sub_prot,
-                bundle=make_docbundle(
-                    titel=f"Richtungs-Ballast m_Ballast,kipp,{winkel}°",
-                    wert=dir_ballast_max / aktuelle_konstanten().erdbeschleunigung,
-                    einheit="kg",
-                    formel="m_Ballast,kipp = max(0, ΣM_K − ΣM_St) / (γ_g · m_stand,1N)",
-                    formelzeichen=["M_K", "M_St", "γ_g", "m_stand,1N", "g"],
-                ),
-                kontext=merge_kontext(base_ctx, {
-                    "nachweis": "KIPP",
-                    "doc_type": "dir_ballast",
-                    "windrichtung_deg": f"{winkel}°",
-                }),
-            )
+            # protokolliere_doc(
+            #     sub_prot,
+            #     bundle=make_docbundle(
+            #         titel=f"Richtungs-Sicherheit S_kipp,{winkel}°",
+            #         wert=dir_min_sicherheit,
+            #         formel="S_kipp = ΣM_St / ΣM_K",
+            #         formelzeichen=["M_St", "M_K"],
+            #     ),
+            #     kontext=merge_kontext(base_ctx, {
+            #         "nachweis": "KIPP",
+            #         "doc_type": "dir_min_sicherheit",
+            #         "windrichtung_deg": f"{winkel}°",
+            #     }),
+            # )
+            # protokolliere_doc(
+            #     sub_prot,
+            #     bundle=make_docbundle(
+            #         titel=f"Richtungs-Ballast m_Ballast,kipp,{winkel}°",
+            #         wert=dir_ballast_max / aktuelle_konstanten().erdbeschleunigung,
+            #         einheit="kg",
+            #         formel="m_Ballast,kipp = max(0, ΣM_K − ΣM_St) / (γ_g · m_stand,1N)",
+            #         formelzeichen=["M_K", "M_St", "γ_g", "m_stand,1N", "g"],
+            #     ),
+            #     kontext=merge_kontext(base_ctx, {
+            #         "nachweis": "KIPP",
+            #         "doc_type": "dir_ballast",
+            #         "windrichtung_deg": f"{winkel}°",
+            #     }),
+            # )
 
             dir_records.append({
                 "windrichtung_deg": f"{winkel}°",
@@ -716,31 +716,31 @@ def _kippsicherheit_DinEn17879_2024_08(
         erdbeschleunigung = aktuelle_konstanten().erdbeschleunigung
         ballast_kg = ballast_erforderlich_max / erdbeschleunigung
 
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Kippsicherheit S_kipp",
-                wert=sicherheit_min_global,
-                formel="S_kipp = ΣM_St / ΣM_K",
-                quelle_formel="---",
-                formelzeichen=["M_St", "M_K"],
-                quelle_formelzeichen=["---"],
-            ),
-            kontext=merge_kontext(base_ctx, {"nachweis": "KIPP", "rolle": "relevant"}),
-        )
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Erforderlicher Ballast m_Ballast,kipp",
-                wert=ballast_kg,
-                einheit="kg",
-                formel="m_Ballast,kipp = max(0, ΣM_K − ΣM_St) / (γ_g · m_stand,1N)",
-                quelle_formel="---",
-                formelzeichen=["M_K", "M_St", "γ_g", "m_stand,1N", "g"],
-                quelle_formelzeichen=["---"],
-            ),
-            kontext=merge_kontext(base_ctx, {"nachweis": "KIPP", "rolle": "relevant"}),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Kippsicherheit S_kipp",
+        #         wert=sicherheit_min_global,
+        #         formel="S_kipp = ΣM_St / ΣM_K",
+        #         quelle_formel="---",
+        #         formelzeichen=["M_St", "M_K"],
+        #         quelle_formelzeichen=["---"],
+        #     ),
+        #     kontext=merge_kontext(base_ctx, {"nachweis": "KIPP", "rolle": "relevant"}),
+        # )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Erforderlicher Ballast m_Ballast,kipp",
+        #         wert=ballast_kg,
+        #         einheit="kg",
+        #         formel="m_Ballast,kipp = max(0, ΣM_K − ΣM_St) / (γ_g · m_stand,1N)",
+        #         quelle_formel="---",
+        #         formelzeichen=["M_K", "M_St", "γ_g", "m_stand,1N", "g"],
+        #         quelle_formelzeichen=["---"],
+        #     ),
+        #     kontext=merge_kontext(base_ctx, {"nachweis": "KIPP", "rolle": "relevant"}),
+        # )
 
         #Entscheidung protokollieren
         protokolliere_decision(

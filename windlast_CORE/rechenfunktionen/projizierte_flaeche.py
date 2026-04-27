@@ -87,15 +87,15 @@ def _projizierte_flaeche_default(
                 text=f"Traverse '{objekt_name_intern}': ungültige Gurtanzahl – {e}",
                 kontext=merge_kontext(base_ctx, {"input_source": "catalog"}),
             )
-            protokolliere_doc(
-                protokoll,
-                bundle=make_docbundle(
-                    titel="Projizierte Fläche A",
-                    wert=float("nan"),
-                    formel="A = 2·L·d_gurt + 3,2·L·d_diag (Ebner-Vereinfachung)",
-                ),
-                kontext=merge_kontext(base_ctx, {"nan": True}),
-            )
+            # protokolliere_doc(
+            #     protokoll,
+            #     bundle=make_docbundle(
+            #         titel="Projizierte Fläche A",
+            #         wert=float("nan"),
+            #         formel="A = 2·L·d_gurt + 3,2·L·d_diag (Ebner-Vereinfachung)",
+            #     ),
+            #     kontext=merge_kontext(base_ctx, {"nan": True}),
+            # )
             return Zwischenergebnis(wert=float("nan"))
 
         d_gurt = traverse.d_gurt
@@ -109,30 +109,30 @@ def _projizierte_flaeche_default(
                 text=f"Traverse '{objekt_name_intern}': ungültige Durchmesser (d_gurt={d_gurt}, d_diag={d_diag}).",
                 kontext=merge_kontext(base_ctx, {"input_source": "catalog"}),
             )
-            protokolliere_doc(
-                protokoll,
-                bundle=make_docbundle(
-                    titel="Projizierte Fläche A",
-                    wert=float("nan"),
-                    formel="A = 2·L·d_gurt + 3,2·L·d_diag",
-                ),
-                kontext=merge_kontext(base_ctx, {"nan": True}),
-            )
+            # protokolliere_doc(
+            #     protokoll,
+            #     bundle=make_docbundle(
+            #         titel="Projizierte Fläche A",
+            #         wert=float("nan"),
+            #         formel="A = 2·L·d_gurt + 3,2·L·d_diag",
+            #     ),
+            #     kontext=merge_kontext(base_ctx, {"nan": True}),
+            # )
             return Zwischenergebnis(wert=float("nan"))
         
         # Vereinfachter Ansatz nach Ebner
         wert = (2.0 * laenge * d_gurt) + (3.2 * laenge * d_diag)
 
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Projizierte Fläche A",
-                wert=wert,
-                einheit="m²",
-                formel="A = 2·L·d_gurt + 3,2·L·d_diag",
-            ),
-            kontext=base_ctx,
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Projizierte Fläche A",
+        #         wert=wert,
+        #         einheit="m²",
+        #         formel="A = 2·L·d_gurt + 3,2·L·d_diag",
+        #     ),
+        #     kontext=base_ctx,
+        # )
         return Zwischenergebnis(wert=wert)
 
     elif objekttyp == ObjektTyp.ROHR:
@@ -150,44 +150,44 @@ def _projizierte_flaeche_default(
                 text=f"Rohr '{objekt_name_intern}': ungültiger Außendurchmesser ({d_aussen}).",
                 kontext=merge_kontext(base_ctx, {"input_source": "catalog"}),
             )
-            protokolliere_doc(
-                protokoll,
-                bundle=make_docbundle(
-                    titel="Projizierte Fläche A",
-                    wert=float("nan"),
-                    formel="A = L·d_aussen",
-                ),
-                kontext=merge_kontext(base_ctx, {"nan": True}),
-            )
+            # protokolliere_doc(
+            #     protokoll,
+            #     bundle=make_docbundle(
+            #         titel="Projizierte Fläche A",
+            #         wert=float("nan"),
+            #         formel="A = L·d_aussen",
+            #     ),
+            #     kontext=merge_kontext(base_ctx, {"nan": True}),
+            # )
             return Zwischenergebnis(wert=float("nan"))
 
         wert = laenge * d_aussen
 
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Projizierte Fläche A",
-                wert=wert,
-                einheit="m²",
-                formel="A = L·d_aussen",
-            ),
-            kontext=base_ctx,
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Projizierte Fläche A",
+        #         wert=wert,
+        #         einheit="m²",
+        #         formel="A = L·d_aussen",
+        #     ),
+        #     kontext=base_ctx,
+        # )
         return Zwischenergebnis(wert=wert)
     
     elif objekttyp == ObjektTyp.SENKRECHTE_FLAECHE:
         wert = flaecheninhalt_polygon(punkte)
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Bezugsfläche A",
-                wert=wert,
-                einheit="m²",
-                formel="A_rel = b · h",
-                quelle_formel="DIN EN 1991-1-4:2010-12, Abschnitt 7.4.3",
-            ),
-            kontext=base_ctx,
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Bezugsfläche A",
+        #         wert=wert,
+        #         einheit="m²",
+        #         formel="A_rel = b · h",
+        #         quelle_formel="DIN EN 1991-1-4:2010-12, Abschnitt 7.4.3",
+        #     ),
+        #     kontext=base_ctx,
+        # )
         return Zwischenergebnis(wert=wert)
 
     else:
@@ -227,11 +227,11 @@ def projizierte_flaeche(
             text=str(e),
             kontext=base_ctx,
         )
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(titel="Projizierte Fläche A_p", wert=float("nan")),
-            kontext=merge_kontext(base_ctx, {"nan": True}),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(titel="Projizierte Fläche A_p", wert=float("nan")),
+        #     kontext=merge_kontext(base_ctx, {"nan": True}),
+        # )
         return Zwischenergebnis(wert=float("nan"))
 
     funktion = _DISPATCH_PROJ.get(norm, _DISPATCH_PROJ[Norm.DEFAULT])

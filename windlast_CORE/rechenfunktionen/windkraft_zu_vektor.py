@@ -76,19 +76,19 @@ def _windkraft_zu_vektor_default(
         senkrechtanteil = vektor_senkrechtanteil(windrichtung, achse)
         kraft_vec: Vec3 = vektor_multiplizieren(senkrechtanteil, windkraft)
 
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Windkraft-Vektor F_W",
-                wert=kraft_vec,
-                einzelwerte=[windkraft, *senkrechtanteil, *achse],
-                formel="F_W = F · ( ê − (ê·t̂) t̂ )",
-                einheit="N",
-                formelzeichen=["F_W", "F", "ê", "t̂"],
-                quelle_formelzeichen=["Projektintern"],
-            ),
-            kontext=merge_kontext(base_ctx, {"start": start, "ende": ende}),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Windkraft-Vektor F_W",
+        #         wert=kraft_vec,
+        #         einzelwerte=[windkraft, *senkrechtanteil, *achse],
+        #         formel="F_W = F · ( ê − (ê·t̂) t̂ )",
+        #         einheit="N",
+        #         formelzeichen=["F_W", "F", "ê", "t̂"],
+        #         quelle_formelzeichen=["Projektintern"],
+        #     ),
+        #     kontext=merge_kontext(base_ctx, {"start": start, "ende": ende}),
+        # )
         return Zwischenergebnis_Vektor(wert=kraft_vec)
     
     elif objekttyp == ObjektTyp.ROHR:
@@ -97,19 +97,19 @@ def _windkraft_zu_vektor_default(
         senkrechtanteil = vektor_senkrechtanteil(windrichtung, achse)
         kraft_vec: Vec3 = vektor_multiplizieren(senkrechtanteil, windkraft)
 
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Windkraft-Vektor F_W",
-                wert=kraft_vec,
-                einzelwerte=[windkraft, *senkrechtanteil, *achse],
-                formel="F_W = F · ( ê − (ê·t̂) t̂ )",
-                einheit="N",
-                formelzeichen=["F_W", "F", "ê", "t̂"],
-                quelle_formelzeichen=["Projektintern"],
-            ),
-            kontext=merge_kontext(base_ctx, {"start": start, "ende": ende}),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Windkraft-Vektor F_W",
+        #         wert=kraft_vec,
+        #         einzelwerte=[windkraft, *senkrechtanteil, *achse],
+        #         formel="F_W = F · ( ê − (ê·t̂) t̂ )",
+        #         einheit="N",
+        #         formelzeichen=["F_W", "F", "ê", "t̂"],
+        #         quelle_formelzeichen=["Projektintern"],
+        #     ),
+        #     kontext=merge_kontext(base_ctx, {"start": start, "ende": ende}),
+        # )
         return Zwischenergebnis_Vektor(wert=kraft_vec)
     
     elif objekttyp == ObjektTyp.SENKRECHTE_FLAECHE:
@@ -118,30 +118,30 @@ def _windkraft_zu_vektor_default(
             parallelanteil = vektor_parallelanteil(windrichtung, normale)
             kraft_vec: Vec3 = vektor_multiplizieren(parallelanteil, windkraft)
 
-            protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Windkraft-Vektor F_W",
-                wert=kraft_vec,
-                einzelwerte=[windkraft, *parallelanteil, *normale],
-                einheit="N",
-            ),
-            kontext=base_ctx,
-        )
+            # protokolliere_doc(
+            #     protokoll,
+            #     bundle=make_docbundle(
+            #         titel="Windkraft-Vektor F_W",
+            #         wert=kraft_vec,
+            #         einzelwerte=[windkraft, *parallelanteil, *normale],
+            #         einheit="N",
+            #     ),
+            #     kontext=base_ctx,
+            # )
         elif senkrechte_flaeche_typ == senkrechteFlaecheTyp.WAND:
             normale = normale_zu_ebene(punkte)
             kraft_vec: Vec3 = vektor_multiplizieren(normale, windkraft)
 
-            protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Windkraft-Vektor F_W",
-                wert=kraft_vec,
-                einzelwerte=[windkraft],
-                einheit="N",
-            ),
-            kontext=base_ctx,
-        )
+            # protokolliere_doc(
+            #     protokoll,
+            #     bundle=make_docbundle(
+            #         titel="Windkraft-Vektor F_W",
+            #         wert=kraft_vec,
+            #         einzelwerte=[windkraft],
+            #         einheit="N",
+            #     ),
+            #     kontext=base_ctx,
+            # )
         else:
             protokolliere_msg(
                 protokoll,
@@ -162,11 +162,11 @@ def _windkraft_zu_vektor_default(
             kontext=base_ctx,
         )
         bad = (float("nan"), float("nan"), float("nan"))
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(titel="Windkraft (Vektor) F_W", wert=bad),
-            kontext=merge_kontext(base_ctx, {"nan": True}),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(titel="Windkraft (Vektor) F_W", wert=bad),
+        #     kontext=merge_kontext(base_ctx, {"nan": True}),
+        # )
         return Zwischenergebnis_Vektor(wert=bad)
 
 _DISPATCH: Dict[Norm, Callable[..., Zwischenergebnis_Vektor]] = {
@@ -206,11 +206,11 @@ def windkraft_zu_vektor(
             kontext=base_ctx,
         )
         bad = (float("nan"), float("nan"), float("nan"))
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(titel="Windkraft-Vektor F⃗_w", wert=bad),
-            kontext=merge_kontext(base_ctx, {"nan": True}),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(titel="Windkraft-Vektor F⃗_w", wert=bad),
+        #     kontext=merge_kontext(base_ctx, {"nan": True}),
+        # )
         return Zwischenergebnis_Vektor(wert=bad)
     
     funktion = _DISPATCH.get(norm, _DISPATCH[Norm.DEFAULT])

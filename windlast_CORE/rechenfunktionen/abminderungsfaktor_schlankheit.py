@@ -86,19 +86,19 @@ def _abminderungsfaktor_schlankheit_default(
 
     wert = bilinear_interpolate_grid(_X_Schlankheit, y_inc, z_inc, x, y)
 
-    protokolliere_doc(
-        protokoll,
-        bundle=make_docbundle(
-            titel="Abminderungsfaktor ψ_λ",
-            wert=wert,
-            formel="bilinear λ–φ → ψ_λ",
-            quelle_formel="Projekt-/Tabellenwerte (λ×φ → Abminderungsfaktor)",
-            formelzeichen=["ψ", "λ", "φ"],
-            quelle_formelzeichen=["Projektinterne Bezeichnungen"],
-            einzelwerte=[x, y],
-        ),
-        kontext=base_ctx,
-    )
+    # protokolliere_doc(
+    #     protokoll,
+    #     bundle=make_docbundle(
+    #         titel="Abminderungsfaktor ψ_λ",
+    #         wert=wert,
+    #         formel="bilinear λ–φ → ψ_λ",
+    #         quelle_formel="Projekt-/Tabellenwerte (λ×φ → Abminderungsfaktor)",
+    #         formelzeichen=["ψ", "λ", "φ"],
+    #         quelle_formelzeichen=["Projektinterne Bezeichnungen"],
+    #         einzelwerte=[x, y],
+    #     ),
+    #     kontext=base_ctx,
+    # )
 
     return Zwischenergebnis(wert=wert)
 
@@ -133,11 +133,11 @@ def abminderungsfaktor_schlankheit(
             text=str(e),
             kontext=base_ctx,
         )
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(titel="Abminderungsfaktor ψ_λ", wert=float("nan")),
-            kontext=merge_kontext(base_ctx, {"nan": True}),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(titel="Abminderungsfaktor ψ_λ", wert=float("nan")),
+        #     kontext=merge_kontext(base_ctx, {"nan": True}),
+        # )
         return Zwischenergebnis(wert=float("nan"))
     
     funktion = _DISPATCH.get(norm, _DISPATCH[Norm.DEFAULT])

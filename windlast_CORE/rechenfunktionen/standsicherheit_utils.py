@@ -181,11 +181,11 @@ def sammle_kippachsen(konstruktion, *, protokoll: Optional[Protokoll] = None, ko
         return []
 
     achsen = kippachsen_aus_eckpunkten(eckpunkte, include_Randpunkte=False)
-    protokolliere_doc(
-        protokoll,
-        bundle=make_docbundle(titel="Anzahl Kippachsen", wert=len(achsen)),
-        kontext=base_ctx,
-    )
+    # protokolliere_doc(
+    #     protokoll,
+    #     bundle=make_docbundle(titel="Anzahl Kippachsen", wert=len(achsen)),
+    #     kontext=base_ctx,
+    # )
     return achsen
 
 def kippachsen_aus_eckpunkten(
@@ -223,11 +223,11 @@ def kippachsen_aus_eckpunkten(
             continue
         kippachsen.append(Achse(punkt=p1, richtung=richtung_norm))
     
-    protokolliere_doc(
-        protokoll,
-        bundle=make_docbundle(titel="Konvexe Hülle (Eckpunkte)", wert=huelle),
-        kontext=base_ctx,
-    )
+    # protokolliere_doc(
+    #     protokoll,
+    #     bundle=make_docbundle(titel="Konvexe Hülle (Eckpunkte)", wert=huelle),
+    #     kontext=base_ctx,
+    # )
     return kippachsen
 
 def bewerte_lastfall_fuer_achse(
@@ -344,38 +344,38 @@ def kipp_envelope_pro_bauelement(
         lastfall_ctx = merge_kontext(base_ctx, {"lasttyp": lasttyp, "lastfall_index": lastfall_index})
 
         # --- Pro Lastfall protokollieren: Kipp/Stand (untergeordnet) ---
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel=f"Lastfall {lasttyp} #{lastfall_index}: Kippmoment M_K",
-                wert=kipp,
-                einheit="Nm",
-            ),
-            kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_momente"}),
-        )
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel=f"Lastfall {lasttyp} #{lastfall_index}: Standmoment M_St",
-                wert=stand,
-                einheit="Nm",
-            ),
-            kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_momente"}),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel=f"Lastfall {lasttyp} #{lastfall_index}: Kippmoment M_K",
+        #         wert=kipp,
+        #         einheit="Nm",
+        #     ),
+        #     kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_momente"}),
+        # )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel=f"Lastfall {lasttyp} #{lastfall_index}: Standmoment M_St",
+        #         wert=stand,
+        #         einheit="Nm",
+        #     ),
+        #     kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_momente"}),
+        # )
 
         # --- Toplevel-Kriterium ---
         kriterium = kipp - stand
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Kriterium Lastfall (M_K − M_St)",
-                wert=kriterium,
-                einheit="Nm",
-                formel="K = M_K − M_St",
-                formelzeichen=["M_K", "M_St"],
-            ),
-            kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_kipp_kriterium"}),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Kriterium Lastfall (M_K − M_St)",
+        #         wert=kriterium,
+        #         einheit="Nm",
+        #         formel="K = M_K − M_St",
+        #         formelzeichen=["M_K", "M_St"],
+        #     ),
+        #     kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_kipp_kriterium"}),
+        # )
 
     if best_wind_kipp == -math.inf:
         best_wind_kipp, best_wind_stand = 0.0, 0.0
@@ -546,57 +546,57 @@ def gleit_envelope_pro_bauelement(
                 best_gewicht_index = gewicht_lastfall_index
 
 
-        protokolliere_doc(
-                protokoll,
-                bundle=make_docbundle(
-                    titel="Horizontalkraft-Vektor H",
-                    wert=H_vec,
-                    einheit="N",
-                ),
-                kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_gleit_horizontal"}),
-            )
+        # protokolliere_doc(
+        #         protokoll,
+        #         bundle=make_docbundle(
+        #             titel="Horizontalkraft-Vektor H",
+        #             wert=H_vec,
+        #             einheit="N",
+        #         ),
+        #         kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_gleit_horizontal"}),
+        #     )
 
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Horizontalkraft H",
-                wert=H_betrag,
-                einheit="N",
-            ),
-            kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_gleit_horizontal"}),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Horizontalkraft H",
+        #         wert=H_betrag,
+        #         einheit="N",
+        #     ),
+        #     kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_gleit_horizontal"}),
+        # )
 
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Normalkraft N_down",
-                wert=N_down,
-                einheit="N",
-            ),
-            kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_gleit_normal_down"}),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Normalkraft N_down",
+        #         wert=N_down,
+        #         einheit="N",
+        #     ),
+        #     kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_gleit_normal_down"}),
+        # )
 
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Normalkraft N_up",
-                wert=N_up,
-                einheit="N",
-            ),
-            kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_gleit_normal_up"}),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Normalkraft N_up",
+        #         wert=N_up,
+        #         einheit="N",
+        #     ),
+        #     kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_gleit_normal_up"}),
+        # )
 
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Effektive Normalkraft N_down - N_up",
-                wert=N_down - N_up,
-                einheit="N",
-                formel="N_eff = N_down - N_up",
-                formelzeichen=["N_down", "N_up"],
-            ),
-            kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_gleit_normal_effektiv"}),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Effektive Normalkraft N_down - N_up",
+        #         wert=N_down - N_up,
+        #         einheit="N",
+        #         formel="N_eff = N_down - N_up",
+        #         formelzeichen=["N_down", "N_up"],
+        #     ),
+        #     kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_gleit_normal_effektiv"}),
+        # )
 
     else:
         pass
@@ -696,39 +696,39 @@ def abhebe_envelope_pro_bauelement(
 
         lastfall_ctx = merge_kontext(base_ctx, {"lasttyp": lasttyp, "lastfall_index": lastfall_index})
 
-        protokolliere_doc(
-                protokoll,
-                bundle=make_docbundle(
-                    titel="Normalkraft N_down",
-                    wert=N_down,
-                    einheit="N",
-                ),
-                kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_abhebe_normal_down"}),
-            )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Normalkraft N_down",
+        #         wert=N_down,
+        #         einheit="N",
+        #     ),
+        #     kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_abhebe_normal_down"}),
+        # )
 
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Normalkraft N_up",
-                wert=N_up,
-                einheit="N",
-            ),
-            kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_abhebe_normal_up"}),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Normalkraft N_up",
+        #         wert=N_up,
+        #         einheit="N",
+        #     ),
+        #     kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_abhebe_normal_up"}),
+        # )
 
         # --- Toplevel-Kriterium ---
         kriterium = N_up - N_down
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Kriterium Lastfall (N_up − N_down)",
-                wert=kriterium,
-                einheit="N",
-                formel="K = N_up − N_down",
-                formelzeichen=["N_up", "N_down"],
-            ),
-            kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_gleit_kriterium"}),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Kriterium Lastfall (N_up − N_down)",
+        #         wert=kriterium,
+        #         einheit="N",
+        #         formel="K = N_up − N_down",
+        #         formelzeichen=["N_up", "N_down"],
+        #     ),
+        #     kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_gleit_kriterium"}),
+        # )
 
     else:
         pass

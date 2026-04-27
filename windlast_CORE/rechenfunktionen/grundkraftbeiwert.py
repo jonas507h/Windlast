@@ -122,11 +122,11 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
                 text=f"Reynoldszahl {reynoldszahl:.3g} > 2·10^5: c_f,0 nicht definiert.",
                 kontext=base_ctx,
             )
-            protokolliere_doc(
-                protokoll,
-                bundle=make_docbundle(titel="Grundkraftbeiwert c_f,0", wert=float("nan")),
-                kontext=merge_kontext(base_ctx, {"nan": True}),
-            )
+            # protokolliere_doc(
+            #     protokoll,
+            #     bundle=make_docbundle(titel="Grundkraftbeiwert c_f,0", wert=float("nan")),
+            #     kontext=merge_kontext(base_ctx, {"nan": True}),
+            # )
             return Zwischenergebnis(wert=float("nan"))
         
         startpunkt, endpunkt, orientierung = punkte[0], punkte[1], punkte[2]
@@ -202,32 +202,32 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
                     text=f"Grundkraftbeiwert für {traversentyp.value} ist noch nicht implementiert.",
                     kontext=base_ctx,
                 )
-                protokolliere_doc(
-                    protokoll,
-                    bundle=make_docbundle(titel="Grundkraftbeiwert c_f,0", wert=float("nan")),
-                    kontext=merge_kontext(base_ctx, {"nan": True}),
-                )
+                # protokolliere_doc(
+                #     protokoll,
+                #     bundle=make_docbundle(titel="Grundkraftbeiwert c_f,0", wert=float("nan")),
+                #     kontext=merge_kontext(base_ctx, {"nan": True}),
+                # )
                 return Zwischenergebnis(wert=float("nan"))
 
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Grundkraftbeiwert c_f,0",
-                wert=wert,
-            ),
-            kontext=base_ctx,
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Grundkraftbeiwert c_f,0",
+        #         wert=wert,
+        #     ),
+        #     kontext=base_ctx,
+        # )
         return Zwischenergebnis(wert=wert)
 
     elif objekttyp == ObjektTyp.ROHR:
         rohr_achse = vektor_normieren(vektor_zwischen_punkten(punkte[0], punkte[1]))
         wind_proj = projektion_vektor_auf_ebene(windrichtung, rohr_achse)
         if vektor_laenge(wind_proj) < 1e-9:
-            protokolliere_doc(
-                protokoll,
-                bundle=make_docbundle(titel="Grundkraftbeiwert c_f,0", wert=0.0),
-                kontext=base_ctx,
-            )
+            # protokolliere_doc(
+            #     protokoll,
+            #     bundle=make_docbundle(titel="Grundkraftbeiwert c_f,0", wert=0.0),
+            #     kontext=base_ctx,
+            # )
             return Zwischenergebnis(wert=0.0)
 
         if reynoldszahl is not None and reynoldszahl > 1.8e5:
@@ -240,14 +240,14 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
             )
         
         wert = 1.2
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Grundkraftbeiwert c_f,0",
-                wert=wert,
-            ),
-            kontext=base_ctx,
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Grundkraftbeiwert c_f,0",
+        #         wert=wert,
+        #     ),
+        #     kontext=base_ctx,
+        # )
         return Zwischenergebnis(wert=wert)
 
     else:
@@ -258,11 +258,11 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
             text=f"Grundkraftbeiwert für Objekttyp '{objekttyp.value}' ist noch nicht implementiert.",
             kontext=base_ctx,
         )
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(titel="Grundkraftbeiwert c_f,0", wert=float("nan")),
-            kontext=merge_kontext(base_ctx, {"nan": True}),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(titel="Grundkraftbeiwert c_f,0", wert=float("nan")),
+        #     kontext=merge_kontext(base_ctx, {"nan": True}),
+        # )
         return Zwischenergebnis(wert=float("nan"))
 
 _DISPATCH: Dict[Norm, Callable[..., Zwischenergebnis]] = {
@@ -303,11 +303,11 @@ def grundkraftbeiwert(
             text=str(e),
             kontext=base_ctx,
         )
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(titel="Grundkraftbeiwert c_f,0", wert=float("nan")),
-            kontext=merge_kontext(base_ctx, {"nan": True}),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(titel="Grundkraftbeiwert c_f,0", wert=float("nan")),
+        #     kontext=merge_kontext(base_ctx, {"nan": True}),
+        # )
         return Zwischenergebnis(wert=float("nan"))
     
     funktion = _DISPATCH.get(norm, _DISPATCH[Norm.DEFAULT])

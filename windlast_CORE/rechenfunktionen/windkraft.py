@@ -49,81 +49,81 @@ def _windkraft_default(
     if objekttyp == ObjektTyp.TRAVERSE:
         wert = kraftbeiwert * staudruck * projizierte_flaeche
 
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Windkraft F_w",
-                wert=wert,
-                einzelwerte=[kraftbeiwert, staudruck, projizierte_flaeche],
-                formel="F_W = c_f · q · A",
-                quelle_formel="DIN EN 1991-1-4:2010-12, Abschnitt 5.3",
-                einheit="N",
-            ),
-            kontext=merge_kontext(kontext, {
-                "funktion": "Windkraft",
-                "objekttyp": getattr(objekttyp, "value", str(objekttyp)),
-            }),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Windkraft F_w",
+        #         wert=wert,
+        #         einzelwerte=[kraftbeiwert, staudruck, projizierte_flaeche],
+        #         formel="F_W = c_f · q · A",
+        #         quelle_formel="DIN EN 1991-1-4:2010-12, Abschnitt 5.3",
+        #         einheit="N",
+        #     ),
+        #     kontext=merge_kontext(kontext, {
+        #         "funktion": "Windkraft",
+        #         "objekttyp": getattr(objekttyp, "value", str(objekttyp)),
+        #     }),
+        # )
         return Zwischenergebnis(wert=wert)
     
     elif objekttyp == ObjektTyp.ROHR:
         wert = kraftbeiwert * staudruck * projizierte_flaeche
 
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Windkraft F_w",
-                wert=wert,
-                einzelwerte=[kraftbeiwert, staudruck, projizierte_flaeche],
-                formel="F_W = c_f · q · A",
-                quelle_formel="DIN EN 1991-1-4:2010-12, Abschnitt 5.3",
-                einheit="N",
-            ),
-            kontext=merge_kontext(kontext, {
-                "funktion": "Windkraft",
-                "objekttyp": getattr(objekttyp, "value", str(objekttyp)),
-            }),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Windkraft F_w",
+        #         wert=wert,
+        #         einzelwerte=[kraftbeiwert, staudruck, projizierte_flaeche],
+        #         formel="F_W = c_f · q · A",
+        #         quelle_formel="DIN EN 1991-1-4:2010-12, Abschnitt 5.3",
+        #         einheit="N",
+        #     ),
+        #     kontext=merge_kontext(kontext, {
+        #         "funktion": "Windkraft",
+        #         "objekttyp": getattr(objekttyp, "value", str(objekttyp)),
+        #     }),
+        # )
         return Zwischenergebnis(wert=wert)
     
     elif objekttyp == ObjektTyp.SENKRECHTE_FLAECHE:
         if senkrechte_flaeche_typ == senkrechteFlaecheTyp.ANZEIGETAFEL:
             wert = kraftbeiwert * staudruck * projizierte_flaeche
 
-            protokolliere_doc(
-                protokoll,
-                bundle=make_docbundle(
-                    titel="Windkraft F_w",
-                    wert=wert,
-                    einzelwerte=[kraftbeiwert, staudruck, projizierte_flaeche],
-                    formel="F_W = c_f · q · A",
-                    quelle_formel="DIN EN 1991-1-4:2010-12, Abschnitt 5.3",
-                    einheit="N",
-                ),
-                kontext=merge_kontext(kontext, {
-                    "funktion": "Windkraft",
-                    "objekttyp": getattr(objekttyp, "value", str(objekttyp)),
-                }),
-            )
+            # protokolliere_doc(
+            #     protokoll,
+            #     bundle=make_docbundle(
+            #         titel="Windkraft F_w",
+            #         wert=wert,
+            #         einzelwerte=[kraftbeiwert, staudruck, projizierte_flaeche],
+            #         formel="F_W = c_f · q · A",
+            #         quelle_formel="DIN EN 1991-1-4:2010-12, Abschnitt 5.3",
+            #         einheit="N",
+            #     ),
+            #     kontext=merge_kontext(kontext, {
+            #         "funktion": "Windkraft",
+            #         "objekttyp": getattr(objekttyp, "value", str(objekttyp)),
+            #     }),
+            # )
             return Zwischenergebnis(wert=wert)
         elif senkrechte_flaeche_typ == senkrechteFlaecheTyp.WAND:
             wert = kraftbeiwert * staudruck * projizierte_flaeche
 
-            protokolliere_doc(
-                protokoll,
-                bundle=make_docbundle(
-                    titel="Windkraft F_w",
-                    wert=wert,
-                    einzelwerte=[kraftbeiwert, staudruck, projizierte_flaeche],
-                    formel="F_W = c_p,net · q · A",
-                    quelle_formel="DIN EN 1991-1-4:2010-12, Abschnitte 5.2 & 5.3",
-                    einheit="N",
-                ),
-                kontext=merge_kontext(kontext, {
-                    "funktion": "Windkraft",
-                    "objekttyp": getattr(objekttyp, "value", str(objekttyp)),
-                }),
-            )
+            # protokolliere_doc(
+            #     protokoll,
+            #     bundle=make_docbundle(
+            #         titel="Windkraft F_w",
+            #         wert=wert,
+            #         einzelwerte=[kraftbeiwert, staudruck, projizierte_flaeche],
+            #         formel="F_W = c_p,net · q · A",
+            #         quelle_formel="DIN EN 1991-1-4:2010-12, Abschnitte 5.2 & 5.3",
+            #         einheit="N",
+            #     ),
+            #     kontext=merge_kontext(kontext, {
+            #         "funktion": "Windkraft",
+            #         "objekttyp": getattr(objekttyp, "value", str(objekttyp)),
+            #     }),
+            # )
             return Zwischenergebnis(wert=wert)
         else:
             wert = float("nan")
@@ -144,11 +144,11 @@ def _windkraft_default(
             text=f"Windkraft für Objekttyp '{objekttyp.value}' ist noch nicht implementiert.",
             kontext=kontext,
         )
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(titel="Windkraft F_w", wert=float("nan")),
-            kontext=kontext,
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(titel="Windkraft F_w", wert=float("nan")),
+        #     kontext=kontext,
+        # )
         return Zwischenergebnis(wert=float("nan"))
 
 _DISPATCH: Dict[Norm, Callable[..., Zwischenergebnis]] = {
@@ -185,11 +185,11 @@ def windkraft(
             text=str(e),
             kontext=base_ctx,
         )
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(titel="Windkraft F_w", wert=float("nan")),
-            kontext=merge_kontext(base_ctx, {"nan": True}),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(titel="Windkraft F_w", wert=float("nan")),
+        #     kontext=merge_kontext(base_ctx, {"nan": True}),
+        # )
         return Zwischenergebnis(wert=float("nan"))
     
     funktion = _DISPATCH.get(norm, _DISPATCH[Norm.DEFAULT])

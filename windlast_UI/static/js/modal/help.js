@@ -42,7 +42,7 @@ registerPages(TOR_HELP_PAGES);
 registerPages(STEHER_HELP_PAGES);
 registerPages(TISCH_HELP_PAGES);
 registerPages(ERGEBNISSE_HELP_PAGES);
-registerPages(ZWISCHENERGEBNISSE_HELP_PAGES);
+// registerPages(ZWISCHENERGEBNISSE_HELP_PAGES);
 
 // --- History-Stack für Vor / Zurück ---------------------------------------
 const history = [];

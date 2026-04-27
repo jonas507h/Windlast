@@ -58,34 +58,34 @@ def _eingeschlossene_flaeche_default(
                 text=f"Traverse '{objekt_name_intern}': ungültige Höhe ({hoehe}).",
                 kontext=merge_kontext(base_ctx, {"input_source": "catalog", "laenge": laenge, "hoehe": hoehe}),
             )
-            protokolliere_doc(
-                protokoll,
-                bundle=make_docbundle(
-                    titel="Eingeschlossene Fläche A_c",
-                    wert=float("nan"),
-                    einheit="m²",
-                    einzelwerte=[laenge, hoehe],
-                    formel="A_c = L · h",
-                    quelle_formel="Norm xyz (Abschnitt ...)",
-                ),
-                kontext=merge_kontext(base_ctx, {"nan": True}),
-            )
+            # protokolliere_doc(
+            #     protokoll,
+            #     bundle=make_docbundle(
+            #         titel="Eingeschlossene Fläche A_c",
+            #         wert=float("nan"),
+            #         einheit="m²",
+            #         einzelwerte=[laenge, hoehe],
+            #         formel="A_c = L · h",
+            #         quelle_formel="Norm xyz (Abschnitt ...)",
+            #     ),
+            #     kontext=merge_kontext(base_ctx, {"nan": True}),
+            # )
             return Zwischenergebnis(wert=float("nan"))
 
         wert = laenge * hoehe
 
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Eingeschlossene Fläche A_c",
-                wert=wert,
-                einheit="m²",
-                einzelwerte=[laenge, hoehe],
-                formel="A_c = L · h",
-                quelle_formel="Norm xyz (Abschnitt ...)",
-            ),
-            kontext=base_ctx,
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Eingeschlossene Fläche A_c",
+        #         wert=wert,
+        #         einheit="m²",
+        #         einzelwerte=[laenge, hoehe],
+        #         formel="A_c = L · h",
+        #         quelle_formel="Norm xyz (Abschnitt ...)",
+        #     ),
+        #     kontext=base_ctx,
+        # )
         return Zwischenergebnis(wert=wert)
     
     elif objekttyp == ObjektTyp.ROHR:
@@ -103,34 +103,34 @@ def _eingeschlossene_flaeche_default(
                 text=f"Rohr '{objekt_name_intern}': ungültiger Außendurchmesser ({d_aussen}).",
                 kontext=merge_kontext(base_ctx, {"input_source": "catalog", "laenge": laenge, "d_aussen": d_aussen}),
             )
-            protokolliere_doc(
-                protokoll,
-                bundle=make_docbundle(
-                    titel="Eingeschlossene Fläche A_c",
-                    wert=float("nan"),
-                    einheit="m²",
-                    einzelwerte=[laenge, d_aussen],
-                    formel="A_c = L · d_aussen",
-                    quelle_formel="Norm xyz (Abschnitt ...)",
-                ),
-                kontext=merge_kontext(base_ctx, {"nan": True}),
-            )
+            # protokolliere_doc(
+            #     protokoll,
+            #     bundle=make_docbundle(
+            #         titel="Eingeschlossene Fläche A_c",
+            #         wert=float("nan"),
+            #         einheit="m²",
+            #         einzelwerte=[laenge, d_aussen],
+            #         formel="A_c = L · d_aussen",
+            #         quelle_formel="Norm xyz (Abschnitt ...)",
+            #     ),
+            #     kontext=merge_kontext(base_ctx, {"nan": True}),
+            # )
             return Zwischenergebnis(wert=float("nan"))
 
         wert = laenge * d_aussen
 
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Eingeschlossene Fläche A_c",
-                wert=wert,
-                einheit="m²",
-                einzelwerte=[laenge, d_aussen],
-                formel="A_c = L · d_aussen",
-                quelle_formel="Norm xyz (Abschnitt ...)",
-            ),
-            kontext=base_ctx,
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Eingeschlossene Fläche A_c",
+        #         wert=wert,
+        #         einheit="m²",
+        #         einzelwerte=[laenge, d_aussen],
+        #         formel="A_c = L · d_aussen",
+        #         quelle_formel="Norm xyz (Abschnitt ...)",
+        #     ),
+        #     kontext=base_ctx,
+        # )
         return Zwischenergebnis(wert=wert)
 
     else:
@@ -168,11 +168,11 @@ def eingeschlossene_flaeche(
             text=str(e),
             kontext=base_ctx,
         )
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(titel="Eingeschlossene Fläche A_e", wert=float("nan")),
-            kontext=merge_kontext(base_ctx, {"nan": True}),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(titel="Eingeschlossene Fläche A_e", wert=float("nan")),
+        #     kontext=merge_kontext(base_ctx, {"nan": True}),
+        # )
         return Zwischenergebnis(wert=float("nan"))
     
     funktion = _DISPATCH.get(norm, _DISPATCH[Norm.DEFAULT])

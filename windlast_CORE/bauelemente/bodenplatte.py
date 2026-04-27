@@ -80,16 +80,16 @@ class Bodenplatte:
         einzelkraefte_vektoren: list[Vec3] = [(0.0, 0.0, gewichtskraft)]
         angriffsbereiche: list[list[Vec3]] = [ecken]
 
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Gewichtskraft F_G",
-                wert= -1 * gewichtskraft,
-                formel="F_G = m · g",
-                einheit="N",
-            ),
-            kontext=base_ctx,
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Gewichtskraft F_G",
+        #         wert= -1 * gewichtskraft,
+        #         formel="F_G = m · g",
+        #         einheit="N",
+        #     ),
+        #     kontext=base_ctx,
+        # )
 
         return [Kraefte(
             element_id_intern=self.element_id_intern,

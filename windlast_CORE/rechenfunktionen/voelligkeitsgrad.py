@@ -51,17 +51,17 @@ def _voelligkeitsgrad_default(
             kontext=merge_kontext(base_ctx, {"phi": wert}),
         )
 
-    protokolliere_doc(
-        protokoll,
-        bundle=make_docbundle(
-            titel="Völligkeitsgrad φ",
-            wert=wert,
-            formel="φ = A_proj / A_e",
-            formelzeichen=["φ", "A_proj", "A_e"],
-            einzelwerte=[a_projiziert, a_eingeschlossen],
-        ),
-        kontext=base_ctx,
-    )
+    # protokolliere_doc(
+    #     protokoll,
+    #     bundle=make_docbundle(
+    #         titel="Völligkeitsgrad φ",
+    #         wert=wert,
+    #         formel="φ = A_proj / A_e",
+    #         formelzeichen=["φ", "A_proj", "A_e"],
+    #         einzelwerte=[a_projiziert, a_eingeschlossen],
+    #     ),
+    #     kontext=base_ctx,
+    # )
     return Zwischenergebnis(wert=wert)
 
 _DISPATCH_VG: Dict[Norm, Callable[..., Zwischenergebnis]] = {
@@ -93,11 +93,11 @@ def voelligkeitsgrad(
             text=str(e),
             kontext=base_ctx,
         )
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(titel="Völligkeitsgrad φ", wert=float("nan")),
-            kontext=merge_kontext(base_ctx, {"nan": True}),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(titel="Völligkeitsgrad φ", wert=float("nan")),
+        #     kontext=merge_kontext(base_ctx, {"nan": True}),
+        # )
         return Zwischenergebnis(wert=float("nan"))
     
     funktion = _DISPATCH_VG.get(norm, _DISPATCH_VG[Norm.DEFAULT])

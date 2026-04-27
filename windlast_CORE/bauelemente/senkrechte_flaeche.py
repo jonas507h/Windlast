@@ -184,17 +184,17 @@ class senkrechteFlaeche:
                 if mitte_hoehe <= grenze:
                     staudruck = staudruecke[i]
                     break
-            protokolliere_doc(
-                protokoll,
-                bundle=make_docbundle(
-                    titel="Staudruck q",
-                    wert=staudruck,
-                    einheit="N/m²",
-                    formel="Staudruck auf mittlerer Höhe der Anzeigetafel",
-                    quelle_formel="DIN EN 1991-1-4:2010-12, Abschnitt 7.4.3",
-                    ),
-                kontext=tafel_ctx,
-            )
+            # protokolliere_doc(
+            #     protokoll,
+            #     bundle=make_docbundle(
+            #         titel="Staudruck q",
+            #         wert=staudruck,
+            #         einheit="N/m²",
+            #         formel="Staudruck auf mittlerer Höhe der Anzeigetafel",
+            #         quelle_formel="DIN EN 1991-1-4:2010-12, Abschnitt 7.4.3",
+            #         ),
+            #     kontext=tafel_ctx,
+            # )
 
             _kraftbeiwert = kraftbeiwert(
                 norm, objekttyp=self.objekttyp, windrichtung=windrichtung, senkrechte_flaeche_typ=self.flaeche_typ, punkte=self.eckpunkte,

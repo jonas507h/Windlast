@@ -117,16 +117,16 @@ def _gleitsicherheit_DinEn13814_2005_06(
     if methode is RechenmethodeGleiten.MIN_REIBWERT:
         reibwert_min = ermittle_min_reibwert(norm,konstruktion, protokoll=protokoll, kontext=base_ctx)
 
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Minimaler Reibwert μ_min",
-                wert=reibwert_min,
-                formel="μ_min = min(μ_Bauelemente)",
-                formelzeichen=["μ_Bauelemente"],
-            ),
-            kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "min_reibwert"}),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Minimaler Reibwert μ_min",
+        #         wert=reibwert_min,
+        #         formel="μ_min = min(μ_Bauelemente)",
+        #         formelzeichen=["μ_Bauelemente"],
+        #     ),
+        #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "min_reibwert"}),
+        # )
 
         sicherheit_min_global = inf
         ballast_erforderlich_max = 0.0
@@ -168,33 +168,33 @@ def _gleitsicherheit_DinEn13814_2005_06(
 
             for element, lastfaelle_elem in kraefte_nach_element.items():
                 H_vec, N_down, N_up = gleit_envelope_pro_bauelement(norm, lastfaelle_elem, protokoll=sub_prot, kontext=merge_kontext(richtung_ctx, {"element_id": str(element)}))
-                protokolliere_doc(
-                    sub_prot,
-                    bundle=make_docbundle(
-                        titel="Horizontalkraft H",
-                        wert=H_vec,
-                        einheit="N",
-                    ),
-                    kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "element_horizontalkraft", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
-                )
-                protokolliere_doc(
-                    sub_prot,
-                    bundle=make_docbundle(
-                        titel="Normalkraft N_down",
-                        wert=N_down,
-                        einheit="N",
-                    ),
-                    kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "element_normalkraft_down", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
-                )
-                protokolliere_doc(
-                    sub_prot,
-                    bundle=make_docbundle(
-                        titel="Normalkraft N_up",
-                        wert=N_up,
-                        einheit="N",
-                    ),
-                    kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "element_normalkraft_up", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
-                )
+                # protokolliere_doc(
+                #     sub_prot,
+                #     bundle=make_docbundle(
+                #         titel="Horizontalkraft H",
+                #         wert=H_vec,
+                #         einheit="N",
+                #     ),
+                #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "element_horizontalkraft", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
+                # )
+                # protokolliere_doc(
+                #     sub_prot,
+                #     bundle=make_docbundle(
+                #         titel="Normalkraft N_down",
+                #         wert=N_down,
+                #         einheit="N",
+                #     ),
+                #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "element_normalkraft_down", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
+                # )
+                # protokolliere_doc(
+                #     sub_prot,
+                #     bundle=make_docbundle(
+                #         titel="Normalkraft N_up",
+                #         wert=N_up,
+                #         einheit="N",
+                #     ),
+                #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "element_normalkraft_up", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
+                # )
                 total_horizontal = vektoren_addieren([total_horizontal, H_vec])
                 total_normal_up += N_up
                 total_normal_down += N_down
@@ -204,77 +204,77 @@ def _gleitsicherheit_DinEn13814_2005_06(
             reibkraft = reibwert_min * normal_effektiv
 
             # === Zwischendocs (Aggregat der Richtung) ===
-            protokolliere_doc(
-                sub_prot,
-                bundle=make_docbundle(
-                    titel="Summe Horizontalbetrag |H|",
-                    wert=horizontal_betrag,
-                    einheit="N",
-                    formel="|T| = √(T_x² + T_y² + T_z²)",
-                    formelzeichen=["T_x", "T_y", "T_z"],
-                ),
-                kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "horizontal_betrag", "windrichtung_deg": f"{winkel}°"}),
-            )
-            protokolliere_doc(
-                sub_prot,
-                bundle=make_docbundle(
-                    titel="Summe Normalkräfte ΣN_down",
-                    wert=total_normal_down,
-                    einheit="N",
-                    formel="ΣN_down = N_{down,Element}",
-                    formelzeichen=["N_{down,Element}"],
-                ),
-                kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "normal_down", "windrichtung_deg": f"{winkel}°"}),
-            )
-            protokolliere_doc(
-                sub_prot,
-                bundle=make_docbundle(
-                    titel="Summe Normalkräfte ΣN_up",
-                    wert=total_normal_up,
-                    einheit="N",
-                    formel="ΣN_up = N_{up,Element}",
-                    formelzeichen=["N_{up,Element}"],
-                ),
-                kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "normal_up", "windrichtung_deg": f"{winkel}°"}),
-            )
-            protokolliere_doc(
-                sub_prot,
-                bundle=make_docbundle(
-                    titel="Effektive Normalkraft N_eff",
-                    wert=normal_effektiv,
-                    einheit="N",
-                    formel="N_eff = max(0, ΣN_down − ΣN_up)",
-                    formelzeichen=["ΣN_down", "ΣN_up"],
-                ),
-                kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "normal_effektiv", "windrichtung_deg": f"{winkel}°"}),
-            )
-            protokolliere_doc(
-                sub_prot,
-                bundle=make_docbundle(
-                    titel="Reibkraft R",
-                    wert=reibkraft,
-                    einheit="N",
-                    formel="R = μ_min · N_eff",
-                    formelzeichen=["μ_min", "N_eff"],
-                ),
-                kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "reibkraft", "windrichtung_deg": f"{winkel}°"}),
-            )
+            # protokolliere_doc(
+            #     sub_prot,
+            #     bundle=make_docbundle(
+            #         titel="Summe Horizontalbetrag |H|",
+            #         wert=horizontal_betrag,
+            #         einheit="N",
+            #         formel="|T| = √(T_x² + T_y² + T_z²)",
+            #         formelzeichen=["T_x", "T_y", "T_z"],
+            #     ),
+            #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "horizontal_betrag", "windrichtung_deg": f"{winkel}°"}),
+            # )
+            # protokolliere_doc(
+            #     sub_prot,
+            #     bundle=make_docbundle(
+            #         titel="Summe Normalkräfte ΣN_down",
+            #         wert=total_normal_down,
+            #         einheit="N",
+            #         formel="ΣN_down = N_{down,Element}",
+            #         formelzeichen=["N_{down,Element}"],
+            #     ),
+            #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "normal_down", "windrichtung_deg": f"{winkel}°"}),
+            # )
+            # protokolliere_doc(
+            #     sub_prot,
+            #     bundle=make_docbundle(
+            #         titel="Summe Normalkräfte ΣN_up",
+            #         wert=total_normal_up,
+            #         einheit="N",
+            #         formel="ΣN_up = N_{up,Element}",
+            #         formelzeichen=["N_{up,Element}"],
+            #     ),
+            #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "normal_up", "windrichtung_deg": f"{winkel}°"}),
+            # )
+            # protokolliere_doc(
+            #     sub_prot,
+            #     bundle=make_docbundle(
+            #         titel="Effektive Normalkraft N_eff",
+            #         wert=normal_effektiv,
+            #         einheit="N",
+            #         formel="N_eff = max(0, ΣN_down − ΣN_up)",
+            #         formelzeichen=["ΣN_down", "ΣN_up"],
+            #     ),
+            #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "normal_effektiv", "windrichtung_deg": f"{winkel}°"}),
+            # )
+            # protokolliere_doc(
+            #     sub_prot,
+            #     bundle=make_docbundle(
+            #         titel="Reibkraft R",
+            #         wert=reibkraft,
+            #         einheit="N",
+            #         formel="R = μ_min · N_eff",
+            #         formelzeichen=["μ_min", "N_eff"],
+            #     ),
+            #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "reibkraft", "windrichtung_deg": f"{winkel}°"}),
+            # )
 
             if horizontal_betrag > _EPS:
                 sicherheit = reibkraft / horizontal_betrag
                 dir_min_sicherheit = min(dir_min_sicherheit, sicherheit)
                 
-            protokolliere_doc(
-                sub_prot,
-                bundle=make_docbundle(
-                    titel=f"Richtungs-Sicherheit S_gleit,{int(winkel)}°",
-                    wert=sicherheit,
-                    formel="S = R / T",
-                    formelzeichen=["R", "T"],
-                    quelle_formel="---",
-                ),
-                kontext={"nachweis": "GLEIT", "doc_type": "dir_sicherheit", "windrichtung_deg": f"{winkel}°"},
-            )
+            # protokolliere_doc(
+            #     sub_prot,
+            #     bundle=make_docbundle(
+            #         titel=f"Richtungs-Sicherheit S_gleit,{int(winkel)}°",
+            #         wert=sicherheit,
+            #         formel="S = R / T",
+            #         formelzeichen=["R", "T"],
+            #         quelle_formel="---",
+            #     ),
+            #     kontext={"nachweis": "GLEIT", "doc_type": "dir_sicherheit", "windrichtung_deg": f"{winkel}°"},
+            # )
 
             if reibwert_min <= _EPS:
                 if horizontal_betrag > _EPS:
@@ -289,18 +289,18 @@ def _gleitsicherheit_DinEn13814_2005_06(
                 dir_ballast_max = ballastkraft
 
             # Ballast-Doc (Richtung)
-            protokolliere_doc(
-                sub_prot,
-                bundle=make_docbundle(
-                    titel=f"Richtungs-Ballast m_Ballast,gleit,{int(winkel)}°",
-                    wert=ballastkraft,
-                    einheit="kg",
-                    formel="Δm_Ballast,gleit = T/μ + ΣN_up − ΣN_down",
-                    formelzeichen=["T", "μ", "N_up", "N_down"],
-                    quelle_formel="---",
-                ),
-                kontext={"nachweis": "GLEIT", "doc_type": "dir_ballast", "windrichtung_deg": f"{winkel}°"},
-            )
+            # protokolliere_doc(
+            #     sub_prot,
+            #     bundle=make_docbundle(
+            #         titel=f"Richtungs-Ballast m_Ballast,gleit,{int(winkel)}°",
+            #         wert=ballastkraft,
+            #         einheit="kg",
+            #         formel="Δm_Ballast,gleit = T/μ + ΣN_up − ΣN_down",
+            #         formelzeichen=["T", "μ", "N_up", "N_down"],
+            #         quelle_formel="---",
+            #     ),
+            #     kontext={"nachweis": "GLEIT", "doc_type": "dir_ballast", "windrichtung_deg": f"{winkel}°"},
+            # )
 
             # Record ablegen (WICHTIG: innerhalb der Schleife!)
             dir_records.append({
@@ -342,29 +342,29 @@ def _gleitsicherheit_DinEn13814_2005_06(
         erdbeschleunigung = aktuelle_konstanten().erdbeschleunigung
         ballast_kg = ballast_erforderlich_max / erdbeschleunigung
 
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Gleitsicherheit S_gleit",
-                wert=sicherheit_min_global,
-                formel="S = R / T",
-                formelzeichen=["R", "T"],
-                quelle_formel="---",
-            ),
-            kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "rolle": "relevant"}),
-        )
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Erforderlicher Ballast m_Ballast,gleit",
-                wert=ballast_kg,
-                einheit="kg",
-                formel="Δm_Ballast,gleit = T/μ + ΣN_up − ΣN_down",
-                formelzeichen=["T", "μ", "N_up", "N_down"],
-                quelle_formel="---",
-            ),
-            kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "ballast_pro_sicherheit", "quelle_nachweis": "GLEIT", "rolle": "relevant"}),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Gleitsicherheit S_gleit",
+        #         wert=sicherheit_min_global,
+        #         formel="S = R / T",
+        #         formelzeichen=["R", "T"],
+        #         quelle_formel="---",
+        #     ),
+        #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "rolle": "relevant"}),
+        # )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Erforderlicher Ballast m_Ballast,gleit",
+        #         wert=ballast_kg,
+        #         einheit="kg",
+        #         formel="Δm_Ballast,gleit = T/μ + ΣN_up − ΣN_down",
+        #         formelzeichen=["T", "μ", "N_up", "N_down"],
+        #         quelle_formel="---",
+        #     ),
+        #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "ballast_pro_sicherheit", "quelle_nachweis": "GLEIT", "rolle": "relevant"}),
+        # )
 
         #Entscheidung protokollieren
         protokolliere_decision(
@@ -415,16 +415,16 @@ def _gleitsicherheit_DinEn17879_2024_08(
     if methode is RechenmethodeGleiten.MIN_REIBWERT:
         reibwert_min = ermittle_min_reibwert(norm,konstruktion, protokoll=protokoll, kontext=base_ctx)
 
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Minimaler Reibwert μ_min",
-                wert=reibwert_min,
-                formel="μ_min = min(μ_Bauelemente)",
-                formelzeichen=["μ_Bauelemente"],
-            ),
-            kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "min_reibwert"}),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Minimaler Reibwert μ_min",
+        #         wert=reibwert_min,
+        #         formel="μ_min = min(μ_Bauelemente)",
+        #         formelzeichen=["μ_Bauelemente"],
+        #     ),
+        #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "min_reibwert"}),
+        # )
 
         sicherheit_min_global = inf
         ballast_erforderlich_max = 0.0
@@ -466,33 +466,33 @@ def _gleitsicherheit_DinEn17879_2024_08(
 
             for element, lastfaelle_elem in kraefte_nach_element.items():
                 H_vec, N_down, N_up = gleit_envelope_pro_bauelement(norm, lastfaelle_elem, protokoll=sub_prot, kontext=merge_kontext(richtung_ctx, {"element_id": str(element)}))
-                protokolliere_doc(
-                    sub_prot,
-                    bundle=make_docbundle(
-                        titel="Horizontalkraft H",
-                        wert=H_vec,
-                        einheit="N",
-                    ),
-                    kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "element_horizontalkraft", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
-                )
-                protokolliere_doc(
-                    sub_prot,
-                    bundle=make_docbundle(
-                        titel="Normalkraft N_down",
-                        wert=N_down,
-                        einheit="N",
-                    ),
-                    kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "element_normalkraft_down", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
-                )
-                protokolliere_doc(
-                    sub_prot,
-                    bundle=make_docbundle(
-                        titel="Normalkraft N_up",
-                        wert=N_up,
-                        einheit="N",
-                    ),
-                    kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "element_normalkraft_up", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
-                )
+                # protokolliere_doc(
+                #     sub_prot,
+                #     bundle=make_docbundle(
+                #         titel="Horizontalkraft H",
+                #         wert=H_vec,
+                #         einheit="N",
+                #     ),
+                #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "element_horizontalkraft", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
+                # )
+                # protokolliere_doc(
+                #     sub_prot,
+                #     bundle=make_docbundle(
+                #         titel="Normalkraft N_down",
+                #         wert=N_down,
+                #         einheit="N",
+                #     ),
+                #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "element_normalkraft_down", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
+                # )
+                # protokolliere_doc(
+                #     sub_prot,
+                #     bundle=make_docbundle(
+                #         titel="Normalkraft N_up",
+                #         wert=N_up,
+                #         einheit="N",
+                #     ),
+                #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "element_normalkraft_up", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
+                # )
                 total_horizontal = vektoren_addieren([total_horizontal, H_vec])
                 total_normal_up += N_up
                 total_normal_down += N_down
@@ -502,76 +502,76 @@ def _gleitsicherheit_DinEn17879_2024_08(
             reibkraft = reibwert_min * normal_effektiv
 
             # === Zwischendocs (Aggregat der Richtung) ===
-            protokolliere_doc(
-                sub_prot,
-                bundle=make_docbundle(
-                    titel="Summe Horizontalbetrag |H|",
-                    wert=horizontal_betrag,
-                    einheit="N",
-                    formel="|T| = √(T_x² + T_y² + T_z²)",
-                    formelzeichen=["T_x", "T_y", "T_z"],
-                ),
-                kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "horizontal_betrag", "windrichtung_deg": f"{winkel}°"}),
-            )
-            protokolliere_doc(
-                sub_prot,
-                bundle=make_docbundle(
-                    titel="Summe Normalkräfte ΣN_down",
-                    wert=total_normal_down,
-                    einheit="N",
-                    formel="ΣN_down = N_{down,Element}",
-                    formelzeichen=["N_{down,Element}"],
-                ),
-                kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "normal_down", "windrichtung_deg": f"{winkel}°"}),
-            )
-            protokolliere_doc(
-                sub_prot,
-                bundle=make_docbundle(
-                    titel="Summe Normalkräfte ΣN_up",
-                    wert=total_normal_up,
-                    einheit="N",
-                    formel="ΣN_up = N_{up,Element}",
-                    formelzeichen=["N_{up,Element}"],
-                ),
-                kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "normal_up", "windrichtung_deg": f"{winkel}°"}),
-            )
-            protokolliere_doc(
-                sub_prot,
-                bundle=make_docbundle(
-                    titel="Effektive Normalkraft N_eff",
-                    wert=normal_effektiv,
-                    einheit="N",
-                    formel="N_eff = max(0, ΣN_down − ΣN_up)",
-                    formelzeichen=["ΣN_down", "ΣN_up"],
-                ),
-                kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "normal_effektiv", "windrichtung_deg": f"{winkel}°"}),
-            )
-            protokolliere_doc(
-                sub_prot,
-                bundle=make_docbundle(
-                    titel="Reibkraft R",
-                    wert=reibkraft,
-                    einheit="N",
-                    formel="R = μ_min · N_eff",
-                    formelzeichen=["μ_min", "N_eff"],
-                ),
-                kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "reibkraft", "windrichtung_deg": f"{winkel}°"}),
-            )
+            # protokolliere_doc(
+            #     sub_prot,
+            #     bundle=make_docbundle(
+            #         titel="Summe Horizontalbetrag |H|",
+            #         wert=horizontal_betrag,
+            #         einheit="N",
+            #         formel="|T| = √(T_x² + T_y² + T_z²)",
+            #         formelzeichen=["T_x", "T_y", "T_z"],
+            #     ),
+            #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "horizontal_betrag", "windrichtung_deg": f"{winkel}°"}),
+            # )
+            # protokolliere_doc(
+            #     sub_prot,
+            #     bundle=make_docbundle(
+            #         titel="Summe Normalkräfte ΣN_down",
+            #         wert=total_normal_down,
+            #         einheit="N",
+            #         formel="ΣN_down = N_{down,Element}",
+            #         formelzeichen=["N_{down,Element}"],
+            #     ),
+            #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "normal_down", "windrichtung_deg": f"{winkel}°"}),
+            # )
+            # protokolliere_doc(
+            #     sub_prot,
+            #     bundle=make_docbundle(
+            #         titel="Summe Normalkräfte ΣN_up",
+            #         wert=total_normal_up,
+            #         einheit="N",
+            #         formel="ΣN_up = N_{up,Element}",
+            #         formelzeichen=["N_{up,Element}"],
+            #     ),
+            #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "normal_up", "windrichtung_deg": f"{winkel}°"}),
+            # )
+            # protokolliere_doc(
+            #     sub_prot,
+            #     bundle=make_docbundle(
+            #         titel="Effektive Normalkraft N_eff",
+            #         wert=normal_effektiv,
+            #         einheit="N",
+            #         formel="N_eff = max(0, ΣN_down − ΣN_up)",
+            #         formelzeichen=["ΣN_down", "ΣN_up"],
+            #     ),
+            #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "normal_effektiv", "windrichtung_deg": f"{winkel}°"}),
+            # )
+            # protokolliere_doc(
+            #     sub_prot,
+            #     bundle=make_docbundle(
+            #         titel="Reibkraft R",
+            #         wert=reibkraft,
+            #         einheit="N",
+            #         formel="R = μ_min · N_eff",
+            #         formelzeichen=["μ_min", "N_eff"],
+            #     ),
+            #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "reibkraft", "windrichtung_deg": f"{winkel}°"}),
+            # )
 
             if horizontal_betrag > _EPS:
                 sicherheit = reibkraft / horizontal_betrag
                 dir_min_sicherheit = min(dir_min_sicherheit, sicherheit)
-                protokolliere_doc(
-                    sub_prot,
-                    bundle=make_docbundle(
-                        titel=f"Richtungs-Sicherheit S_gleit,{int(winkel)}°",
-                        wert=sicherheit,
-                        formel="S = R / T",
-                        formelzeichen=["R", "T"],
-                        quelle_formel="---",
-                    ),
-                    kontext={"nachweis": "GLEIT", "doc_type": "dir_sicherheit", "windrichtung_deg": f"{winkel}°"},
-                )
+                # protokolliere_doc(
+                #     sub_prot,
+                #     bundle=make_docbundle(
+                #         titel=f"Richtungs-Sicherheit S_gleit,{int(winkel)}°",
+                #         wert=sicherheit,
+                #         formel="S = R / T",
+                #         formelzeichen=["R", "T"],
+                #         quelle_formel="---",
+                #     ),
+                #     kontext={"nachweis": "GLEIT", "doc_type": "dir_sicherheit", "windrichtung_deg": f"{winkel}°"},
+                # )
 
             if reibwert_min <= _EPS:
                 if horizontal_betrag > _EPS:
@@ -585,18 +585,18 @@ def _gleitsicherheit_DinEn17879_2024_08(
                 dir_ballast_max = ballastkraft
 
             # Ballast-Doc (Richtung)
-            protokolliere_doc(
-                sub_prot,
-                bundle=make_docbundle(
-                    titel=f"Richtungs-Ballast m_Ballast,gleit,{int(winkel)}°",
-                    wert=ballastkraft,
-                    einheit="kg",
-                    formel=f"m_Ballast,gleit,{int(winkel)}° = T/μ + ΣN_up − ΣN_down",
-                    formelzeichen=["T", "μ", "N_up", "N_down"],
-                    quelle_formel="---",
-                ),
-                kontext={"nachweis": "GLEIT", "doc_type": "dir_ballast", "windrichtung_deg": f"{winkel}°"},
-            )
+            # protokolliere_doc(
+            #     sub_prot,
+            #     bundle=make_docbundle(
+            #         titel=f"Richtungs-Ballast m_Ballast,gleit,{int(winkel)}°",
+            #         wert=ballastkraft,
+            #         einheit="kg",
+            #         formel=f"m_Ballast,gleit,{int(winkel)}° = T/μ + ΣN_up − ΣN_down",
+            #         formelzeichen=["T", "μ", "N_up", "N_down"],
+            #         quelle_formel="---",
+            #     ),
+            #     kontext={"nachweis": "GLEIT", "doc_type": "dir_ballast", "windrichtung_deg": f"{winkel}°"},
+            # )
 
             # Record ablegen (WICHTIG: innerhalb der Schleife!)
             dir_records.append({
@@ -638,29 +638,29 @@ def _gleitsicherheit_DinEn17879_2024_08(
         erdbeschleunigung = aktuelle_konstanten().erdbeschleunigung
         ballast_kg = ballast_erforderlich_max / erdbeschleunigung
 
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Gleitsicherheit S_gleit",
-                wert=sicherheit_min_global,
-                formel="S_gleit = R / T",
-                formelzeichen=["R", "T"],
-                quelle_formel="---",
-            ),
-            kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "rolle": "relevant"}),
-        )
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Erforderlicher Ballast m_Ballast,gleit",
-                wert=ballast_kg,
-                einheit="kg",
-                formel="m_Ballast,gleit = T/μ + ΣN_up − ΣN_down",
-                formelzeichen=["T", "μ", "N_up", "N_down"],
-                quelle_formel="---",
-            ),
-            kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "rolle": "relevant"}),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Gleitsicherheit S_gleit",
+        #         wert=sicherheit_min_global,
+        #         formel="S_gleit = R / T",
+        #         formelzeichen=["R", "T"],
+        #         quelle_formel="---",
+        #     ),
+        #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "rolle": "relevant"}),
+        # )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Erforderlicher Ballast m_Ballast,gleit",
+        #         wert=ballast_kg,
+        #         einheit="kg",
+        #         formel="m_Ballast,gleit = T/μ + ΣN_up − ΣN_down",
+        #         formelzeichen=["T", "μ", "N_up", "N_down"],
+        #         quelle_formel="---",
+        #     ),
+        #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "rolle": "relevant"}),
+        # )
 
         #Entscheidung protokollieren
         protokolliere_decision(

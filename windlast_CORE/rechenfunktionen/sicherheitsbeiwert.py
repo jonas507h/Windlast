@@ -70,25 +70,25 @@ def _beiwert_default(
                 text=f"Unbekannter Lasttyp: {kraft.typ}",
                 kontext=base_ctx,
             )
-            protokolliere_doc(
-                protokoll,
-                bundle=make_docbundle(titel=titel, wert=float("nan")),
-                kontext=merge_kontext(base_ctx, {"nan": True}),
-            )
+            # protokolliere_doc(
+            #     protokoll,
+            #     bundle=make_docbundle(titel=titel, wert=float("nan")),
+            #     kontext=merge_kontext(base_ctx, {"nan": True}),
+            # )
             return Zwischenergebnis(wert=float("nan"))
 
-    protokolliere_doc(
-        protokoll,
-        bundle=make_docbundle(
-            titel=titel,
-            wert=gamma,
-            formel=formel,
-            quelle_formel="DIN EN 17879:2024-08 / DIN EN 13814:2005-06",
-            formelzeichen=["γ"],
-            quelle_formelzeichen=["---"],
-        ),
-        kontext=base_ctx,
-    )
+    # protokolliere_doc(
+    #     protokoll,
+    #     bundle=make_docbundle(
+    #         titel=titel,
+    #         wert=gamma,
+    #         formel=formel,
+    #         quelle_formel="DIN EN 17879:2024-08 / DIN EN 13814:2005-06",
+    #         formelzeichen=["γ"],
+    #         quelle_formelzeichen=["---"],
+    #     ),
+    #     kontext=base_ctx,
+    # )
     return Zwischenergebnis(wert=gamma)
 
 # Norm-Dispatch (derzeit alle Normen → default)
@@ -119,11 +119,11 @@ def sicherheitsbeiwert(
             protokoll, severity=Severity.ERROR, code="SICHB/INPUT_INVALID",
             text=str(e), kontext=base_ctx,
         )
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(titel="Sicherheitsbeiwert γ", wert=float("nan")),
-            kontext=merge_kontext(base_ctx, {"nan": True}),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(titel="Sicherheitsbeiwert γ", wert=float("nan")),
+        #     kontext=merge_kontext(base_ctx, {"nan": True}),
+        # )
         return Zwischenergebnis(wert=float("nan"))
 
     fn = _DISPATCH.get(norm, _DISPATCH[Norm.DEFAULT])

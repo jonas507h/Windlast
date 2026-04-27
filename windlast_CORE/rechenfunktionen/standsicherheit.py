@@ -223,29 +223,29 @@ def _rechne_drei_nachweise(
 
     # Globalen Ballast auch als Protokoll-Dokument ablegen
     if protokoll is not None and ballast_wert is not None:
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Erforderlicher Ballast m_Ballast,max",
-                wert=ballast_wert,  # Achtung: hier in derselben Einheit wie b_* (kg)
-                einheit="kg",
-                formel="m_Ballast,max = max(m_Ballast,kipp, m_Ballast,gleit, m_Ballast,abheb)",
-                formelzeichen=[
-                    "m_Ballast,kipp",
-                    "m_Ballast,gleit",
-                    "m_Ballast,abheb",
-                ],
-                quelle_formel="---",
-            ),
-            kontext=merge_kontext(base_ctx, {
-                "nachweis": "BALLAST",
-                # Rolle: wie bei den Endwerten der Einzelnachweise → immer 'relevant'
-                # (die sind in KIPP/GLEIT/ABHEB auch mit rolle='relevant' markiert)
-                "rolle": "relevant",
-                # Wichtig für den nächsten Schritt: welcher Nachweis bestimmt den Ballast?
-                "quelle_nachweis": ballast_quelle.name if ballast_quelle is not None else None,
-            }),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Erforderlicher Ballast m_Ballast,max",
+        #         wert=ballast_wert,  # Achtung: hier in derselben Einheit wie b_* (kg)
+        #         einheit="kg",
+        #         formel="m_Ballast,max = max(m_Ballast,kipp, m_Ballast,gleit, m_Ballast,abheb)",
+        #         formelzeichen=[
+        #             "m_Ballast,kipp",
+        #             "m_Ballast,gleit",
+        #             "m_Ballast,abheb",
+        #         ],
+        #         quelle_formel="---",
+        #     ),
+        #     kontext=merge_kontext(base_ctx, {
+        #         "nachweis": "BALLAST",
+        #         # Rolle: wie bei den Endwerten der Einzelnachweise → immer 'relevant'
+        #         # (die sind in KIPP/GLEIT/ABHEB auch mit rolle='relevant' markiert)
+        #         "rolle": "relevant",
+        #         # Wichtig für den nächsten Schritt: welcher Nachweis bestimmt den Ballast?
+        #         "quelle_nachweis": ballast_quelle.name if ballast_quelle is not None else None,
+        #     }),
+        # )
         protokolliere_decision(
             protokoll,
             key="quelle_nachweis",

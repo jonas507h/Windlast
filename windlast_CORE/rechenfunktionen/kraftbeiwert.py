@@ -107,30 +107,30 @@ def _kraftbeiwert_DinEn1991_1_4_2010_12(
 
     if objekttyp == ObjektTyp.TRAVERSE:
         wert = grundkraftbeiwert * abminderungsfaktor_schlankheit
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Kraftbeiwert c_f",
-                wert=wert,
-                einzelwerte=[grundkraftbeiwert, abminderungsfaktor_schlankheit],
-                formel="c = c₀ · η_schlank",
-            ),
-            kontext=base_ctx,
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Kraftbeiwert c_f",
+        #         wert=wert,
+        #         einzelwerte=[grundkraftbeiwert, abminderungsfaktor_schlankheit],
+        #         formel="c = c₀ · η_schlank",
+        #     ),
+        #     kontext=base_ctx,
+        # )
         return Zwischenergebnis(wert=wert)
     
     elif objekttyp == ObjektTyp.ROHR:
         wert = grundkraftbeiwert * abminderungsfaktor_schlankheit
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Kraftbeiwert c_f",
-                wert=wert,
-                einzelwerte=[grundkraftbeiwert, abminderungsfaktor_schlankheit],
-                formel="c = c₀ · η_schlank",
-            ),
-            kontext=base_ctx,
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Kraftbeiwert c_f",
+        #         wert=wert,
+        #         einzelwerte=[grundkraftbeiwert, abminderungsfaktor_schlankheit],
+        #         formel="c = c₀ · η_schlank",
+        #     ),
+        #     kontext=base_ctx,
+        # )
         return Zwischenergebnis(wert=wert)
     
     elif objekttyp == ObjektTyp.SENKRECHTE_FLAECHE:
@@ -145,29 +145,29 @@ def _kraftbeiwert_DinEn1991_1_4_2010_12(
                     text="Windrichtung verläuft (nahezu) parallel zur Ebene der senkrechten Fläche – c_f = 0.",
                     kontext=base_ctx,
                 )
-                protokolliere_doc(
-                    protokoll,
-                    bundle=make_docbundle(
-                        titel="Kraftbeiwert c_f",
-                        wert=wert,
-                        formel="c_f = 0,0 für Anzeigetafeln bei paralleler Anströmung",
-                        quelle_formel="DIN EN 1991-1-4:2010-12, Abschnitt 7.4.3",
-                        ),
-                    kontext=base_ctx,
-                )
+                # protokolliere_doc(
+                #     protokoll,
+                #     bundle=make_docbundle(
+                #         titel="Kraftbeiwert c_f",
+                #         wert=wert,
+                #         formel="c_f = 0,0 für Anzeigetafeln bei paralleler Anströmung",
+                #         quelle_formel="DIN EN 1991-1-4:2010-12, Abschnitt 7.4.3",
+                #         ),
+                #     kontext=base_ctx,
+                # )
             else:
                 wert = 1.8
 
-                protokolliere_doc(
-                    protokoll,
-                    bundle=make_docbundle(
-                        titel="Kraftbeiwert c_f",
-                        wert=wert,
-                        formel="c_f = 1,8 für Anzeigetafeln",
-                        quelle_formel="DIN EN 1991-1-4:2010-12, Abschnitt 7.4.3",
-                        ),
-                    kontext=base_ctx,
-                )
+                # protokolliere_doc(
+                #     protokoll,
+                #     bundle=make_docbundle(
+                #         titel="Kraftbeiwert c_f",
+                #         wert=wert,
+                #         formel="c_f = 1,8 für Anzeigetafeln",
+                #         quelle_formel="DIN EN 1991-1-4:2010-12, Abschnitt 7.4.3",
+                #         ),
+                #     kontext=base_ctx,
+                # )
             return Zwischenergebnis(wert=wert)
         elif senkrechte_flaeche_typ == senkrechteFlaecheTyp.WAND:
             # Höhe und Breite bestimmen
@@ -181,17 +181,17 @@ def _kraftbeiwert_DinEn1991_1_4_2010_12(
             verhaeltnis = breite / hoehe
             wert = druckbeiwert_zone(zone, verhaeltnis)
             
-            protokolliere_doc(
-                protokoll,
-                bundle=make_docbundle(
-                    titel="Nettodruckbeiwert c_p,net",
-                    wert=wert,
-                    einzelwerte=[zone.value, verhaeltnis],
-                    formel=f"c_p,net = {wert} für Wand in Zone {zone.value} mit l/h = {verhaeltnis:.2f}",
-                    quelle_formel="DIN EN 1991-1-4:2010-12, Tabelle 7.9",
-                ),
-                kontext=base_ctx,
-            )
+            # protokolliere_doc(
+            #     protokoll,
+            #     bundle=make_docbundle(
+            #         titel="Nettodruckbeiwert c_p,net",
+            #         wert=wert,
+            #         einzelwerte=[zone.value, verhaeltnis],
+            #         formel=f"c_p,net = {wert} für Wand in Zone {zone.value} mit l/h = {verhaeltnis:.2f}",
+            #         quelle_formel="DIN EN 1991-1-4:2010-12, Tabelle 7.9",
+            #     ),
+            #     kontext=base_ctx,
+            # )
             return Zwischenergebnis(wert=wert)
         else:
             protokolliere_msg(
@@ -201,11 +201,11 @@ def _kraftbeiwert_DinEn1991_1_4_2010_12(
                 text=f"Kraftbeiwert für senkrechte Fläche vom Typ '{senkrechte_flaeche_typ.name}' ist noch nicht implementiert.",
                 kontext=base_ctx,
             )
-            protokolliere_doc(
-                protokoll,
-                bundle=make_docbundle(titel="Kraftbeiwert c_f", wert=float("nan")),
-                kontext=merge_kontext(base_ctx, {"nan": True}),
-            )
+            # protokolliere_doc(
+            #     protokoll,
+            #     bundle=make_docbundle(titel="Kraftbeiwert c_f", wert=float("nan")),
+            #     kontext=merge_kontext(base_ctx, {"nan": True}),
+            # )
             return Zwischenergebnis(wert=float("nan"))  
 
     else:
@@ -248,11 +248,11 @@ def kraftbeiwert(
             text=str(e),
             kontext=base_ctx,
         )
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(titel="Kraftbeiwert c", wert=float("nan")),
-            kontext=merge_kontext(base_ctx, {"nan": True}),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(titel="Kraftbeiwert c", wert=float("nan")),
+        #     kontext=merge_kontext(base_ctx, {"nan": True}),
+        # )
         return Zwischenergebnis(wert=float("nan"))
     
     funktion = _DISPATCH.get(norm, _DISPATCH[Norm.DEFAULT])

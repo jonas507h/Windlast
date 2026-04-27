@@ -71,12 +71,12 @@ def _schlankheit_DinEn1991_1_4_2010_12(
                 text=f"Traverse '{objekt_name_intern}': ungültige Höhe ({hoehe}m).",
                 kontext=local_ctx,
             )
-            protokolliere_doc(
-                protokoll,
-                bundle=make_docbundle(titel="Schlankheit λ", wert=float("nan"),
-                                      einzelwerte=[laenge, hoehe]),
-                kontext=merge_kontext(local_ctx, {"nan": True}),
-            )
+            # protokolliere_doc(
+            #     protokoll,
+            #     bundle=make_docbundle(titel="Schlankheit λ", wert=float("nan"),
+            #                           einzelwerte=[laenge, hoehe]),
+            #     kontext=merge_kontext(local_ctx, {"nan": True}),
+            # )
             return Zwischenergebnis(wert=float("nan"))
 
         faktor = interpol_2D([15.0, 50.0], [2.0, 1.4], laenge)
@@ -93,17 +93,17 @@ def _schlankheit_DinEn1991_1_4_2010_12(
         #         kontext=merge_kontext(kontext, {"phase": "Zwischenwerte", "rechenwert": rechenwert}),
         #     )
 
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Schlankheit λ",
-                wert=wert,
-                einzelwerte=[laenge, hoehe],
-                # Optional: Wenn du Formeln/Quellen an dieser Stelle schon kennst:
-                # formel="λ = f(L) * L / h", quelle_formel="DIN EN 1991-1-4:2010-12, Tab ..."
-            ),
-            kontext=merge_kontext(kontext, {"phase": "Zwischenwerte"}),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Schlankheit λ",
+        #         wert=wert,
+        #         einzelwerte=[laenge, hoehe],
+        #         # Optional: Wenn du Formeln/Quellen an dieser Stelle schon kennst:
+        #         # formel="λ = f(L) * L / h", quelle_formel="DIN EN 1991-1-4:2010-12, Tab ..."
+        #     ),
+        #     kontext=merge_kontext(kontext, {"phase": "Zwischenwerte"}),
+        # )
         return Zwischenergebnis(wert=wert)
     
     elif objekttyp == ObjektTyp.ROHR:
@@ -127,12 +127,12 @@ def _schlankheit_DinEn1991_1_4_2010_12(
                 text=f"Rohr '{objekt_name_intern}': ungültiger Außendurchmesser ({d_aussen}).",
                 kontext=local_ctx,
             )
-            protokolliere_doc(
-                protokoll,
-                bundle=make_docbundle(titel="Schlankheit λ", wert=float("nan"),
-                                      einzelwerte=[laenge, d_aussen]),
-                kontext=merge_kontext(local_ctx, {"nan": True}),
-            )
+            # protokolliere_doc(
+            #     protokoll,
+            #     bundle=make_docbundle(titel="Schlankheit λ", wert=float("nan"),
+            #                           einzelwerte=[laenge, d_aussen]),
+            #     kontext=merge_kontext(local_ctx, {"nan": True}),
+            # )
             return Zwischenergebnis(wert=float("nan"))
 
         faktor = interpol_2D([15.0, 50.0], [1.0, 0.7], laenge)
@@ -149,15 +149,15 @@ def _schlankheit_DinEn1991_1_4_2010_12(
         #         kontext=merge_kontext(kontext, {"phase": "Zwischenwerte", "rechenwert": rechenwert}),
         #     )
 
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Schlankheit λ",
-                wert=wert,
-                einzelwerte=[laenge, d_aussen],
-            ),
-            kontext=merge_kontext(kontext, {"phase": "Zwischenwerte"}),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Schlankheit λ",
+        #         wert=wert,
+        #         einzelwerte=[laenge, d_aussen],
+        #     ),
+        #     kontext=merge_kontext(kontext, {"phase": "Zwischenwerte"}),
+        # )
         return Zwischenergebnis(wert=wert)
 
     # Andere Objekttypen:
@@ -199,11 +199,11 @@ def schlankheit(
             kontext=base_ctx,
         )
         # NaN-Ergebnis zurück und minimal dokumentieren
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(titel="Schlankheit λ", wert=float("nan")),
-            kontext=merge_kontext(base_ctx, {"nan": True}),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(titel="Schlankheit λ", wert=float("nan")),
+        #     kontext=merge_kontext(base_ctx, {"nan": True}),
+        # )
         return Zwischenergebnis(wert=float("nan"))
     
     funktion = _DISPATCH.get(norm, _DISPATCH[Norm.DEFAULT])

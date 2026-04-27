@@ -54,16 +54,16 @@ class Traversenstrecke:
 
         schwerpunkt = flaechenschwerpunkt([self.start, self.ende])
 
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Gewichtskraft F_G",
-                wert= -1 * Fz,
-                formel="F_G = m · L · g",
-                einheit="N",
-            ),
-            kontext=base_ctx,
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Gewichtskraft F_G",
+        #         wert= -1 * Fz,
+        #         formel="F_G = m · L · g",
+        #         einheit="N",
+        #     ),
+        #     kontext=base_ctx,
+        # )
 
         return [Kraefte(
             element_id_intern=self.element_id_intern,

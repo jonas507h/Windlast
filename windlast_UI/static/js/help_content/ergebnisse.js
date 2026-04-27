@@ -34,8 +34,7 @@ export const ERGEBNISSE_HELP_PAGES = [
         In den vier Zellen darunter werden die Ergebnisse angezeigt. [[ergebnisse:sicherheit|Sicherheitswerte]] werden immer aufgerundet
         und der [[ergebnisse:ballast|erforderliche Ballast]] wird immer abgerundet. &bdquo;--&ldquo; erscheint, wenn keine gültigen Ergebnisse vorliegen
         (z. B. bei Fehlern in der Berechnung oder wenn noch nichts berechnet wurde). ∞ erscheint, wenn die Sicherheit rechnerisch unendlich groß ist
-        (näheres dazu [[ergebnisse:unendliche_sicherheit|hier]]). Ein Klick auf eine Zelle öffnet das [[zwischenergebnis:allgemein|Zwischenergebnis-Fenster]],
-        wo alle Zwischenergebnisse der Berechnung detailliert dargestellt aufgelistet sind.
+        (näheres dazu [[ergebnisse:unendliche_sicherheit|hier]]).
       </p>
       <p>
         <b>Die Software berechnet nur die Standsicherheit der Konstruktion. Bauteile und Verbindungen werden nicht geprüft.</b>

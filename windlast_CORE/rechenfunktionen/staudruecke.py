@@ -208,32 +208,32 @@ def _winddruck_DinEn13814_2005_06(
             )
 
     # 4) Zwei Zwischenergebnisse bauen: (a) Obergrenzen, (b) Staudrücke
-    protokolliere_doc(
-        protokoll,
-        bundle=make_docbundle(
-            titel="Obergrenzen z_max",
-            wert=obergrenzen,
-            einheit="m",
-            formel="z_max Klassen",
-            quelle_formel="DIN EN 13814:2005-06 (Tabelle q vs. Bauhöhe)",
-            formelzeichen=["z_max"],
-            quelle_formelzeichen=["DIN EN 13814:2005-06"],
-        ),
-        kontext=base_ctx,
-    )
-    protokolliere_doc(
-        protokoll,
-        bundle=make_docbundle(
-            titel="Staudrücke q",
-            wert=q_werte,
-            einheit="N/m²",
-            formel="q(z)",
-            quelle_formel="DIN EN 13814:2005-06 (Tabelle q vs. Bauhöhe)",
-            formelzeichen=["q"],
-            quelle_formelzeichen=["DIN EN 13814:2005-06"],
-        ),
-        kontext=base_ctx,
-    )
+    # protokolliere_doc(
+    #     protokoll,
+    #     bundle=make_docbundle(
+    #         titel="Obergrenzen z_max",
+    #         wert=obergrenzen,
+    #         einheit="m",
+    #         formel="z_max Klassen",
+    #         quelle_formel="DIN EN 13814:2005-06 (Tabelle q vs. Bauhöhe)",
+    #         formelzeichen=["z_max"],
+    #         quelle_formelzeichen=["DIN EN 13814:2005-06"],
+    #     ),
+    #     kontext=base_ctx,
+    # )
+    # protokolliere_doc(
+    #     protokoll,
+    #     bundle=make_docbundle(
+    #         titel="Staudrücke q",
+    #         wert=q_werte,
+    #         einheit="N/m²",
+    #         formel="q(z)",
+    #         quelle_formel="DIN EN 13814:2005-06 (Tabelle q vs. Bauhöhe)",
+    #         formelzeichen=["q"],
+    #         quelle_formelzeichen=["DIN EN 13814:2005-06"],
+    #     ),
+    #     kontext=base_ctx,
+    # )
 
     return Zwischenergebnis_Liste(wert=obergrenzen), Zwischenergebnis_Liste(wert=q_werte)
 
@@ -283,32 +283,32 @@ def _winddruck_DinEn17879_2024_08(
     # 3) (keine Aufstelldauer-Prüfung in 17879)
 
     # 4) Zwei Zwischenergebnisse: (a) Obergrenzen, (b) Staudrücke
-    protokolliere_doc(
-        protokoll,
-        bundle=make_docbundle(
-            titel="Obergrenzen z_max",
-            wert=obergrenzen,
-            einheit="m",
-            formel="z_max Klassen",
-            quelle_formel="DIN EN 17879:2024-08 (Tabelle q vs. Bauhöhe)",
-            formelzeichen=["z_max"],
-            quelle_formelzeichen=["DIN EN 17879:2024-08"],
-        ),
-        kontext=base_ctx,
-    )
-    protokolliere_doc(
-        protokoll,
-        bundle=make_docbundle(
-            titel="Staudrücke q",
-            wert=q_werte,
-            einheit="N/m²",
-            formel="q(z)",
-            quelle_formel="DIN EN 17879:2024-08 (Tabelle q vs. Bauhöhe)",
-            formelzeichen=["q"],
-            quelle_formelzeichen=["DIN EN 17879:2024-08"],
-        ),
-        kontext=base_ctx,
-    )
+    # protokolliere_doc(
+    #     protokoll,
+    #     bundle=make_docbundle(
+    #         titel="Obergrenzen z_max",
+    #         wert=obergrenzen,
+    #         einheit="m",
+    #         formel="z_max Klassen",
+    #         quelle_formel="DIN EN 17879:2024-08 (Tabelle q vs. Bauhöhe)",
+    #         formelzeichen=["z_max"],
+    #         quelle_formelzeichen=["DIN EN 17879:2024-08"],
+    #     ),
+    #     kontext=base_ctx,
+    # )
+    # protokolliere_doc(
+    #     protokoll,
+    #     bundle=make_docbundle(
+    #         titel="Staudrücke q",
+    #         wert=q_werte,
+    #         einheit="N/m²",
+    #         formel="q(z)",
+    #         quelle_formel="DIN EN 17879:2024-08 (Tabelle q vs. Bauhöhe)",
+    #         formelzeichen=["q"],
+    #         quelle_formelzeichen=["DIN EN 17879:2024-08"],
+    #     ),
+    #     kontext=base_ctx,
+    # )
 
     return Zwischenergebnis_Liste(wert=obergrenzen), Zwischenergebnis_Liste(wert=q_werte)
 
@@ -402,33 +402,33 @@ def _geschwindigkeitsdruck_DinEn1991_1_4_2010_12(
         # else: Dauer oberhalb der höchsten Obergrenze → faktor=1.0 implizit, keine Warnung
 
     # 4) Zwei Zwischenergebnisse: (a) [q_eff], (b) [z_max]
-    protokolliere_doc(
-        protokoll,
-        bundle=make_docbundle(
-            titel="z_max (Klassen-Obergrenze zu h)",
-            wert=[gueltige_obergrenze],
-            einheit="m",
-            formel="z_max (zu h)",
-            quelle_formel="DIN EN 1991-1-4:2010-12 (Zonen-Tabelle)",
-            formelzeichen=["z_max"],
-            quelle_formelzeichen=["DIN EN 1991-1-4:2010-12"],
-        ),
-        kontext=base_ctx,
-    )
-    protokolliere_doc(
-        protokoll,
-        bundle=make_docbundle(
-            titel="Geschwindigkeitsdruck q",
-            wert=[q_eff],
-            einheit="N/m²",
-            formel="q(z=h)",
-            quelle_formel="DIN EN 1991-1-4:2010-12 (Zonen-Tabelle); ggf. Faktor für vorübergehenden Zustand",
-            formelzeichen=["q"],
-            quelle_formelzeichen=["DIN EN 1991-1-4:2010-12"],
-            einzelwerte=[q_basis],
-        ),
-        kontext=base_ctx,
-    )
+    # protokolliere_doc(
+    #     protokoll,
+    #     bundle=make_docbundle(
+    #         titel="z_max (Klassen-Obergrenze zu h)",
+    #         wert=[gueltige_obergrenze],
+    #         einheit="m",
+    #         formel="z_max (zu h)",
+    #         quelle_formel="DIN EN 1991-1-4:2010-12 (Zonen-Tabelle)",
+    #         formelzeichen=["z_max"],
+    #         quelle_formelzeichen=["DIN EN 1991-1-4:2010-12"],
+    #     ),
+    #     kontext=base_ctx,
+    # )
+    # protokolliere_doc(
+    #     protokoll,
+    #     bundle=make_docbundle(
+    #         titel="Geschwindigkeitsdruck q",
+    #         wert=[q_eff],
+    #         einheit="N/m²",
+    #         formel="q(z=h)",
+    #         quelle_formel="DIN EN 1991-1-4:2010-12 (Zonen-Tabelle); ggf. Faktor für vorübergehenden Zustand",
+    #         formelzeichen=["q"],
+    #         quelle_formelzeichen=["DIN EN 1991-1-4:2010-12"],
+    #         einzelwerte=[q_basis],
+    #     ),
+    #     kontext=base_ctx,
+    # )
 
     return Zwischenergebnis_Liste(wert=[gueltige_obergrenze]), Zwischenergebnis_Liste(wert=[q_eff])
 
@@ -475,16 +475,16 @@ def staudruecke(
         )
         nan = Zwischenergebnis_Liste(wert=[float("nan")])
         # Minimal-Doku mitschreiben
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(titel="Obergrenzen z_max", wert=[float("nan")]),
-            kontext=merge_kontext(base_ctx, {"nan": True}),
-        )
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(titel="Staudrücke q", wert=[float("nan")]),
-            kontext=merge_kontext(base_ctx, {"nan": True}),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(titel="Obergrenzen z_max", wert=[float("nan")]),
+        #     kontext=merge_kontext(base_ctx, {"nan": True}),
+        # )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(titel="Staudrücke q", wert=[float("nan")]),
+        #     kontext=merge_kontext(base_ctx, {"nan": True}),
+        # )
         return nan, nan
     
     funktion = _DISPATCH.get(norm, _DISPATCH[Norm.DEFAULT])

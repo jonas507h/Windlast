@@ -148,59 +148,59 @@ def _abhebesicherheit_DinEn13814_2005_06(
 
             for element, lastfaelle_elem in kraefte_nach_element.items():
                 N_down_b, N_up_b = abhebe_envelope_pro_bauelement(norm, lastfaelle_elem, protokoll=sub_prot, kontext=merge_kontext(richtung_ctx, {"element_id": str(element)}))
-                protokolliere_doc(
-                    sub_prot,
-                    bundle=make_docbundle(
-                        titel="Normalkraft N_down",
-                        wert=N_down_b,
-                        einheit="N",
-                    ),
-                    kontext=merge_kontext(base_ctx, {"nachweis": "ABHEBE", "doc_type": "element_normalkraft_down", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
-                )
-                protokolliere_doc(
-                    sub_prot,
-                    bundle=make_docbundle(
-                        titel="Normalkraft N_up",
-                        wert=N_up_b,
-                        einheit="N",
-                    ),
-                    kontext=merge_kontext(base_ctx, {"nachweis": "ABHEBE", "doc_type": "element_normalkraft_up", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
-                )
+                # protokolliere_doc(
+                #     sub_prot,
+                #     bundle=make_docbundle(
+                #         titel="Normalkraft N_down",
+                #         wert=N_down_b,
+                #         einheit="N",
+                #     ),
+                #     kontext=merge_kontext(base_ctx, {"nachweis": "ABHEBE", "doc_type": "element_normalkraft_down", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
+                # )
+                # protokolliere_doc(
+                #     sub_prot,
+                #     bundle=make_docbundle(
+                #         titel="Normalkraft N_up",
+                #         wert=N_up_b,
+                #         einheit="N",
+                #     ),
+                #     kontext=merge_kontext(base_ctx, {"nachweis": "ABHEBE", "doc_type": "element_normalkraft_up", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
+                # )
                 total_normal_down += N_down_b
                 total_normal_up += N_up_b
 
             # Richtungs-Aggregate dokumentieren
-            protokolliere_doc(
-                sub_prot,
-                bundle=make_docbundle(
-                    titel="Summe Normalkräfte ΣN_down",
-                    wert=total_normal_down,
-                    einheit="N",
-                ),
-                kontext={"nachweis": "ABHEBE", "doc_type": "dir_N_down_sum", "windrichtung_deg": f"{winkel}°"},
-            )
-            protokolliere_doc(
-                sub_prot,
-                bundle=make_docbundle(
-                    titel="Summe Normalkräfte ΣN_up",
-                    wert=total_normal_up,
-                    einheit="N",
-                ),
-                kontext={"nachweis": "ABHEBE", "doc_type": "dir_N_up_sum", "windrichtung_deg": f"{winkel}°"},
-            )
+            # protokolliere_doc(
+            #     sub_prot,
+            #     bundle=make_docbundle(
+            #         titel="Summe Normalkräfte ΣN_down",
+            #         wert=total_normal_down,
+            #         einheit="N",
+            #     ),
+            #     kontext={"nachweis": "ABHEBE", "doc_type": "dir_N_down_sum", "windrichtung_deg": f"{winkel}°"},
+            # )
+            # protokolliere_doc(
+            #     sub_prot,
+            #     bundle=make_docbundle(
+            #         titel="Summe Normalkräfte ΣN_up",
+            #         wert=total_normal_up,
+            #         einheit="N",
+            #     ),
+            #     kontext={"nachweis": "ABHEBE", "doc_type": "dir_N_up_sum", "windrichtung_deg": f"{winkel}°"},
+            # )
 
             sicherheit = inf if total_normal_up <= _EPS else (total_normal_down / total_normal_up)
-            protokolliere_doc(
-                sub_prot,
-                bundle=make_docbundle(
-                    titel=f"Richtungs-Sicherheit S_abheb,{int(winkel)}°",
-                    wert=sicherheit,
-                    formel="S = ΣN_down / ΣN_up",
-                    formelzeichen=["N_down", "N_up"],
-                    quelle_formel="---",
-                ),
-                kontext={"nachweis": "ABHEBE", "doc_type": "dir_sicherheit", "windrichtung_deg": f"{winkel}°"},
-            )
+            # protokolliere_doc(
+            #     sub_prot,
+            #     bundle=make_docbundle(
+            #         titel=f"Richtungs-Sicherheit S_abheb,{int(winkel)}°",
+            #         wert=sicherheit,
+            #         formel="S = ΣN_down / ΣN_up",
+            #         formelzeichen=["N_down", "N_up"],
+            #         quelle_formel="---",
+            #     ),
+            #     kontext={"nachweis": "ABHEBE", "doc_type": "dir_sicherheit", "windrichtung_deg": f"{winkel}°"},
+            # )
 
             if total_normal_up <= _EPS:
                 ballastkraft = 0.0
@@ -210,17 +210,17 @@ def _abhebesicherheit_DinEn13814_2005_06(
             if ballastkraft > ballast_erforderlich_max:
                 ballast_erforderlich_max = ballastkraft
 
-            protokolliere_doc(
-                sub_prot,
-                bundle=make_docbundle(
-                    titel=f"Richtungs-Ballast m_Ballast,abheb,{int(winkel)}°",
-                    wert=ballastkraft,
-                    formel="ΔN_down,erf = max(0, ΣN_up − ΣN_down) / γ_g",
-                    formelzeichen=["N_up", "N_down", "γ_g"],
-                    quelle_formel="---",
-                ),
-                kontext={"nachweis": "ABHEBE", "doc_type": "dir_ballast", "windrichtung_deg": f"{winkel}°"},
-            )
+            # protokolliere_doc(
+            #     sub_prot,
+            #     bundle=make_docbundle(
+            #         titel=f"Richtungs-Ballast m_Ballast,abheb,{int(winkel)}°",
+            #         wert=ballastkraft,
+            #         formel="ΔN_down,erf = max(0, ΣN_up − ΣN_down) / γ_g",
+            #         formelzeichen=["N_up", "N_down", "γ_g"],
+            #         quelle_formel="---",
+            #     ),
+            #     kontext={"nachweis": "ABHEBE", "doc_type": "dir_ballast", "windrichtung_deg": f"{winkel}°"},
+            # )
 
             # WICHTIG: nicht hier schon mergen/entscheiden – erst sammeln:
             dir_records.append({
@@ -258,31 +258,31 @@ def _abhebesicherheit_DinEn13814_2005_06(
         ballast_kg = ballast_erforderlich_max / erdbeschleunigung
 
         # Endwerte (relevant)
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Abhebesicherheit S_abheb",
-                wert=sicherheit_min_global,
-                formel="S_abheb = ΣN_down / ΣN_up",
-                formelzeichen=["N_down", "N_up"],
-                quelle_formel="---",
-                quelle_formelzeichen=["---"],
-            ),
-            kontext=merge_kontext(base_ctx, {"nachweis": "ABHEBE", "rolle": "relevant"}),
-        )
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Erforderlicher Ballast m_Ballast,abheb",
-                wert=ballast_kg,
-                einheit="kg",
-                formel="m_Ballast,abheb = max(0, ΣN_up − ΣN_down) / γ_g",
-                formelzeichen=["N_up", "N_down", "γ_g"],
-                quelle_formel="---",
-                quelle_formelzeichen=["---"],
-            ),
-            kontext=merge_kontext(base_ctx, {"nachweis": "ABHEBE", "rolle": "relevant"}),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Abhebesicherheit S_abheb",
+        #         wert=sicherheit_min_global,
+        #         formel="S_abheb = ΣN_down / ΣN_up",
+        #         formelzeichen=["N_down", "N_up"],
+        #         quelle_formel="---",
+        #         quelle_formelzeichen=["---"],
+        #     ),
+        #     kontext=merge_kontext(base_ctx, {"nachweis": "ABHEBE", "rolle": "relevant"}),
+        # )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Erforderlicher Ballast m_Ballast,abheb",
+        #         wert=ballast_kg,
+        #         einheit="kg",
+        #         formel="m_Ballast,abheb = max(0, ΣN_up − ΣN_down) / γ_g",
+        #         formelzeichen=["N_up", "N_down", "γ_g"],
+        #         quelle_formel="---",
+        #         quelle_formelzeichen=["---"],
+        #     ),
+        #     kontext=merge_kontext(base_ctx, {"nachweis": "ABHEBE", "rolle": "relevant"}),
+        # )
 
         #Entscheidung protokollieren
         protokolliere_decision(
@@ -366,59 +366,59 @@ def _abhebesicherheit_DinEn17879_2024_08(
 
             for element, lastfaelle_elem in kraefte_nach_element.items():
                 N_down_b, N_up_b = abhebe_envelope_pro_bauelement(norm, lastfaelle_elem, protokoll=sub_prot, kontext=merge_kontext(richtung_ctx, {"element_id": str(element)}))
-                protokolliere_doc(  
-                    sub_prot,
-                    bundle=make_docbundle(
-                        titel="Normalkraft N_down",
-                        wert=N_down_b,
-                        einheit="N",
-                    ),
-                    kontext=merge_kontext(base_ctx, {"nachweis": "ABHEBE", "doc_type": "element_normalkraft_down", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
-                )
-                protokolliere_doc(
-                    sub_prot,
-                    bundle=make_docbundle(
-                        titel="Normalkraft N_up",
-                        wert=N_up_b,
-                        einheit="N",
-                    ),
-                    kontext=merge_kontext(base_ctx, {"nachweis": "ABHEBE", "doc_type": "element_normalkraft_up", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
-                )
+                # protokolliere_doc(  
+                #     sub_prot,
+                #     bundle=make_docbundle(
+                #         titel="Normalkraft N_down",
+                #         wert=N_down_b,
+                #         einheit="N",
+                #     ),
+                #     kontext=merge_kontext(base_ctx, {"nachweis": "ABHEBE", "doc_type": "element_normalkraft_down", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
+                # )
+                # protokolliere_doc(
+                #     sub_prot,
+                #     bundle=make_docbundle(
+                #         titel="Normalkraft N_up",
+                #         wert=N_up_b,
+                #         einheit="N",
+                #     ),
+                #     kontext=merge_kontext(base_ctx, {"nachweis": "ABHEBE", "doc_type": "element_normalkraft_up", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
+                # )
                 total_normal_down += N_down_b
                 total_normal_up += N_up_b
 
             # Richtungs-Aggregate dokumentieren
-            protokolliere_doc(
-                sub_prot,
-                bundle=make_docbundle(
-                    titel="Summe Normalkräfte ΣN_down",
-                    wert=total_normal_down,
-                    einheit="N",
-                ),
-                kontext={"nachweis": "ABHEBE", "doc_type": "dir_N_down_sum", "windrichtung_deg": f"{winkel}°"},
-            )
-            protokolliere_doc(
-                sub_prot,
-                bundle=make_docbundle(
-                    titel="Summe Normalkräfte ΣN_up",
-                    wert=total_normal_up,
-                    einheit="N",
-                ),
-                kontext={"nachweis": "ABHEBE", "doc_type": "dir_N_up_sum", "windrichtung_deg": f"{winkel}°"},
-            )
+            # protokolliere_doc(
+            #     sub_prot,
+            #     bundle=make_docbundle(
+            #         titel="Summe Normalkräfte ΣN_down",
+            #         wert=total_normal_down,
+            #         einheit="N",
+            #     ),
+            #     kontext={"nachweis": "ABHEBE", "doc_type": "dir_N_down_sum", "windrichtung_deg": f"{winkel}°"},
+            # )
+            # protokolliere_doc(
+            #     sub_prot,
+            #     bundle=make_docbundle(
+            #         titel="Summe Normalkräfte ΣN_up",
+            #         wert=total_normal_up,
+            #         einheit="N",
+            #     ),
+            #     kontext={"nachweis": "ABHEBE", "doc_type": "dir_N_up_sum", "windrichtung_deg": f"{winkel}°"},
+            # )
 
             sicherheit = inf if total_normal_up <= _EPS else (total_normal_down / total_normal_up)
-            protokolliere_doc(
-                sub_prot,
-                bundle=make_docbundle(
-                    titel=f"Richtungs-Sicherheit S_abheb,{int(winkel)}°",
-                    wert=sicherheit,
-                    formel="S = ΣN_down / ΣN_up",
-                    formelzeichen=["N_down", "N_up"],
-                    quelle_formel="---",
-                ),
-                kontext={"nachweis": "ABHEBE", "doc_type": "dir_sicherheit", "windrichtung_deg": f"{winkel}°"},
-            )
+            # protokolliere_doc(
+            #     sub_prot,
+            #     bundle=make_docbundle(
+            #         titel=f"Richtungs-Sicherheit S_abheb,{int(winkel)}°",
+            #         wert=sicherheit,
+            #         formel="S = ΣN_down / ΣN_up",
+            #         formelzeichen=["N_down", "N_up"],
+            #         quelle_formel="---",
+            #     ),
+            #     kontext={"nachweis": "ABHEBE", "doc_type": "dir_sicherheit", "windrichtung_deg": f"{winkel}°"},
+            # )
 
             if total_normal_up <= _EPS:
                 ballastkraft = 0.0
@@ -428,17 +428,17 @@ def _abhebesicherheit_DinEn17879_2024_08(
             if ballastkraft > ballast_erforderlich_max:
                 ballast_erforderlich_max = ballastkraft
 
-            protokolliere_doc(
-                sub_prot,
-                bundle=make_docbundle(
-                    titel=f"Richtungs-Ballast m_Ballast,abheb,{int(winkel)}°",
-                    wert=ballastkraft,
-                    formel="ΔN_down,erf = max(0, ΣN_up − ΣN_down) / γ_g",
-                    formelzeichen=["N_up", "N_down", "γ_g"],
-                    quelle_formel="---",
-                ),
-                kontext={"nachweis": "ABHEBE", "doc_type": "dir_ballast", "windrichtung_deg": f"{winkel}°"},
-            )
+            # protokolliere_doc(
+            #     sub_prot,
+            #     bundle=make_docbundle(
+            #         titel=f"Richtungs-Ballast m_Ballast,abheb,{int(winkel)}°",
+            #         wert=ballastkraft,
+            #         formel="ΔN_down,erf = max(0, ΣN_up − ΣN_down) / γ_g",
+            #         formelzeichen=["N_up", "N_down", "γ_g"],
+            #         quelle_formel="---",
+            #     ),
+            #     kontext={"nachweis": "ABHEBE", "doc_type": "dir_ballast", "windrichtung_deg": f"{winkel}°"},
+            # )
 
             # WICHTIG: nicht hier schon mergen/entscheiden – erst sammeln:
             dir_records.append({
@@ -476,31 +476,31 @@ def _abhebesicherheit_DinEn17879_2024_08(
         ballast_kg = ballast_erforderlich_max / erdbeschleunigung
 
         # Endwerte (relevant)
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Abhebesicherheit S_abheb",
-                wert=sicherheit_min_global,
-                formel="S_abheb = ΣN_down / ΣN_up",
-                formelzeichen=["N_down", "N_up"],
-                quelle_formel="---",
-                quelle_formelzeichen=["---"],
-            ),
-            kontext=merge_kontext(base_ctx, {"nachweis": "ABHEBE", "rolle": "relevant"}),
-        )
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Erforderlicher Ballast m_Ballast,abheb",
-                wert=ballast_kg,
-                einheit="kg",
-                formel="m_Ballast,abheb = max(0, ΣN_up − ΣN_down) / γ_g",
-                formelzeichen=["N_up", "N_down", "γ_g"],
-                quelle_formel="---",
-                quelle_formelzeichen=["---"],
-            ),
-            kontext=merge_kontext(base_ctx, {"nachweis": "ABHEBE", "doc_type": "ballast_pro_sicherheit", "quelle_nachweis": "ABHEBE", "rolle": "relevant"}),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Abhebesicherheit S_abheb",
+        #         wert=sicherheit_min_global,
+        #         formel="S_abheb = ΣN_down / ΣN_up",
+        #         formelzeichen=["N_down", "N_up"],
+        #         quelle_formel="---",
+        #         quelle_formelzeichen=["---"],
+        #     ),
+        #     kontext=merge_kontext(base_ctx, {"nachweis": "ABHEBE", "rolle": "relevant"}),
+        # )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Erforderlicher Ballast m_Ballast,abheb",
+        #         wert=ballast_kg,
+        #         einheit="kg",
+        #         formel="m_Ballast,abheb = max(0, ΣN_up − ΣN_down) / γ_g",
+        #         formelzeichen=["N_up", "N_down", "γ_g"],
+        #         quelle_formel="---",
+        #         quelle_formelzeichen=["---"],
+        #     ),
+        #     kontext=merge_kontext(base_ctx, {"nachweis": "ABHEBE", "doc_type": "ballast_pro_sicherheit", "quelle_nachweis": "ABHEBE", "rolle": "relevant"}),
+        # )
 
         #Entscheidung protokollieren
         protokolliere_decision(

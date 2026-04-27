@@ -55,44 +55,44 @@ def _reynoldszahl_DinEn1991_1_4_2010_12(
                 text=f"Traverse '{objekt_name_intern}': ungültiger Gurt-Durchmesser ({charak_Laenge}).",
                 kontext=merge_kontext(base_ctx, {"input_source": "catalog"}),
             )
-            protokolliere_doc(
-                protokoll,
-                bundle=make_docbundle(
-                    titel="Reynoldszahl Re",
-                    wert=float("nan"),
-                    einzelwerte=[staudruck, luftdichte, geschwindigkeit, charak_Laenge, zaehigkeit],
-                    formel="Re = v·L/ν; v = √(2·q/ρ)",
-                ),
-                kontext=merge_kontext(base_ctx, {"nan": True}),
-            )
+            # protokolliere_doc(
+            #     protokoll,
+            #     bundle=make_docbundle(
+            #         titel="Reynoldszahl Re",
+            #         wert=float("nan"),
+            #         einzelwerte=[staudruck, luftdichte, geschwindigkeit, charak_Laenge, zaehigkeit],
+            #         formel="Re = v·L/ν; v = √(2·q/ρ)",
+            #     ),
+            #     kontext=merge_kontext(base_ctx, {"nan": True}),
+            # )
             return Zwischenergebnis(wert=float("nan"))
         
         geschwindigkeit = math.sqrt(2.0 * staudruck / luftdichte)
 
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Strömungsgeschwindigkeit v",
-                wert=geschwindigkeit,
-                einzelwerte=[staudruck, luftdichte],
-                formel="v = √(2·q/ρ)",
-                einheit="m/s",
-            ),
-            kontext=base_ctx,
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Strömungsgeschwindigkeit v",
+        #         wert=geschwindigkeit,
+        #         einzelwerte=[staudruck, luftdichte],
+        #         formel="v = √(2·q/ρ)",
+        #         einheit="m/s",
+        #     ),
+        #     kontext=base_ctx,
+        # )
 
         wert = geschwindigkeit * charak_Laenge / zaehigkeit
 
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Reynoldszahl Re",
-                wert=wert,
-                einzelwerte=[staudruck, luftdichte, geschwindigkeit, charak_Laenge, zaehigkeit],
-                formel="Re = v·L/ν; v = √(2·q/ρ)",
-            ),
-            kontext=base_ctx,
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Reynoldszahl Re",
+        #         wert=wert,
+        #         einzelwerte=[staudruck, luftdichte, geschwindigkeit, charak_Laenge, zaehigkeit],
+        #         formel="Re = v·L/ν; v = √(2·q/ρ)",
+        #     ),
+        #     kontext=base_ctx,
+        # )
         return Zwischenergebnis(wert=wert)
     
     elif objekttyp == ObjektTyp.ROHR:
@@ -108,30 +108,30 @@ def _reynoldszahl_DinEn1991_1_4_2010_12(
                 text=f"Rohr '{objekt_name_intern}': ungültiger Außendurchmesser ({charak_Laenge}).",
                 kontext=merge_kontext(base_ctx, {"input_source": "catalog"}),
             )
-            protokolliere_doc(
-                protokoll,
-                bundle=make_docbundle(
-                    titel="Reynoldszahl Re",
-                    wert=float("nan"),
-                    einzelwerte=[staudruck, luftdichte, geschwindigkeit, charak_Laenge, zaehigkeit],
-                    formel="Re = v·L/ν; v = √(2·q/ρ)",
-                ),
-                kontext=merge_kontext(base_ctx, {"nan": True}),
-            )
+            # protokolliere_doc(
+            #     protokoll,
+            #     bundle=make_docbundle(
+            #         titel="Reynoldszahl Re",
+            #         wert=float("nan"),
+            #         einzelwerte=[staudruck, luftdichte, geschwindigkeit, charak_Laenge, zaehigkeit],
+            #         formel="Re = v·L/ν; v = √(2·q/ρ)",
+            #     ),
+            #     kontext=merge_kontext(base_ctx, {"nan": True}),
+            # )
             return Zwischenergebnis(wert=float("nan"))
 
         wert = geschwindigkeit * charak_Laenge / zaehigkeit
 
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(
-                titel="Reynoldszahl Re",
-                wert=wert,
-                einzelwerte=[staudruck, luftdichte, geschwindigkeit, charak_Laenge, zaehigkeit],
-                formel="Re = v·L/ν; v = √(2·q/ρ)",
-            ),
-            kontext=base_ctx,
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(
+        #         titel="Reynoldszahl Re",
+        #         wert=wert,
+        #         einzelwerte=[staudruck, luftdichte, geschwindigkeit, charak_Laenge, zaehigkeit],
+        #         formel="Re = v·L/ν; v = √(2·q/ρ)",
+        #     ),
+        #     kontext=base_ctx,
+        # )
         return Zwischenergebnis(wert=wert)
     else:
         raise NotImplementedError(f"Objekttyp '{objekttyp}' wird aktuell nicht unterstützt.")
@@ -171,11 +171,11 @@ def reynoldszahl(
             text=str(e),
             kontext=base_ctx,
         )
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(titel="Reynoldszahl Re", wert=float("nan")),
-            kontext=merge_kontext(base_ctx, {"nan": True}),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(titel="Reynoldszahl Re", wert=float("nan")),
+        #     kontext=merge_kontext(base_ctx, {"nan": True}),
+        # )
         return Zwischenergebnis(wert=float("nan"))
 
     funktion = _DISPATCH.get(norm, _DISPATCH[Norm.DEFAULT])

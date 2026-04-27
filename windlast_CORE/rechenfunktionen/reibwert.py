@@ -60,11 +60,11 @@ def reibwert(
             text="Es werden mindestens zwei reale Materialien benötigt.",
             kontext=base_ctx,
         )
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(titel="Effektiver Reibwert μ_eff", wert=None),
-            kontext=merge_kontext(base_ctx, {"None": True}),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(titel="Effektiver Reibwert μ_eff", wert=None),
+        #     kontext=merge_kontext(base_ctx, {"None": True}),
+        # )
         return Zwischenergebnis(wert=None)
 
     # 2) Reibwerte Quellen ermitteln
@@ -97,11 +97,11 @@ def reibwert(
             text=str(e),
             kontext=base_ctx,
         )
-        protokolliere_doc(
-            protokoll,
-            bundle=make_docbundle(titel="Effektiver Reibwert μ_eff", wert=None),
-            kontext=merge_kontext(base_ctx, {"None": True}),
-        )
+        # protokolliere_doc(
+        #     protokoll,
+        #     bundle=make_docbundle(titel="Effektiver Reibwert μ_eff", wert=None),
+        #     kontext=merge_kontext(base_ctx, {"None": True}),
+        # )
         return Zwischenergebnis(wert=None)
 
     # 3) effektiver Reibwert ist das Minimum
@@ -119,18 +119,18 @@ def reibwert(
     )
 
     # 4) in Zwischenergebnis schreiben
-    protokolliere_doc(
-        protokoll,
-        bundle=make_docbundle(
-            titel="Effektiver Reibwert μ_eff",
-            wert=reibwert_eff,
-            formel="μ_eff = min(μ_i)",
-            quelle_formel="Konservatives Verfahren: kleinster Reibwert maßgebend.",
-            einzelwerte=einzelwerte,
-            quelle_einzelwerte=quelle_einzelwerte,
-        ),
-        kontext=base_ctx,
-    )
+    # protokolliere_doc(
+    #     protokoll,
+    #     bundle=make_docbundle(
+    #         titel="Effektiver Reibwert μ_eff",
+    #         wert=reibwert_eff,
+    #         formel="μ_eff = min(μ_i)",
+    #         quelle_formel="Konservatives Verfahren: kleinster Reibwert maßgebend.",
+    #         einzelwerte=einzelwerte,
+    #         quelle_einzelwerte=quelle_einzelwerte,
+    #     ),
+    #     kontext=base_ctx,
+    # )
 
     return Zwischenergebnis(wert=reibwert_eff)
 

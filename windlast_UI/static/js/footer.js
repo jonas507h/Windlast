@@ -729,6 +729,8 @@ registerCountsTooltip('.results-table .alt-title th[data-szenario] .count-badge'
 
 // Tooltip auf Ergebnis-Zellen: "Für Details klicken"
 (function(){
+  const showFlag = !!(window.APP_STATE?.flags?.open_zwischenergebnis_modal);
+  if (!showFlag) return;
   const TT = window.Tooltip;
   if (!TT) return;
 
