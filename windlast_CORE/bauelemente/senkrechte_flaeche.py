@@ -357,8 +357,8 @@ class senkrechteFlaeche:
                     )
                 )
 
-            # Fall 3: 90° <= winkel < 175° -> Anströmung von Seite B
-            if 90.0-_EPS <= winkel < 175.0:
+            # Fall 3: 90° <= winkel <= 175° -> Anströmung von Seite B
+            if 90.0-_EPS <= winkel <= 175.0:
                 einzelkraefte_vektoren: list[Vec3] = []
                 angriffsbereiche: list[list[Vec3]] = []
 

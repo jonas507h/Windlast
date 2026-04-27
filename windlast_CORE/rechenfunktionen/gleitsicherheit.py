@@ -280,7 +280,8 @@ def _gleitsicherheit_DinEn13814_2005_06(
                 if horizontal_betrag > _EPS:
                     ballastkraft = inf
                 else:
-                    ballastkraft = max(0.0, total_normal_up - total_normal_down) / sicherheitsbeiwert_ballast.wert
+                    # ballastkraft = max(0.0, total_normal_up - total_normal_down) / sicherheitsbeiwert_ballast.wert
+                    ballastkraft = 0.0
             else:
                 ballastkraft = max(0.0, horizontal_betrag / reibwert_min + total_normal_up - total_normal_down) / sicherheitsbeiwert_ballast.wert
 

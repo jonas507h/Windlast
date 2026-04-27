@@ -28,28 +28,28 @@ from windlast_CORE.datenstruktur.zwischenergebnis import (
     make_docbundle,
 )
 
-def dataclass_to_json(obj):
-    """
-    Wandelt verschachtelte Dataclasses in dicts um und ersetzt Enum-Werte durch .value.
-    """
-    if is_dataclass(obj):
-        return {k: dataclass_to_json(v) for k, v in asdict(obj).items()}
-    if isinstance(obj, dict):
-        return {dataclass_to_json(k): dataclass_to_json(v) for k, v in obj.items()}
-    if isinstance(obj, list):
-        return [dataclass_to_json(v) for v in obj]
-    if isinstance(obj, Enum):
-        return obj.value
-    return obj
+# def dataclass_to_json(obj):
+#     """
+#     Wandelt verschachtelte Dataclasses in dicts um und ersetzt Enum-Werte durch .value.
+#     """
+#     if is_dataclass(obj):
+#         return {k: dataclass_to_json(v) for k, v in asdict(obj).items()}
+#     if isinstance(obj, dict):
+#         return {dataclass_to_json(k): dataclass_to_json(v) for k, v in obj.items()}
+#     if isinstance(obj, list):
+#         return [dataclass_to_json(v) for v in obj]
+#     if isinstance(obj, Enum):
+#         return obj.value
+#     return obj
 
-def save_ergebnis_to_file(ergebnis, pfad="ergebnis_dump.json"):
-    from pathlib import Path
-    import json
-    Path(pfad).write_text(
-        json.dumps(dataclass_to_json(ergebnis), indent=2, ensure_ascii=False),
-        encoding="utf-8"
-    )
-    print(f"✅ Ergebnis gespeichert unter: {Path(pfad).resolve()}")
+# def save_ergebnis_to_file(ergebnis, pfad="ergebnis_dump.json"):
+#     from pathlib import Path
+#     import json
+#     Path(pfad).write_text(
+#         json.dumps(dataclass_to_json(ergebnis), indent=2, ensure_ascii=False),
+#         encoding="utf-8"
+#     )
+#     print(f"✅ Ergebnis gespeichert unter: {Path(pfad).resolve()}")
 
 # -----------------------------
 # 1) Staudruck-Ermittlung

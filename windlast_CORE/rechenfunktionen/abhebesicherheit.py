@@ -205,7 +205,7 @@ def _abhebesicherheit_DinEn13814_2005_06(
             if total_normal_up <= _EPS:
                 ballastkraft = 0.0
             else:
-                ballastkraft = max(0.0, total_normal_up - total_normal_down) / sicherheitsbeiwert_ballast.wert
+                ballastkraft = max(0.0, (total_normal_up - total_normal_down) / sicherheitsbeiwert_ballast.wert)
 
             if ballastkraft > ballast_erforderlich_max:
                 ballast_erforderlich_max = ballastkraft

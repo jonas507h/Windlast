@@ -482,12 +482,10 @@ def bewerte_lastfall_fuer_gleiten(
         fy = Kraft[1]
         fz = Kraft[2]
 
-        if fx > _EPS:
-            gamma = sicherheitsbeiwert(norm, lastfall, ist_guenstig=False, protokoll=protokoll, kontext=base_ctx).wert
-            Hx += gamma * fx
-        if fy > _EPS:
-            gamma = sicherheitsbeiwert(norm, lastfall, ist_guenstig=False, protokoll=protokoll, kontext=base_ctx).wert
-            Hy += gamma * fy
+        gamma = sicherheitsbeiwert(norm, lastfall, ist_guenstig=False, protokoll=protokoll, kontext=base_ctx).wert
+        Hx += gamma * fx
+        gamma = sicherheitsbeiwert(norm, lastfall, ist_guenstig=False, protokoll=protokoll, kontext=base_ctx).wert
+        Hy += gamma * fy
 
         if fz > _EPS:
             gamma = sicherheitsbeiwert(norm, lastfall, ist_guenstig=False, protokoll=protokoll, kontext=base_ctx).wert
@@ -740,8 +738,8 @@ def abhebe_envelope_pro_bauelement(
     if best_gewicht_N_up == -math.inf:
         best_gewicht_N_down, best_gewicht_N_up = 0.0, 0.0
 
-    best_N_up = max(best_wind_N_up, best_gewicht_N_up)
-    best_N_down = min(best_wind_N_down, best_gewicht_N_down)
+    best_N_up = best_wind_N_up + best_gewicht_N_up
+    best_N_down = best_wind_N_down + best_gewicht_N_down
 
 
     if base_ctx.get("element_id") is not None:
