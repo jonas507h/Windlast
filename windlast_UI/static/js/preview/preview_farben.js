@@ -175,7 +175,7 @@ export function subscribePreviewTheme(cb) {
   const handler = (e) => {
     const d = e && e.data;
     if (!d || d.type !== 'theme') return;
-    const val = d.value === 'dark' ? 'dark' : 'light';
+    const val = d.value;
 
     // 1 Frame warten, damit CSS (data-theme / Variablen) sicher “gezogen” ist
     requestAnimationFrame(() => {
