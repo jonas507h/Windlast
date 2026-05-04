@@ -16,8 +16,9 @@ export const GENERAL_HELP_PAGES = [
         <li>[[ergebnisse:allgemein|Ergebnisse]]</li>
       </ul>
 
-      <h4>Fehlermeldungen & FAQs</h4>
+      <h4>Wiki, Fehlermeldungen & FAQs</h4>
       <ul>
+        <li>[[ext:https://wiki.neumannmueller.com/pages/viewpage.action?pageId=1649541245|Wiki]]</li>
         <li>[[meldungen:haeufige_meldungen|Häufige Meldungen]]</li>
       </ul>
       <p>
