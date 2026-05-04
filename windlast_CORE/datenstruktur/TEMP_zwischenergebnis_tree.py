@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Enum
-from typing import Any, Dict, List, Optional, Protocol, Sequence, Tuple, Union, Callable, TYPE_CHECKING, runtime_checkable
+from typing import Any, Dict, List, Optional, Protocol, Sequence, Tuple, Union, TYPE_CHECKING, runtime_checkable
 
-from windlast_CORE.datenstruktur.enums import Severity, ProtokollModus
+from windlast_CORE.datenstruktur.enums import Severity
 
 if TYPE_CHECKING:
     from windlast_CORE.rechenfunktionen.geom3d import Vec3
@@ -22,6 +21,7 @@ Meta = Dict[str, Any]
 
 @dataclass
 class Ergebnis:
+    """Ein protokollierter Zwischen- oder Endwert."""
     name: str
     wert: WertTyp
 
@@ -29,9 +29,7 @@ class Ergebnis:
     formelzeichen: Optional[Union[str, Sequence[str]]] = None
     formel: Optional[str] = None
     einheit: Optional[str] = None
-    priority: int = 0
-
-    meta: Dict[str, Any] = field(default_factory=dict)
+    meta: Meta = field(default_factory=dict)
 
 
 @dataclass
@@ -97,41 +95,40 @@ Breadcrumb = List[BreadcrumbStep]
 # Protokoll-Schnittstelle
 # =========================
 
-class Protokoll:
+@runtime_checkable
+class Protokoll(Protocol):
+    root: ErgebnisBaum
+
+    def add_ergebnis(self, *, breadcrumb: Optional[Breadcrumb], ergebnis: Ergebnis) -> None: ...
+    def add_message(self, *, breadcrumb: Optional[Breadcrumb], message: Message) -> None: ...
+    def set_winner(self, *, breadcrumb: Breadcrumb) -> None: ...
+
+
+class TreeProtokoll:
     """Baumbasierte Protokoll-Implementierung."""
-    def __init__(self, *, meta: Optional[Meta] = None, modus: ProtokollModus = ProtokollModus.STANDARD) -> None:
+    def __init__(self, *, meta: Optional[Meta] = None) -> None:
         self.root = ErgebnisBaum(meta=dict(meta or {}))
-        self.modus = modus
 
     def add_ergebnis(self, *, breadcrumb: Optional[Breadcrumb], ergebnis: Ergebnis) -> None:
-        if self.modus == ProtokollModus.STANDARD:
-            gruppe = get_or_create_gruppe(self.root, breadcrumb)
-            if gruppe is None:
-                self.root.ergebnisse.append(ergebnis)
-            else:
-                gruppe.ergebnisse.append(ergebnis)
+        gruppe = get_or_create_gruppe(self.root, breadcrumb)
+        if gruppe is None:
+            self.root.ergebnisse.append(ergebnis)
         else:
-            return
+            gruppe.ergebnisse.append(ergebnis)
 
     def add_message(self, *, breadcrumb: Optional[Breadcrumb], message: Message) -> None:
-        if self.modus == ProtokollModus.STANDARD:
-            gruppe = get_or_create_gruppe(self.root, breadcrumb)
-            if gruppe is None:
-                self.root.messages.append(message)
-            else:
-                gruppe.messages.append(message)
+        gruppe = get_or_create_gruppe(self.root, breadcrumb)
+        if gruppe is None:
+            self.root.messages.append(message)
         else:
-            return
+            gruppe.messages.append(message)
 
     def set_winner(self, *, breadcrumb: Breadcrumb) -> None:
-        if self.modus == ProtokollModus.STANDARD:
-            set_winner(self.root, breadcrumb)
-        else:
-            return
+        set_winner(self.root, breadcrumb)
 
 
-def make_protokoll(*, modus: ProtokollModus = ProtokollModus.STANDARD, meta: Optional[Meta] = None) -> Protokoll:
-    return Protokoll(meta=meta, modus=modus)
+def make_protokoll(*, meta: Optional[Meta] = None) -> TreeProtokoll:
+    return TreeProtokoll(meta=meta)
 
 
 # =========================

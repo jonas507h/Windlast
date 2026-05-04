@@ -135,3 +135,6 @@ class Zone (str, Enum):
     B = "B"
     C = "C"
     D = "D"
+
+class ProtokollModus(str, Enum):
+    STANDARD = "standard"
