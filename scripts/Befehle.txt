@@ -27,6 +27,16 @@ Exe starten
 cd dist
 .\windlastUI.exe
 
+=================== GIT ====================
+Tags zeigen: git tag
+Änderungen anzeigen: git log v1.9.0..v2.0.0
+
+Commit Release:
+git add .
+git commit -m "Release 2.0.0"
+git tag -a v2.0.0 -m "Release v2.0.0"
+git push
+git push origin v2.0.0
 
 ================== Rollen Management =============================
 

@@ -1,55 +1,52 @@
-# datenstruktur/standsicherheit.py — Staudrücke+Nachweise klar getrennt
+# datenstruktur/standsicherheit.py
 
-from __future__ import annotations
-from dataclasses import dataclass
-from typing import Optional, Tuple, Any, List, Dict, Literal
+from dataclasses import dataclass, asdict, is_dataclass
+from typing import Optional, Tuple, Any, List, Literal
 from enum import Enum
-from dataclasses import asdict, is_dataclass
 import json
 
 from windlast_CORE.datenstruktur.enums import (
     Norm, Windzone, Betriebszustand, Schutzmassnahmen,
     RechenmethodeKippen, RechenmethodeGleiten, RechenmethodeAbheben,
-    VereinfachungKonstruktion, Nachweis, Severity, ValueSource, NormStatus, Zeitfaktor
+    VereinfachungKonstruktion, Nachweis, Severity, Zeitfaktor
 )
 from windlast_CORE.datenstruktur.zeit import Dauer, convert_dauer
-from windlast_CORE.datenstruktur.standsicherheit_ergebnis import (
-    StandsicherheitErgebnis, NormErgebnis, SafetyValue, Message, Meta, NormStatus, NormDetails, AlternativeErgebnis
-)
-from windlast_CORE.rechenfunktionen.staudruecke import staudruecke  # type: ignore
+from windlast_CORE.rechenfunktionen.staudruecke import staudruecke
 from windlast_CORE.datenstruktur.zwischenergebnis import (
     make_protokoll,
-    collect_messages,
-    merge_kontext,
+    collect_tree,
+    merge_breadcrumb,
+    bc_step,
     Protokoll,
-    collect_docs,
-    protokolliere_doc,
-    protokolliere_decision,
-    make_docbundle,
+    ErgebnisBaum,
+    protokolliere_ergebnis,
+    protokolliere_msg,
+    set_winner,
 )
 
-# def dataclass_to_json(obj):
-#     """
-#     Wandelt verschachtelte Dataclasses in dicts um und ersetzt Enum-Werte durch .value.
-#     """
-#     if is_dataclass(obj):
-#         return {k: dataclass_to_json(v) for k, v in asdict(obj).items()}
-#     if isinstance(obj, dict):
-#         return {dataclass_to_json(k): dataclass_to_json(v) for k, v in obj.items()}
-#     if isinstance(obj, list):
-#         return [dataclass_to_json(v) for v in obj]
-#     if isinstance(obj, Enum):
-#         return obj.value
-#     return obj
+def _tree_to_jsonable(obj):
+    if is_dataclass(obj):
+        return {k: _tree_to_jsonable(v) for k, v in asdict(obj).items()}
+    if isinstance(obj, Enum):
+        return obj.value
+    if isinstance(obj, dict):
+        return {
+            str(_tree_to_jsonable(k)): _tree_to_jsonable(v)
+            for k, v in obj.items()
+        }
+    if isinstance(obj, (list, tuple)):
+        return [_tree_to_jsonable(v) for v in obj]
+    return obj
 
-# def save_ergebnis_to_file(ergebnis, pfad="ergebnis_dump.json"):
-#     from pathlib import Path
-#     import json
-#     Path(pfad).write_text(
-#         json.dumps(dataclass_to_json(ergebnis), indent=2, ensure_ascii=False),
-#         encoding="utf-8"
-#     )
-#     print(f"✅ Ergebnis gespeichert unter: {Path(pfad).resolve()}")
+
+def save_tree_to_file(tree: ErgebnisBaum, pfad: str = "ergebnisbaum_dump.json") -> None:
+    from pathlib import Path
+
+    Path(pfad).write_text(
+        json.dumps(_tree_to_jsonable(tree), indent=2, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    print(f"✅ Ergebnisbaum gespeichert unter: {Path(pfad).resolve()}")
 
 # -----------------------------
 # 1) Staudruck-Ermittlung
@@ -71,55 +68,59 @@ def _ermittle_staudruecke(
     *,
     aufstelldauer: Optional[Dauer],
     protokoll: Optional[Protokoll] = None,
-    kontext: Optional[dict] = None,
-) -> Tuple[Optional[List[float]], Optional[List[float]], List[Message]]:
-    """
-    Liefert (z, q, reasons). Kapselt staudruecke(...) inkl. robustem Fehlermanagement.
-    z = Obergrenzen, q = Staudrücke, beide als List[float].
-    """
-    reasons: List[Message] = []
-    base_ctx = merge_kontext(kontext, {
-        "szenario_anzeigename": s.anzeigename,
-        "szenario": s.label,
-        "norm": s.norm.value
-    })
-    # Alle Protokoll-Einträge der Staudruck-Ermittlung klar als "LOADS" kennzeichnen
-    loads_ctx = merge_kontext(base_ctx, {"nachweis": "LOADS"})
+    breadcrumb: Optional[list] = None,
+) -> Tuple[Optional[List[float]], Optional[List[float]]]:
+
+    loads_bc = merge_breadcrumb(
+        breadcrumb,
+        [bc_step("nachweis", "LOADS", ebene_label="Nachweis", gruppe_label="Lasten")]
+    )
+
     try:
         if s.modus == "betrieb":
             zl1, zl2 = staudruecke(
                 s.norm, konstruktion, s.betriebszustand,
-                aufstelldauer=aufstelldauer, windzone=s.windzone,
-                protokoll=protokoll, kontext=loads_ctx
+                aufstelldauer=aufstelldauer,
+                windzone=s.windzone,
+                protokoll=protokoll,
+                breadcrumb=loads_bc,
             )
-        else:  # "schutz"
+        else:
             zl1, zl2 = staudruecke(
                 s.norm, konstruktion, s.schutz,
-                aufstelldauer=aufstelldauer, windzone=s.windzone,
-                protokoll=protokoll, kontext=loads_ctx
+                aufstelldauer=aufstelldauer,
+                windzone=s.windzone,
+                protokoll=protokoll,
+                breadcrumb=loads_bc,
             )
-        z = list(zl1.wert)  # Obergrenzen
-        q = list(zl2.wert)  # Staudrücke
 
-        def _has_nan(xs): 
-            return any((isinstance(v, float) and v != v) for v in xs)  # NaN-Test
+        z = list(zl1.wert)
+        q = list(zl2.wert)
 
-        if _has_nan(z) or _has_nan(q):
-            return None, None, reasons
+        if any(isinstance(v, float) and v != v for v in z + q):
+            protokolliere_msg(
+                protokoll,
+                breadcrumb=loads_bc,
+                severity=Severity.ERROR,
+                code="STAUDRUECKE_NAN",
+                text=f"Staudrücke/Obergrenzen ({s.norm.name}, {s.label}) enthalten NaN.",
+            )
+            return None, None
 
-        return z, q, reasons
+        return z, q
+
     except Exception as e:
-        # Einheitliche Fehlercodes/Texte pro Normfamilie
         code = "STAUDRUECKE_FAILED" if s.label != "IN_BETRIEB" else "STAUDRUECKE_IN_BETRIEB_FAILED"
-        sev  = Severity.ERROR if s.label not in ("IN_BETRIEB",) else Severity.WARN
-        txt  = ("Geschwindigkeitsdruck/Obergrenze" if s.norm == Norm.DIN_EN_1991_1_4_2010_12
-                else "Staudrücke/Obergrenzen")
-        reasons.append(Message(
-            code=code, severity=sev,
-            text=f"{txt} ({s.norm.name}, {s.label}) fehlgeschlagen: {e}",
-            context={"nachweis": "LOADS"},
-        ))
-        return None, None, reasons
+        sev = Severity.ERROR if s.label != "IN_BETRIEB" else Severity.WARN
+
+        protokolliere_msg(
+            protokoll,
+            breadcrumb=loads_bc,
+            severity=sev,
+            code=code,
+            text=f"Staudrücke/Obergrenzen ({s.norm.name}, {s.label}) fehlgeschlagen: {e}",
+        )
+        return None, None
 
 
 # -----------------------------
@@ -128,7 +129,8 @@ def _ermittle_staudruecke(
 def _rechne_drei_nachweise(
     konstruktion: Any,
     norm: Norm,
-    q: List[float], z: List[float],
+    q: List[float],
+    z: List[float],
     *,
     konst: Optional[Any],
     meth_kipp: RechenmethodeKippen,
@@ -136,70 +138,152 @@ def _rechne_drei_nachweise(
     meth_abhebe: RechenmethodeAbheben,
     vereinfachung_konstruktion: VereinfachungKonstruktion,
     anzahl_windrichtungen: int,
-    reasons: List[Message],
     norm_label: str,
     protokoll: Optional[Protokoll] = None,
-    kontext: Optional[dict] = None,
-) -> Tuple[Dict[Nachweis, SafetyValue], Tuple[Optional[float], Optional[float], Optional[float]]]:
-    base_ctx = merge_kontext(kontext, {"funktion": "_rechne_drei_nachweise", "norm": norm.value})
+    breadcrumb: Optional[list] = None,
+) -> Tuple[Optional[float], Optional[float], Optional[float]]:
 
-    """
-    Führt Kipp/Gleit/Abhebe durch (inkl. Fehlermeldungen im gleichen Stil wie bisher)
-    und liefert SafetyValues + die drei Rohwerte (für Fallback-Trigger).
-    """
-    out: Dict[Nachweis, SafetyValue] = {}
     v_kipp = v_gleit = v_abhebe = None
     b_kipp = b_gleit = b_abhebe = None
 
-    # Kipp
+    kipp_bc = merge_breadcrumb(
+        breadcrumb,
+        [bc_step("nachweis", "KIPP", ebene_label="Nachweis", gruppe_label="Kippsicherheit")]
+    )
     try:
         r = konstruktion.berechne_kippsicherheit(
-            norm, q, z, konst=konst, reset_berechnungen=True,
-            methode=meth_kipp, vereinfachung_konstruktion=vereinfachung_konstruktion,
+            norm, q, z,
+            konst=konst,
+            reset_berechnungen=True,
+            methode=meth_kipp,
+            vereinfachung_konstruktion=vereinfachung_konstruktion,
             anzahl_windrichtungen=anzahl_windrichtungen,
             protokoll=protokoll,
-            kontext=base_ctx,
+            breadcrumb=kipp_bc,
         )
-        v_kipp = float(r[0].wert); b_kipp = float(r[1].wert)
-        out[Nachweis.KIPP] = SafetyValue(v_kipp, meth_kipp, ValueSource.COMPUTED, [])
-    except Exception as e:
-        reasons.append(Message(code="KIPP_FAILED", severity=Severity.ERROR,
-                               text=f"Kippsicherheit ({norm_label}) fehlgeschlagen: {e}", context={}))
-        out[Nachweis.KIPP] = SafetyValue(None, meth_kipp, ValueSource.ERROR, [])
+        v_kipp = float(r[0].wert)
+        b_kipp = float(r[1].wert)
 
-    # Gleit
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=kipp_bc,
+            name="kippsicherheit",
+            label="Kippsicherheit",
+            formelzeichen="S_kipp",
+            wert=v_kipp,
+            priority=10,
+        )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=kipp_bc,
+            name="ballast_kipp",
+            label="Erforderlicher Ballast aus Kippen",
+            formelzeichen="m_Ballast,kipp",
+            wert=b_kipp,
+            einheit="kg",
+            priority=10,
+        )
+    except Exception as e:
+        protokolliere_msg(
+            protokoll,
+            breadcrumb=kipp_bc,
+            severity=Severity.ERROR,
+            code="KIPP_FAILED",
+            text=f"Kippsicherheit ({norm_label}) fehlgeschlagen: {e}",
+        )
+
+    gleit_bc = merge_breadcrumb(
+        breadcrumb,
+        [bc_step("nachweis", "GLEIT", ebene_label="Nachweis", gruppe_label="Gleitsicherheit")]
+    )
     try:
         r = konstruktion.berechne_gleitsicherheit(
-            norm, q, z, konst=konst, reset_berechnungen=False,
-            methode=meth_gleit, vereinfachung_konstruktion=vereinfachung_konstruktion,
+            norm, q, z,
+            konst=konst,
+            reset_berechnungen=False,
+            methode=meth_gleit,
+            vereinfachung_konstruktion=vereinfachung_konstruktion,
             anzahl_windrichtungen=anzahl_windrichtungen,
             protokoll=protokoll,
-            kontext=base_ctx,
+            breadcrumb=gleit_bc,
         )
-        v_gleit = float(r[0].wert); b_gleit = float(r[1].wert)
-        out[Nachweis.GLEIT] = SafetyValue(v_gleit, meth_gleit, ValueSource.COMPUTED, [])
-    except Exception as e:
-        reasons.append(Message(code="GLEIT_FAILED", severity=Severity.ERROR,
-                               text=f"Gleitsicherheit ({norm_label}) fehlgeschlagen: {e}", context={}))
-        out[Nachweis.GLEIT] = SafetyValue(None, meth_gleit, ValueSource.ERROR, [])
+        v_gleit = float(r[0].wert)
+        b_gleit = float(r[1].wert)
 
-    # Abhebe
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=gleit_bc,
+            name="gleitsicherheit",
+            label="Gleitsicherheit",
+            formelzeichen="S_gleit",
+            wert=v_gleit,
+            priority=10,
+        )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=gleit_bc,
+            name="ballast_gleit",
+            label="Erforderlicher Ballast aus Gleiten",
+            formelzeichen="m_Ballast,gleit",
+            wert=b_gleit,
+            einheit="kg",
+            priority=10,
+        )
+    except Exception as e:
+        protokolliere_msg(
+            protokoll,
+            breadcrumb=gleit_bc,
+            severity=Severity.ERROR,
+            code="GLEIT_FAILED",
+            text=f"Gleitsicherheit ({norm_label}) fehlgeschlagen: {e}",
+        )
+
+    abhebe_bc = merge_breadcrumb(
+        breadcrumb,
+        [bc_step("nachweis", "ABHEBE", ebene_label="Nachweis", gruppe_label="Abhebesicherheit")]
+    )
     try:
         r = konstruktion.berechne_abhebesicherheit(
-            norm, q, z, konst=konst, reset_berechnungen=False,
-            methode=meth_abhebe, vereinfachung_konstruktion=vereinfachung_konstruktion,
+            norm, q, z,
+            konst=konst,
+            reset_berechnungen=False,
+            methode=meth_abhebe,
+            vereinfachung_konstruktion=vereinfachung_konstruktion,
             anzahl_windrichtungen=anzahl_windrichtungen,
             protokoll=protokoll,
-            kontext=base_ctx,
+            breadcrumb=abhebe_bc,
         )
-        v_abhebe = float(r[0].wert); b_abhebe = float(r[1].wert)
-        out[Nachweis.ABHEBE] = SafetyValue(v_abhebe, meth_abhebe, ValueSource.COMPUTED, [])
-    except Exception as e:
-        reasons.append(Message(code="ABHEBE_FAILED", severity=Severity.ERROR,
-                               text=f"Abhebesicherheit ({norm_label}) fehlgeschlagen: {e}", context={}))
-        out[Nachweis.ABHEBE] = SafetyValue(None, meth_abhebe, ValueSource.ERROR, [])
+        v_abhebe = float(r[0].wert)
+        b_abhebe = float(r[1].wert)
 
-    # Max-Ballast bilden + Quelle-Nachweis merken
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=abhebe_bc,
+            name="abhebesicherheit",
+            label="Abhebesicherheit",
+            formelzeichen="S_abhebe",
+            wert=v_abhebe,
+            priority=10,
+        )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=abhebe_bc,
+            name="ballast_abhebe",
+            label="Erforderlicher Ballast aus Abheben",
+            formelzeichen="m_Ballast,abhebe",
+            wert=b_abhebe,
+            einheit="kg",
+            priority=10,
+        )
+    except Exception as e:
+        protokolliere_msg(
+            protokoll,
+            breadcrumb=abhebe_bc,
+            severity=Severity.ERROR,
+            code="ABHEBE_FAILED",
+            text=f"Abhebesicherheit ({norm_label}) fehlgeschlagen: {e}",
+        )
+
     ballast_pairs: list[tuple[Nachweis, float]] = []
     if b_kipp is not None:
         ballast_pairs.append((Nachweis.KIPP, b_kipp))
@@ -208,52 +292,48 @@ def _rechne_drei_nachweise(
     if b_abhebe is not None:
         ballast_pairs.append((Nachweis.ABHEBE, b_abhebe))
 
-    ballast_wert: float | None = None
-    ballast_quelle: Nachweis | None = None
+    ballast_bc = merge_breadcrumb(
+        breadcrumb,
+        [bc_step("nachweis", "BALLAST", ebene_label="Nachweis", gruppe_label="Ballast")]
+    )
 
     if ballast_pairs:
         ballast_quelle, ballast_wert = max(ballast_pairs, key=lambda p: p[1])
 
-    out[Nachweis.BALLAST] = SafetyValue(
-        wert=ballast_wert,
-        methode="MAX_BALLAST_KIPP_GLEIT_ABHEBE",
-        source=ValueSource.COMPUTED if ballast_wert is not None else ValueSource.ERROR,
-        messages=[],
-    )
+        for quelle, wert in ballast_pairs:
+            quelle_bc = merge_breadcrumb(
+                ballast_bc,
+                [bc_step("quelle_nachweis", quelle.name, ebene_label="Quelle Nachweis", gruppe_label=quelle.name)]
+            )
+            protokolliere_ergebnis(
+                protokoll,
+                breadcrumb=quelle_bc,
+                name="ballast_kandidat",
+                label=f"Ballast-Kandidat {quelle.name}",
+                formelzeichen=f"m_Ballast,{quelle.name.lower()}",
+                wert=wert,
+                einheit="kg",
+                priority=5,
+            )
 
-    # Globalen Ballast auch als Protokoll-Dokument ablegen
-    if protokoll is not None and ballast_wert is not None:
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(
-        #         titel="Erforderlicher Ballast m_Ballast,max",
-        #         wert=ballast_wert,  # Achtung: hier in derselben Einheit wie b_* (kg)
-        #         einheit="kg",
-        #         formel="m_Ballast,max = max(m_Ballast,kipp, m_Ballast,gleit, m_Ballast,abheb)",
-        #         formelzeichen=[
-        #             "m_Ballast,kipp",
-        #             "m_Ballast,gleit",
-        #             "m_Ballast,abheb",
-        #         ],
-        #         quelle_formel="---",
-        #     ),
-        #     kontext=merge_kontext(base_ctx, {
-        #         "nachweis": "BALLAST",
-        #         # Rolle: wie bei den Endwerten der Einzelnachweise → immer 'relevant'
-        #         # (die sind in KIPP/GLEIT/ABHEB auch mit rolle='relevant' markiert)
-        #         "rolle": "relevant",
-        #         # Wichtig für den nächsten Schritt: welcher Nachweis bestimmt den Ballast?
-        #         "quelle_nachweis": ballast_quelle.name if ballast_quelle is not None else None,
-        #     }),
-        # )
-        protokolliere_decision(
+        set_winner(
             protokoll,
-            key="quelle_nachweis",
-            value=ballast_quelle.name,
-            scope={"nachweis": "BALLAST"},
+            merge_breadcrumb(ballast_bc, [bc_step("quelle_nachweis", ballast_quelle.name)])
         )
 
-    return out, (v_kipp, v_gleit, v_abhebe)
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=ballast_bc,
+            name="ballast_max",
+            label="Erforderlicher Ballast",
+            formelzeichen="m_Ballast,max",
+            wert=ballast_wert,
+            einheit="kg",
+            formel="m_Ballast,max = max(m_Ballast,kipp, m_Ballast,gleit, m_Ballast,abheb)",
+            priority=10,
+        )
+
+    return v_kipp, v_gleit, v_abhebe
 
 
 # -----------------------------
@@ -268,10 +348,11 @@ def standsicherheit(
     methode: Optional[Tuple[RechenmethodeKippen, RechenmethodeGleiten, RechenmethodeAbheben]] = None,
     vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
     anzahl_windrichtungen: int = 8,
-) -> StandsicherheitErgebnis:
+) -> ErgebnisBaum:
     """
     Rechnet Kipp-/Gleit-/Abhebesicherheit je Norm. Staudrücke/Alternativen laufen über Szenarien.
     """
+    prot = make_protokoll()
     if methode is None:
         methode = (
             RechenmethodeKippen.STANDARD,
@@ -280,107 +361,100 @@ def standsicherheit(
         )
     meth_kipp, meth_gleit, meth_abhebe = methode
 
-    meta = Meta(
-        version="core-dev",
-        inputs={
-            "konstruktion_typ": konstruktion.__class__.__name__,
-            "windzone": windzone.name,
-            "aufstelldauer": (
-                {"wert": aufstelldauer.wert, "einheit": aufstelldauer.einheit.name}
-                if aufstelldauer is not None else None
-            ),
-        },
-        methoden={Nachweis.KIPP: meth_kipp, Nachweis.GLEIT: meth_gleit, Nachweis.ABHEBE: meth_abhebe},
-        vereinfachung_konstruktion=vereinfachung_konstruktion,
-        anzahl_windrichtungen=anzahl_windrichtungen,
-        konst_overrides={} if konst is None else {"custom": True},
-    )
-
-    normen: Dict[Norm, NormErgebnis] = {}
-
     # Helper zum Ausführen einer Norm mit beliebig vielen Szenarien
     def _rechne_norm(
         szenarien: List[StaudruckSzenario],
         *,
         normtitel: str,
         allow_alternativen: bool = True,
-    ) -> NormErgebnis:
-        # Primär-Szenario ist szenarien[0]; alle weiteren werden als alternativen[...] abgelegt
-        reasons_all: List[Message] = []
-        prot = make_protokoll()
-
+    ) -> None:
         # Primär
         s_primary = szenarien[0]
-        z, q, reasons = _ermittle_staudruecke(konstruktion, s_primary, aufstelldauer=aufstelldauer, protokoll=prot, kontext={})
-        reasons_all.extend(reasons)
-        try:
-            reasons_all.extend(collect_messages(prot))
-        except Exception:
-            pass
-        if z is None or q is None:
-            # Ohne q/z: ERROR + Platzhalterwerte wie bisher
-            return NormErgebnis(
-                status=NormStatus.ERROR,
-                reasons=reasons_all,
-                werte={
-                    Nachweis.KIPP:   SafetyValue(None, meth_kipp, ValueSource.ERROR, []),
-                    Nachweis.GLEIT:  SafetyValue(None, meth_gleit, ValueSource.ERROR, []),
-                    Nachweis.ABHEBE: SafetyValue(None, meth_abhebe, ValueSource.ERROR, []),
-                    Nachweis.BALLAST: SafetyValue(None, "MAX_BALLAST_KIPP_GLEIT_ABHEBE", ValueSource.ERROR, []),
-                },
-            )
 
-        werte, (v_kipp, v_gleit, v_abhebe) = _rechne_drei_nachweise(
-            konstruktion, szenarien[0].norm, q, z,
-            konst=konst, meth_kipp=meth_kipp, meth_gleit=meth_gleit, meth_abhebe=meth_abhebe,
-            vereinfachung_konstruktion=vereinfachung_konstruktion, anzahl_windrichtungen=anzahl_windrichtungen,
-            reasons=reasons_all, norm_label=normtitel,
-            protokoll=prot, kontext={"szenario_anzeigename": s_primary.anzeigename, "szenario": s_primary.label,},
+        primary_bc = [
+            bc_step("norm", s_primary.norm.name, ebene_label="Norm", gruppe_label=normtitel),
+            bc_step("berechnung", "hauptberechnung", ebene_label="Berechnung", gruppe_label="Hauptberechnung"),
+            bc_step("szenario", s_primary.label, ebene_label="Szenario", gruppe_label=s_primary.anzeigename),
+        ]
+
+        z, q = _ermittle_staudruecke(
+            konstruktion,
+            s_primary,
+            aufstelldauer=aufstelldauer,
+            protokoll=prot,
+            breadcrumb=primary_bc,
         )
 
-        alternativen: Dict[str, AlternativeErgebnis] = {}
-        # Fallback nur versuchen, wenn eine Sicherheit < 1 oder wenn man sie immer anbieten will
+        if z is None or q is None:
+            protokolliere_msg(
+                prot,
+                breadcrumb=primary_bc,
+                severity=Severity.ERROR,
+                code="NORM_FAILED",
+                text=f"{normtitel}: Berechnung abgebrochen, weil Staudrücke/Obergrenzen fehlen.",
+            )
+            return
+
+        v_kipp, v_gleit, v_abhebe = _rechne_drei_nachweise(
+            konstruktion,
+            s_primary.norm,
+            q,
+            z,
+            konst=konst,
+            meth_kipp=meth_kipp,
+            meth_gleit=meth_gleit,
+            meth_abhebe=meth_abhebe,
+            vereinfachung_konstruktion=vereinfachung_konstruktion,
+            anzahl_windrichtungen=anzahl_windrichtungen,
+            norm_label=normtitel,
+            protokoll=prot,
+            breadcrumb=primary_bc,
+        )
+
         need_fallback = any(v is not None and v < 1.0 for v in (v_kipp, v_gleit, v_abhebe))
 
         if need_fallback and len(szenarien) > 1 and allow_alternativen:
             for s in szenarien[1:]:
-                z_b, q_b, reasons_b = _ermittle_staudruecke(konstruktion, s, aufstelldauer=aufstelldauer, protokoll=prot, kontext={})
-                reasons_all.extend(reasons_b)
+                alt_bc = [
+                    bc_step("norm", s.norm.name, ebene_label="Norm", gruppe_label=normtitel),
+                    bc_step("berechnung", "alternative", ebene_label="Berechnung", gruppe_label="Alternative"),
+                    bc_step("szenario", s.label, ebene_label="Szenario", gruppe_label=s.anzeigename),
+                ]
+
+                z_b, q_b = _ermittle_staudruecke(
+                    konstruktion,
+                    s,
+                    aufstelldauer=aufstelldauer,
+                    protokoll=prot,
+                    breadcrumb=alt_bc,
+                )
+
                 if z_b is None or q_b is None:
-                    # Wenn Staudrücke fürs Fallback nicht verfügbar, einfach überspringen (Reasons sind geloggt)
+                    protokolliere_msg(
+                        prot,
+                        breadcrumb=alt_bc,
+                        severity=Severity.WARN,
+                        code="ALTERNATIVE_SKIPPED",
+                        text=f"Alternative {s.anzeigename} übersprungen, weil Staudrücke/Obergrenzen fehlen.",
+                    )
                     continue
-                vals_b, _ = _rechne_drei_nachweise(
-                    konstruktion, s.norm, q_b, z_b,
-                    konst=konst, meth_kipp=meth_kipp, meth_gleit=meth_gleit, meth_abhebe=meth_abhebe,
-                    vereinfachung_konstruktion=vereinfachung_konstruktion, anzahl_windrichtungen=anzahl_windrichtungen,
-                    reasons=reasons_all, norm_label=f"{s.norm.name} ({s.label})",
-                    protokoll=prot, kontext={"szenario_anzeigename": s.anzeigename, "szenario": s.label,},
+
+                _rechne_drei_nachweise(
+                    konstruktion,
+                    s.norm,
+                    q_b,
+                    z_b,
+                    konst=konst,
+                    meth_kipp=meth_kipp,
+                    meth_gleit=meth_gleit,
+                    meth_abhebe=meth_abhebe,
+                    vereinfachung_konstruktion=vereinfachung_konstruktion,
+                    anzahl_windrichtungen=anzahl_windrichtungen,
+                    norm_label=f"{s.norm.name} ({s.label})",
+                    protokoll=prot,
+                    breadcrumb=alt_bc,
                 )
-                alternativen[s.label] = AlternativeErgebnis(
-                    anzeigename=s.anzeigename,
-                    werte=vals_b,
-                )
-
-        try:
-            reasons_all.extend(collect_messages(prot))
-        except Exception:
-            pass
-
-        
-        # NEU: Docs einsammeln und in details hängen
-        docs = []
-        try:
-            docs = collect_docs(prot)  # Liste von (bundle, ctx)
-        except Exception:
-            docs = []
-
-        status = NormStatus.ERROR if any(m.severity == Severity.ERROR for m in reasons_all) else NormStatus.CALCULATED
-        details = NormDetails()  # falls du bisher None gelassen hast
-        details.notes = details.notes or []
-        details.windrichtungen = details.windrichtungen or []
-        details.docs = docs
-
-        return NormErgebnis(status=status, reasons=reasons_all, werte=werte, alternativen=alternativen, details=details)
+        return
     
     aufstelldauer_monate = convert_dauer(aufstelldauer.wert, aufstelldauer.einheit, Zeitfaktor.MONAT) if aufstelldauer else None
     allow_alternativen_1991 = (aufstelldauer_monate is not None and aufstelldauer_monate <= 24.0)
@@ -388,7 +462,7 @@ def standsicherheit(
     # --------------------------
     # DIN EN 13814:2005-06
     # --------------------------
-    normen[Norm.DIN_EN_13814_2005_06] = _rechne_norm(
+    _rechne_norm(
         [
             StaudruckSzenario("AUSSER_BETRIEB", "Außer Betrieb", Norm.DIN_EN_13814_2005_06, modus="betrieb",
                             betriebszustand=Betriebszustand.AUSSER_BETRIEB, windzone=windzone),
@@ -402,7 +476,7 @@ def standsicherheit(
     # --------------------------
     # DIN EN 17879:2024-08
     # --------------------------
-    normen[Norm.DIN_EN_17879_2024_08] = _rechne_norm(
+    _rechne_norm(
         [
             StaudruckSzenario("AUSSER_BETRIEB", "Außer Betrieb", Norm.DIN_EN_17879_2024_08, modus="betrieb",
                             betriebszustand=Betriebszustand.AUSSER_BETRIEB, windzone=windzone),
@@ -416,7 +490,7 @@ def standsicherheit(
     # --------------------------
     # DIN EN 1991-1-4:2010-12
     # --------------------------
-    normen[Norm.DIN_EN_1991_1_4_2010_12] = _rechne_norm(
+    _rechne_norm(
         [
             StaudruckSzenario("STANDARD", "Standard", Norm.DIN_EN_1991_1_4_2010_12, modus="schutz",
                             schutz=Schutzmassnahmen.KEINE, windzone=windzone),
@@ -429,7 +503,9 @@ def standsicherheit(
         allow_alternativen=allow_alternativen_1991,
     )
 
-    # Ergebnis speichern (Debug)
-    # save_ergebnis_to_file(StandsicherheitErgebnis(normen=normen, messages=[], meta=meta))
+    tree = collect_tree(prot) or prot.root
 
-    return StandsicherheitErgebnis(normen=normen, messages=[], meta=meta)
+    # Debug:
+    # save_tree_to_file(tree)
+
+    return tree
