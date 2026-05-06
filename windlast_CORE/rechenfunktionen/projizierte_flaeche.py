@@ -54,7 +54,7 @@ def _projizierte_flaeche_default(
 ) -> Zwischenergebnis:
     base_bc = breadcrumb if breadcrumb is not None else []
     base_meta = {
-        "funktion": "_projizierte_flaeche_default",
+        "funktion": "projizierte_flaeche_default",
         "objekttyp": getattr(objekttyp, "value", str(objekttyp)),
     }
 

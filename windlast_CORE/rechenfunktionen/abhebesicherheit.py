@@ -80,12 +80,16 @@ def _abhebesicherheit_DinEn13814_2005_06(
     breadcrumb: Optional[list] = None,
 ) -> List[Zwischenergebnis]:
     base_bc = breadcrumb if breadcrumb is not None else []
+    base_meta = {
+        "funktion": "abhebesicherheit_DinEn13814_2005_06",
+    }
 
     if vereinfachung_konstruktion is not VereinfachungKonstruktion.KEINE:
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="ABHEBE/NOT_IMPLEMENTED",
             text=f"Vereinfachung '{vereinfachung_konstruktion.value}' ist noch nicht implementiert.",
             breadcrumb=base_bc,
+            meta=base_meta,
         )
         return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
 
@@ -114,7 +118,7 @@ def _abhebesicherheit_DinEn13814_2005_06(
                 obergrenzen=obergrenzen,
                 konst=konst,
                 protokoll=protokoll,
-                kontext=richtung_bc
+                breadcrumb=richtung_bc
             )
             kraefte_nach_element = lastset.kraefte_nach_element
 
@@ -131,7 +135,8 @@ def _abhebesicherheit_DinEn13814_2005_06(
                     wert=N_down_b,
                     label=f"Normalkraft N_down",
                     einheit="N",
-                    priority=10
+                    priority=10,
+                    meta=base_meta,
                 )
                 protokolliere_ergebnis(
                     protokoll,
@@ -140,7 +145,8 @@ def _abhebesicherheit_DinEn13814_2005_06(
                     wert=N_up_b,
                     label=f"Normalkraft N_up",
                     einheit="N",
-                    priority=10
+                    priority=10,
+                    meta=base_meta,
                 )
                 total_normal_down += N_down_b
                 total_normal_up += N_up_b
@@ -153,7 +159,8 @@ def _abhebesicherheit_DinEn13814_2005_06(
                 wert=total_normal_down,
                 label="Summe Normalkräfte ΣN_down",
                 einheit="N",
-                priority=7
+                priority=7,
+                meta=base_meta,
             )
             protokolliere_ergebnis(
                 protokoll,
@@ -162,7 +169,8 @@ def _abhebesicherheit_DinEn13814_2005_06(
                 wert=total_normal_up,
                 label="Summe Normalkräfte ΣN_up",
                 einheit="N",
-                priority=7
+                priority=7,
+                meta=base_meta,
             )
 
             sicherheit = inf if total_normal_up <= _EPS else (total_normal_down / total_normal_up)
@@ -175,6 +183,7 @@ def _abhebesicherheit_DinEn13814_2005_06(
                 wert=sicherheit,
                 formel="S = ΣN_down / ΣN_up",
                 priority=10,
+                meta=base_meta,
             )
 
             if total_normal_up <= _EPS:
@@ -195,6 +204,7 @@ def _abhebesicherheit_DinEn13814_2005_06(
                 einheit="N",
                 formel="ΔN_down,erf = max(0, ΣN_up − ΣN_down) / γ_g",
                 priority=10,
+                meta=base_meta,
             )
 
             dir_records.append({
@@ -226,6 +236,7 @@ def _abhebesicherheit_DinEn13814_2005_06(
             wert=sicherheit_min_global,
             formel="S_abhebe = ΣN_down / ΣN_up",
             priority=10,
+            meta=base_meta,
         )
 
         protokolliere_ergebnis(
@@ -238,6 +249,7 @@ def _abhebesicherheit_DinEn13814_2005_06(
             einheit="kg",
             formel="m_Ballast,abhebe = max(0, ΣN_up − ΣN_down) / γ_g",
             priority=10,
+            meta=base_meta,
         )
 
         return [Zwischenergebnis(wert=sicherheit_min_global), Zwischenergebnis(wert=ballast_kg)]
@@ -247,6 +259,7 @@ def _abhebesicherheit_DinEn13814_2005_06(
             protokoll, severity=Severity.ERROR, code="ABHEBE/METHOD_NI",
             text=f"Methode '{methode.value}' ({methode.name}) ist noch nicht implementiert.",
             breadcrumb=base_bc,
+            meta=base_meta,
         )
         return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
 
@@ -265,12 +278,16 @@ def _abhebesicherheit_DinEn17879_2024_08(
     breadcrumb: Optional[list] = None,
 ) -> List[Zwischenergebnis]:
     base_bc = breadcrumb if breadcrumb is not None else []
+    base_meta = {
+        "funktion": "abhebesicherheit_DinEn17879_2024_08",
+    }
 
     if vereinfachung_konstruktion is not VereinfachungKonstruktion.KEINE:
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="ABHEBE/NOT_IMPLEMENTED",
             text=f"Vereinfachung '{vereinfachung_konstruktion.value}' ist noch nicht implementiert.",
             breadcrumb=base_bc,
+            meta=base_meta,
         )
         return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
 
@@ -299,7 +316,7 @@ def _abhebesicherheit_DinEn17879_2024_08(
                 obergrenzen=obergrenzen,
                 konst=konst,
                 protokoll=protokoll,
-                kontext=richtung_bc
+                breadcrumb=richtung_bc
             )
             kraefte_nach_element = lastset.kraefte_nach_element
 
@@ -316,7 +333,8 @@ def _abhebesicherheit_DinEn17879_2024_08(
                     wert=N_down_b,
                     label=f"Normalkraft N_down",
                     einheit="N",
-                    priority=10
+                    priority=10,
+                    meta=base_meta,
                 )
                 protokolliere_ergebnis(
                     protokoll,
@@ -325,7 +343,8 @@ def _abhebesicherheit_DinEn17879_2024_08(
                     wert=N_up_b,
                     label=f"Normalkraft N_up",
                     einheit="N",
-                    priority=10
+                    priority=10,
+                    meta=base_meta,
                 )
                 total_normal_down += N_down_b
                 total_normal_up += N_up_b
@@ -338,7 +357,8 @@ def _abhebesicherheit_DinEn17879_2024_08(
                 wert=total_normal_down,
                 label="Summe Normalkräfte ΣN_down",
                 einheit="N",
-                priority=7
+                priority=7,
+                meta=base_meta,
             )
             protokolliere_ergebnis(
                 protokoll,
@@ -347,7 +367,8 @@ def _abhebesicherheit_DinEn17879_2024_08(
                 wert=total_normal_up,
                 label="Summe Normalkräfte ΣN_up",
                 einheit="N",
-                priority=7
+                priority=7,
+                meta=base_meta,
             )
 
             sicherheit = inf if total_normal_up <= _EPS else (total_normal_down / total_normal_up)
@@ -360,6 +381,7 @@ def _abhebesicherheit_DinEn17879_2024_08(
                 wert=sicherheit,
                 formel="S = ΣN_down / ΣN_up",
                 priority=10,
+                meta=base_meta,
             )
 
             if total_normal_up <= _EPS:
@@ -380,6 +402,7 @@ def _abhebesicherheit_DinEn17879_2024_08(
                 einheit="N",
                 formel="ΔN_down,erf = max(0, ΣN_up − ΣN_down) / γ_g",
                 priority=10,
+                meta=base_meta,
             )
 
             dir_records.append({
@@ -411,6 +434,7 @@ def _abhebesicherheit_DinEn17879_2024_08(
             wert=sicherheit_min_global,
             formel="S_abhebe = ΣN_down / ΣN_up",
             priority=10,
+            meta=base_meta,
         )
 
         protokolliere_ergebnis(
@@ -423,6 +447,7 @@ def _abhebesicherheit_DinEn17879_2024_08(
             einheit="kg",
             formel="m_Ballast,abhebe = max(0, ΣN_up − ΣN_down) / γ_g",
             priority=10,
+            meta=base_meta,
         )
 
         return [Zwischenergebnis(wert=sicherheit_min_global), Zwischenergebnis(wert=ballast_kg)]
@@ -432,6 +457,7 @@ def _abhebesicherheit_DinEn17879_2024_08(
             protokoll, severity=Severity.ERROR, code="ABHEBE/METHOD_NI",
             text=f"Methode '{methode.value}' ({methode.name}) ist noch nicht implementiert.",
             breadcrumb=base_bc,
+            meta=base_meta,
         )
         return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
 
@@ -460,6 +486,9 @@ def abhebesicherheit(
     breadcrumb: Optional[list] = None,
 ) -> List[Zwischenergebnis]:
     base_bc = merge_breadcrumb(breadcrumb, [bc_step("nachweis", "ABHEBE")])
+    base_meta = {
+        "funktion": "abhebesicherheit",
+    }
     """
     Norm-dispatchte Abhebe-Sicherheitsbewertung.
     Gibt ein Zwischenergebnis mit der minimalen Sicherheit über alle Windrichtungen zurück.
@@ -480,6 +509,7 @@ def abhebesicherheit(
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="ABHEBE/INPUT_INVALID",
             text=str(e), breadcrumb=base_bc,
+            meta=base_meta,
         )
         return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
     

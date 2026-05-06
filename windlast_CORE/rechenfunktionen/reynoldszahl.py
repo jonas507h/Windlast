@@ -32,7 +32,7 @@ def _reynoldszahl_DinEn1991_1_4_2010_12(
 ) -> Zwischenergebnis:
     base_bc = breadcrumb if breadcrumb is not None else []
     base_meta = {
-        "funktion": "_reynoldszahl_DinEn1991_1_4_2010_12",
+        "funktion": "reynoldszahl_DinEn1991_1_4_2010_12",
         "objekttyp": getattr(objekttyp, "value", str(objekttyp)),
     }
 

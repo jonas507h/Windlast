@@ -82,12 +82,16 @@ def _kippsicherheit_DinEn13814_2005_06(
     breadcrumb: Optional[list] = None,
 ) -> List[Zwischenergebnis]:
     base_bc = breadcrumb if breadcrumb is not None else []
+    base_meta = {
+        "funktion": "kippsicherheit_DinEn13814_2005_06",
+    }
 
     if vereinfachung_konstruktion is not VereinfachungKonstruktion.KEINE:
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="KIPP/NOT_IMPLEMENTED",
             text=f"Vereinfachung '{vereinfachung_konstruktion.value}' ist noch nicht implementiert.",
             breadcrumb=base_bc,
+            meta=base_meta,
         )
         return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
 
@@ -156,6 +160,7 @@ def _kippsicherheit_DinEn13814_2005_06(
                         formelzeichen="M_K",
                         einheit="Nm",
                         priority=10,
+                        meta=base_meta,
                     )
                     protokolliere_ergebnis(
                         protokoll,
@@ -166,6 +171,7 @@ def _kippsicherheit_DinEn13814_2005_06(
                         formelzeichen="M_St",
                         einheit="Nm",
                         priority=10,
+                        meta=base_meta,
                     )
                     total_kipp += kipp_b
                     total_stand += stand_b
@@ -186,6 +192,7 @@ def _kippsicherheit_DinEn13814_2005_06(
                     formel="ΣM_K = ΣM_K,Bauelement",
                     einheit="Nm",
                     priority=10,
+                    meta=base_meta,
                 )
                 protokolliere_ergebnis(
                     protokoll,
@@ -197,6 +204,7 @@ def _kippsicherheit_DinEn13814_2005_06(
                     formel="ΣM_St = ΣM_St,Bauelement",
                     einheit="Nm",
                     priority=10,
+                    meta=base_meta,
                 )
                 protokolliere_ergebnis(
                     protokoll,
@@ -207,6 +215,7 @@ def _kippsicherheit_DinEn13814_2005_06(
                     formelzeichen=f"S_kipp,Achse{achse_idx}",
                     formel=f"S_kipp,Achse{achse_idx} = ΣM_St / ΣM_K",
                     priority=10,
+                    meta=base_meta,
                 )
 
                 if sicherheit < dir_min_sicherheit:
@@ -243,6 +252,7 @@ def _kippsicherheit_DinEn13814_2005_06(
                     formelzeichen=f"m_Ballast,kipp,Achse{achse_idx}",
                     einheit="N",
                     priority=10,
+                    meta=base_meta,
                 )
 
             protokolliere_ergebnis(
@@ -254,6 +264,7 @@ def _kippsicherheit_DinEn13814_2005_06(
                 formelzeichen=f"S_kipp,{winkel}°",
                 formel="S_kipp = ΣM_St / ΣM_K",
                 priority=10,
+                meta=base_meta,
             )
             protokolliere_ergebnis(
                 protokoll,
@@ -264,6 +275,7 @@ def _kippsicherheit_DinEn13814_2005_06(
                 formelzeichen=f"m_Ballast,kipp,{winkel}°",
                 einheit="kg",
                 priority=10,
+                meta=base_meta,
             )
 
             dir_records.append({
@@ -299,6 +311,7 @@ def _kippsicherheit_DinEn13814_2005_06(
             formelzeichen="S_kipp",
             formel="S_kipp = ΣM_St / ΣM_K",
             priority=10,
+            meta=base_meta,
         )
         protokolliere_ergebnis(
             protokoll,
@@ -310,6 +323,7 @@ def _kippsicherheit_DinEn13814_2005_06(
             einheit="kg",
             formel="m_Ballast,kipp = max(0, ΣM_K − ΣM_St) / (γ_g · m_stand,1N)",
             priority=10,
+            meta=base_meta,
         )
 
         set_winner(protokoll, merge_breadcrumb(base_bc, [bc_step("windrichtung_deg", winner["windrichtung_deg"])]))
@@ -322,6 +336,7 @@ def _kippsicherheit_DinEn13814_2005_06(
             protokoll, severity=Severity.ERROR, code="KIPP/METHOD_NI",
             text=f"Methode '{methode.value}' ({methode.name}) ist noch nicht implementiert.",
             breadcrumb=base_bc,
+            meta=base_meta,
         )
         return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
     
@@ -340,12 +355,16 @@ def _kippsicherheit_DinEn17879_2024_08(
     breadcrumb: Optional[list] = None,
 ) -> List[Zwischenergebnis]:
     base_bc = breadcrumb if breadcrumb is not None else []
+    base_meta = {
+        "funktion": "kippsicherheit_DinEn17879_2024_08",
+    }
 
     if vereinfachung_konstruktion is not VereinfachungKonstruktion.KEINE:
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="KIPP/NOT_IMPLEMENTED",
             text=f"Vereinfachung '{vereinfachung_konstruktion.value}' ist noch nicht implementiert.",
             breadcrumb=base_bc,
+            meta=base_meta,
         )
         return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
 
@@ -414,6 +433,7 @@ def _kippsicherheit_DinEn17879_2024_08(
                         formelzeichen="M_K",
                         einheit="Nm",
                         priority=10,
+                        meta=base_meta,
                     )
                     protokolliere_ergebnis(
                         protokoll,
@@ -424,6 +444,7 @@ def _kippsicherheit_DinEn17879_2024_08(
                         formelzeichen="M_St",
                         einheit="Nm",
                         priority=10,
+                        meta=base_meta,
                     )
                     total_kipp += kipp_b
                     total_stand += stand_b
@@ -444,6 +465,7 @@ def _kippsicherheit_DinEn17879_2024_08(
                     formel="ΣM_K = ΣM_K,Bauelement",
                     einheit="Nm",
                     priority=10,
+                    meta=base_meta,
                 )
                 protokolliere_ergebnis(
                     protokoll,
@@ -455,6 +477,7 @@ def _kippsicherheit_DinEn17879_2024_08(
                     formel="ΣM_St = ΣM_St,Bauelement",
                     einheit="Nm",
                     priority=10,
+                    meta=base_meta,
                 )
                 protokolliere_ergebnis(
                     protokoll,
@@ -465,6 +488,7 @@ def _kippsicherheit_DinEn17879_2024_08(
                     formelzeichen=f"S_kipp,Achse{achse_idx}",
                     formel=f"S_kipp,Achse{achse_idx} = ΣM_St / ΣM_K",
                     priority=10,
+                    meta=base_meta,
                 )
 
                 if sicherheit < dir_min_sicherheit:
@@ -501,6 +525,7 @@ def _kippsicherheit_DinEn17879_2024_08(
                     formelzeichen=f"m_Ballast,kipp,Achse{achse_idx}",
                     einheit="N",
                     priority=10,
+                    meta=base_meta,
                 )
 
             protokolliere_ergebnis(
@@ -512,6 +537,7 @@ def _kippsicherheit_DinEn17879_2024_08(
                 formelzeichen=f"S_kipp,{winkel}°",
                 formel="S_kipp = ΣM_St / ΣM_K",
                 priority=10,
+                meta=base_meta,
             )
             protokolliere_ergebnis(
                 protokoll,
@@ -522,6 +548,7 @@ def _kippsicherheit_DinEn17879_2024_08(
                 formelzeichen=f"m_Ballast,kipp,{winkel}°",
                 einheit="kg",
                 priority=10,
+                meta=base_meta,
             )
 
             dir_records.append({
@@ -557,6 +584,7 @@ def _kippsicherheit_DinEn17879_2024_08(
             formelzeichen="S_kipp",
             formel="S_kipp = ΣM_St / ΣM_K",
             priority=10,
+            meta=base_meta,
         )
         protokolliere_ergebnis(
             protokoll,
@@ -568,6 +596,7 @@ def _kippsicherheit_DinEn17879_2024_08(
             einheit="kg",
             formel="m_Ballast,kipp = max(0, ΣM_K − ΣM_St) / (γ_g · m_stand,1N)",
             priority=10,
+            meta=base_meta,
         )
 
         set_winner(protokoll, merge_breadcrumb(base_bc, [bc_step("windrichtung_deg", winner["windrichtung_deg"])]))
@@ -580,6 +609,7 @@ def _kippsicherheit_DinEn17879_2024_08(
             protokoll, severity=Severity.ERROR, code="KIPP/METHOD_NI",
             text=f"Methode '{methode.value}' ({methode.name}) ist noch nicht implementiert.",
             breadcrumb=base_bc,
+            meta=base_meta,
         )
         return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
     
@@ -604,6 +634,9 @@ def kippsicherheit(
     breadcrumb: Optional[list] = None,
 ) -> List[Zwischenergebnis]:
     base_bc = merge_breadcrumb(breadcrumb, [bc_step("nachweis", "KIPP")])
+    base_meta = {
+        "funktion": "kippsicherheit",
+    }
     """
     Norm-dispatchte Kipp-Sicherheitsbewertung.
     Gibt ein Zwischenergebnis mit der minimalen Sicherheit über alle Windrichtungen/Achsen zurück.
@@ -626,6 +659,7 @@ def kippsicherheit(
             code="KIPP/INPUT_INVALID",
             text=str(e),
             breadcrumb=base_bc,
+            meta=base_meta,
         )
         # NaN-Placeholder zurück (wie vereinbart: Zwischenergebnis nur mit wert)
         return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]

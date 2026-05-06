@@ -290,6 +290,7 @@ def protokolliere_ergebnis(
     formelzeichen: Optional[Union[str, Sequence[str]]] = None,
     formel: Optional[str] = None,
     einheit: Optional[str] = None,
+    priority: int = 0,
     meta: Optional[Meta] = None,
 ) -> None:
     """Sicheres Protokollieren eines Ergebnisses in den Baum."""
@@ -305,6 +306,7 @@ def protokolliere_ergebnis(
             formel=formel,
             wert=wert,
             einheit=einheit,
+            priority=priority,
             meta=dict(meta or {}),
         ),
     )

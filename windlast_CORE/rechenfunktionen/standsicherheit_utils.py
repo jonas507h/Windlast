@@ -18,6 +18,9 @@ def generiere_windrichtungen(
     breadcrumb: Optional[list] = None
 ) -> List[Tuple[float, Vec3]]:
     base_bc = breadcrumb
+    base_meta = {
+        "funktion": "generiere_windrichtungen",
+    }
     
     if winkel is not None:
         result = [(w, einheitsvektor_aus_winkeln(w, 0.0)) for w in winkel]
@@ -26,8 +29,9 @@ def generiere_windrichtungen(
             protokolliere_msg(protokoll, severity=Severity.ERROR,
                 code="UTILS/WINDRICHTUNG_ANZAHL",
                 text="Anzahl der Windrichtungen muss ≥ 1 sein.",
-                breadcrumb=base_bc
-                )
+                breadcrumb=base_bc,
+                meta=base_meta,
+            )
         winkelabstand = 360.0 / anzahl
         result = [(i * winkelabstand + startwinkel, einheitsvektor_aus_winkeln(i * winkelabstand + startwinkel, 0.0)) for i in range(anzahl)]
 
@@ -45,6 +49,9 @@ def ermittle_kraefte_pro_windrichtung(
     breadcrumb: Optional[list] = None
 ) -> Dict[str, List[Kraefte]]:
     base_bc = merge_breadcrumb(breadcrumb, [bc_step("windrichtung", f"{windrichtung}")])
+    base_meta = {
+        "funktion": "ermittle_kraefte_pro_windrichtung",
+    }
 
     # 1)Wind- & Gewichtskräfte aller Bauelemente holen
     kraefte_windrichtung: List[Kraefte] = []
@@ -64,6 +71,7 @@ def ermittle_kraefte_pro_windrichtung(
                     code="UTILS/GEWICHT_FAIL",
                     text=f"gewichtskraefte() für Element {idx} fehlgeschlagen: {e}",
                     breadcrumb=elem_bc,
+                    meta=base_meta,
                 )
 
         # Wind
@@ -87,6 +95,7 @@ def ermittle_kraefte_pro_windrichtung(
                     code="UTILS/WIND_FAIL",
                     text=f"windkraefte() für Element {idx} fehlgeschlagen: {e}",
                     breadcrumb=elem_bc,
+                    meta=base_meta,
                 )
     
     # 2) Nach Bauelement gruppieren (erwartet: element_id_intern gesetzt)
@@ -101,13 +110,17 @@ def _angle_key(winkel_deg: float) -> int:
     return int(round(winkel_deg * 1e4))
 
 def obtain_pool(konstruktion, reset_berechnungen: bool, *, protokoll: Optional[Protokoll]=None, breadcrumb: Optional[list] = None) -> LastPool:
-    base_bc = breadcrumb
+    base_bc = breadcrumb if breadcrumb is not None else []
+    base_meta = {
+        "funktion": "obtain_pool",
+    }
     if reset_berechnungen or not hasattr(konstruktion, "_lastpool") or konstruktion._lastpool is None:
         konstruktion._lastpool = LastPool()
         protokolliere_msg(protokoll, severity=Severity.HINT,
                           code="UTILS/POOL_RESET",
                           text="Lastpool neu angelegt/gesetzt (reset_berechnungen=True oder fehlte).",
-                          breadcrumb=base_bc)
+                          breadcrumb=base_bc,
+                          meta=base_meta)
     return konstruktion._lastpool
 
 
@@ -125,6 +138,9 @@ def get_or_create_lastset(
     breadcrumb: Optional[list] = None
 ) -> LastSet:
     base_bc = merge_breadcrumb(breadcrumb, [bc_step("winkel_deg", f"{winkel_deg}°")])
+    base_meta = {
+        "funktion": "get_or_create_lastset",
+    }
 
     key = _angle_key(winkel_deg)
     ls = pool.nach_winkel.get(key)
@@ -146,7 +162,10 @@ def get_or_create_lastset(
 # Kippsicherheit Utils --------------------------------------------
 
 def sammle_kippachsen(konstruktion, *, protokoll: Optional[Protokoll] = None, breadcrumb: Optional[list] = None) -> List[Achse]:
-    base_bc = breadcrumb
+    base_bc = breadcrumb if breadcrumb is not None else []
+    base_meta = {
+        "funktion": "sammle_kippachsen",
+    }
     eckpunkte: List[Vec3] = []
 
     for idx, obj in enumerate(getattr(konstruktion, "bauelemente", [])):
@@ -165,6 +184,7 @@ def sammle_kippachsen(konstruktion, *, protokoll: Optional[Protokoll] = None, br
             protokoll, severity=Severity.ERROR, code="KIPP/NO_POINTS",
             text="Zu wenige Eckpunkte für die Bestimmung von Kippachsen (min. 3).",
             breadcrumb=base_bc,
+            meta=base_meta,
         )
         return []
 
@@ -174,7 +194,8 @@ def sammle_kippachsen(konstruktion, *, protokoll: Optional[Protokoll] = None, br
         breadcrumb=base_bc,
         name="anz_kippachsen",
         wert=len(achsen),
-        label="Anzahl Kippachsen"
+        label="Anzahl Kippachsen",
+        meta=base_meta
     )
     return achsen
 
@@ -182,13 +203,17 @@ def kippachsen_aus_eckpunkten(
     punkte: List[Vec3], *, include_Randpunkte: bool = False,
     protokoll: Optional[Protokoll] = None, breadcrumb: Optional[list] = None
 ) -> List[Achse]:
-    base_bc = breadcrumb
+    base_bc = breadcrumb if breadcrumb is not None else []
+    base_meta = {
+        "funktion": "kippachsen_aus_eckpunkten",
+    }
 
     if len(punkte) < 3:
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="KIPP/POINTS_LT3",
             text="Mindestens 3 Punkte erforderlich, um Kippachsen zu bestimmen.",
             breadcrumb=base_bc,
+            meta=base_meta,
         )
         return []
     
@@ -199,6 +224,7 @@ def kippachsen_aus_eckpunkten(
             protokoll, severity=Severity.ERROR, code="KIPP/HULL_LT2",
             text="Konvexe Hülle enthält weniger als 2 Eckpunkte.",
             breadcrumb=base_bc,
+            meta=base_meta,
         )
         return []
     
@@ -235,6 +261,9 @@ def bewerte_lastfall_fuer_achse(
     """
 
     base_bc = merge_breadcrumb(breadcrumb, [bc_step("lasttyp", f"{getattr(lastfall, 'typ', None)}")])
+    base_meta = {
+        "funktion": "bewerte_lastfall_fuer_achse",
+    }
 
     Einzelkraefte: Sequence[Vec3] = lastfall.Einzelkraefte
     Angriffspunkte: Sequence[Vec3] = lastfall.Angriffspunkte_Einzelkraefte
@@ -244,6 +273,7 @@ def bewerte_lastfall_fuer_achse(
             protokoll, severity=Severity.ERROR, code="KIPP/NO_ATTACK_POINTS",
             text="Angriffspunkte der Einzelkräfte fehlen oder ungleich lang.",
             breadcrumb=base_bc,
+            meta=base_meta,
         )
         return 0.0, 0.0
     
@@ -276,7 +306,10 @@ def kipp_envelope_pro_bauelement(
     protokoll: Optional[Protokoll] = None,
     breadcrumb: Optional[list] = None
 ) -> Tuple[float, float]:
-    base_bc = breadcrumb
+    base_bc = breadcrumb if breadcrumb is not None else []
+    base_meta = {
+        "funktion": "kipp_envelope_pro_bauelement",
+    }
 
     wind_lastfall_index = -1
     best_wind_index = None
@@ -329,7 +362,8 @@ def kipp_envelope_pro_bauelement(
             name="lastfall_kippmoment",
             wert=kipp,
             label=f"Kippmoment M_K (Lastfall {lasttyp} #{lastfall_index})",
-            einheit="Nm"
+            einheit="Nm",
+            meta=base_meta,
         )
         protokolliere_ergebnis(
             protokoll,
@@ -338,6 +372,7 @@ def kipp_envelope_pro_bauelement(
             wert=stand,
             label=f"Standmoment M_St (Lastfall {lasttyp} #{lastfall_index})",
             einheit="Nm",
+            meta=base_meta,
         )
 
     if best_wind_kipp == -math.inf:
@@ -365,7 +400,10 @@ def ermittle_min_reibwert(
     norm: Norm, konstruktion,
     *, protokoll: Optional[Protokoll] = None, breadcrumb: Optional[list] = None
 ) -> float:
-    base_bc = breadcrumb
+    base_bc = breadcrumb if breadcrumb is not None else []
+    base_meta = {
+        "funktion": "ermittle_min_reibwert",
+    }
     """Liest μ aus allen Bodenplatten (Elem hat Methode reibwert()) und gibt das Minimum zurück.
        Falls keine Platte gefunden → 0.0 (konservativ)."""
     mu_werte: List[float] = []
@@ -385,6 +423,7 @@ def ermittle_min_reibwert(
                 protokoll, severity=Severity.ERROR, code="GLEIT/MU_READ_FAIL",
                 text=f"Reibwert-Ermittlung für Element {idx} fehlgeschlagen: {e}",
                 breadcrumb=elem_bc,
+                meta=base_meta,
             )
 
     if not mu_werte:
@@ -392,6 +431,7 @@ def ermittle_min_reibwert(
         #     protokoll, severity=Severity.WARN, code="GLEIT/NO_PLATE_MU",
         #     text="Kein Reibwert gefunden – setze konservativ μ=0.",
         #     breadcrumb=base_bc,
+        #     meta=base_meta,
         # )
         return 0.0
 
@@ -402,7 +442,10 @@ def bewerte_lastfall_fuer_gleiten(
     norm: Norm, lastfall: Kraefte,
     *, protokoll: Optional[Protokoll] = None, breadcrumb: Optional[list] = None
 ) -> Tuple[Vec3, float, float]:
-    base_bc = breadcrumb
+    base_bc = breadcrumb if breadcrumb is not None else []
+    base_meta = {
+        "funktion": "bewerte_lastfall_fuer_gleiten",
+    }
     """
     Zerlegt einen Lastfall in:
       H_vec (treibend, horizontal, γ_ungünstig),
@@ -442,7 +485,10 @@ def gleit_envelope_pro_bauelement(
     norm: Norm, lastfaelle: Iterable[Kraefte],
     *, protokoll: Optional[Protokoll] = None, breadcrumb: Optional[list] = None
 ) -> Tuple[Vec3, float, float]:
-    base_bc = breadcrumb
+    base_bc = breadcrumb if breadcrumb is not None else []
+    base_meta = {
+        "funktion": "gleit_envelope_pro_bauelement",
+    }
 
     wind_lastfall_index = -1
     best_wind_index = None
@@ -492,7 +538,8 @@ def gleit_envelope_pro_bauelement(
             name="lastfall_horizontalkraft_vektor",
             wert=H_vec,
             label="Horizontalkraft-Vektor H",
-            einheit="N"
+            einheit="N",
+            meta=base_meta,
         )
 
         protokolliere_ergebnis(
@@ -501,7 +548,8 @@ def gleit_envelope_pro_bauelement(
             name="lastfall_horizontalkraft_betrag",
             wert=H_betrag,
             label="Horizontalkraft-Betrag |H|",
-            einheit="N"
+            einheit="N",
+            meta=base_meta,
         )
 
         protokolliere_ergebnis(
@@ -510,7 +558,8 @@ def gleit_envelope_pro_bauelement(
             name="lastfall_normalkraft_down",
             wert=N_down,
             label="Normalkraft N_down",
-            einheit="N"
+            einheit="N",
+            meta=base_meta,
         )
 
         protokolliere_ergebnis(
@@ -519,7 +568,8 @@ def gleit_envelope_pro_bauelement(
             name="lastfall_normalkraft_up",
             wert=N_up,
             label="Normalkraft N_up",
-            einheit="N"
+            einheit="N",
+            meta=base_meta,
         )
 
         protokolliere_ergebnis(
@@ -530,7 +580,8 @@ def gleit_envelope_pro_bauelement(
             label="Effektive Normalkraft N_down - N_up",
             formelzeichen="N_eff",
             formel="N_eff = N_down - N_up",
-            einheit="N"
+            einheit="N",
+            meta=base_meta,
         )
 
     else:
@@ -552,7 +603,10 @@ def bewerte_lastfall_fuer_abheben(
     norm: Norm, lastfall: Kraefte, *,
     protokoll: Optional[Protokoll] = None, breadcrumb: Optional[list] = None
 ) -> Tuple[float, float]:
-    base_bc = breadcrumb
+    base_bc = breadcrumb if breadcrumb is not None else []
+    base_meta = {
+        "funktion": "bewerte_lastfall_fuer_abheben",
+    }
     """
     Zerlegt einen Lastfall in:
       N_down (günstig, NACH UNTEN; nur aus GEWICHT mit γ_günstig, als positive Größe),
@@ -580,7 +634,10 @@ def abhebe_envelope_pro_bauelement(
     norm: Norm, lastfaelle: Iterable[Kraefte], *,
     protokoll: Optional[Protokoll] = None, breadcrumb: Optional[list] = None
 ) -> Tuple[float, float]:
-    base_bc = breadcrumb
+    base_bc = breadcrumb if breadcrumb is not None else []
+    base_meta = {
+        "funktion": "abhebe_envelope_pro_bauelement",
+    }
 
     wind_lastfall_index = -1
     best_wind_index = None
@@ -623,7 +680,8 @@ def abhebe_envelope_pro_bauelement(
             name="lastfall_normalkraft_down",
             wert=N_down,
             label="Normalkraft N_down",
-            einheit="N"
+            einheit="N",
+            meta=base_meta,
         )
 
         protokolliere_ergebnis(
@@ -632,7 +690,8 @@ def abhebe_envelope_pro_bauelement(
             name="lastfall_normalkraft_up",
             wert=N_up,
             label="Normalkraft N_up",
-            einheit="N"
+            einheit="N",
+            meta=base_meta,
         )
 
     else:

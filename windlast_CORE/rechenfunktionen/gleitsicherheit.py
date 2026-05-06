@@ -82,12 +82,16 @@ def _gleitsicherheit_DinEn13814_2005_06(
     breadcrumb: Optional[list] = None,
 ) -> List[Zwischenergebnis]:
     base_bc = breadcrumb if breadcrumb is not None else []
+    base_meta = {
+        "funktion": "gleitsicherheit_DinEn13814_2005_06",
+    }
 
     if vereinfachung_konstruktion is not VereinfachungKonstruktion.KEINE:
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="GLEIT/NOT_IMPLEMENTED",
             text=f"Vereinfachung '{vereinfachung_konstruktion.value}' ist noch nicht implementiert.",
             breadcrumb=base_bc,
+            meta=base_meta,
         )
         return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
 
@@ -101,7 +105,8 @@ def _gleitsicherheit_DinEn13814_2005_06(
             wert=reibwert_min,
             label="Minimaler Reibwert μ_min",
             formelzeichen="μ_min",
-            formel="μ_min = min(μ_Bauelemente)"
+            formel="μ_min = min(μ_Bauelemente)",
+            meta=base_meta,
         )
 
         sicherheit_min_global = inf
@@ -128,7 +133,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
                 obergrenzen=obergrenzen,
                 konst=konst,
                 protokoll=protokoll,
-                kontext=richtung_bc
+                breadcrumb=richtung_bc
             )
             kraefte_nach_element = lastset.kraefte_nach_element
 
@@ -151,7 +156,8 @@ def _gleitsicherheit_DinEn13814_2005_06(
                     label="Horizontalkraft H",
                     formelzeichen="H",
                     einheit="N",
-                    priority=10, 
+                    priority=10,
+                    meta=base_meta,
                 )
                 protokolliere_ergebnis(
                     protokoll,
@@ -161,7 +167,8 @@ def _gleitsicherheit_DinEn13814_2005_06(
                     label="Normalkraft N_down",
                     formelzeichen="N_down",
                     einheit="N",
-                    priority=10, 
+                    priority=10,
+                    meta=base_meta,
                 )
                 protokolliere_ergebnis(
                     protokoll,
@@ -171,7 +178,8 @@ def _gleitsicherheit_DinEn13814_2005_06(
                     label="Normalkraft N_up",
                     formelzeichen="N_up",
                     einheit="N",
-                    priority=10, 
+                    priority=10,
+                    meta=base_meta,
                 )
                 total_horizontal = vektoren_addieren([total_horizontal, H_vec])
                 total_normal_up += N_up
@@ -191,6 +199,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
                 formelzeichen="|H|",
                 einheit="N",
                 priority=7,
+                meta=base_meta,
             )
             protokolliere_ergebnis(
                 protokoll,
@@ -201,6 +210,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
                 formelzeichen="ΣN_down",
                 einheit="N",
                 priority=7,
+                meta=base_meta,
             )
             protokolliere_ergebnis(
                 protokoll,
@@ -211,6 +221,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
                 formelzeichen="ΣN_up",
                 einheit="N",
                 priority=7,
+                meta=base_meta,
             )
             protokolliere_ergebnis(
                 protokoll,
@@ -222,6 +233,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
                 formel="N_eff = max(0, ΣN_down − ΣN_up)",
                 einheit="N",
                 priority=7,
+                meta=base_meta,
             )
             protokolliere_ergebnis(
                 protokoll,
@@ -233,6 +245,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
                 formel="R = μ_min · N_eff",
                 einheit="N",
                 priority=7,
+                meta=base_meta,
             )
 
             if horizontal_betrag > _EPS:
@@ -247,6 +260,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
                 label=f"Richtungs-Sicherheit S_gleit,{int(winkel)}°",
                 formelzeichen=f"S_gleit,{int(winkel)}°",
                 priority=10,
+                meta=base_meta,
             )
 
             if reibwert_min <= _EPS:
@@ -271,6 +285,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
                 formelzeichen=f"m_Ballast,gleit,{int(winkel)}°",
                 einheit="N",
                 priority=10,
+                meta=base_meta,
             )
 
             # Record ablegen (WICHTIG: innerhalb der Schleife!)
@@ -303,6 +318,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
             label="Gleitsicherheit S_gleit",
             formelzeichen="S_gleit",
             priority=10,
+            meta=base_meta,
         )
         protokolliere_ergebnis(
             protokoll,
@@ -313,6 +329,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
             formelzeichen="m_Ballast,gleit",
             einheit="kg",
             priority=10,
+            meta=base_meta,
         )
 
         return [Zwischenergebnis(wert=sicherheit_min_global), Zwischenergebnis(wert=ballast_kg)]
@@ -322,6 +339,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
             protokoll, severity=Severity.ERROR, code="GLEIT/METHOD_NI",
             text=f"Methode '{methode.value}' ({methode.name}) ist noch nicht implementiert.",
             breadcrumb=base_bc,
+            meta=base_meta,
         )
         return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
 
@@ -340,12 +358,16 @@ def _gleitsicherheit_DinEn17879_2024_08(
     breadcrumb: Optional[list] = None,
 ) -> List[Zwischenergebnis]:
     base_bc = breadcrumb if breadcrumb is not None else []
+    base_meta = {
+        "funktion": "gleitsicherheit_DinEn17879_2024_08",
+    }
 
     if vereinfachung_konstruktion is not VereinfachungKonstruktion.KEINE:
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="GLEIT/NOT_IMPLEMENTED",
             text=f"Vereinfachung '{vereinfachung_konstruktion.value}' ist noch nicht implementiert.",
             breadcrumb=base_bc,
+            meta=base_meta,
         )
         return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
 
@@ -359,7 +381,8 @@ def _gleitsicherheit_DinEn17879_2024_08(
             wert=reibwert_min,
             label="Minimaler Reibwert μ_min",
             formelzeichen="μ_min",
-            formel="μ_min = min(μ_Bauelemente)"
+            formel="μ_min = min(μ_Bauelemente)",
+            meta=base_meta,
         )
 
         sicherheit_min_global = inf
@@ -386,7 +409,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
                 obergrenzen=obergrenzen,
                 konst=konst,
                 protokoll=protokoll,
-                kontext=richtung_bc
+                breadcrumb=richtung_bc
             )
             kraefte_nach_element = lastset.kraefte_nach_element
 
@@ -409,7 +432,8 @@ def _gleitsicherheit_DinEn17879_2024_08(
                     label="Horizontalkraft H",
                     formelzeichen="H",
                     einheit="N",
-                    priority=10, 
+                    priority=10,
+                    meta=base_meta,
                 )
                 protokolliere_ergebnis(
                     protokoll,
@@ -419,7 +443,8 @@ def _gleitsicherheit_DinEn17879_2024_08(
                     label="Normalkraft N_down",
                     formelzeichen="N_down",
                     einheit="N",
-                    priority=10, 
+                    priority=10,
+                    meta=base_meta,
                 )
                 protokolliere_ergebnis(
                     protokoll,
@@ -429,7 +454,8 @@ def _gleitsicherheit_DinEn17879_2024_08(
                     label="Normalkraft N_up",
                     formelzeichen="N_up",
                     einheit="N",
-                    priority=10, 
+                    priority=10,
+                    meta=base_meta,
                 )
                 total_horizontal = vektoren_addieren([total_horizontal, H_vec])
                 total_normal_up += N_up
@@ -449,6 +475,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
                 formelzeichen="|H|",
                 einheit="N",
                 priority=7,
+                meta=base_meta,
             )
             protokolliere_ergebnis(
                 protokoll,
@@ -459,6 +486,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
                 formelzeichen="ΣN_down",
                 einheit="N",
                 priority=7,
+                meta=base_meta,
             )
             protokolliere_ergebnis(
                 protokoll,
@@ -469,6 +497,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
                 formelzeichen="ΣN_up",
                 einheit="N",
                 priority=7,
+                meta=base_meta,
             )
             protokolliere_ergebnis(
                 protokoll,
@@ -480,6 +509,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
                 formel="N_eff = max(0, ΣN_down − ΣN_up)",
                 einheit="N",
                 priority=7,
+                meta=base_meta,
             )
             protokolliere_ergebnis(
                 protokoll,
@@ -491,6 +521,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
                 formel="R = μ_min · N_eff",
                 einheit="N",
                 priority=7,
+                meta=base_meta,
             )
 
             if horizontal_betrag > _EPS:
@@ -505,6 +536,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
                 label=f"Richtungs-Sicherheit S_gleit,{int(winkel)}°",
                 formelzeichen=f"S_gleit,{int(winkel)}°",
                 priority=10,
+                meta=base_meta,
             )
 
             if reibwert_min <= _EPS:
@@ -529,6 +561,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
                 formelzeichen=f"m_Ballast,gleit,{int(winkel)}°",
                 einheit="N",
                 priority=10,
+                meta=base_meta,
             )
 
             # Record ablegen (WICHTIG: innerhalb der Schleife!)
@@ -561,6 +594,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
             label="Gleitsicherheit S_gleit",
             formelzeichen="S_gleit",
             priority=10,
+            meta=base_meta,
         )
         protokolliere_ergebnis(
             protokoll,
@@ -571,6 +605,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
             formelzeichen="m_Ballast,gleit",
             einheit="kg",
             priority=10,
+            meta=base_meta,
         )
 
         return [Zwischenergebnis(wert=sicherheit_min_global), Zwischenergebnis(wert=ballast_kg)]
@@ -580,6 +615,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
             protokoll, severity=Severity.ERROR, code="GLEIT/METHOD_NI",
             text=f"Methode '{methode.value}' ({methode.name}) ist noch nicht implementiert.",
             breadcrumb=base_bc,
+            meta=base_meta,
         )
         return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
     
@@ -604,6 +640,9 @@ def gleitsicherheit(
     breadcrumb: Optional[list] = None,
 ) -> List[Zwischenergebnis]:
     base_bc = merge_breadcrumb(breadcrumb, [bc_step("nachweis", "GLEIT")])
+    base_meta = {
+        "funktion": "gleitsicherheit",
+    }
 
     try:
         _validate_inputs(
@@ -620,7 +659,7 @@ def gleitsicherheit(
     except Exception as e:
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="GLEIT/INPUT_INVALID",
-            text=str(e), breadcrumb=base_bc,
+            text=str(e), breadcrumb=base_bc, meta=base_meta,
         )
         return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
     

@@ -17,7 +17,7 @@ from windlast_CORE.datenstruktur.enums import (
     RechenmethodeAbheben,
     VereinfachungKonstruktion,
 )
-from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_kontext
+from windlast_CORE.datenstruktur.zwischenergebnis import Protokoll, Zwischenergebnis, protokolliere_msg, merge_breadcrumb, bc_step, protokolliere_ergebnis, set_winner
 
 def _parse_material(value, default: "MaterialTyp | None" = None):
     """
