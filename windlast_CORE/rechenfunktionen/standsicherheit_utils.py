@@ -48,7 +48,7 @@ def ermittle_kraefte_pro_windrichtung(
     protokoll: Optional[Protokoll] = None,
     breadcrumb: Optional[list] = None
 ) -> Dict[str, List[Kraefte]]:
-    base_bc = merge_breadcrumb(breadcrumb, [bc_step("windrichtung", f"{windrichtung}")])
+    base_bc = breadcrumb if breadcrumb is not None else []
     base_meta = {
         "funktion": "ermittle_kraefte_pro_windrichtung",
     }
@@ -137,7 +137,7 @@ def get_or_create_lastset(
     protokoll: Optional[Protokoll] = None,
     breadcrumb: Optional[list] = None
 ) -> LastSet:
-    base_bc = merge_breadcrumb(breadcrumb, [bc_step("winkel_deg", f"{winkel_deg}°")])
+    base_bc = breadcrumb if breadcrumb is not None else []
     base_meta = {
         "funktion": "get_or_create_lastset",
     }
@@ -260,7 +260,7 @@ def bewerte_lastfall_fuer_achse(
       (kipp_sum, stand_sum) für diesen Lastfall.
     """
 
-    base_bc = merge_breadcrumb(breadcrumb, [bc_step("lasttyp", f"{getattr(lastfall, 'typ', None)}")])
+    base_bc = merge_breadcrumb(breadcrumb, [bc_step("lasttyp", f"{getattr(lastfall, 'typ.value', None)}")])
     base_meta = {
         "funktion": "bewerte_lastfall_fuer_achse",
     }
@@ -334,7 +334,7 @@ def kipp_envelope_pro_bauelement(
                 best_wind_kipp = kipp
                 best_wind_stand = stand
                 best_wind_index = wind_lastfall_index
-                lasttyp = "WIND"
+                lasttyp = k.typ.value
                 lastfall_index = wind_lastfall_index
         elif k.typ == Lasttyp.GEWICHT:
             gewicht_lastfall_index += 1
@@ -342,16 +342,8 @@ def kipp_envelope_pro_bauelement(
                 best_gew_kipp = kipp
                 best_gew_stand = stand
                 best_gewicht_index = gewicht_lastfall_index
-                lasttyp = "GEWICHT"
+                lasttyp = k.typ.value
                 lastfall_index = gewicht_lastfall_index
-        else:
-            other_lastfall_index += 1
-            if (kipp - stand) > (best_other_kipp - best_other_stand):
-                best_other_kipp = kipp
-                best_other_stand = stand
-                best_other_index = other_lastfall_index
-                lasttyp = "ANDERE"
-                lastfall_index = other_lastfall_index
 
         lastfall_bc = merge_breadcrumb(base_bc, [bc_step("lasttyp", lasttyp), bc_step("lastfall_index", lastfall_index)])
 
@@ -383,11 +375,9 @@ def kipp_envelope_pro_bauelement(
         best_other_kipp, best_other_stand = 0.0, 0.0
 
     if best_wind_index is not None:
-        set_winner(protokoll, merge_breadcrumb(base_bc, [bc_step("lasttyp", "WIND"), bc_step("lastfall_index", best_wind_index)]))
+        set_winner(protokoll, merge_breadcrumb(base_bc, [bc_step("lasttyp", Lasttyp.WIND.value), bc_step("lastfall_index", best_wind_index)]))
     if best_gewicht_index is not None:
-        set_winner(protokoll, merge_breadcrumb(base_bc, [bc_step("lasttyp", "GEWICHT"), bc_step("lastfall_index", best_gewicht_index)]))
-    if best_other_index is not None:
-        set_winner(protokoll, merge_breadcrumb(base_bc, [bc_step("lasttyp", "ANDERE"), bc_step("lastfall_index", best_other_index)]))
+        set_winner(protokoll, merge_breadcrumb(base_bc, [bc_step("lasttyp", Lasttyp.GEWICHT.value), bc_step("lastfall_index", best_gewicht_index)]))
 
     # Ergebnis für das Bauelement
     kipp_sum_bauteil = best_wind_kipp + best_gew_kipp + best_other_kipp
@@ -508,7 +498,7 @@ def gleit_envelope_pro_bauelement(
         if k.typ == Lasttyp.WIND:
             wind_lastfall_index += 1
             lastfall_index = wind_lastfall_index
-            lasttyp = "WIND"
+            lasttyp = k.typ.value
 
             lastfall_bc = merge_breadcrumb(base_bc, [bc_step("lasttyp", lasttyp), bc_step("lastfall_index", lastfall_index)])
 
@@ -521,7 +511,7 @@ def gleit_envelope_pro_bauelement(
         if k.typ == Lasttyp.GEWICHT:
             gewicht_lastfall_index += 1
             lastfall_index = gewicht_lastfall_index
-            lasttyp = "GEWICHT"
+            lasttyp = k.typ.value
 
             lastfall_bc = merge_breadcrumb(base_bc, [bc_step("lasttyp", lasttyp), bc_step("lastfall_index", lastfall_index)])
 
@@ -591,9 +581,9 @@ def gleit_envelope_pro_bauelement(
         best_N_down = 0.0
 
     if best_wind_index is not None:
-        set_winner(protokoll, merge_breadcrumb(base_bc, [bc_step("lasttyp", "WIND"), bc_step("lastfall_index", best_wind_index)]))
+        set_winner(protokoll, merge_breadcrumb(base_bc, [bc_step("lasttyp", Lasttyp.WIND.value), bc_step("lastfall_index", best_wind_index)]))
     if best_gewicht_index is not None:
-        set_winner(protokoll, merge_breadcrumb(base_bc, [bc_step("lasttyp", "GEWICHT"), bc_step("lastfall_index", best_gewicht_index)]))
+        set_winner(protokoll, merge_breadcrumb(base_bc, [bc_step("lasttyp", Lasttyp.GEWICHT.value), bc_step("lastfall_index", best_gewicht_index)]))
 
     return best_H_vec, best_N_down, best_N_up
 
@@ -655,7 +645,7 @@ def abhebe_envelope_pro_bauelement(
         if k.typ == Lasttyp.WIND:
             wind_lastfall_index += 1
             lastfall_index = wind_lastfall_index
-            lasttyp = "WIND"
+            lasttyp = k.typ.value
 
             if (N_up - N_down) > (best_wind_N_up - best_wind_N_down):
                 best_wind_N_up = N_up
@@ -665,7 +655,7 @@ def abhebe_envelope_pro_bauelement(
         if k.typ == Lasttyp.GEWICHT:
             gewicht_lastfall_index += 1
             lastfall_index = gewicht_lastfall_index
-            lasttyp = "GEWICHT"
+            lasttyp = k.typ.value
 
             if (N_up - N_down) > (best_gewicht_N_up - best_gewicht_N_down):
                 best_gewicht_N_up = N_up
@@ -707,9 +697,9 @@ def abhebe_envelope_pro_bauelement(
 
 
     if best_wind_index is not None:
-        set_winner(protokoll, merge_breadcrumb(base_bc, [bc_step("lasttyp", "WIND"), bc_step("lastfall_index", best_wind_index)]))
+        set_winner(protokoll, merge_breadcrumb(base_bc, [bc_step("lasttyp", Lasttyp.WIND.value), bc_step("lastfall_index", best_wind_index)]))
 
     if best_gewicht_index is not None:
-        set_winner(protokoll, merge_breadcrumb(base_bc, [bc_step("lasttyp", "GEWICHT"), bc_step("lastfall_index", best_gewicht_index)]))
+        set_winner(protokoll, merge_breadcrumb(base_bc, [bc_step("lasttyp", Lasttyp.GEWICHT.value), bc_step("lastfall_index", best_gewicht_index)]))
 
     return best_N_down, best_N_up

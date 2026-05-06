@@ -1,0 +1,54 @@
+TREE STATS
+===========
+ebenen: 3609
+gruppen: 6513
+ergebnisse: 12510
+messages: 10
+max_depth: 9
+
+Top result names:
+  2330  sicherheitsbeiwert
+  1280  lastfall_kippmoment
+  1280  lastfall_standmoment
+   800  element_kippmoment
+   800  element_standmoment
+   640  lastfall_normalkraft_down
+   640  lastfall_normalkraft_up
+   320  lastfall_horizontalkraft_vektor
+   320  lastfall_horizontalkraft_betrag
+   320  lastfall_normalkraft_effektiv
+   200  gewichtskraft
+   200  horizontalkraft
+   200  normalkraft_down
+   200  normalkraft_up
+   200  element_normalkraft_down
+   200  element_normalkraft_up
+   160  achse_kippmoment
+   160  achse_standmoment
+   160  achse_sicherheit_kipp
+   160  achse_ballastkraft_kipp
+   120  schlankheit
+   120  stroemungsgeschwindigkeit
+   120  reynoldszahl
+   120  projizierte_flaeche
+   120  eingeschlossene_flaeche
+   120  voelligkeitsgrad
+   120  grundkraftbeiwert
+   120  abminderungsfaktor_schlankheit
+   120  kraftbeiwert
+   120  windkraft
+
+Top level names:
+  1920  lastfall_index
+  1200  lasttyp
+   285  element_id
+   120  segment
+    40  achse_index
+    20  nachweis
+    15  windrichtung_deg
+     5  quelle_nachweis
+     3  szenario
+     1  norm
+
+Suspicious:
+- keine auffälligen Knoten gefunden

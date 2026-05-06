@@ -24,29 +24,31 @@ from windlast_CORE.datenstruktur.zwischenergebnis import (
     set_winner,
 )
 
-def _tree_to_jsonable(obj):
-    if is_dataclass(obj):
-        return {k: _tree_to_jsonable(v) for k, v in asdict(obj).items()}
-    if isinstance(obj, Enum):
-        return obj.value
-    if isinstance(obj, dict):
-        return {
-            str(_tree_to_jsonable(k)): _tree_to_jsonable(v)
-            for k, v in obj.items()
-        }
-    if isinstance(obj, (list, tuple)):
-        return [_tree_to_jsonable(v) for v in obj]
-    return obj
+from windlast_CORE.rechenfunktionen.DEBUG_ergebnisobjekt import debug_tree
+
+# def _tree_to_jsonable(obj):
+#     if is_dataclass(obj):
+#         return {k: _tree_to_jsonable(v) for k, v in asdict(obj).items()}
+#     if isinstance(obj, Enum):
+#         return obj.value
+#     if isinstance(obj, dict):
+#         return {
+#             str(_tree_to_jsonable(k)): _tree_to_jsonable(v)
+#             for k, v in obj.items()
+#         }
+#     if isinstance(obj, (list, tuple)):
+#         return [_tree_to_jsonable(v) for v in obj]
+#     return obj
 
 
-def save_tree_to_file(tree: ErgebnisBaum, pfad: str = "ergebnisbaum_dump.json") -> None:
-    from pathlib import Path
+# def save_tree_to_file(tree: ErgebnisBaum, pfad: str = "ergebnisbaum_dump.json") -> None:
+#     from pathlib import Path
 
-    Path(pfad).write_text(
-        json.dumps(_tree_to_jsonable(tree), indent=2, ensure_ascii=False),
-        encoding="utf-8",
-    )
-    print(f"✅ Ergebnisbaum gespeichert unter: {Path(pfad).resolve()}")
+#     Path(pfad).write_text(
+#         json.dumps(_tree_to_jsonable(tree), indent=2, ensure_ascii=False),
+#         encoding="utf-8",
+#     )
+#     print(f"✅ Ergebnisbaum gespeichert unter: {Path(pfad).resolve()}")
 
 # -----------------------------
 # 1) Staudruck-Ermittlung
@@ -373,7 +375,6 @@ def standsicherheit(
 
         primary_bc = [
             bc_step("norm", s_primary.norm.name, ebene_label="Norm", gruppe_label=normtitel),
-            bc_step("berechnung", "hauptberechnung", ebene_label="Berechnung", gruppe_label="Hauptberechnung"),
             bc_step("szenario", s_primary.label, ebene_label="Szenario", gruppe_label=s_primary.anzeigename),
         ]
 
@@ -417,7 +418,6 @@ def standsicherheit(
             for s in szenarien[1:]:
                 alt_bc = [
                     bc_step("norm", s.norm.name, ebene_label="Norm", gruppe_label=normtitel),
-                    bc_step("berechnung", "alternative", ebene_label="Berechnung", gruppe_label="Alternative"),
                     bc_step("szenario", s.label, ebene_label="Szenario", gruppe_label=s.anzeigename),
                 ]
 
@@ -505,7 +505,7 @@ def standsicherheit(
 
     tree = collect_tree(prot) or prot.root
 
-    # Debug:
-    save_tree_to_file(tree)
+    # DEBUG
+    debug_tree(tree,output_dir="debug_output")
 
     return tree
