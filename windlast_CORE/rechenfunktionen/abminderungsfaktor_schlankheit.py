@@ -1,14 +1,7 @@
 # rechenfunktionen/abminderungsfaktor_schlankheit.py
 from __future__ import annotations
 from typing import Tuple, Dict, Callable, Optional
-from windlast_CORE.datenstruktur.zwischenergebnis import (
-    Zwischenergebnis,
-    Protokoll,
-    merge_kontext,
-    make_docbundle,
-    protokolliere_msg,
-    protokolliere_doc,
-)
+from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_breadcrumb, bc_step, protokolliere_msg, protokolliere_ergebnis, set_winner
 from windlast_CORE.datenstruktur.enums import Norm, ObjektTyp, Severity
 
 from windlast_CORE.rechenfunktionen.interpolation import (
@@ -40,18 +33,18 @@ def _abminderungsfaktor_schlankheit_default(
     voelligkeitsgrad: float,
     *,
     protokoll: Optional[Protokoll] = None,
-    kontext: Optional[dict] = None,
+    breadcrumb: Optional[list] = None,
 ) -> Zwischenergebnis:
     """
     Bilineare Interpolation des Abminderungsfaktors auf Tabelle (λ vs. φ).
-).
+
     Werte außerhalb des Tabellenbereichs werden auf den Randbereich geklemmt.
     Der Objekttyp ist zzt. ohne Einfluss (Platzhalter für zukünftige Spezialisierungen).
     """
-    base_ctx = merge_kontext(kontext, {
-        "funktion": "abminderungsfaktor_schlankheit",
-        "objekttyp": getattr(objekttyp, "name", str(objekttyp)),
-    })
+    base_bc = breadcrumb if breadcrumb is not None else []
+    base_meta = {
+        "funktion": "abminderungsfaktor_schlankheit_default",
+    }
 
     # Originale Eingaben merken für Logging
     lam_orig = schlankheit
@@ -65,7 +58,8 @@ def _abminderungsfaktor_schlankheit_default(
             severity=Severity.WARN,
             code="ABM_SCHL/CLAMP_LAMBDA",
             text=f"Schlankheit λ von {lam_orig:.3f} auf {x:.3f} geklemmt.",
-            kontext=merge_kontext(base_ctx, {"bounds_lambda": [_X_Schlankheit[0], _X_Schlankheit[-1]]}),
+            breadcrumb=base_bc,
+            meta=base_meta,
         )
 
     # Y-Achse für Interpolation aufsteigend sortieren
@@ -81,24 +75,21 @@ def _abminderungsfaktor_schlankheit_default(
             severity=Severity.WARN,
             code="ABM_SCHL/CLAMP_VOELLIGKEIT",
             text=f"Völligkeitsgrad φ von {phi_orig:.3f} auf {y:.3f} geklemmt.",
-            kontext=merge_kontext(base_ctx, {"bounds_phi": [y_inc[0], y_inc[-1]]}),
+            breadcrumb=base_bc,
+            meta=base_meta,
         )
 
     wert = bilinear_interpolate_grid(_X_Schlankheit, y_inc, z_inc, x, y)
 
-    # protokolliere_doc(
-    #     protokoll,
-    #     bundle=make_docbundle(
-    #         titel="Abminderungsfaktor ψ_λ",
-    #         wert=wert,
-    #         formel="bilinear λ–φ → ψ_λ",
-    #         quelle_formel="Projekt-/Tabellenwerte (λ×φ → Abminderungsfaktor)",
-    #         formelzeichen=["ψ", "λ", "φ"],
-    #         quelle_formelzeichen=["Projektinterne Bezeichnungen"],
-    #         einzelwerte=[x, y],
-    #     ),
-    #     kontext=base_ctx,
-    # )
+    protokolliere_ergebnis(
+        protokoll,
+        breadcrumb=base_bc,
+        name="abminderungsfaktor_schlankheit",
+        wert=wert,
+        label="Abminderungsfaktor ψ_λ",
+        formelzeichen="ψ_λ",
+        meta=base_meta,
+    )
 
     return Zwischenergebnis(wert=wert)
 
@@ -113,13 +104,12 @@ def abminderungsfaktor_schlankheit(
     voelligkeitsgrad: float,
     *,
     protokoll: Optional[Protokoll] = None,
-    kontext: Optional[dict] = None,
+    breadcrumb: Optional[list] = None,
 ) -> Zwischenergebnis:
-    base_ctx = merge_kontext(kontext, {
+    base_bc = breadcrumb if breadcrumb is not None else []
+    base_meta = {
         "funktion": "abminderungsfaktor_schlankheit",
-        "objekttyp": getattr(objekttyp, "name", str(objekttyp)),
-        "norm": getattr(norm, "name", str(norm)),
-    })
+    }
 
     try:
         _validate_inputs(objekttyp, schlankheit, voelligkeitsgrad)
@@ -131,17 +121,22 @@ def abminderungsfaktor_schlankheit(
             severity=Severity.ERROR,
             code="ABM_SCHL/INPUT_INVALID",
             text=str(e),
-            kontext=base_ctx,
+            breadcrumb=base_bc,
+            meta=base_meta,
         )
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(titel="Abminderungsfaktor ψ_λ", wert=float("nan")),
-        #     kontext=merge_kontext(base_ctx, {"nan": True}),
-        # )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=base_bc,
+            name="abminderungsfaktor_schlankheit",
+            wert=float("nan"),
+            label="Abminderungsfaktor ψ_λ",
+            formelzeichen="ψ_λ",
+            meta=base_meta,
+        )
         return Zwischenergebnis(wert=float("nan"))
     
     funktion = _DISPATCH.get(norm, _DISPATCH[Norm.DEFAULT])
     return funktion(
         objekttyp, schlankheit, voelligkeitsgrad,
-        protokoll=protokoll, kontext=base_ctx,
+        protokoll=protokoll, breadcrumb=base_bc,
     )

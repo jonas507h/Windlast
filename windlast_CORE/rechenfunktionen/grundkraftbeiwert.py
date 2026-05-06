@@ -6,14 +6,7 @@ import math
 import warnings
 
 from windlast_CORE.datenstruktur.enums import Norm, TraversenTyp, ObjektTyp, Severity
-from windlast_CORE.datenstruktur.zwischenergebnis import (                              # + Protokoll & Helpers
-    Zwischenergebnis,
-    Protokoll,
-    merge_kontext,
-    make_docbundle,
-    protokolliere_msg,
-    protokolliere_doc,
-)
+from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_breadcrumb, bc_step, protokolliere_msg, protokolliere_ergebnis, set_winner
 from windlast_CORE.materialdaten.catalog import catalog
 from windlast_CORE.rechenfunktionen.geom3d import (
     Vec3,
@@ -103,15 +96,13 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
     reynoldszahl: Optional[float] = None,
     *,
     protokoll: Optional[Protokoll] = None,
-    kontext: Optional[dict] = None,
+    breadcrumb: Optional[list] = None,
 ) -> Zwischenergebnis:
-    
-    base_ctx = merge_kontext(kontext, {
-        "funktion": "grundkraftbeiwert",
-        "objekttyp": getattr(objekttyp, "name", str(objekttyp)),
-        "objekt_name_intern": objekt_name_intern,
-        "abschnitt": abschnitt,
-    })
+    base_bc = breadcrumb if breadcrumb is not None else []
+    base_meta = {
+        "funktion": "grundkraftbeiwert_DinEn1991_1_4_2010_12",
+        "objekttyp": getattr(objekttyp, "value", str(objekttyp)),
+    }
 
     if objekttyp == ObjektTyp.TRAVERSE:
         if reynoldszahl is not None and reynoldszahl > 2e5:
@@ -120,13 +111,18 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
                 severity=Severity.ERROR,
                 code="GRUNDKRAFT/RE_OUT_OF_RANGE",
                 text=f"Reynoldszahl {reynoldszahl:.3g} > 2·10^5: c_f,0 nicht definiert.",
-                kontext=base_ctx,
+                breadcrumb=base_bc,
+                meta=base_meta,
             )
-            # protokolliere_doc(
-            #     protokoll,
-            #     bundle=make_docbundle(titel="Grundkraftbeiwert c_f,0", wert=float("nan")),
-            #     kontext=merge_kontext(base_ctx, {"nan": True}),
-            # )
+            protokolliere_ergebnis(
+                protokoll,
+                breadcrumb=base_bc,
+                name="grundkraftbeiwert",
+                wert=float("nan"),
+                label="Grundkraftbeiwert c_f,0",
+                formelzeichen="c_f,0",
+                meta=base_meta,
+            )
             return Zwischenergebnis(wert=float("nan"))
         
         startpunkt, endpunkt, orientierung = punkte[0], punkte[1], punkte[2]
@@ -153,7 +149,8 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
                     protokolliere_msg(
                         protokoll, severity=Severity.WARN, code="GRUNDKRAFT/EXTRAPOLATION_V",
                         text=f"Völligkeitsgrad {voelligkeitsgrad:.3f} außerhalb [{x[0]}, {x[-1]}] – Interpolation extrapoliert.",
-                        kontext=merge_kontext(base_ctx, {"bereich": [x[0], x[-1]]}),
+                        breadcrumb=base_bc,
+                        meta=base_meta,
                     )
                 wert_Ecke = interpol_2D(x, y, voelligkeitsgrad)
                 wert_Seite = 1.1
@@ -176,7 +173,8 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
                     protokolliere_msg(
                         protokoll, severity=Severity.WARN, code="GRUNDKRAFT/EXTRAPOLATION_V",
                         text=f"Völligkeitsgrad {voelligkeitsgrad:.3f} außerhalb [{x[0]}, {x[-1]}] – Interpolation extrapoliert.",
-                        kontext=merge_kontext(base_ctx, {"bereich": [x[0], x[-1]]}),
+                        breadcrumb=base_bc,
+                        meta=base_meta,
                     )
                 wert_Ecke = interpol_2D(x, y, voelligkeitsgrad)
 
@@ -186,7 +184,8 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
                     protokolliere_msg(
                         protokoll, severity=Severity.WARN, code="GRUNDKRAFT/EXTRAPOLATION_V",
                         text=f"Völligkeitsgrad {voelligkeitsgrad:.3f} außerhalb [{x[0]}, {x[-1]}] – Interpolation extrapoliert.",
-                        kontext=merge_kontext(base_ctx, {"bereich": [x[0], x[-1]]}),
+                        breadcrumb=base_bc,
+                        meta=base_meta,
                     )
                 wert_Seite = interpol_2D(x, y, voelligkeitsgrad)
 
@@ -200,34 +199,44 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
                     severity=Severity.ERROR,
                     code="GRUNDKRAFT/NOT_IMPLEMENTED",
                     text=f"Grundkraftbeiwert für {traversentyp.value} ist noch nicht implementiert.",
-                    kontext=base_ctx,
+                    breadcrumb=base_bc,
+                    meta=base_meta,
                 )
-                # protokolliere_doc(
-                #     protokoll,
-                #     bundle=make_docbundle(titel="Grundkraftbeiwert c_f,0", wert=float("nan")),
-                #     kontext=merge_kontext(base_ctx, {"nan": True}),
-                # )
+                protokolliere_ergebnis(
+                    protokoll,
+                    breadcrumb=base_bc,
+                    name="grundkraftbeiwert",
+                    wert=float("nan"),
+                    label="Grundkraftbeiwert c_f,0",
+                    formelzeichen="c_f,0",
+                    meta=base_meta,
+                )
                 return Zwischenergebnis(wert=float("nan"))
 
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(
-        #         titel="Grundkraftbeiwert c_f,0",
-        #         wert=wert,
-        #     ),
-        #     kontext=base_ctx,
-        # )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=base_bc,
+            name="grundkraftbeiwert",
+            wert=wert,
+            label="Grundkraftbeiwert c_f,0",
+            formelzeichen="c_f,0",
+            meta=base_meta,
+        )
         return Zwischenergebnis(wert=wert)
 
     elif objekttyp == ObjektTyp.ROHR:
         rohr_achse = vektor_normieren(vektor_zwischen_punkten(punkte[0], punkte[1]))
         wind_proj = projektion_vektor_auf_ebene(windrichtung, rohr_achse)
         if vektor_laenge(wind_proj) < 1e-9:
-            # protokolliere_doc(
-            #     protokoll,
-            #     bundle=make_docbundle(titel="Grundkraftbeiwert c_f,0", wert=0.0),
-            #     kontext=base_ctx,
-            # )
+            protokolliere_ergebnis(
+                protokoll,
+                breadcrumb=base_bc,
+                name="grundkraftbeiwert",
+                wert=0.0,
+                label="Grundkraftbeiwert c_f,0",
+                formelzeichen="c_f,0",
+                meta=base_meta,
+            )
             return Zwischenergebnis(wert=0.0)
 
         if reynoldszahl is not None and reynoldszahl > 1.8e5:
@@ -236,18 +245,20 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
                 severity=Severity.WARN,
                 code="GRUNDKRAFT/RE_HIGH_SET_1_2",
                 text=f"Re={reynoldszahl:.3g} > 1,8·10^5: setze c_f,0 = 1,2 (ungünstigster Wert).",
-                kontext=base_ctx,
+                breadcrumb=base_bc,
+                meta=base_meta,
             )
         
         wert = 1.2
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(
-        #         titel="Grundkraftbeiwert c_f,0",
-        #         wert=wert,
-        #     ),
-        #     kontext=base_ctx,
-        # )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=base_bc,
+            name="grundkraftbeiwert",
+            wert=wert,
+            label="Grundkraftbeiwert c_f,0",
+            formelzeichen="c_f,0",
+            meta=base_meta,
+        )
         return Zwischenergebnis(wert=wert)
 
     else:
@@ -256,13 +267,18 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
             severity=Severity.ERROR,
             code="GRUNDKRAFT/NOT_IMPLEMENTED",
             text=f"Grundkraftbeiwert für Objekttyp '{objekttyp.value}' ist noch nicht implementiert.",
-            kontext=base_ctx,
+            breadcrumb=base_bc,
+            meta=base_meta,
         )
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(titel="Grundkraftbeiwert c_f,0", wert=float("nan")),
-        #     kontext=merge_kontext(base_ctx, {"nan": True}),
-        # )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=base_bc,
+            name="grundkraftbeiwert",
+            wert=float("nan"),
+            label="Grundkraftbeiwert c_f,0",
+            formelzeichen="c_f,0",
+            meta=base_meta,
+        )
         return Zwischenergebnis(wert=float("nan"))
 
 _DISPATCH: Dict[Norm, Callable[..., Zwischenergebnis]] = {
@@ -281,15 +297,12 @@ def grundkraftbeiwert(
     reynoldszahl: Optional[float] = None,
     *,
     protokoll: Optional[Protokoll] = None,
-    kontext: Optional[dict] = None,   
+    breadcrumb: Optional[list] = None,
 ) -> Zwischenergebnis:
-    
-    base_ctx = merge_kontext(kontext, {
+    base_bc = breadcrumb if breadcrumb is not None else []
+    base_meta = {
         "funktion": "grundkraftbeiwert",
-        "objekttyp": getattr(objekttyp, "name", str(objekttyp)),
-        "objekt_name_intern": objekt_name_intern,
-        "norm": getattr(norm, "name", str(norm)),
-    })
+    }
 
     try:
         _validate_inputs(objekttyp, objekt_name_intern, punkte, abschnitt, windrichtung, voelligkeitsgrad, reynoldszahl)
@@ -301,17 +314,22 @@ def grundkraftbeiwert(
             severity=Severity.ERROR,
             code="GRUNDKRAFT/INPUT_INVALID",
             text=str(e),
-            kontext=base_ctx,
+            breadcrumb=base_bc,
+            meta=base_meta,
         )
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(titel="Grundkraftbeiwert c_f,0", wert=float("nan")),
-        #     kontext=merge_kontext(base_ctx, {"nan": True}),
-        # )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=base_bc,
+            name="grundkraftbeiwert",
+            wert=float("nan"),
+            label="Grundkraftbeiwert c_f,0",
+            formelzeichen="c_f,0",
+            meta=base_meta,
+        )
         return Zwischenergebnis(wert=float("nan"))
     
     funktion = _DISPATCH.get(norm, _DISPATCH[Norm.DEFAULT])
     return funktion(
         objekttyp, objekt_name_intern, punkte, abschnitt, windrichtung, voelligkeitsgrad, reynoldszahl,
-        protokoll=protokoll, kontext=base_ctx,
+        protokoll=protokoll, breadcrumb=base_bc,
     )

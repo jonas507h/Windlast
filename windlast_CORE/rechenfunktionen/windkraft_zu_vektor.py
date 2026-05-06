@@ -4,14 +4,7 @@ from typing import Dict, Callable, Sequence, Optional
 import math
 
 from windlast_CORE.datenstruktur.enums import Norm, ObjektTyp, Severity, senkrechteFlaecheTyp
-from windlast_CORE.datenstruktur.zwischenergebnis import (
-    Zwischenergebnis_Vektor,
-    Protokoll,
-    merge_kontext,
-    make_docbundle,
-    protokolliere_msg,
-    protokolliere_doc,
-)
+from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis_Vektor, Protokoll, merge_breadcrumb, bc_step, protokolliere_msg, protokolliere_ergebnis, set_winner
 from windlast_CORE.rechenfunktionen.geom3d import (
     Vec3,
     vektor_laenge,
@@ -60,15 +53,14 @@ def _windkraft_zu_vektor_default(
     senkrechte_flaeche_typ: Optional[senkrechteFlaecheTyp] = None,
     *,
     protokoll: Optional[Protokoll] = None,
-    kontext: Optional[dict] = None,
+    breadcrumb: Optional[list] = None,
 ) -> Zwischenergebnis_Vektor:
     
-    base_ctx = merge_kontext(kontext, {
-        "funktion": "windkraft_zu_vektor",
+    base_bc = breadcrumb if breadcrumb is not None else []
+    base_meta = {
+        "funktion": "windkraft_zu_vektor_default",
         "objekttyp": getattr(objekttyp, "name", str(objekttyp)),
-        "windkraft": windkraft,
-        "windrichtung": windrichtung,
-    })
+    }
 
     if objekttyp == ObjektTyp.TRAVERSE:
         start, ende = punkte
@@ -76,19 +68,16 @@ def _windkraft_zu_vektor_default(
         senkrechtanteil = vektor_senkrechtanteil(windrichtung, achse)
         kraft_vec: Vec3 = vektor_multiplizieren(senkrechtanteil, windkraft)
 
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(
-        #         titel="Windkraft-Vektor F_W",
-        #         wert=kraft_vec,
-        #         einzelwerte=[windkraft, *senkrechtanteil, *achse],
-        #         formel="F_W = F · ( ê − (ê·t̂) t̂ )",
-        #         einheit="N",
-        #         formelzeichen=["F_W", "F", "ê", "t̂"],
-        #         quelle_formelzeichen=["Projektintern"],
-        #     ),
-        #     kontext=merge_kontext(base_ctx, {"start": start, "ende": ende}),
-        # )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=base_bc,
+            name="windkraft_vektor",
+            wert=kraft_vec,
+            label="Windkraft-Vektor F_W",
+            formelzeichen="F_W",
+            einheit="N",
+            meta=base_meta,
+        )
         return Zwischenergebnis_Vektor(wert=kraft_vec)
     
     elif objekttyp == ObjektTyp.ROHR:
@@ -97,58 +86,60 @@ def _windkraft_zu_vektor_default(
         senkrechtanteil = vektor_senkrechtanteil(windrichtung, achse)
         kraft_vec: Vec3 = vektor_multiplizieren(senkrechtanteil, windkraft)
 
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(
-        #         titel="Windkraft-Vektor F_W",
-        #         wert=kraft_vec,
-        #         einzelwerte=[windkraft, *senkrechtanteil, *achse],
-        #         formel="F_W = F · ( ê − (ê·t̂) t̂ )",
-        #         einheit="N",
-        #         formelzeichen=["F_W", "F", "ê", "t̂"],
-        #         quelle_formelzeichen=["Projektintern"],
-        #     ),
-        #     kontext=merge_kontext(base_ctx, {"start": start, "ende": ende}),
-        # )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=base_bc,
+            name="windkraft_vektor",
+            wert=kraft_vec,
+            label="Windkraft-Vektor F_W",
+            formelzeichen="F_W",
+            einheit="N",
+            meta=base_meta,
+        )
         return Zwischenergebnis_Vektor(wert=kraft_vec)
-    
+
     elif objekttyp == ObjektTyp.SENKRECHTE_FLAECHE:
+        flaeche_meta = {
+            **base_meta,
+            "senkrechte_flaeche_typ": getattr(senkrechte_flaeche_typ, "value", str(senkrechte_flaeche_typ)),
+        }
         if senkrechte_flaeche_typ == senkrechteFlaecheTyp.ANZEIGETAFEL:
             normale = normale_zu_ebene(punkte)
             parallelanteil = vektor_parallelanteil(windrichtung, normale)
             kraft_vec: Vec3 = vektor_multiplizieren(parallelanteil, windkraft)
 
-            # protokolliere_doc(
-            #     protokoll,
-            #     bundle=make_docbundle(
-            #         titel="Windkraft-Vektor F_W",
-            #         wert=kraft_vec,
-            #         einzelwerte=[windkraft, *parallelanteil, *normale],
-            #         einheit="N",
-            #     ),
-            #     kontext=base_ctx,
-            # )
+            protokolliere_ergebnis(
+                protokoll,
+                breadcrumb=base_bc,
+                name="windkraft_vektor",
+                wert=kraft_vec,
+                label="Windkraft-Vektor F_W",
+                formelzeichen="F_W",
+                einheit="N",
+                meta=flaeche_meta,
+            )
         elif senkrechte_flaeche_typ == senkrechteFlaecheTyp.WAND:
             normale = normale_zu_ebene(punkte)
             kraft_vec: Vec3 = vektor_multiplizieren(normale, windkraft)
 
-            # protokolliere_doc(
-            #     protokoll,
-            #     bundle=make_docbundle(
-            #         titel="Windkraft-Vektor F_W",
-            #         wert=kraft_vec,
-            #         einzelwerte=[windkraft],
-            #         einheit="N",
-            #     ),
-            #     kontext=base_ctx,
-            # )
+            protokolliere_ergebnis(
+                protokoll,
+                breadcrumb=base_bc,
+                name="windkraft_vektor",
+                wert=kraft_vec,
+                label="Windkraft-Vektor F_W",
+                formelzeichen="F_W",
+                einheit="N",
+                meta=flaeche_meta,
+            )
         else:
             protokolliere_msg(
                 protokoll,
                 severity=Severity.ERROR,
                 code="WINDVEK/INVALID_SURFACE_TYPE",
-                text=f"Ungültiger Typ für senkrechte Fläche: {senkrechte_flaeche_typ}.",
-                kontext=base_ctx,
+                text=f"Ungültiger Typ für senkrechte Fläche: {senkrechte_flaeche_typ.value}.",
+                breadcrumb=base_bc,
+                meta=flaeche_meta,
             )
             return Zwischenergebnis_Vektor(wert=(float("nan"), float("nan"), float("nan")))
         return Zwischenergebnis_Vektor(wert=kraft_vec)
@@ -158,15 +149,21 @@ def _windkraft_zu_vektor_default(
             protokoll,
             severity=Severity.ERROR,
             code="WINDVEK/NOT_IMPLEMENTED",
-            text=f"Windkraft-Vektor für Objekttyp {objekttyp.name} ist noch nicht implementiert.",
-            kontext=base_ctx,
+            text=f"Windkraft-Vektor für Objekttyp {objekttyp.value} ist noch nicht implementiert.",
+            breadcrumb=base_bc,
+            meta=base_meta,
         )
         bad = (float("nan"), float("nan"), float("nan"))
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(titel="Windkraft (Vektor) F_W", wert=bad),
-        #     kontext=merge_kontext(base_ctx, {"nan": True}),
-        # )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=base_bc,
+            name="windkraft_vektor",
+            wert=bad,
+            label="Windkraft-Vektor F_W",
+            formelzeichen="F_W",
+            einheit="N",
+            meta=base_meta,
+        )
         return Zwischenergebnis_Vektor(wert=bad)
 
 _DISPATCH: Dict[Norm, Callable[..., Zwischenergebnis_Vektor]] = {
@@ -182,16 +179,12 @@ def windkraft_zu_vektor(
     senkrechte_flaeche_typ: Optional[senkrechteFlaecheTyp] = None,
     *,
     protokoll: Optional[Protokoll] = None,
-    kontext: Optional[dict] = None,
+    breadcrumb: Optional[list] = None,
 ) -> Zwischenergebnis_Vektor:
-    
-    base_ctx = merge_kontext(kontext, {
+    base_bc = breadcrumb if breadcrumb is not None else []
+    base_meta = {
         "funktion": "windkraft_zu_vektor",
-        "objekttyp": getattr(objekttyp, "name", str(objekttyp)),
-        "norm": getattr(norm, "name", str(norm)),
-        "windkraft": windkraft,
-        "windrichtung": windrichtung,
-    })
+    }
 
     try:
         _validate_inputs(objekttyp, punkte, windkraft, windrichtung, senkrechte_flaeche_typ)
@@ -203,18 +196,24 @@ def windkraft_zu_vektor(
             severity=Severity.ERROR,
             code="WINDVEK/INPUT_INVALID",
             text=str(e),
-            kontext=base_ctx,
+            breadcrumb=base_bc,
+            meta=base_meta,
         )
         bad = (float("nan"), float("nan"), float("nan"))
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(titel="Windkraft-Vektor F⃗_w", wert=bad),
-        #     kontext=merge_kontext(base_ctx, {"nan": True}),
-        # )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=base_bc,
+            name="windkraft_vektor",
+            wert=bad,
+            label="Windkraft-Vektor F_W",
+            formelzeichen="F_W",
+            einheit="N",
+            meta=base_meta,
+        )
         return Zwischenergebnis_Vektor(wert=bad)
     
     funktion = _DISPATCH.get(norm, _DISPATCH[Norm.DEFAULT])
     return funktion(
         objekttyp, punkte, windkraft, windrichtung, senkrechte_flaeche_typ,
-        protokoll=protokoll, kontext=base_ctx,
+        protokoll=protokoll, breadcrumb=base_bc,
     )

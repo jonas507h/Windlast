@@ -1,17 +1,9 @@
 from typing import Dict, Callable, Sequence, Optional
-from windlast_CORE.datenstruktur.zwischenergebnis import (
-    Zwischenergebnis,
-    Protokoll,
-    merge_kontext,
-    make_docbundle,
-    protokolliere_msg,
-    protokolliere_doc,
-)
+from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_breadcrumb, bc_step, protokolliere_msg, protokolliere_ergebnis, set_winner
 from windlast_CORE.datenstruktur.enums import Norm, ObjektTyp, Severity
 from windlast_CORE.materialdaten.catalog import catalog
 from windlast_CORE.rechenfunktionen.geom3d import Vec3, abstand_punkte
-
-_EPS = 1e-9  # numerische Toleranz für Längen
+from windlast_CORE.datenstruktur.konstanten import _EPS
 
 def _validate_inputs(
     objekttyp: ObjektTyp,
@@ -34,14 +26,13 @@ def _eingeschlossene_flaeche_default(
     punkte: Sequence[Vec3],
     *,
     protokoll: Optional[Protokoll] = None,
-    kontext: Optional[dict] = None,
+    breadcrumb: Optional[list] = None,
 ) -> Zwischenergebnis:
-    
-    base_ctx = merge_kontext(kontext, {
-        "funktion": "eingeschlossene_flaeche",
-        "objekttyp": getattr(objekttyp, "name", str(objekttyp)),
-        "objekt_name_intern": objekt_name_intern,
-    })
+    base_bc = breadcrumb if breadcrumb is not None else []
+    base_meta = {
+        "funktion": "eingeschlossene_flaeche_default",
+        "objekttyp": getattr(objekttyp, "value", str(objekttyp)),
+    }
 
     if objekttyp == ObjektTyp.TRAVERSE:
         startpunkt, endpunkt = punkte[0], punkte[1]
@@ -56,36 +47,35 @@ def _eingeschlossene_flaeche_default(
                 severity=Severity.ERROR,
                 code="EINGESCHL/CATALOG_MISSING",
                 text=f"Traverse '{objekt_name_intern}': ungültige Höhe ({hoehe}).",
-                kontext=merge_kontext(base_ctx, {"input_source": "catalog", "laenge": laenge, "hoehe": hoehe}),
+                breadcrumb=base_bc,
+                meta=base_meta,
             )
-            # protokolliere_doc(
-            #     protokoll,
-            #     bundle=make_docbundle(
-            #         titel="Eingeschlossene Fläche A_c",
-            #         wert=float("nan"),
-            #         einheit="m²",
-            #         einzelwerte=[laenge, hoehe],
-            #         formel="A_c = L · h",
-            #         quelle_formel="Norm xyz (Abschnitt ...)",
-            #     ),
-            #     kontext=merge_kontext(base_ctx, {"nan": True}),
-            # )
+            protokolliere_ergebnis(
+                protokoll,
+                breadcrumb=base_bc,
+                name="eingeschlossene_flaeche",
+                wert=float("nan"),
+                label="Eingeschlossene Fläche A_C",
+                formelzeichen="A_C",
+                formel="A_C = L · h",
+                einheit="m²",
+                meta=base_meta,
+            )
             return Zwischenergebnis(wert=float("nan"))
 
         wert = laenge * hoehe
 
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(
-        #         titel="Eingeschlossene Fläche A_c",
-        #         wert=wert,
-        #         einheit="m²",
-        #         einzelwerte=[laenge, hoehe],
-        #         formel="A_c = L · h",
-        #         quelle_formel="Norm xyz (Abschnitt ...)",
-        #     ),
-        #     kontext=base_ctx,
-        # )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=base_bc,
+            name="eingeschlossene_flaeche",
+            wert=wert,
+            label="Eingeschlossene Fläche A_C",
+            formelzeichen="A_C",
+            formel="A_C = L · h",
+            einheit="m²",
+            meta=base_meta,
+        )
         return Zwischenergebnis(wert=wert)
     
     elif objekttyp == ObjektTyp.ROHR:
@@ -101,36 +91,35 @@ def _eingeschlossene_flaeche_default(
                 severity=Severity.ERROR,
                 code="EINGESCHL/CATALOG_MISSING",
                 text=f"Rohr '{objekt_name_intern}': ungültiger Außendurchmesser ({d_aussen}).",
-                kontext=merge_kontext(base_ctx, {"input_source": "catalog", "laenge": laenge, "d_aussen": d_aussen}),
+                breadcrumb=base_bc,
+                meta=base_meta,
             )
-            # protokolliere_doc(
-            #     protokoll,
-            #     bundle=make_docbundle(
-            #         titel="Eingeschlossene Fläche A_c",
-            #         wert=float("nan"),
-            #         einheit="m²",
-            #         einzelwerte=[laenge, d_aussen],
-            #         formel="A_c = L · d_aussen",
-            #         quelle_formel="Norm xyz (Abschnitt ...)",
-            #     ),
-            #     kontext=merge_kontext(base_ctx, {"nan": True}),
-            # )
+            protokolliere_ergebnis(
+                protokoll,
+                breadcrumb=base_bc,
+                name="eingeschlossene_flaeche",
+                wert=float("nan"),
+                label="Eingeschlossene Fläche A_C",
+                formelzeichen="A_C",
+                formel="A_C = L · d_aussen",
+                einheit="m²",
+                meta=base_meta,
+            )
             return Zwischenergebnis(wert=float("nan"))
 
         wert = laenge * d_aussen
 
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(
-        #         titel="Eingeschlossene Fläche A_c",
-        #         wert=wert,
-        #         einheit="m²",
-        #         einzelwerte=[laenge, d_aussen],
-        #         formel="A_c = L · d_aussen",
-        #         quelle_formel="Norm xyz (Abschnitt ...)",
-        #     ),
-        #     kontext=base_ctx,
-        # )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=base_bc,
+            name="eingeschlossene_flaeche",
+            wert=wert,
+            label="Eingeschlossene Fläche A_C",
+            formelzeichen="A_C",
+            formel="A_C = L · d_aussen",
+            einheit="m²",
+            meta=base_meta,
+        )
         return Zwischenergebnis(wert=wert)
 
     else:
@@ -147,14 +136,12 @@ def eingeschlossene_flaeche(
     punkte: Sequence[Vec3],
     *,
     protokoll: Optional[Protokoll] = None,
-    kontext: Optional[dict] = None,
+    breadcrumb: Optional[list] = None,
 ) -> Zwischenergebnis:
-    base_ctx = merge_kontext(kontext, {
+    base_bc = breadcrumb if breadcrumb is not None else []
+    base_meta = {
         "funktion": "eingeschlossene_flaeche",
-        "objekttyp": getattr(objekttyp, "name", str(objekttyp)),
-        "objekt_name_intern": objekt_name_intern,
-        "norm": getattr(norm, "name", str(norm)),
-    })
+    }
 
     try:
         _validate_inputs(objekttyp, objekt_name_intern, punkte)
@@ -166,17 +153,23 @@ def eingeschlossene_flaeche(
             severity=Severity.ERROR,
             code="EINGESCHL/INPUT_INVALID",
             text=str(e),
-            kontext=base_ctx,
+            breadcrumb=base_bc,
+            meta=base_meta,
         )
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(titel="Eingeschlossene Fläche A_e", wert=float("nan")),
-        #     kontext=merge_kontext(base_ctx, {"nan": True}),
-        # )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=base_bc,
+            name="eingeschlossene_flaeche",
+            wert=float("nan"),
+            label="Eingeschlossene Fläche A_C",
+            formelzeichen="A_C",
+            einheit="m²",
+            meta=base_meta,
+        )
         return Zwischenergebnis(wert=float("nan"))
     
     funktion = _DISPATCH.get(norm, _DISPATCH[Norm.DEFAULT])
     return funktion(
         objekttyp, objekt_name_intern, punkte,
-        protokoll=protokoll, kontext=base_ctx,
+        protokoll=protokoll, breadcrumb=base_bc,
     )

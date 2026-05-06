@@ -7,14 +7,7 @@ from windlast_CORE.materialdaten.catalog import catalog
 from windlast_CORE.rechenfunktionen.geom3d import Vec3, abstand_punkte
 from windlast_CORE.rechenfunktionen.interpolation import interpol_2D
 from windlast_CORE.datenstruktur.konstanten import _EPS
-from windlast_CORE.datenstruktur.zwischenergebnis import (
-    Protokoll,
-    merge_kontext,
-    make_docbundle,
-    protokolliere_msg,
-    protokolliere_doc,
-    Zwischenergebnis,
-)
+from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_breadcrumb, bc_step, protokolliere_msg, protokolliere_ergebnis, set_winner
 
 def _validate_inputs(
     objekttyp: ObjektTyp,
@@ -47,8 +40,13 @@ def _schlankheit_DinEn1991_1_4_2010_12(
     punkte: Sequence[Vec3],
     *,
     protokoll: Optional[Protokoll] = None,
-    kontext: Optional[dict] = None,
+    breadcrumb: Optional[list] = None,
 ) -> Zwischenergebnis:
+    base_bc = breadcrumb if breadcrumb is not None else []
+    base_meta = {
+        "funktion": "schlankheit_DinEn1991_1_4_2010_12",
+        "objekttyp": getattr(objekttyp, "value", str(objekttyp)),
+    }
 
     if objekttyp == ObjektTyp.TRAVERSE:
         start, ende = punkte[0], punkte[1]
@@ -57,26 +55,23 @@ def _schlankheit_DinEn1991_1_4_2010_12(
         traverse = catalog.get_traverse(objekt_name_intern)
         hoehe = min(traverse.A_hoehe, traverse.B_hoehe)  # TODO: Abhängig von Ausrichtung machen
         if hoehe is None or hoehe <= 0:
-            local_ctx = merge_kontext(kontext, {
-                "phase": "Zwischenwerte",
-                "metrik": "λ",
-                "input_source": "Katalog",
-                "laenge": f"{laenge}m",
-                "hoehe": f"{hoehe}m",
-            })
             protokolliere_msg(
                 protokoll,
                 severity=Severity.ERROR,
                 code="SCHLANKHEIT/CATALOG_MISSING",
                 text=f"Traverse '{objekt_name_intern}': ungültige Höhe ({hoehe}m).",
-                kontext=local_ctx,
+                breadcrumb=base_bc,
+                meta=base_meta,
             )
-            # protokolliere_doc(
-            #     protokoll,
-            #     bundle=make_docbundle(titel="Schlankheit λ", wert=float("nan"),
-            #                           einzelwerte=[laenge, hoehe]),
-            #     kontext=merge_kontext(local_ctx, {"nan": True}),
-            # )
+            protokolliere_ergebnis(
+                protokoll,
+                breadcrumb=base_bc,
+                name="schlankheit",
+                wert=float("nan"),
+                label="Schlankheit λ",
+                formelzeichen="λ",
+                meta=base_meta,
+            )
             return Zwischenergebnis(wert=float("nan"))
 
         faktor = interpol_2D([15.0, 50.0], [2.0, 1.4], laenge)
@@ -90,20 +85,19 @@ def _schlankheit_DinEn1991_1_4_2010_12(
         #         severity=Severity.INFO,
         #         code="SCHLANKHEIT/CLAMP_70",
         #         text=f"Schlankheit auf 70 gekappt (Rechenwert {rechenwert:.3f}).",
-        #         kontext=merge_kontext(kontext, {"phase": "Zwischenwerte", "rechenwert": rechenwert}),
+        #         breadcrumb=base_bc,
+        #         meta=base_meta,
         #     )
 
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(
-        #         titel="Schlankheit λ",
-        #         wert=wert,
-        #         einzelwerte=[laenge, hoehe],
-        #         # Optional: Wenn du Formeln/Quellen an dieser Stelle schon kennst:
-        #         # formel="λ = f(L) * L / h", quelle_formel="DIN EN 1991-1-4:2010-12, Tab ..."
-        #     ),
-        #     kontext=merge_kontext(kontext, {"phase": "Zwischenwerte"}),
-        # )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=base_bc,
+            name="schlankheit",
+            wert=wert,
+            label="Schlankheit λ",
+            formelzeichen="λ",
+            meta=base_meta,
+        )
         return Zwischenergebnis(wert=wert)
     
     elif objekttyp == ObjektTyp.ROHR:
@@ -113,26 +107,23 @@ def _schlankheit_DinEn1991_1_4_2010_12(
         rohr = catalog.get_rohr(objekt_name_intern)
         d_aussen = rohr.d_aussen
         if d_aussen is None or d_aussen <= 0:
-            local_ctx = merge_kontext(kontext, {
-                "phase": "Zwischenwerte",
-                "metrik": "λ",
-                "input_source": "Katalog",
-                "laenge": f"{laenge}m",
-                "d_aussen": f"{d_aussen}m",
-            })
             protokolliere_msg(
                 protokoll,
                 severity=Severity.ERROR,
                 code="SCHLANKHEIT/CATALOG_MISSING",
                 text=f"Rohr '{objekt_name_intern}': ungültiger Außendurchmesser ({d_aussen}).",
-                kontext=local_ctx,
+                breadcrumb=base_bc,
+                meta=base_meta,
             )
-            # protokolliere_doc(
-            #     protokoll,
-            #     bundle=make_docbundle(titel="Schlankheit λ", wert=float("nan"),
-            #                           einzelwerte=[laenge, d_aussen]),
-            #     kontext=merge_kontext(local_ctx, {"nan": True}),
-            # )
+            protokolliere_ergebnis(
+                protokoll,
+                breadcrumb=base_bc,
+                name="schlankheit",
+                wert=float("nan"),
+                label="Schlankheit λ",
+                formelzeichen="λ",
+                meta=base_meta,
+            )
             return Zwischenergebnis(wert=float("nan"))
 
         faktor = interpol_2D([15.0, 50.0], [1.0, 0.7], laenge)
@@ -146,18 +137,19 @@ def _schlankheit_DinEn1991_1_4_2010_12(
         #         severity=Severity.INFO,
         #         code="SCHLANKHEIT/CLAMP_70",
         #         text=f"Schlankheit auf 70 gekappt (Rechenwert {rechenwert:.3f}).",
-        #         kontext=merge_kontext(kontext, {"phase": "Zwischenwerte", "rechenwert": rechenwert}),
+        #         breadcrumb=base_bc,
+        #         meta=base_meta,
         #     )
 
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(
-        #         titel="Schlankheit λ",
-        #         wert=wert,
-        #         einzelwerte=[laenge, d_aussen],
-        #     ),
-        #     kontext=merge_kontext(kontext, {"phase": "Zwischenwerte"}),
-        # )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=base_bc,
+            name="schlankheit",
+            wert=wert,
+            label="Schlankheit λ",
+            formelzeichen="λ",
+            meta=base_meta,
+        )
         return Zwischenergebnis(wert=wert)
 
     # Andere Objekttypen:
@@ -175,14 +167,12 @@ def schlankheit(
     punkte: Sequence[Vec3],           # TRAVERSE, ROHR: [start, ende]
     *,
     protokoll: Optional[Protokoll] = None,
-    kontext: Optional[dict] = None,
+    breadcrumb: Optional[list] = None,
 ) -> Zwischenergebnis:
-    base_ctx = merge_kontext(kontext, {
-        "funktion": "Schlankheit",
-        "objekttyp": getattr(objekttyp, "value", str(objekttyp)),
-        "objekt_name_intern": objekt_name_intern,
-        "norm": getattr(norm, "value", str(norm)),
-    })
+    base_bc = breadcrumb if breadcrumb is not None else []
+    base_meta = {
+        "funktion": "schlankheit",
+    }
 
     # Eingaben prüfen: fachliche Fehler -> Message + NaN statt harter Exception
     try:
@@ -196,18 +186,22 @@ def schlankheit(
             severity=Severity.ERROR,
             code="SCHLANKHEIT/INPUT_INVALID",
             text=str(e),
-            kontext=base_ctx,
+            breadcrumb=base_bc,
+            meta=base_meta,
         )
-        # NaN-Ergebnis zurück und minimal dokumentieren
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(titel="Schlankheit λ", wert=float("nan")),
-        #     kontext=merge_kontext(base_ctx, {"nan": True}),
-        # )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=base_bc,
+            name="schlankheit",
+            wert=float("nan"),
+            label="Schlankheit λ",
+            formelzeichen="λ",
+            meta=base_meta,
+        )
         return Zwischenergebnis(wert=float("nan"))
     
     funktion = _DISPATCH.get(norm, _DISPATCH[Norm.DEFAULT])
     return funktion(
         objekttyp, objekt_name_intern, punkte,
-        protokoll=protokoll, kontext=base_ctx
+        protokoll=protokoll, breadcrumb=base_bc
     )

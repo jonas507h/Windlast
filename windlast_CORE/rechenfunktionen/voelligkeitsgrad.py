@@ -1,16 +1,8 @@
 from typing import Dict, Callable, Optional
 import math
-from windlast_CORE.datenstruktur.zwischenergebnis import (
-    Zwischenergebnis,
-    Protokoll,
-    merge_kontext,
-    make_docbundle,
-    protokolliere_msg,
-    protokolliere_doc,
-)
+from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_breadcrumb, bc_step, protokolliere_msg, protokolliere_ergebnis, set_winner
 from windlast_CORE.datenstruktur.enums import Norm, Severity
-
-_EPS = 1e-12  # numerische Toleranz gegen Division durch ~0
+from windlast_CORE.datenstruktur.konstanten import _EPS
 
 def _validate_inputs_voelligkeitsgrad(
     a_projiziert: float,
@@ -33,12 +25,12 @@ def _voelligkeitsgrad_default(
     a_eingeschlossen: float,
     *,
     protokoll: Optional[Protokoll] = None,
-    kontext: Optional[dict] = None,
+    breadcrumb: Optional[list] = None,
 ) -> Zwischenergebnis:
-    
-    base_ctx = merge_kontext(kontext, {
-        "funktion": "voelligkeitsgrad",
-    })
+    base_bc = breadcrumb if breadcrumb is not None else []
+    base_meta = {
+        "funktion": "voelligkeitsgrad_default",
+    }
 
     wert = a_projiziert / a_eingeschlossen
 
@@ -48,23 +40,22 @@ def _voelligkeitsgrad_default(
             severity=Severity.WARN,
             code="VOELLIG/OUT_OF_RANGE",
             text=f"Völligkeitsgrad φ={wert:.4f} liegt außerhalb [0,1].",
-            kontext=merge_kontext(base_ctx, {"phi": wert}),
+            breadcrumb=base_bc,
+            meta=base_meta,
         )
 
-    # protokolliere_doc(
-    #     protokoll,
-    #     bundle=make_docbundle(
-    #         titel="Völligkeitsgrad φ",
-    #         wert=wert,
-    #         formel="φ = A_proj / A_e",
-    #         formelzeichen=["φ", "A_proj", "A_e"],
-    #         einzelwerte=[a_projiziert, a_eingeschlossen],
-    #     ),
-    #     kontext=base_ctx,
-    # )
+    protokolliere_ergebnis(
+        protokoll,
+        breadcrumb=base_bc,
+        name="voelligkeitsgrad",
+        wert=wert,
+        label="Völligkeitsgrad φ",
+        formelzeichen="φ",
+        meta=base_meta,
+    )
     return Zwischenergebnis(wert=wert)
 
-_DISPATCH_VG: Dict[Norm, Callable[..., Zwischenergebnis]] = {
+_DISPATCH: Dict[Norm, Callable[..., Zwischenergebnis]] = {
     Norm.DEFAULT: _voelligkeitsgrad_default,
 }
 
@@ -74,12 +65,12 @@ def voelligkeitsgrad(
     eingeschlossene_flaeche: float,
     *,
     protokoll: Optional[Protokoll] = None,
-    kontext: Optional[dict] = None,
+    breadcrumb: Optional[list] = None,
 ) -> Zwischenergebnis:
-    base_ctx = merge_kontext(kontext, {
+    base_bc = breadcrumb if breadcrumb is not None else []
+    base_meta = {
         "funktion": "voelligkeitsgrad",
-        "norm": getattr(norm, "name", str(norm)),
-    })
+    }
 
     try:
         _validate_inputs_voelligkeitsgrad(projizierte_flaeche, eingeschlossene_flaeche)
@@ -91,17 +82,22 @@ def voelligkeitsgrad(
             severity=Severity.ERROR,
             code="VOELLIG/INPUT_INVALID",
             text=str(e),
-            kontext=base_ctx,
+            breadcrumb=base_bc,
+            meta=base_meta,
         )
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(titel="Völligkeitsgrad φ", wert=float("nan")),
-        #     kontext=merge_kontext(base_ctx, {"nan": True}),
-        # )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=base_bc,
+            name="voelligkeitsgrad",
+            wert=float("nan"),
+            label="Völligkeitsgrad φ",
+            formelzeichen="φ",
+            meta=base_meta,
+        )
         return Zwischenergebnis(wert=float("nan"))
     
-    funktion = _DISPATCH_VG.get(norm, _DISPATCH_VG[Norm.DEFAULT])
+    funktion = _DISPATCH.get(norm, _DISPATCH[Norm.DEFAULT])
     return funktion(
         projizierte_flaeche, eingeschlossene_flaeche,
-        protokoll=protokoll, kontext=base_ctx,
+        protokoll=protokoll, breadcrumb=base_bc,
     )

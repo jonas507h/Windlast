@@ -119,12 +119,13 @@ class Konstruktion:
     def gesamthoehe(
         self, *,
         protokoll: Optional[Protokoll] = None,
-        kontext: Optional[dict] = None,
+        breadcrumb: Optional[list] = None,
     ) -> float:
         """Maximale Gesamthöhe über alle Bauelemente mit .gesamthoehe()."""
-        base_ctx = merge_kontext(kontext, {
-            "funktion": "Konstruktion.Gesamthoehe",
-        })
+        base_bc = breadcrumb if breadcrumb is not None else []
+        base_meta = {
+            "funktion": "Konstruktion.gesamthoehe",
+        }
         max_h = 0.0
         found = False
 
@@ -156,11 +157,12 @@ class Konstruktion:
         vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
         anzahl_windrichtungen: int = 4,
         protokoll: Optional[Protokoll] = None,
-        kontext: Optional[dict] = None,
+        breadcrumb: Optional[list] = None,
     ) -> List[Zwischenergebnis]:
-        base_ctx = merge_kontext(kontext, {
-            "funktion": "Konstruktion.BerechneKippsicherheit",
-        })
+        base_bc = breadcrumb if breadcrumb is not None else []
+        base_meta = {
+            "funktion": "Konstruktion.berechne_kippsicherheit",
+        }
 
         return _kippsicherheit(
             self,
@@ -173,7 +175,7 @@ class Konstruktion:
             vereinfachung_konstruktion=vereinfachung_konstruktion,
             anzahl_windrichtungen=anzahl_windrichtungen,
             protokoll=protokoll,
-            kontext=base_ctx,
+            breadcrumb=base_bc,
         )
 
     def berechne_gleitsicherheit(
@@ -188,11 +190,12 @@ class Konstruktion:
         vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
         anzahl_windrichtungen: int = 4,
         protokoll: Optional[Protokoll] = None,
-        kontext: Optional[dict] = None,
+        breadcrumb: Optional[list] = None,
     ) -> List[Zwischenergebnis]:
-        base_ctx = merge_kontext(kontext, {
-            "funktion": "Konstruktion.BerechneGleitsicherheit",
-        })
+        base_bc = breadcrumb if breadcrumb is not None else []
+        base_meta = {
+            "funktion": "Konstruktion.berechne_gleitsicherheit",
+        }
 
         return _gleitsicherheit(
             self,
@@ -205,7 +208,7 @@ class Konstruktion:
             vereinfachung_konstruktion=vereinfachung_konstruktion,
             anzahl_windrichtungen=anzahl_windrichtungen,
             protokoll=protokoll,
-            kontext=base_ctx,
+            breadcrumb=base_bc,
         )
 
     def berechne_abhebesicherheit(
@@ -220,11 +223,12 @@ class Konstruktion:
         vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
         anzahl_windrichtungen: int = 4,
         protokoll: Optional[Protokoll] = None,
-        kontext: Optional[dict] = None,
+        breadcrumb: Optional[list] = None,
     ) -> List[Zwischenergebnis]:
-        base_ctx = merge_kontext(kontext, {
-            "funktion": "Konstruktion.BerechneAbhebesicherheit",
-        })
+        base_bc = breadcrumb if breadcrumb is not None else []
+        base_meta = {
+            "funktion": "Konstruktion.berechne_abhebesicherheit",
+        }
 
         return _abhebesicherheit(
             self,
@@ -237,7 +241,7 @@ class Konstruktion:
             vereinfachung_konstruktion=vereinfachung_konstruktion,
             anzahl_windrichtungen=anzahl_windrichtungen,
             protokoll=protokoll,
-            kontext=base_ctx,
+            breadcrumb=base_bc,
         )
 
     def gesamtgewicht(self) -> float:

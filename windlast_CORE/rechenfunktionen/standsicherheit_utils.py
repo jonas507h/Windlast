@@ -4,7 +4,7 @@ from windlast_CORE.rechenfunktionen.geom3d import Vec3, vektor_zwischen_punkten,
 from windlast_CORE.datenstruktur.objekte3d import Achse
 from windlast_CORE.datenstruktur.kraefte import Kraefte
 from windlast_CORE.datenstruktur.enums import Norm, Lasttyp, Variabilitaet, Severity
-from windlast_CORE.datenstruktur.zwischenergebnis import Protokoll, merge_kontext, protokolliere_msg, protokolliere_doc, protokolliere_decision, make_docbundle
+from windlast_CORE.datenstruktur.zwischenergebnis import Protokoll, protokolliere_msg, merge_breadcrumb, bc_step, protokolliere_ergebnis, set_winner
 from windlast_CORE.rechenfunktionen.sicherheitsbeiwert import sicherheitsbeiwert
 from windlast_CORE.datenstruktur.lastpool import LastPool, LastSet
 from windlast_CORE.datenstruktur.konstanten import _EPS
@@ -15,9 +15,9 @@ def generiere_windrichtungen(
     startwinkel: float = 0.0,
     winkel: Optional[Sequence[float]] = None,
     protokoll: Optional[Protokoll] = None,
-    kontext: Optional[dict] = None,
+    breadcrumb: Optional[list] = None
 ) -> List[Tuple[float, Vec3]]:
-    base_ctx = merge_kontext(kontext, {"funktion": "generiere_windrichtungen"})
+    base_bc = breadcrumb
     
     if winkel is not None:
         result = [(w, einheitsvektor_aus_winkeln(w, 0.0)) for w in winkel]
@@ -26,7 +26,7 @@ def generiere_windrichtungen(
             protokolliere_msg(protokoll, severity=Severity.ERROR,
                 code="UTILS/WINDRICHTUNG_ANZAHL",
                 text="Anzahl der Windrichtungen muss ≥ 1 sein.",
-                kontext=base_ctx
+                breadcrumb=base_bc
                 )
         winkelabstand = 360.0 / anzahl
         result = [(i * winkelabstand + startwinkel, einheitsvektor_aus_winkeln(i * winkelabstand + startwinkel, 0.0)) for i in range(anzahl)]
@@ -42,28 +42,20 @@ def ermittle_kraefte_pro_windrichtung(
     konst,
     *,
     protokoll: Optional[Protokoll] = None,
-    kontext: Optional[dict] = None,
+    breadcrumb: Optional[list] = None
 ) -> Dict[str, List[Kraefte]]:
-    base_ctx = merge_kontext(kontext, {
-        "funktion": "ermittle_kraefte_pro_windrichtung",
-        "norm": getattr(norm, "value", str(norm)),
-        "windrichtung": windrichtung,
-    })
+    base_bc = merge_breadcrumb(breadcrumb, [bc_step("windrichtung", f"{windrichtung}")])
 
     # 1)Wind- & Gewichtskräfte aller Bauelemente holen
     kraefte_windrichtung: List[Kraefte] = []
 
     for idx, elem in enumerate(getattr(konstruktion, "bauelemente", []) or []):
-        elem_ctx = merge_kontext(base_ctx, {
-            "element_index": idx,
-            "element_id": getattr(elem, "element_id_intern", None),
-            "objekttyp": getattr(getattr(elem, "objekttyp", None), "value", None),
-        })
+        elem_bc = merge_breadcrumb(base_bc, [bc_step("element_id", f"{getattr(elem, 'element_id_intern', None)}")])
         # Gewicht
         fn_gewicht = getattr(elem, "gewichtskraefte", None)
         if callable(fn_gewicht):
             try:
-                kraefte_gewicht = fn_gewicht(protokoll=protokoll, kontext=elem_ctx)
+                kraefte_gewicht = fn_gewicht(protokoll=protokoll, breadcrumb=elem_bc)
                 if kraefte_gewicht:
                     kraefte_windrichtung.extend(kraefte_gewicht)
             except Exception as e:
@@ -71,7 +63,7 @@ def ermittle_kraefte_pro_windrichtung(
                     protokoll, severity=Severity.ERROR,
                     code="UTILS/GEWICHT_FAIL",
                     text=f"gewichtskraefte() für Element {idx} fehlgeschlagen: {e}",
-                    kontext=elem_ctx,
+                    breadcrumb=elem_bc,
                 )
 
         # Wind
@@ -85,7 +77,7 @@ def ermittle_kraefte_pro_windrichtung(
                     obergrenzen=obergrenzen,
                     konst=konst,
                     protokoll=protokoll,
-                    kontext=elem_ctx,
+                    breadcrumb=elem_bc,
                 )
                 if kraefte_wind:
                     kraefte_windrichtung.extend(kraefte_wind)
@@ -94,7 +86,7 @@ def ermittle_kraefte_pro_windrichtung(
                     protokoll, severity=Severity.ERROR,
                     code="UTILS/WIND_FAIL",
                     text=f"windkraefte() für Element {idx} fehlgeschlagen: {e}",
-                    kontext=elem_ctx,
+                    breadcrumb=elem_bc,
                 )
     
     # 2) Nach Bauelement gruppieren (erwartet: element_id_intern gesetzt)
@@ -108,14 +100,14 @@ def ermittle_kraefte_pro_windrichtung(
 def _angle_key(winkel_deg: float) -> int:
     return int(round(winkel_deg * 1e4))
 
-def obtain_pool(konstruktion, reset_berechnungen: bool, *, protokoll: Optional[Protokoll]=None, kontext: Optional[dict]=None) -> LastPool:
-    base_ctx = merge_kontext(kontext, {"funktion": "obtain_pool"})
+def obtain_pool(konstruktion, reset_berechnungen: bool, *, protokoll: Optional[Protokoll]=None, breadcrumb: Optional[list] = None) -> LastPool:
+    base_bc = breadcrumb
     if reset_berechnungen or not hasattr(konstruktion, "_lastpool") or konstruktion._lastpool is None:
         konstruktion._lastpool = LastPool()
         protokolliere_msg(protokoll, severity=Severity.HINT,
                           code="UTILS/POOL_RESET",
                           text="Lastpool neu angelegt/gesetzt (reset_berechnungen=True oder fehlte).",
-                          kontext=base_ctx)
+                          breadcrumb=base_bc)
     return konstruktion._lastpool
 
 
@@ -130,13 +122,9 @@ def get_or_create_lastset(
     obergrenzen: Sequence[float],
     konst,
     protokoll: Optional[Protokoll] = None,
-    kontext: Optional[dict] = None,
+    breadcrumb: Optional[list] = None
 ) -> LastSet:
-    base_ctx = merge_kontext(kontext, {
-        "funktion": "get_or_create_lastset",
-        "winkel_deg": f"{winkel_deg}°",
-        "windrichtung": windrichtung,
-    })
+    base_bc = merge_breadcrumb(breadcrumb, [bc_step("winkel_deg", f"{winkel_deg}°")])
 
     key = _angle_key(winkel_deg)
     ls = pool.nach_winkel.get(key)
@@ -149,7 +137,7 @@ def get_or_create_lastset(
             obergrenzen=obergrenzen,
             konst=konst,
             protokoll=protokoll,
-            kontext=base_ctx,
+            breadcrumb=base_bc,
         )
         ls = LastSet(winkel_deg=winkel_deg, windrichtung=windrichtung, kraefte_nach_element=kbe)
         pool.nach_winkel[key] = ls
@@ -157,15 +145,15 @@ def get_or_create_lastset(
 
 # Kippsicherheit Utils --------------------------------------------
 
-def sammle_kippachsen(konstruktion, *, protokoll: Optional[Protokoll] = None, kontext: Optional[dict] = None) -> List[Achse]:
-    base_ctx = merge_kontext(kontext, {"funktion": "sammle_kippachsen"})
+def sammle_kippachsen(konstruktion, *, protokoll: Optional[Protokoll] = None, breadcrumb: Optional[list] = None) -> List[Achse]:
+    base_bc = breadcrumb
     eckpunkte: List[Vec3] = []
 
     for idx, obj in enumerate(getattr(konstruktion, "bauelemente", [])):
         ep = getattr(obj, "eckpunkte", None)
         if callable(ep):
             try:
-                punkte = ep(protokoll=protokoll, kontext=merge_kontext(base_ctx, {"element_index": idx}))
+                punkte = ep(protokoll=protokoll, breadcrumb=merge_breadcrumb(base_bc, [bc_step("element_id", f"{getattr(obj, 'element_id_intern', None)}")]))
             except TypeError:
                 # alte Signatur ohne protokoll/kontext
                 punkte = ep()
@@ -176,29 +164,31 @@ def sammle_kippachsen(konstruktion, *, protokoll: Optional[Protokoll] = None, ko
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="KIPP/NO_POINTS",
             text="Zu wenige Eckpunkte für die Bestimmung von Kippachsen (min. 3).",
-            kontext=merge_kontext(base_ctx, {"anzahl_punkte": len(eckpunkte)}),
+            breadcrumb=base_bc,
         )
         return []
 
     achsen = kippachsen_aus_eckpunkten(eckpunkte, include_Randpunkte=False)
-    # protokolliere_doc(
-    #     protokoll,
-    #     bundle=make_docbundle(titel="Anzahl Kippachsen", wert=len(achsen)),
-    #     kontext=base_ctx,
-    # )
+    protokolliere_ergebnis(
+        protokoll,
+        breadcrumb=base_bc,
+        name="anz_kippachsen",
+        wert=len(achsen),
+        label="Anzahl Kippachsen"
+    )
     return achsen
 
 def kippachsen_aus_eckpunkten(
     punkte: List[Vec3], *, include_Randpunkte: bool = False,
-    protokoll: Optional[Protokoll] = None, kontext: Optional[dict] = None
+    protokoll: Optional[Protokoll] = None, breadcrumb: Optional[list] = None
 ) -> List[Achse]:
-    base_ctx = merge_kontext(kontext, {"funktion": "kippachsen_aus_eckpunkten"})
+    base_bc = breadcrumb
 
     if len(punkte) < 3:
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="KIPP/POINTS_LT3",
             text="Mindestens 3 Punkte erforderlich, um Kippachsen zu bestimmen.",
-            kontext=merge_kontext(base_ctx, {"anzahl_punkte": len(punkte)}),
+            breadcrumb=base_bc,
         )
         return []
     
@@ -208,7 +198,7 @@ def kippachsen_aus_eckpunkten(
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="KIPP/HULL_LT2",
             text="Konvexe Hülle enthält weniger als 2 Eckpunkte.",
-            kontext=merge_kontext(base_ctx, {"anzahl_huelle": len(huelle)}),
+            breadcrumb=base_bc,
         )
         return []
     
@@ -222,17 +212,12 @@ def kippachsen_aus_eckpunkten(
         if richtung_norm == (0.0, 0.0, 0.0):
             continue
         kippachsen.append(Achse(punkt=p1, richtung=richtung_norm))
-    
-    # protokolliere_doc(
-    #     protokoll,
-    #     bundle=make_docbundle(titel="Konvexe Hülle (Eckpunkte)", wert=huelle),
-    #     kontext=base_ctx,
-    # )
+
     return kippachsen
 
 def bewerte_lastfall_fuer_achse(
     norm: Norm, achse: Achse, lastfall: Kraefte,
-    *, protokoll: Optional[Protokoll] = None, kontext: Optional[dict] = None
+    *, protokoll: Optional[Protokoll] = None, breadcrumb: Optional[list] = None
 ) -> Tuple[float, float]:
     """
     Aggregiert das Moment eines Lastfalls (Objekt 'Kraefte') um die gegebene Achse.
@@ -249,10 +234,7 @@ def bewerte_lastfall_fuer_achse(
       (kipp_sum, stand_sum) für diesen Lastfall.
     """
 
-    base_ctx = merge_kontext(kontext, {
-        "funktion": "bewerte_lastfall_fuer_achse",
-        "lasttyp": getattr(lastfall, "typ", None),
-    })
+    base_bc = merge_breadcrumb(breadcrumb, [bc_step("lasttyp", f"{getattr(lastfall, 'typ', None)}")])
 
     Einzelkraefte: Sequence[Vec3] = lastfall.Einzelkraefte
     Angriffspunkte: Sequence[Vec3] = lastfall.Angriffspunkte_Einzelkraefte
@@ -261,10 +243,7 @@ def bewerte_lastfall_fuer_achse(
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="KIPP/NO_ATTACK_POINTS",
             text="Angriffspunkte der Einzelkräfte fehlen oder ungleich lang.",
-            kontext=merge_kontext(base_ctx, {
-                "anzahl_kraefte": len(Einzelkraefte),
-                "anzahl_punkte": 0 if Angriffspunkte is None else len(Angriffspunkte),
-            }),
+            breadcrumb=base_bc,
         )
         return 0.0, 0.0
     
@@ -277,7 +256,7 @@ def bewerte_lastfall_fuer_achse(
 
         # 2) Sicherheitsbeiwert nach Günstigkeit bestimmen
         ist_guenstig = (m_kipp <= _EPS)
-        gamma = sicherheitsbeiwert(norm, lastfall, ist_guenstig, protokoll=protokoll, kontext=base_ctx).wert
+        gamma = sicherheitsbeiwert(norm, lastfall, ist_guenstig, protokoll=protokoll, breadcrumb=base_bc).wert
 
         # 3) Aufteilen in kippend vs. stabilisierend
         if m_kipp > _EPS:
@@ -295,9 +274,9 @@ def kipp_envelope_pro_bauelement(
     lastfaelle: Iterable[Kraefte],
     *,
     protokoll: Optional[Protokoll] = None,
-    kontext: Optional[dict] = None
+    breadcrumb: Optional[list] = None
 ) -> Tuple[float, float]:
-    base_ctx = merge_kontext(kontext, {"funktion": "kipp_envelope_pro_bauelement"})
+    base_bc = breadcrumb
 
     wind_lastfall_index = -1
     best_wind_index = None
@@ -314,7 +293,7 @@ def kipp_envelope_pro_bauelement(
     best_other_stand = 0.0
 
     for k in lastfaelle:
-        kipp, stand = bewerte_lastfall_fuer_achse(norm, achse, k, protokoll=protokoll, kontext=base_ctx)
+        kipp, stand = bewerte_lastfall_fuer_achse(norm, achse, k, protokoll=protokoll, breadcrumb=base_bc)
 
         if k.typ == Lasttyp.WIND:
             wind_lastfall_index += 1
@@ -341,41 +320,25 @@ def kipp_envelope_pro_bauelement(
                 lasttyp = "ANDERE"
                 lastfall_index = other_lastfall_index
 
-        lastfall_ctx = merge_kontext(base_ctx, {"lasttyp": lasttyp, "lastfall_index": lastfall_index})
+        lastfall_bc = merge_breadcrumb(base_bc, [bc_step("lasttyp", lasttyp), bc_step("lastfall_index", lastfall_index)])
 
         # --- Pro Lastfall protokollieren: Kipp/Stand (untergeordnet) ---
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(
-        #         titel=f"Lastfall {lasttyp} #{lastfall_index}: Kippmoment M_K",
-        #         wert=kipp,
-        #         einheit="Nm",
-        #     ),
-        #     kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_momente"}),
-        # )
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(
-        #         titel=f"Lastfall {lasttyp} #{lastfall_index}: Standmoment M_St",
-        #         wert=stand,
-        #         einheit="Nm",
-        #     ),
-        #     kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_momente"}),
-        # )
-
-        # --- Toplevel-Kriterium ---
-        kriterium = kipp - stand
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(
-        #         titel="Kriterium Lastfall (M_K − M_St)",
-        #         wert=kriterium,
-        #         einheit="Nm",
-        #         formel="K = M_K − M_St",
-        #         formelzeichen=["M_K", "M_St"],
-        #     ),
-        #     kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_kipp_kriterium"}),
-        # )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=lastfall_bc,
+            name="lastfall_kippmoment",
+            wert=kipp,
+            label=f"Kippmoment M_K (Lastfall {lasttyp} #{lastfall_index})",
+            einheit="Nm"
+        )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=lastfall_bc,
+            name="lastfall_standmoment",
+            wert=stand,
+            label=f"Standmoment M_St (Lastfall {lasttyp} #{lastfall_index})",
+            einheit="Nm",
+        )
 
     if best_wind_kipp == -math.inf:
         best_wind_kipp, best_wind_stand = 0.0, 0.0
@@ -384,31 +347,12 @@ def kipp_envelope_pro_bauelement(
     if best_other_kipp == -math.inf:
         best_other_kipp, best_other_stand = 0.0, 0.0
 
-
-    if base_ctx.get("achse_index") is not None:
-        achse_index = base_ctx.get("achse_index")
-
     if best_wind_index is not None:
-        protokolliere_decision(
-            protokoll,
-            key="lastfall_index",
-            value=best_wind_index,
-            scope={"achse_index": achse_index},
-        )
+        set_winner(protokoll, merge_breadcrumb(base_bc, [bc_step("lasttyp", "WIND"), bc_step("lastfall_index", best_wind_index)]))
     if best_gewicht_index is not None:
-        protokolliere_decision(
-            protokoll,
-            key="lastfall_index",
-            value=best_gewicht_index,
-            scope={"achse_index": achse_index},
-        )
+        set_winner(protokoll, merge_breadcrumb(base_bc, [bc_step("lasttyp", "GEWICHT"), bc_step("lastfall_index", best_gewicht_index)]))
     if best_other_index is not None:
-        protokolliere_decision(
-            protokoll,
-            key="lastfall_index",
-            value=best_other_index,
-            scope={"achse_index": achse_index},
-        )
+        set_winner(protokoll, merge_breadcrumb(base_bc, [bc_step("lasttyp", "ANDERE"), bc_step("lastfall_index", best_other_index)]))
 
     # Ergebnis für das Bauelement
     kipp_sum_bauteil = best_wind_kipp + best_gew_kipp + best_other_kipp
@@ -419,38 +363,35 @@ def kipp_envelope_pro_bauelement(
 
 def ermittle_min_reibwert(
     norm: Norm, konstruktion,
-    *, protokoll: Optional[Protokoll] = None, kontext: Optional[dict] = None
+    *, protokoll: Optional[Protokoll] = None, breadcrumb: Optional[list] = None
 ) -> float:
-    base_ctx = merge_kontext(kontext, {"funktion": "ermittle_min_reibwert"})
+    base_bc = breadcrumb
     """Liest μ aus allen Bodenplatten (Elem hat Methode reibwert()) und gibt das Minimum zurück.
        Falls keine Platte gefunden → 0.0 (konservativ)."""
     mu_werte: List[float] = []
     for idx, elem in enumerate(getattr(konstruktion, "bauelemente", []) or []):
-        elem_ctx = merge_kontext(base_ctx, {
-            "element_index": idx,
-            "element_id": getattr(elem, "element_id_intern", None),
-        })
+        elem_bc = merge_breadcrumb(base_bc, [bc_step("element_id", getattr(elem, "element_id_intern", None))])
 
         reib_fn = getattr(elem, "reibwert_effektiv", None)
         if not callable(reib_fn):
             continue
 
         try:
-            mu = reib_fn(norm, protokoll=protokoll, kontext=elem_ctx)
+            mu = reib_fn(norm, protokoll=protokoll, breadcrumb=elem_bc)
             if mu is not None:
                 mu_werte.append(float(mu))
         except Exception as e:
             protokolliere_msg(
                 protokoll, severity=Severity.ERROR, code="GLEIT/MU_READ_FAIL",
                 text=f"Reibwert-Ermittlung für Element {idx} fehlgeschlagen: {e}",
-                kontext=elem_ctx,
+                breadcrumb=elem_bc,
             )
 
     if not mu_werte:
         # protokolliere_msg(
         #     protokoll, severity=Severity.WARN, code="GLEIT/NO_PLATE_MU",
         #     text="Kein Reibwert gefunden – setze konservativ μ=0.",
-        #     kontext=base_ctx,
+        #     breadcrumb=base_bc,
         # )
         return 0.0
 
@@ -459,10 +400,9 @@ def ermittle_min_reibwert(
 
 def bewerte_lastfall_fuer_gleiten(
     norm: Norm, lastfall: Kraefte,
-    *, protokoll: Optional[Protokoll] = None, kontext: Optional[dict] = None
+    *, protokoll: Optional[Protokoll] = None, breadcrumb: Optional[list] = None
 ) -> Tuple[Vec3, float, float]:
-    base_ctx = merge_kontext(kontext, {"funktion": "bewerte_lastfall_fuer_gleiten",
-                                       "lasttyp": getattr(lastfall, "typ", None)})
+    base_bc = breadcrumb
     """
     Zerlegt einen Lastfall in:
       H_vec (treibend, horizontal, γ_ungünstig),
@@ -482,16 +422,16 @@ def bewerte_lastfall_fuer_gleiten(
         fy = Kraft[1]
         fz = Kraft[2]
 
-        gamma = sicherheitsbeiwert(norm, lastfall, ist_guenstig=False, protokoll=protokoll, kontext=base_ctx).wert
+        gamma = sicherheitsbeiwert(norm, lastfall, ist_guenstig=False, protokoll=protokoll, breadcrumb=base_bc).wert
         Hx += gamma * fx
-        gamma = sicherheitsbeiwert(norm, lastfall, ist_guenstig=False, protokoll=protokoll, kontext=base_ctx).wert
+        gamma = sicherheitsbeiwert(norm, lastfall, ist_guenstig=False, protokoll=protokoll, breadcrumb=base_bc).wert
         Hy += gamma * fy
 
         if fz > _EPS:
-            gamma = sicherheitsbeiwert(norm, lastfall, ist_guenstig=False, protokoll=protokoll, kontext=base_ctx).wert
+            gamma = sicherheitsbeiwert(norm, lastfall, ist_guenstig=False, protokoll=protokoll, breadcrumb=base_bc).wert
             N_up += gamma * fz
         elif fz < -_EPS:
-            gamma = sicherheitsbeiwert(norm, lastfall, ist_guenstig=True, protokoll=protokoll, kontext=base_ctx).wert
+            gamma = sicherheitsbeiwert(norm, lastfall, ist_guenstig=True, protokoll=protokoll, breadcrumb=base_bc).wert
             N_down += gamma * (-fz)
 
     H_vec: Vec3 = (Hx, Hy, Hz)
@@ -500,9 +440,9 @@ def bewerte_lastfall_fuer_gleiten(
 
 def gleit_envelope_pro_bauelement(
     norm: Norm, lastfaelle: Iterable[Kraefte],
-    *, protokoll: Optional[Protokoll] = None, kontext: Optional[dict] = None
+    *, protokoll: Optional[Protokoll] = None, breadcrumb: Optional[list] = None
 ) -> Tuple[Vec3, float, float]:
-    base_ctx = merge_kontext(kontext, {"funktion": "gleit_envelope_pro_bauelement"})
+    base_bc = breadcrumb
 
     wind_lastfall_index = -1
     best_wind_index = None
@@ -516,7 +456,7 @@ def gleit_envelope_pro_bauelement(
     best_Ndown_minus_Nup = None
 
     for k in lastfaelle:
-        H_vec, N_down, N_up = bewerte_lastfall_fuer_gleiten(norm, k, protokoll=protokoll, kontext=base_ctx)
+        H_vec, N_down, N_up = bewerte_lastfall_fuer_gleiten(norm, k, protokoll=protokoll, breadcrumb=base_bc)
         H_betrag = vektor_laenge(H_vec)
 
         if k.typ == Lasttyp.WIND:
@@ -524,7 +464,7 @@ def gleit_envelope_pro_bauelement(
             lastfall_index = wind_lastfall_index
             lasttyp = "WIND"
 
-            lastfall_ctx = merge_kontext(base_ctx, {"lasttyp": lasttyp, "lastfall_index": lastfall_index})
+            lastfall_bc = merge_breadcrumb(base_bc, [bc_step("lasttyp", lasttyp), bc_step("lastfall_index", lastfall_index)])
 
             if H_betrag > best_H_betrag:
                 best_H_betrag = H_betrag
@@ -537,7 +477,7 @@ def gleit_envelope_pro_bauelement(
             lastfall_index = gewicht_lastfall_index
             lasttyp = "GEWICHT"
 
-            lastfall_ctx = merge_kontext(base_ctx, {"lasttyp": lasttyp, "lastfall_index": lastfall_index})
+            lastfall_bc = merge_breadcrumb(base_bc, [bc_step("lasttyp", lasttyp), bc_step("lastfall_index", lastfall_index)])
 
             n_eff = N_down - N_up
             if best_Ndown_minus_Nup is None or n_eff < best_Ndown_minus_Nup:
@@ -546,57 +486,52 @@ def gleit_envelope_pro_bauelement(
                 best_gewicht_index = gewicht_lastfall_index
 
 
-        # protokolliere_doc(
-        #         protokoll,
-        #         bundle=make_docbundle(
-        #             titel="Horizontalkraft-Vektor H",
-        #             wert=H_vec,
-        #             einheit="N",
-        #         ),
-        #         kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_gleit_horizontal"}),
-        #     )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=lastfall_bc,
+            name="lastfall_horizontalkraft_vektor",
+            wert=H_vec,
+            label="Horizontalkraft-Vektor H",
+            einheit="N"
+        )
 
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(
-        #         titel="Horizontalkraft H",
-        #         wert=H_betrag,
-        #         einheit="N",
-        #     ),
-        #     kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_gleit_horizontal"}),
-        # )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=lastfall_bc,
+            name="lastfall_horizontalkraft_betrag",
+            wert=H_betrag,
+            label="Horizontalkraft-Betrag |H|",
+            einheit="N"
+        )
 
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(
-        #         titel="Normalkraft N_down",
-        #         wert=N_down,
-        #         einheit="N",
-        #     ),
-        #     kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_gleit_normal_down"}),
-        # )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=lastfall_bc,
+            name="lastfall_normalkraft_down",
+            wert=N_down,
+            label="Normalkraft N_down",
+            einheit="N"
+        )
 
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(
-        #         titel="Normalkraft N_up",
-        #         wert=N_up,
-        #         einheit="N",
-        #     ),
-        #     kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_gleit_normal_up"}),
-        # )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=lastfall_bc,
+            name="lastfall_normalkraft_up",
+            wert=N_up,
+            label="Normalkraft N_up",
+            einheit="N"
+        )
 
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(
-        #         titel="Effektive Normalkraft N_down - N_up",
-        #         wert=N_down - N_up,
-        #         einheit="N",
-        #         formel="N_eff = N_down - N_up",
-        #         formelzeichen=["N_down", "N_up"],
-        #     ),
-        #     kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_gleit_normal_effektiv"}),
-        # )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=lastfall_bc,
+            name="lastfall_normalkraft_effektiv",
+            wert=N_down - N_up,
+            label="Effektive Normalkraft N_down - N_up",
+            formelzeichen="N_eff",
+            formel="N_eff = N_down - N_up",
+            einheit="N"
+        )
 
     else:
         pass
@@ -604,23 +539,10 @@ def gleit_envelope_pro_bauelement(
     if best_N_down is None:
         best_N_down = 0.0
 
-    if base_ctx.get("element_id") is not None:
-        element_id = base_ctx.get("element_id")
-
     if best_wind_index is not None:
-        protokolliere_decision(
-            protokoll,
-            key="lastfall_index",
-            value=best_wind_index,
-            scope={"element_id": element_id},
-        )
+        set_winner(protokoll, merge_breadcrumb(base_bc, [bc_step("lasttyp", "WIND"), bc_step("lastfall_index", best_wind_index)]))
     if best_gewicht_index is not None:
-        protokolliere_decision(
-            protokoll,
-            key="lastfall_index",
-            value=best_gewicht_index,
-            scope={"element_id": element_id},
-        )
+        set_winner(protokoll, merge_breadcrumb(base_bc, [bc_step("lasttyp", "GEWICHT"), bc_step("lastfall_index", best_gewicht_index)]))
 
     return best_H_vec, best_N_down, best_N_up
 
@@ -628,10 +550,9 @@ def gleit_envelope_pro_bauelement(
 
 def bewerte_lastfall_fuer_abheben(
     norm: Norm, lastfall: Kraefte, *,
-    protokoll: Optional[Protokoll] = None, kontext: Optional[dict] = None
+    protokoll: Optional[Protokoll] = None, breadcrumb: Optional[list] = None
 ) -> Tuple[float, float]:
-    base_ctx = merge_kontext(kontext, {"funktion": "bewerte_lastfall_fuer_abheben",
-                                       "lasttyp": getattr(lastfall, "typ", None)})
+    base_bc = breadcrumb
     """
     Zerlegt einen Lastfall in:
       N_down (günstig, NACH UNTEN; nur aus GEWICHT mit γ_günstig, als positive Größe),
@@ -645,11 +566,11 @@ def bewerte_lastfall_fuer_abheben(
         fz = F[2]
         if fz > _EPS:
             # nach oben → ungünstig
-            gamma = sicherheitsbeiwert(norm, lastfall, ist_guenstig=False, protokoll=protokoll, kontext=base_ctx).wert
+            gamma = sicherheitsbeiwert(norm, lastfall, ist_guenstig=False, protokoll=protokoll, breadcrumb=base_bc).wert
             N_up += gamma * fz
         elif fz < -_EPS:
             # nach unten → günstig, positive Magnitude
-            gamma = sicherheitsbeiwert(norm, lastfall, ist_guenstig=True, protokoll=protokoll, kontext=base_ctx).wert
+            gamma = sicherheitsbeiwert(norm, lastfall, ist_guenstig=True, protokoll=protokoll, breadcrumb=base_bc).wert
             N_down += gamma * (-fz)
 
     return N_down, N_up
@@ -657,9 +578,9 @@ def bewerte_lastfall_fuer_abheben(
 
 def abhebe_envelope_pro_bauelement(
     norm: Norm, lastfaelle: Iterable[Kraefte], *,
-    protokoll: Optional[Protokoll] = None, kontext: Optional[dict] = None
+    protokoll: Optional[Protokoll] = None, breadcrumb: Optional[list] = None
 ) -> Tuple[float, float]:
-    base_ctx = merge_kontext(kontext, {"funktion": "abhebe_envelope_pro_bauelement"})
+    base_bc = breadcrumb
 
     wind_lastfall_index = -1
     best_wind_index = None
@@ -672,7 +593,7 @@ def abhebe_envelope_pro_bauelement(
     best_gewicht_N_down = 0.0
 
     for k in lastfaelle:
-        N_down, N_up = bewerte_lastfall_fuer_abheben(norm, k, protokoll=protokoll, kontext=base_ctx)
+        N_down, N_up = bewerte_lastfall_fuer_abheben(norm, k, protokoll=protokoll, breadcrumb=base_bc)
 
         if k.typ == Lasttyp.WIND:
             wind_lastfall_index += 1
@@ -694,41 +615,25 @@ def abhebe_envelope_pro_bauelement(
                 best_gewicht_N_down = N_down
                 best_gewicht_index = gewicht_lastfall_index
 
-        lastfall_ctx = merge_kontext(base_ctx, {"lasttyp": lasttyp, "lastfall_index": lastfall_index})
+        lastfall_bc = merge_breadcrumb(base_bc, [bc_step("lasttyp", lasttyp), bc_step("lastfall_index", lastfall_index)])
 
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(
-        #         titel="Normalkraft N_down",
-        #         wert=N_down,
-        #         einheit="N",
-        #     ),
-        #     kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_abhebe_normal_down"}),
-        # )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=lastfall_bc,
+            name="lastfall_normalkraft_down",
+            wert=N_down,
+            label="Normalkraft N_down",
+            einheit="N"
+        )
 
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(
-        #         titel="Normalkraft N_up",
-        #         wert=N_up,
-        #         einheit="N",
-        #     ),
-        #     kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_abhebe_normal_up"}),
-        # )
-
-        # --- Toplevel-Kriterium ---
-        kriterium = N_up - N_down
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(
-        #         titel="Kriterium Lastfall (N_up − N_down)",
-        #         wert=kriterium,
-        #         einheit="N",
-        #         formel="K = N_up − N_down",
-        #         formelzeichen=["N_up", "N_down"],
-        #     ),
-        #     kontext=merge_kontext(lastfall_ctx, {"doc_type": "lf_gleit_kriterium"}),
-        # )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=lastfall_bc,
+            name="lastfall_normalkraft_up",
+            wert=N_up,
+            label="Normalkraft N_up",
+            einheit="N"
+        )
 
     else:
         pass
@@ -742,22 +647,10 @@ def abhebe_envelope_pro_bauelement(
     best_N_down = best_wind_N_down + best_gewicht_N_down
 
 
-    if base_ctx.get("element_id") is not None:
-        element_id = base_ctx.get("element_id")
-
     if best_wind_index is not None:
-        protokolliere_decision(
-            protokoll,
-            key="lastfall_index",
-            value=best_wind_index,
-            scope={"element_id": element_id},
-        )
+        set_winner(protokoll, merge_breadcrumb(base_bc, [bc_step("lasttyp", "WIND"), bc_step("lastfall_index", best_wind_index)]))
+
     if best_gewicht_index is not None:
-        protokolliere_decision(
-            protokoll,
-            key="lastfall_index",
-            value=best_gewicht_index,
-            scope={"element_id": element_id},
-        )
+        set_winner(protokoll, merge_breadcrumb(base_bc, [bc_step("lasttyp", "GEWICHT"), bc_step("lastfall_index", best_gewicht_index)]))
 
     return best_N_down, best_N_up

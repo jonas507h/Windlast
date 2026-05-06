@@ -1,13 +1,6 @@
 from typing import Dict, Callable, Optional, Sequence
 import math
-from windlast_CORE.datenstruktur.zwischenergebnis import (
-    Zwischenergebnis,
-    Protokoll,
-    merge_kontext,
-    make_docbundle,
-    protokolliere_msg,
-    protokolliere_doc,
-)
+from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_breadcrumb, bc_step, protokolliere_msg, protokolliere_ergebnis, set_winner
 from windlast_CORE.datenstruktur.enums import Norm, ObjektTyp, Severity
 from windlast_CORE.materialdaten.catalog import catalog
 
@@ -35,13 +28,13 @@ def _reynoldszahl_DinEn1991_1_4_2010_12(
     luftdichte: float,
     *,
     protokoll: Optional[Protokoll] = None,
-    kontext: Optional[dict] = None,
+    breadcrumb: Optional[list] = None,
 ) -> Zwischenergebnis:
-    base_ctx = merge_kontext(kontext, {
-        "funktion": "reynoldszahl",
-        "objekttyp": getattr(objekttyp, "name", str(objekttyp)),
-        "objekt_name_intern": objekt_name_intern,
-    })
+    base_bc = breadcrumb if breadcrumb is not None else []
+    base_meta = {
+        "funktion": "_reynoldszahl_DinEn1991_1_4_2010_12",
+        "objekttyp": getattr(objekttyp, "value", str(objekttyp)),
+    }
 
     if objekttyp == ObjektTyp.TRAVERSE:
         traverse = catalog.get_traverse(objekt_name_intern)
@@ -53,46 +46,46 @@ def _reynoldszahl_DinEn1991_1_4_2010_12(
                 severity=Severity.ERROR,
                 code="REYNOLDS/CATALOG_MISSING",
                 text=f"Traverse '{objekt_name_intern}': ungültiger Gurt-Durchmesser ({charak_Laenge}).",
-                kontext=merge_kontext(base_ctx, {"input_source": "catalog"}),
+                breadcrumb=base_bc,
+                meta=base_meta,
             )
-            # protokolliere_doc(
-            #     protokoll,
-            #     bundle=make_docbundle(
-            #         titel="Reynoldszahl Re",
-            #         wert=float("nan"),
-            #         einzelwerte=[staudruck, luftdichte, geschwindigkeit, charak_Laenge, zaehigkeit],
-            #         formel="Re = v·L/ν; v = √(2·q/ρ)",
-            #     ),
-            #     kontext=merge_kontext(base_ctx, {"nan": True}),
-            # )
+            protokolliere_ergebnis(
+                protokoll,
+                breadcrumb=base_bc,
+                name="reynoldszahl",
+                wert=float("nan"),
+                label="Reynoldszahl Re",
+                formelzeichen="Re",
+                meta=base_meta,
+            )
             return Zwischenergebnis(wert=float("nan"))
         
         geschwindigkeit = math.sqrt(2.0 * staudruck / luftdichte)
 
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(
-        #         titel="Strömungsgeschwindigkeit v",
-        #         wert=geschwindigkeit,
-        #         einzelwerte=[staudruck, luftdichte],
-        #         formel="v = √(2·q/ρ)",
-        #         einheit="m/s",
-        #     ),
-        #     kontext=base_ctx,
-        # )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=base_bc,
+            name="stroemungsgeschwindigkeit",
+            wert=geschwindigkeit,
+            label="Strömungsgeschwindigkeit v",
+            formelzeichen="v",
+            formel="v = √(2·q/ρ)",
+            einheit="m/s",
+            meta=base_meta,
+        )
 
         wert = geschwindigkeit * charak_Laenge / zaehigkeit
 
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(
-        #         titel="Reynoldszahl Re",
-        #         wert=wert,
-        #         einzelwerte=[staudruck, luftdichte, geschwindigkeit, charak_Laenge, zaehigkeit],
-        #         formel="Re = v·L/ν; v = √(2·q/ρ)",
-        #     ),
-        #     kontext=base_ctx,
-        # )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=base_bc,
+            name="reynoldszahl",
+            wert=wert,
+            label="Reynoldszahl Re",
+            formelzeichen="Re",
+            formel="Re = v·L/ν",
+            meta=base_meta,
+        )
         return Zwischenergebnis(wert=wert)
     
     elif objekttyp == ObjektTyp.ROHR:
@@ -106,32 +99,44 @@ def _reynoldszahl_DinEn1991_1_4_2010_12(
                 severity=Severity.ERROR,
                 code="REYNOLDS/CATALOG_MISSING",
                 text=f"Rohr '{objekt_name_intern}': ungültiger Außendurchmesser ({charak_Laenge}).",
-                kontext=merge_kontext(base_ctx, {"input_source": "catalog"}),
+                breadcrumb=base_bc,
+                meta=base_meta,
             )
-            # protokolliere_doc(
-            #     protokoll,
-            #     bundle=make_docbundle(
-            #         titel="Reynoldszahl Re",
-            #         wert=float("nan"),
-            #         einzelwerte=[staudruck, luftdichte, geschwindigkeit, charak_Laenge, zaehigkeit],
-            #         formel="Re = v·L/ν; v = √(2·q/ρ)",
-            #     ),
-            #     kontext=merge_kontext(base_ctx, {"nan": True}),
-            # )
+            protokolliere_ergebnis(
+                protokoll,
+                breadcrumb=base_bc,
+                name="reynoldszahl",
+                wert=float("nan"),
+                label="Reynoldszahl Re",
+                formelzeichen="Re",
+                meta=base_meta,
+            )
             return Zwischenergebnis(wert=float("nan"))
 
         wert = (geschwindigkeit * charak_Laenge) / zaehigkeit
 
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(
-        #         titel="Reynoldszahl Re",
-        #         wert=wert,
-        #         einzelwerte=[staudruck, luftdichte, geschwindigkeit, charak_Laenge, zaehigkeit],
-        #         formel="Re = v·L/ν; v = √(2·q/ρ)",
-        #     ),
-        #     kontext=base_ctx,
-        # )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=base_bc,
+            name="stroemungsgeschwindigkeit",
+            wert=geschwindigkeit,
+            label="Strömungsgeschwindigkeit v",
+            formelzeichen="v",
+            formel="v = √(2·q/ρ)",
+            einheit="m/s",
+            meta=base_meta,
+        )
+
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=base_bc,
+            name="reynoldszahl",
+            wert=wert,
+            label="Reynoldszahl Re",
+            formelzeichen="Re",
+            formel="Re = v·L/ν",
+            meta=base_meta,
+        )
         return Zwischenergebnis(wert=wert)
     else:
         raise NotImplementedError(f"Objekttyp '{objekttyp}' wird aktuell nicht unterstützt.")
@@ -150,14 +155,12 @@ def reynoldszahl(
     luftdichte: float,      # kg/m³
     *,
     protokoll: Optional[Protokoll] = None,
-    kontext: Optional[dict] = None,
+    breadcrumb: Optional[list] = None,
 ) -> Zwischenergebnis:
-    base_ctx = merge_kontext(kontext, {
+    base_bc = breadcrumb if breadcrumb is not None else []
+    base_meta = {
         "funktion": "reynoldszahl",
-        "objekttyp": getattr(objekttyp, "name", str(objekttyp)),
-        "objekt_name_intern": objekt_name_intern,
-        "norm": getattr(norm, "name", str(norm)),
-    })
+    }
 
     try:
         _validate_inputs(objekttyp, objekt_name_intern, staudruck, zaehigkeit, luftdichte)
@@ -169,18 +172,23 @@ def reynoldszahl(
             severity=Severity.ERROR,
             code="REYNOLDS/INPUT_INVALID",
             text=str(e),
-            kontext=base_ctx,
+            breadcrumb=base_bc,
+            meta=base_meta,
         )
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(titel="Reynoldszahl Re", wert=float("nan")),
-        #     kontext=merge_kontext(base_ctx, {"nan": True}),
-        # )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=base_bc,
+            name="reynoldszahl",
+            wert=float("nan"),
+            label="Reynoldszahl Re",
+            formelzeichen="Re",
+            meta=base_meta,
+        )
         return Zwischenergebnis(wert=float("nan"))
 
     funktion = _DISPATCH.get(norm, _DISPATCH[Norm.DEFAULT])
     return funktion(
         objekttyp, objekt_name_intern, staudruck, zaehigkeit, luftdichte,
-        protokoll=protokoll, kontext=base_ctx,
+        protokoll=protokoll, breadcrumb=base_bc,
     )
 

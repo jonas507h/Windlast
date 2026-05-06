@@ -4,7 +4,7 @@ from math import inf
 from typing import Dict, Callable, Sequence, List, Optional, Tuple, Iterable
 from collections.abc import Sequence as _SeqABC
 
-from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_kontext, protokolliere_msg, protokolliere_doc, protokolliere_decision, make_docbundle, merge_protokoll, make_protokoll, collect_docs
+from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_breadcrumb, bc_step, protokolliere_msg, protokolliere_ergebnis, set_winner
 from windlast_CORE.datenstruktur.enums import Norm, RechenmethodeKippen, VereinfachungKonstruktion, Lasttyp, Variabilitaet, Severity
 from windlast_CORE.datenstruktur.konstanten import _EPS, aktuelle_konstanten
 from windlast_CORE.datenstruktur.kraefte import Kraefte
@@ -18,41 +18,6 @@ from windlast_CORE.rechenfunktionen.standsicherheit_utils import (
     get_or_create_lastset,
     kipp_envelope_pro_bauelement,
 )
-
-def _emit_kipp_docs_two_stage(
-    *,
-    dst_protokoll,
-    docs,
-    base_ctx: dict,
-    is_global_winner: bool,
-    best_achse_idx: int | None,
-):
-    for bundle, ctx in docs:
-        ktx = merge_kontext(base_ctx, ctx or {})
-        doc_type    = (ktx.get("doc_type") or "")
-        achse_index = ktx.get("achse_index")
-
-        # 1) Achsentscheidung innerhalb der Richtung
-        if isinstance(achse_index, int) and best_achse_idx is not None:
-            if is_global_winner:
-                # Diese Achse liefert die Richtungs-Minimum-Sicherheit
-                if achse_index == best_achse_idx:
-                    ktx["rolle"] = "relevant"
-                else:
-                    ktx["rolle"] = "entscheidungsrelevant"
-            else:
-                # andere Achsen bleiben ohne rolle => später "irrelevant"
-                pass
-
-        # 2) Richtungsentscheidung (wie bisher)
-        if is_global_winner:
-            if isinstance(doc_type, str) and doc_type.startswith("dir_"):
-                ktx["rolle"] = "relevant"
-        else:
-            if doc_type in ("dir_min_sicherheit", "dir_ballast"):
-                ktx["rolle"] = "entscheidungsrelevant"
-
-        protokolliere_doc(dst_protokoll, bundle=bundle, kontext=ktx)
 
 def _validate_inputs(
     konstruktion,
@@ -114,25 +79,21 @@ def _kippsicherheit_DinEn13814_2005_06(
     vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
     anzahl_windrichtungen: int = 4,
     protokoll: Optional[Protokoll] = None,
-    kontext: Optional[dict] = None,
+    breadcrumb: Optional[list] = None,
 ) -> List[Zwischenergebnis]:
-    base_ctx = merge_kontext(kontext, {
-        "funktion": "_kippsicherheit",
-        "norm": "DIN_EN_13814_2005_06",
-        "methode": methode.name,
-    })
+    base_bc = breadcrumb if breadcrumb is not None else []
 
     if vereinfachung_konstruktion is not VereinfachungKonstruktion.KEINE:
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="KIPP/NOT_IMPLEMENTED",
             text=f"Vereinfachung '{vereinfachung_konstruktion.value}' ist noch nicht implementiert.",
-            kontext=base_ctx,
+            breadcrumb=base_bc,
         )
         return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
 
     if methode == RechenmethodeKippen.STANDARD:
         # 1) Eckpunkte sammeln → Kippachsen bestimmen
-        achsen = sammle_kippachsen(konstruktion, protokoll=protokoll, kontext=base_ctx)
+        achsen = sammle_kippachsen(konstruktion, protokoll=protokoll, breadcrumb=base_bc)
         if not achsen:
             return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
         # 1.1) Grundgrößen für Ballast bestimmen
@@ -153,8 +114,8 @@ def _kippsicherheit_DinEn13814_2005_06(
         pool = obtain_pool(konstruktion, reset_berechnungen)
         dir_records = []  # (winkel, richtung, min_sicherheit, ballast_max)
 
-        for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen, protokoll=protokoll, kontext=base_ctx):
-            sub_prot = make_protokoll()
+        for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen, protokoll=protokoll, breadcrumb=base_bc):
+            richtung_bc = merge_breadcrumb(base_bc, [bc_step("windrichtung_deg", f"{winkel}°", ebene_label="Windrichtung")])
             lastset = get_or_create_lastset(
                 pool,
                 konstruktion,
@@ -164,8 +125,8 @@ def _kippsicherheit_DinEn13814_2005_06(
                 staudruecke=staudruecke,
                 obergrenzen=obergrenzen,
                 konst=konst,
-                protokoll=sub_prot,
-                kontext=merge_kontext(base_ctx, {"nachweis": "LOADS"}),
+                protokoll=protokoll,
+                breadcrumb=richtung_bc,
             )
             kraefte_nach_element = lastset.kraefte_nach_element
 
@@ -181,38 +142,31 @@ def _kippsicherheit_DinEn13814_2005_06(
                 total_kipp = 0.0
                 total_stand = 0.0
 
-                achse_ctx = merge_kontext(base_ctx, {"achse_index": achse_idx, "windrichtung_deg": f"{winkel}°", "windrichtung": richtung, "nachweis": "KIPP"})
+                achse_bc = merge_breadcrumb(richtung_bc, [bc_step("achse_index", str(achse_idx), ebene_label="Kippachse")])
 
                 for element, lastfaelle_elem in kraefte_nach_element.items():
-                    kipp_b, stand_b = kipp_envelope_pro_bauelement(norm, achse, lastfaelle_elem, protokoll=sub_prot, kontext=merge_kontext(achse_ctx, {"element_id": str(element)}))
-                    # protokolliere_doc(
-                    #     sub_prot,
-                    #     bundle=make_docbundle(
-                    #         titel="Kippmoment M_K",
-                    #         wert=kipp_b,
-                    #         einheit="Nm",
-                    #     ),
-                    #     kontext=merge_kontext(base_ctx, {
-                    #         "nachweis": "KIPP",
-                    #         "doc_type": "axis_momente",
-                    #         "achse_index": achse_idx,
-                    #         "element_id": str(element),
-                    #     }),
-                    # )
-                    # protokolliere_doc(
-                    #     sub_prot,
-                    #     bundle=make_docbundle(
-                    #         titel="Standmoment M_St",
-                    #         wert=stand_b,
-                    #         einheit="Nm",
-                    #     ),
-                    #     kontext=merge_kontext(base_ctx, {
-                    #         "nachweis": "KIPP",
-                    #         "doc_type": "axis_momente",
-                    #         "achse_index": achse_idx,
-                    #         "element_id": str(element),
-                    #     }),
-                    # )
+                    element_bc = merge_breadcrumb(achse_bc, [bc_step("element_id", str(element), ebene_label="Bauelement")])
+                    kipp_b, stand_b = kipp_envelope_pro_bauelement(norm, achse, lastfaelle_elem, protokoll=protokoll, breadcrumb=element_bc)
+                    protokolliere_ergebnis(
+                        protokoll,
+                        breadcrumb=element_bc,
+                        name="element_kippmoment",
+                        wert=kipp_b,
+                        label="Kippmoment M_K",
+                        formelzeichen="M_K",
+                        einheit="Nm",
+                        priority=10,
+                    )
+                    protokolliere_ergebnis(
+                        protokoll,
+                        breadcrumb=element_bc,
+                        name="element_standmoment",
+                        wert=stand_b,
+                        label="Standmoment M_St",
+                        formelzeichen="M_St",
+                        einheit="Nm",
+                        priority=10,
+                    )
                     total_kipp += kipp_b
                     total_stand += stand_b
 
@@ -222,48 +176,38 @@ def _kippsicherheit_DinEn13814_2005_06(
                 else:
                     sicherheit = total_stand / total_kipp
 
-                # protokolliere_doc(
-                #     sub_prot,
-                #     bundle=make_docbundle(
-                #         titel="Summe Kippmoment ΣM_K",
-                #         wert=total_kipp,
-                #         formel="ΣM_K = ΣM_K,Bauelement",
-                #         einheit="Nm",
-                #     ),
-                #     kontext=merge_kontext(base_ctx, {
-                #         "nachweis": "KIPP",
-                #         "doc_type": "axis_momente",
-                #         "achse_index": achse_idx,
-                #     }),
-                # )
-                # protokolliere_doc(
-                #     sub_prot,
-                #     bundle=make_docbundle(
-                #         titel="Summe Standmoment ΣM_St",
-                #         wert=total_stand,
-                #         formel="ΣM_St = ΣM_St,Bauelement",
-                #         einheit="Nm",
-                #     ),
-                #     kontext=merge_kontext(base_ctx, {
-                #         "nachweis": "KIPP",
-                #         "doc_type": "axis_momente",
-                #         "achse_index": achse_idx,
-                #     }),
-                # )
-                # protokolliere_doc(
-                #     sub_prot,
-                #     bundle=make_docbundle(
-                #         titel=f"Achs-Sicherheit S_kipp,Achse{achse_idx}",
-                #         wert=sicherheit,
-                #         formel=f"S_kipp,Achse{achse_idx} = ΣM_St / ΣM_K",
-                #         formelzeichen=["M_St", "M_K"],
-                #     ),
-                #     kontext=merge_kontext(base_ctx, {
-                #         "nachweis": "KIPP",
-                #         "doc_type": "axis_sicherheit",
-                #         "achse_index": achse_idx,
-                #     }),
-                # )
+                protokolliere_ergebnis(
+                    protokoll,
+                    breadcrumb=achse_bc,
+                    name="achse_kippmoment",
+                    wert=total_kipp,
+                    label="Achse Kippmoment ΣM_K",
+                    formelzeichen="M_K",
+                    formel="ΣM_K = ΣM_K,Bauelement",
+                    einheit="Nm",
+                    priority=10,
+                )
+                protokolliere_ergebnis(
+                    protokoll,
+                    breadcrumb=achse_bc,
+                    name="achse_standmoment",
+                    wert=total_stand,
+                    label="Achse Standmoment ΣM_St",
+                    formelzeichen="M_St",
+                    formel="ΣM_St = ΣM_St,Bauelement",
+                    einheit="Nm",
+                    priority=10,
+                )
+                protokolliere_ergebnis(
+                    protokoll,
+                    breadcrumb=achse_bc,
+                    name="achse_sicherheit_kipp",
+                    wert=sicherheit,
+                    label=f"Achse Sicherheit S_kipp,Achse{achse_idx}",
+                    formelzeichen=f"S_kipp,Achse{achse_idx}",
+                    formel=f"S_kipp,Achse{achse_idx} = ΣM_St / ΣM_K",
+                    priority=10,
+                )
 
                 if sicherheit < dir_min_sicherheit:
                     dir_min_sicherheit = sicherheit
@@ -290,68 +234,46 @@ def _kippsicherheit_DinEn13814_2005_06(
                 if ballastkraft > dir_ballast_max:
                     dir_ballast_max = ballastkraft
 
-                # protokolliere_doc(
-                #     sub_prot,
-                #     bundle=make_docbundle(
-                #         titel=f"Achs-Ballast m_Ballast,kipp,Achse{achse_idx}",
-                #         wert=ballastkraft / aktuelle_konstanten().erdbeschleunigung,  # kg
-                #         formel="m_Ballast,kipp,Achse = max(0, ΣM_K − ΣM_St) / (γ_g · m_stand,1N)",
-                #         formelzeichen=["M_K", "M_St", "γ_g", "m_stand,1N", "g"],
-                #         einheit="kg",
-                #     ),
-                #     kontext=merge_kontext(base_ctx, {
-                #         "nachweis": "KIPP",
-                #         "doc_type": "axis_ballast",
-                #         "achse_index": achse_idx,
-                #     }),
-                # )
+                protokolliere_ergebnis(
+                    protokoll,
+                    breadcrumb=achse_bc,
+                    name="achse_ballastkraft_kipp",
+                    wert=ballastkraft,
+                    label=f"Achse Ballastkraft m_Ballast,kipp,Achse{achse_idx}",
+                    formelzeichen=f"m_Ballast,kipp,Achse{achse_idx}",
+                    einheit="N",
+                    priority=10,
+                )
 
-            # protokolliere_doc(
-            #     sub_prot,
-            #     bundle=make_docbundle(
-            #         titel=f"Richtungs-Sicherheit S_kipp,{winkel}°",
-            #         wert=dir_min_sicherheit,
-            #         formel="S_kipp = ΣM_St / ΣM_K",
-            #         formelzeichen=["M_St", "M_K"],
-            #     ),
-            #     kontext=merge_kontext(base_ctx, {
-            #         "nachweis": "KIPP",
-            #         "doc_type": "dir_min_sicherheit",
-            #         "windrichtung_deg": f"{winkel}°",
-            #     }),
-            # )
-            # protokolliere_doc(
-            #     sub_prot,
-            #     bundle=make_docbundle(
-            #         titel=f"Richtungs-Ballast m_Ballast,kipp,{winkel}°",
-            #         wert=dir_ballast_max / aktuelle_konstanten().erdbeschleunigung,
-            #         einheit="kg",
-            #         formel="m_Ballast,kipp = max(0, ΣM_K − ΣM_St) / (γ_g · m_stand,1N)",
-            #         formelzeichen=["M_K", "M_St", "γ_g", "m_stand,1N", "g"],
-            #     ),
-            #     kontext=merge_kontext(base_ctx, {
-            #         "nachweis": "KIPP",
-            #         "doc_type": "dir_ballast",
-            #         "windrichtung_deg": f"{winkel}°",
-            #     }),
-            # )
+            protokolliere_ergebnis(
+                protokoll,
+                breadcrumb=richtung_bc,
+                name="richtung_sicherheit_kipp",
+                wert=dir_min_sicherheit,
+                label=f"Richtungs-Sicherheit S_kipp,{winkel}°",
+                formelzeichen=f"S_kipp,{winkel}°",
+                formel="S_kipp = ΣM_St / ΣM_K",
+                priority=10,
+            )
+            protokolliere_ergebnis(
+                protokoll,
+                breadcrumb=richtung_bc,
+                name="richtung_ballast_kipp",
+                wert=dir_ballast_max / aktuelle_konstanten().erdbeschleunigung,
+                label=f"Richtungs-Ballast m_Ballast,kipp,{winkel}°",
+                formelzeichen=f"m_Ballast,kipp,{winkel}°",
+                einheit="kg",
+                priority=10,
+            )
 
             dir_records.append({
                 "windrichtung_deg": f"{winkel}°",
                 "dir_min_sicherheit": dir_min_sicherheit,
                 "dir_ballast_max": dir_ballast_max,
                 "best_achse_idx": best_achse_idx,
-                "docs": collect_docs(sub_prot),   # Liste[(bundle, ctx)]
-                "sub_prot": sub_prot,             # nur für Messages
             })
 
-            #Entscheidung protokollieren
-            protokolliere_decision(
-                protokoll,
-                key="achse_index",
-                value=best_achse_idx,
-                scope={"windrichtung_deg": f"{winkel}°"},
-            )
+            set_winner(protokoll, merge_breadcrumb(base_bc, [bc_step("windrichtung_deg", f"{winkel}°")]))
 
         # --- Globale Entscheidung & Rollenvergabe ---
         if not dir_records:
@@ -362,63 +284,35 @@ def _kippsicherheit_DinEn13814_2005_06(
         winner_idx = min(range(len(dir_records)), key=lambda i: dir_records[i]["dir_min_sicherheit"])
         winner = dir_records[winner_idx]
 
-        # 2) Messages: wie gehabt – Gewinner komplett, Verlierer nur Errors
-        for i, rec in enumerate(dir_records):
-            sub_prot = rec["sub_prot"]
-            if i == winner_idx:
-                merge_protokoll(sub_prot, protokoll, only_errors=False)
-            else:
-                merge_protokoll(sub_prot, protokoll, only_errors=True)
-
-        # 3) Docs (neu): mit Rollen ins Hauptprotokoll heben
-        for i, rec in enumerate(dir_records):
-            _emit_kipp_docs_two_stage(
-                dst_protokoll=protokoll,
-                docs=rec["docs"],
-                base_ctx=merge_kontext(base_ctx, {"nachweis": "KIPP", "windrichtung_deg": rec["windrichtung_deg"]}),
-                is_global_winner=(i == winner_idx),
-                best_achse_idx=rec.get("best_achse_idx"),
-            )
-
         # 4) Globale Ergebnis-Docs (beste Richtung) kennzeichnen
         sicherheit_min_global = winner["dir_min_sicherheit"]
         ballast_erforderlich_max = winner["dir_ballast_max"]
         erdbeschleunigung = aktuelle_konstanten().erdbeschleunigung
         ballast_kg = ballast_erforderlich_max / erdbeschleunigung
 
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(
-        #         titel="Kippsicherheit S_kipp",
-        #         wert=sicherheit_min_global,
-        #         formel="S_kipp = ΣM_St / ΣM_K",
-        #         quelle_formel="---",
-        #         formelzeichen=["M_St", "M_K"],
-        #         quelle_formelzeichen=["---"],
-        #     ),
-        #     kontext=merge_kontext(base_ctx, {"nachweis": "KIPP", "rolle": "relevant"}),
-        # )
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(
-        #         titel="Erforderlicher Ballast m_Ballast,kipp",
-        #         wert=ballast_kg,
-        #         einheit="kg",
-        #         formel="m_Ballast,kipp = max(0, ΣM_K − ΣM_St) / (γ_g · m_stand,1N)",
-        #         quelle_formel="---",
-        #         formelzeichen=["M_K", "M_St", "γ_g", "m_stand,1N", "g"],
-        #         quelle_formelzeichen=["---"],
-        #     ),
-        #     kontext=merge_kontext(base_ctx, {"nachweis": "KIPP", "doc_type": "ballast_pro_sicherheit", "quelle_nachweis": "KIPP", "rolle": "relevant"}),
-        # )
-
-        #Entscheidung protokollieren
-        protokolliere_decision(
+        protokolliere_ergebnis(
             protokoll,
-            key="windrichtung_deg",
-            value=dir_records[winner_idx]["windrichtung_deg"],
-            scope={"nachweis": "KIPP"},
+            breadcrumb=base_bc,
+            name="sicherheit_kipp",
+            wert=sicherheit_min_global,
+            label="Kippsicherheit S_kipp",
+            formelzeichen="S_kipp",
+            formel="S_kipp = ΣM_St / ΣM_K",
+            priority=10,
         )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=base_bc,
+            name="ballast_kipp",
+            wert=ballast_kg,
+            label="Erforderlicher Ballast m_Ballast,kipp",
+            formelzeichen="m_Ballast,kipp",
+            einheit="kg",
+            formel="m_Ballast,kipp = max(0, ΣM_K − ΣM_St) / (γ_g · m_stand,1N)",
+            priority=10,
+        )
+
+        set_winner(protokoll, merge_breadcrumb(base_bc, [bc_step("windrichtung_deg", winner["windrichtung_deg"])]))
 
         return [Zwischenergebnis(wert=sicherheit_min_global), Zwischenergebnis(wert=ballast_kg)]
     
@@ -427,7 +321,7 @@ def _kippsicherheit_DinEn13814_2005_06(
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="KIPP/METHOD_NI",
             text=f"Methode '{methode.value}' ({methode.name}) ist noch nicht implementiert.",
-            kontext=base_ctx,
+            breadcrumb=base_bc,
         )
         return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
     
@@ -443,25 +337,21 @@ def _kippsicherheit_DinEn17879_2024_08(
     vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
     anzahl_windrichtungen: int = 4,
     protokoll: Optional[Protokoll] = None,
-    kontext: Optional[dict] = None,
+    breadcrumb: Optional[list] = None,
 ) -> List[Zwischenergebnis]:
-    base_ctx = merge_kontext(kontext, {
-        "funktion": "_kippsicherheit",
-        "norm": "DIN_EN_17879_2024_08",
-        "methode": methode.name,
-    })
+    base_bc = breadcrumb if breadcrumb is not None else []
 
     if vereinfachung_konstruktion is not VereinfachungKonstruktion.KEINE:
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="KIPP/NOT_IMPLEMENTED",
             text=f"Vereinfachung '{vereinfachung_konstruktion.value}' ist noch nicht implementiert.",
-            kontext=base_ctx,
+            breadcrumb=base_bc,
         )
         return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
 
     if methode == RechenmethodeKippen.STANDARD:
         # 1) Eckpunkte sammeln → Kippachsen bestimmen
-        achsen = sammle_kippachsen(konstruktion, protokoll=protokoll, kontext=base_ctx)
+        achsen = sammle_kippachsen(konstruktion, protokoll=protokoll, breadcrumb=base_bc)
         if not achsen:
             return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
         # 1.1) Grundgrößen für Ballast bestimmen
@@ -482,8 +372,8 @@ def _kippsicherheit_DinEn17879_2024_08(
         pool = obtain_pool(konstruktion, reset_berechnungen)
         dir_records = []  # (winkel, richtung, min_sicherheit, ballast_max)
 
-        for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen, protokoll=protokoll, kontext=base_ctx):
-            sub_prot = make_protokoll()
+        for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen, protokoll=protokoll, breadcrumb=base_bc):
+            richtung_bc = merge_breadcrumb(base_bc, [bc_step("windrichtung_deg", f"{winkel}°", ebene_label="Windrichtung")])
             lastset = get_or_create_lastset(
                 pool,
                 konstruktion,
@@ -493,14 +383,14 @@ def _kippsicherheit_DinEn17879_2024_08(
                 staudruecke=staudruecke,
                 obergrenzen=obergrenzen,
                 konst=konst,
-                protokoll=sub_prot,
-                kontext=merge_kontext(base_ctx, {"nachweis": "LOADS"}),
+                protokoll=protokoll,
+                breadcrumb=richtung_bc,
             )
             kraefte_nach_element = lastset.kraefte_nach_element
 
             # Richtungs-lokale Aggregation
-            dir_min_sicherheit = inf           # <<< NEU: kleinstes S dieser Richtung
-            dir_ballast_max = 0.0              # <<< NEU: größter Ballast dieser Richtung
+            dir_min_sicherheit = inf
+            dir_ballast_max = 0.0 
             best_achse_idx = None
             achse_idx = -1
 
@@ -510,38 +400,31 @@ def _kippsicherheit_DinEn17879_2024_08(
                 total_kipp = 0.0
                 total_stand = 0.0
 
-                achse_ctx = merge_kontext(base_ctx, {"achse_index": achse_idx, "windrichtung_deg": f"{winkel}°", "windrichtung": richtung, "nachweis": "KIPP"})
+                achse_bc = merge_breadcrumb(richtung_bc, [bc_step("achse_index", str(achse_idx), ebene_label="Kippachse")])
 
                 for element, lastfaelle_elem in kraefte_nach_element.items():
-                    kipp_b, stand_b = kipp_envelope_pro_bauelement(norm, achse, lastfaelle_elem, protokoll=sub_prot, kontext=merge_kontext(achse_ctx, {"element_id": str(element)}))
-                    # protokolliere_doc(
-                    #     sub_prot,
-                    #     bundle=make_docbundle(
-                    #         titel="Kippmoment M_K",
-                    #         wert=kipp_b,
-                    #         einheit="Nm",
-                    #     ),
-                    #     kontext=merge_kontext(base_ctx, {
-                    #         "nachweis": "KIPP",
-                    #         "doc_type": "axis_momente",
-                    #         "achse_index": achse_idx,
-                    #         "element_id": str(element),
-                    #     }),
-                    # )
-                    # protokolliere_doc(
-                    #     sub_prot,
-                    #     bundle=make_docbundle(
-                    #         titel="Standmoment M_St",
-                    #         wert=stand_b,
-                    #         einheit="Nm",
-                    #     ),
-                    #     kontext=merge_kontext(base_ctx, {
-                    #         "nachweis": "KIPP",
-                    #         "doc_type": "axis_momente",
-                    #         "achse_index": achse_idx,
-                    #         "element_id": str(element),
-                    #     }),
-                    # )
+                    element_bc = merge_breadcrumb(achse_bc, [bc_step("element_id", str(element), ebene_label="Bauelement")])
+                    kipp_b, stand_b = kipp_envelope_pro_bauelement(norm, achse, lastfaelle_elem, protokoll=protokoll, breadcrumb=element_bc)
+                    protokolliere_ergebnis(
+                        protokoll,
+                        breadcrumb=element_bc,
+                        name="element_kippmoment",
+                        wert=kipp_b,
+                        label="Kippmoment M_K",
+                        formelzeichen="M_K",
+                        einheit="Nm",
+                        priority=10,
+                    )
+                    protokolliere_ergebnis(
+                        protokoll,
+                        breadcrumb=element_bc,
+                        name="element_standmoment",
+                        wert=stand_b,
+                        label="Standmoment M_St",
+                        formelzeichen="M_St",
+                        einheit="Nm",
+                        priority=10,
+                    )
                     total_kipp += kipp_b
                     total_stand += stand_b
 
@@ -551,50 +434,39 @@ def _kippsicherheit_DinEn17879_2024_08(
                 else:
                     sicherheit = total_stand / total_kipp
 
-                # protokolliere_doc(
-                #     sub_prot,
-                #     bundle=make_docbundle(
-                #         titel="Summe Kippmoment ΣM_K",
-                #         wert=total_kipp,
-                #         formel="ΣM_K = ΣM_K,Bauelement",
-                #         einheit="Nm",
-                #     ),
-                #     kontext=merge_kontext(base_ctx, {
-                #         "nachweis": "KIPP",
-                #         "doc_type": "axis_momente",
-                #         "achse_index": achse_idx,
-                #     }),
-                # )
-                # protokolliere_doc(
-                #     sub_prot,
-                #     bundle=make_docbundle(
-                #         titel="Summe Standmoment ΣM_St",
-                #         wert=total_stand,
-                #         formel="ΣM_St = ΣM_St,Bauelement",
-                #         einheit="Nm",
-                #     ),
-                #     kontext=merge_kontext(base_ctx, {
-                #         "nachweis": "KIPP",
-                #         "doc_type": "axis_momente",
-                #         "achse_index": achse_idx,
-                #     }),
-                # )
-                # protokolliere_doc(
-                #     sub_prot,
-                #     bundle=make_docbundle(
-                #         titel=f"Achs-Sicherheit S_kipp,Achse{achse_idx}",
-                #         wert=sicherheit,
-                #         formel=f"S_kipp,Achse{achse_idx} = ΣM_St / ΣM_K",
-                #         formelzeichen=["M_St", "M_K"],
-                #     ),
-                #     kontext=merge_kontext(base_ctx, {
-                #         "nachweis": "KIPP",
-                #         "doc_type": "axis_sicherheit",
-                #         "achse_index": achse_idx,
-                #     }),
-                # )
+                protokolliere_ergebnis(
+                    protokoll,
+                    breadcrumb=achse_bc,
+                    name="achse_kippmoment",
+                    wert=total_kipp,
+                    label="Achse Kippmoment ΣM_K",
+                    formelzeichen="M_K",
+                    formel="ΣM_K = ΣM_K,Bauelement",
+                    einheit="Nm",
+                    priority=10,
+                )
+                protokolliere_ergebnis(
+                    protokoll,
+                    breadcrumb=achse_bc,
+                    name="achse_standmoment",
+                    wert=total_stand,
+                    label="Achse Standmoment ΣM_St",
+                    formelzeichen="M_St",
+                    formel="ΣM_St = ΣM_St,Bauelement",
+                    einheit="Nm",
+                    priority=10,
+                )
+                protokolliere_ergebnis(
+                    protokoll,
+                    breadcrumb=achse_bc,
+                    name="achse_sicherheit_kipp",
+                    wert=sicherheit,
+                    label=f"Achse Sicherheit S_kipp,Achse{achse_idx}",
+                    formelzeichen=f"S_kipp,Achse{achse_idx}",
+                    formel=f"S_kipp,Achse{achse_idx} = ΣM_St / ΣM_K",
+                    priority=10,
+                )
 
-                # Richtungs-Minimum aktualisieren
                 if sicherheit < dir_min_sicherheit:
                     dir_min_sicherheit = sicherheit
                     best_achse_idx = achse_idx
@@ -620,68 +492,46 @@ def _kippsicherheit_DinEn17879_2024_08(
                 if ballastkraft > dir_ballast_max:
                     dir_ballast_max = ballastkraft
 
-                # protokolliere_doc(
-                #     sub_prot,
-                #     bundle=make_docbundle(
-                #         titel=f"Achs-Ballast m_Ballast,kipp,Achse{achse_idx}",
-                #         wert=ballastkraft / aktuelle_konstanten().erdbeschleunigung,  # kg
-                #         einheit= "kg",
-                #         formel="m_Ballast,kipp,Achse = max(0, ΣM_K − ΣM_St) / (γ_g · m_stand,1N)",
-                #         formelzeichen=["M_K", "M_St", "γ_g", "m_stand,1N", "g"],
-                #     ),
-                #     kontext=merge_kontext(base_ctx, {
-                #         "nachweis": "KIPP",
-                #         "doc_type": "axis_ballast",
-                #         "achse_index": achse_idx,
-                #     }),
-                # )
+                protokolliere_ergebnis(
+                    protokoll,
+                    breadcrumb=achse_bc,
+                    name="achse_ballastkraft_kipp",
+                    wert=ballastkraft,
+                    label=f"Achse Ballastkraft m_Ballast,kipp,Achse{achse_idx}",
+                    formelzeichen=f"m_Ballast,kipp,Achse{achse_idx}",
+                    einheit="N",
+                    priority=10,
+                )
 
-            # protokolliere_doc(
-            #     sub_prot,
-            #     bundle=make_docbundle(
-            #         titel=f"Richtungs-Sicherheit S_kipp,{winkel}°",
-            #         wert=dir_min_sicherheit,
-            #         formel="S_kipp = ΣM_St / ΣM_K",
-            #         formelzeichen=["M_St", "M_K"],
-            #     ),
-            #     kontext=merge_kontext(base_ctx, {
-            #         "nachweis": "KIPP",
-            #         "doc_type": "dir_min_sicherheit",
-            #         "windrichtung_deg": f"{winkel}°",
-            #     }),
-            # )
-            # protokolliere_doc(
-            #     sub_prot,
-            #     bundle=make_docbundle(
-            #         titel=f"Richtungs-Ballast m_Ballast,kipp,{winkel}°",
-            #         wert=dir_ballast_max / aktuelle_konstanten().erdbeschleunigung,
-            #         einheit="kg",
-            #         formel="m_Ballast,kipp = max(0, ΣM_K − ΣM_St) / (γ_g · m_stand,1N)",
-            #         formelzeichen=["M_K", "M_St", "γ_g", "m_stand,1N", "g"],
-            #     ),
-            #     kontext=merge_kontext(base_ctx, {
-            #         "nachweis": "KIPP",
-            #         "doc_type": "dir_ballast",
-            #         "windrichtung_deg": f"{winkel}°",
-            #     }),
-            # )
+            protokolliere_ergebnis(
+                protokoll,
+                breadcrumb=richtung_bc,
+                name="richtung_sicherheit_kipp",
+                wert=dir_min_sicherheit,
+                label=f"Richtungs-Sicherheit S_kipp,{winkel}°",
+                formelzeichen=f"S_kipp,{winkel}°",
+                formel="S_kipp = ΣM_St / ΣM_K",
+                priority=10,
+            )
+            protokolliere_ergebnis(
+                protokoll,
+                breadcrumb=richtung_bc,
+                name="richtung_ballast_kipp",
+                wert=dir_ballast_max / aktuelle_konstanten().erdbeschleunigung,
+                label=f"Richtungs-Ballast m_Ballast,kipp,{winkel}°",
+                formelzeichen=f"m_Ballast,kipp,{winkel}°",
+                einheit="kg",
+                priority=10,
+            )
 
             dir_records.append({
                 "windrichtung_deg": f"{winkel}°",
                 "dir_min_sicherheit": dir_min_sicherheit,
                 "dir_ballast_max": dir_ballast_max,
                 "best_achse_idx": best_achse_idx,
-                "docs": collect_docs(sub_prot),   # Liste[(bundle, ctx)]
-                "sub_prot": sub_prot,             # nur für Messages
             })
 
-            #Entscheidung protokollieren
-            protokolliere_decision(
-                protokoll,
-                key="achse_index",
-                value=best_achse_idx,
-                scope={"windrichtung_deg": f"{winkel}°"},
-            )
+            set_winner(protokoll, merge_breadcrumb(base_bc, [bc_step("windrichtung_deg", f"{winkel}°")]))
 
         # --- Globale Entscheidung & Rollenvergabe ---
         if not dir_records:
@@ -692,71 +542,44 @@ def _kippsicherheit_DinEn17879_2024_08(
         winner_idx = min(range(len(dir_records)), key=lambda i: dir_records[i]["dir_min_sicherheit"])
         winner = dir_records[winner_idx]
 
-        # 2) Messages: wie gehabt – Gewinner komplett, Verlierer nur Errors
-        for i, rec in enumerate(dir_records):
-            sub_prot = rec["sub_prot"]
-            if i == winner_idx:
-                merge_protokoll(sub_prot, protokoll, only_errors=False)
-            else:
-                merge_protokoll(sub_prot, protokoll, only_errors=True)
-
-        # 3) Docs (neu): mit Rollen ins Hauptprotokoll heben
-        for i, rec in enumerate(dir_records):
-            _emit_kipp_docs_two_stage(
-                dst_protokoll=protokoll,
-                docs=rec["docs"],
-                base_ctx=merge_kontext(base_ctx, {"nachweis": "KIPP", "windrichtung_deg": rec["windrichtung_deg"]}),
-                is_global_winner=(i == winner_idx),
-                best_achse_idx=rec.get("best_achse_idx"),
-            )
-
         # 4) Globale Ergebnis-Docs (beste Richtung) kennzeichnen
         sicherheit_min_global = winner["dir_min_sicherheit"]
         ballast_erforderlich_max = winner["dir_ballast_max"]
         erdbeschleunigung = aktuelle_konstanten().erdbeschleunigung
         ballast_kg = ballast_erforderlich_max / erdbeschleunigung
 
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(
-        #         titel="Kippsicherheit S_kipp",
-        #         wert=sicherheit_min_global,
-        #         formel="S_kipp = ΣM_St / ΣM_K",
-        #         quelle_formel="---",
-        #         formelzeichen=["M_St", "M_K"],
-        #         quelle_formelzeichen=["---"],
-        #     ),
-        #     kontext=merge_kontext(base_ctx, {"nachweis": "KIPP", "rolle": "relevant"}),
-        # )
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(
-        #         titel="Erforderlicher Ballast m_Ballast,kipp",
-        #         wert=ballast_kg,
-        #         einheit="kg",
-        #         formel="m_Ballast,kipp = max(0, ΣM_K − ΣM_St) / (γ_g · m_stand,1N)",
-        #         quelle_formel="---",
-        #         formelzeichen=["M_K", "M_St", "γ_g", "m_stand,1N", "g"],
-        #         quelle_formelzeichen=["---"],
-        #     ),
-        #     kontext=merge_kontext(base_ctx, {"nachweis": "KIPP", "rolle": "relevant"}),
-        # )
-
-        #Entscheidung protokollieren
-        protokolliere_decision(
+        protokolliere_ergebnis(
             protokoll,
-            key="windrichtung_deg",
-            value=dir_records[winner_idx]["windrichtung_deg"],
-            scope={"nachweis": "KIPP"},
+            breadcrumb=base_bc,
+            name="sicherheit_kipp",
+            wert=sicherheit_min_global,
+            label="Kippsicherheit S_kipp",
+            formelzeichen="S_kipp",
+            formel="S_kipp = ΣM_St / ΣM_K",
+            priority=10,
         )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=base_bc,
+            name="ballast_kipp",
+            wert=ballast_kg,
+            label="Erforderlicher Ballast m_Ballast,kipp",
+            formelzeichen="m_Ballast,kipp",
+            einheit="kg",
+            formel="m_Ballast,kipp = max(0, ΣM_K − ΣM_St) / (γ_g · m_stand,1N)",
+            priority=10,
+        )
+
+        set_winner(protokoll, merge_breadcrumb(base_bc, [bc_step("windrichtung_deg", winner["windrichtung_deg"])]))
 
         return [Zwischenergebnis(wert=sicherheit_min_global), Zwischenergebnis(wert=ballast_kg)]
     
     else:
+        # (andere Methoden:)
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="KIPP/METHOD_NI",
             text=f"Methode '{methode.value}' ({methode.name}) ist noch nicht implementiert.",
-            kontext=base_ctx,
+            breadcrumb=base_bc,
         )
         return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
     
@@ -778,13 +601,9 @@ def kippsicherheit(
     vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
     anzahl_windrichtungen: int = 4,
     protokoll: Optional[Protokoll] = None,
-    kontext: Optional[dict] = None,
+    breadcrumb: Optional[list] = None,
 ) -> List[Zwischenergebnis]:
-    base_ctx = merge_kontext(kontext, {
-        "funktion": "kippsicherheit",
-        "norm": getattr(norm, "name", str(norm)),
-        "anzahl_windrichtungen": anzahl_windrichtungen,
-    })
+    base_bc = merge_breadcrumb(breadcrumb, [bc_step("nachweis", "KIPP")])
     """
     Norm-dispatchte Kipp-Sicherheitsbewertung.
     Gibt ein Zwischenergebnis mit der minimalen Sicherheit über alle Windrichtungen/Achsen zurück.
@@ -806,7 +625,7 @@ def kippsicherheit(
             protokoll, severity=Severity.ERROR,
             code="KIPP/INPUT_INVALID",
             text=str(e),
-            kontext=base_ctx,
+            breadcrumb=base_bc,
         )
         # NaN-Placeholder zurück (wie vereinbart: Zwischenergebnis nur mit wert)
         return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
@@ -823,5 +642,5 @@ def kippsicherheit(
         vereinfachung_konstruktion=vereinfachung_konstruktion,
         anzahl_windrichtungen=anzahl_windrichtungen,
         protokoll=protokoll,
-        kontext=base_ctx,
+        breadcrumb=base_bc,
     )

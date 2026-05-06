@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Tuple, List, Sequence, Optional
 import math
 from windlast_CORE.datenstruktur.konstanten import PhysikKonstanten, aktuelle_konstanten
-from windlast_CORE.datenstruktur.zwischenergebnis import Protokoll, make_docbundle, merge_kontext, protokolliere_msg, protokolliere_doc
+from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_breadcrumb, bc_step, protokolliere_msg, protokolliere_ergebnis, set_winner
 from windlast_CORE.rechenfunktionen import (
     Vec3,
     flaechenschwerpunkt,
@@ -89,14 +89,11 @@ class senkrechteFlaeche:
     def gesamthoehe(self) -> float:
         return max(p[2] for p in self.eckpunkte)
   
-    def gewichtskraefte(self, *, protokoll: Optional[Protokoll] = None, kontext: Optional[dict] = None) -> List[Kraefte]:
-        base_ctx = merge_kontext(kontext, {
-            "funktion": "gewichtskraefte",
-            "element_id": self.element_id_intern,
-            "objekttyp": self.objekttyp.name,
-            "flaechenlast": self.flaechenlast,
-            "gesamtgewicht": self.gesamtgewicht,
-        })
+    def gewichtskraefte(self, *, protokoll: Optional[Protokoll] = None, breadcrumb: Optional[list] = None) -> List[Kraefte]:
+        base_bc = breadcrumb if breadcrumb is not None else []
+        base_meta = {
+            "funktion": "senkrechteFlaeche.gewichtskraefte",
+        }
         if self.gesamtgewicht is not None:
             Fz = -self.gesamtgewicht * aktuelle_konstanten().erdbeschleunigung  # [N]
         elif self.flaechenlast is not None:
@@ -106,7 +103,7 @@ class senkrechteFlaeche:
             # protokolliere_msg(
             #     protokoll, severity=Severity.WARN, code="SENKRECHTE_FLAECHE/NO_WEIGHT",
             #     text="Weder Gesamtgewicht noch Flächenlast der Fläche angegeben. Es werden keine Gewichtskräfte berechnet.",
-            #     kontext=base_ctx,
+            #     breadcrumb=base_bc, meta=base_meta,
             # )
             Fz = 0.0
 
@@ -134,15 +131,12 @@ class senkrechteFlaeche:
         konst: PhysikKonstanten | None = None,   # optional: Defaults oder Override-Set
         *,
         protokoll: Optional[Protokoll] = None,
-        kontext: Optional[dict] = None,
+        breadcrumb: Optional[list] = None,
     ) -> List[Kraefte]:
-        base_ctx = merge_kontext(kontext, {
-            "funktion": "windkraefte",
-            "norm": norm.value,
-            "element_id": self.element_id_intern,
-            "objekttyp": self.objekttyp.value,
-            "windrichtung": windrichtung,
-        })
+        base_bc = breadcrumb if breadcrumb is not None else []
+        base_meta = {
+            "funktion": "senkrechteFlaeche.windkraefte",
+        }
 
         # Unterscheidung Wand / Anzeigetafel
         oberkante = max(p[2] for p in self.eckpunkte)
@@ -157,7 +151,7 @@ class senkrechteFlaeche:
                 severity=Severity.ERROR,
                 code="WINDKRAEFTE/WAND_UNTERKANTE_UNGUELTIG",
                 text=f"Erwartet 2 Eckpunkte auf der Unterkante (z={unterkante}), gefunden: {len(endpunkte_unterkante)}.",
-                kontext=base_ctx,
+                breadcrumb=base_bc, meta=base_meta,
             )
             return []
         wand_dir = vektor_zwischen_punkten(endpunkte_unterkante[0], endpunkte_unterkante[1])
@@ -171,46 +165,47 @@ class senkrechteFlaeche:
         else:
             self.flaeche_typ = senkrechteFlaecheTyp.WAND
 
+        flaeche_meta = {
+            **base_meta,
+            "flaeche_typ": self.flaeche_typ.value,
+        }
+
         # Berechnung der Windkräfte
         if self.flaeche_typ == senkrechteFlaecheTyp.ANZEIGETAFEL:
             # Staudruck auf mittlerer Höhe der Anzeigetafel
             mitte_hoehe = (oberkante + unterkante) / 2
-            tafel_ctx = merge_kontext(base_ctx, {
-                "mittlere_hoehe": mitte_hoehe,
-                "flaeche_typ": self.flaeche_typ.value,
-            })
             staudruck = 0.0
             for i, grenze in enumerate(obergrenzen):
                 if mitte_hoehe <= grenze:
                     staudruck = staudruecke[i]
                     break
-            # protokolliere_doc(
-            #     protokoll,
-            #     bundle=make_docbundle(
-            #         titel="Staudruck q",
-            #         wert=staudruck,
-            #         einheit="N/m²",
-            #         formel="Staudruck auf mittlerer Höhe der Anzeigetafel",
-            #         quelle_formel="DIN EN 1991-1-4:2010-12, Abschnitt 7.4.3",
-            #         ),
-            #     kontext=tafel_ctx,
-            # )
+
+            protokolliere_ergebnis(
+                protokoll,
+                breadcrumb=base_bc,
+                name="staudruck",
+                wert=staudruck,
+                label="Staudruck q",
+                formelzeichen="q",
+                einheit="N/m²",
+                meta=flaeche_meta,
+            )
 
             _kraftbeiwert = kraftbeiwert(
                 norm, objekttyp=self.objekttyp, windrichtung=windrichtung, senkrechte_flaeche_typ=self.flaeche_typ, punkte=self.eckpunkte,
-                protokoll=protokoll, kontext=tafel_ctx
+                protokoll=protokoll, breadcrumb=base_bc
             )
             _bezugsflaeche = projizierte_flaeche(
                 norm, objekttyp=self.objekttyp, punkte=self.eckpunkte,
-                protokoll=protokoll, kontext=tafel_ctx
+                protokoll=protokoll, breadcrumb=base_bc
             )
             _windkraft = windkraft(
                 norm, objekttyp=self.objekttyp, kraftbeiwert=_kraftbeiwert.wert, staudruck=staudruck, projizierte_flaeche=_bezugsflaeche.wert,senkrechte_flaeche_typ=self.flaeche_typ,
-                protokoll=protokoll, kontext=tafel_ctx
+                protokoll=protokoll, breadcrumb=base_bc
             )
             _windkraft_vec = windkraft_zu_vektor(
                 norm, objekttyp=self.objekttyp, punkte=self.eckpunkte, windkraft=_windkraft.wert, windrichtung=windrichtung, senkrechte_flaeche_typ=self.flaeche_typ,
-                protokoll=protokoll, kontext=tafel_ctx
+                protokoll=protokoll, breadcrumb=base_bc
             )
             einzelkraefte_vektoren = [_windkraft_vec.wert]
             angriffsbereiche = [self.eckpunkte]
@@ -233,19 +228,17 @@ class senkrechteFlaeche:
                     severity=Severity.INFO,
                     code="WINDKRAEFTE/WAND_KEINE_HORIZ_KOMPONENTE",
                     text="Wandrichtung oder Windrichtung hat keine horizontale Komponente – keine Windlast auf freistehende Wand angesetzt.",
-                    kontext=base_ctx,
+                    breadcrumb=base_bc, meta=base_meta,
                 )
                 return []
 
             # Winkel 0°…180° zwischen horizontaler Wandrichtung und horizontaler Windrichtung
             winkel = vektor_winkel(wand_dir_xy, wind_xy)
 
-            wand_ctx = merge_kontext(base_ctx, {
-                "wand_breite": f"{breite}m",
-                "wand_hoehe": f"{hoehe}m",
+            wand_meta = {
+                **flaeche_meta,
                 "winkel_wand_wind": f"{winkel:.2f}°",
-                "flaeche_typ": self.flaeche_typ.value,
-            })
+            }
 
             # Fall 1: Wind praktisch parallel
             if winkel < 5.0 or winkel > 175.0:
@@ -254,7 +247,7 @@ class senkrechteFlaeche:
                     severity=Severity.HINT,
                     code="WINDKRAEFTE/WAND_PARALLEL",
                     text=f"Winkel zwischen Wand und Windrichtung = {winkel:.2f}° -> Wind nahezu parallel, keine Windkraft angesetzt.",
-                    kontext=wand_ctx,
+                    breadcrumb=base_bc, meta=wand_meta,
                 )
                 return []
 
@@ -278,11 +271,9 @@ class senkrechteFlaeche:
                 zonen = [Zone.A, Zone.B, Zone.C, Zone.D]
 
                 if 90.0-_EPS < winkel <= 90.0+_EPS:
-                    lastfall_ctx = merge_kontext(wand_ctx, {
-                        "lastfall_index": 0,
-                    })
+                    lastfall_bc = merge_breadcrumb(base_bc, [bc_step("lastfall", 0)])
                 else:
-                    lastfall_ctx = wand_ctx
+                    lastfall_bc = base_bc
 
                 # Iteration über horizontale Zonen
                 for i in range(len(trennpunkte_unterkante)-1):
@@ -292,9 +283,7 @@ class senkrechteFlaeche:
                     teilvektor_unterkante = vektor_zwischen_punkten(unten_start, unten_ende)
                     zone = zonen[i]
 
-                    zonen_ctx = merge_kontext(lastfall_ctx, {
-                        "zone": zone.value,
-                    })
+                    zonen_bc = merge_breadcrumb(lastfall_bc, [bc_step("zone", zone.value)])
 
                     # Segmentierung nach Höhenbereichen
                     segmente = segmentiere_strecke_nach_hoehenbereichen(
@@ -304,11 +293,11 @@ class senkrechteFlaeche:
                         protokolliere_msg(
                             protokoll, severity=Severity.ERROR, code="WAND/NO_WIND_SEGMENTS",
                             text="Wand liegt in keinem Windbereich.",
-                            kontext=zonen_ctx,
+                            breadcrumb=zonen_bc, meta=wand_meta,
                         )
                         return []
                     
-                    # Iteration über vertikale Zonen
+                    # Iteration über vertikale Segmente
                     for j, seg in enumerate(segmente):
                         unten_start_lokal = seg["start_lokal"]
                         unten_ende_lokal = vektoren_addieren([unten_start_lokal, teilvektor_unterkante])
@@ -317,26 +306,24 @@ class senkrechteFlaeche:
                         eckpunkte_lokal = [ unten_start_lokal, unten_ende_lokal, oben_ende_lokal, oben_start_lokal ]
                         staudruck   = seg["staudruck"]
 
-                        seg_ctx = merge_kontext(zonen_ctx, {
-                            "segment_index": j,
-                        })
+                        seg_bc = merge_breadcrumb(zonen_bc, [bc_step("segment", j)])
 
                         _kraftbeiwert = kraftbeiwert(
                             norm, objekttyp=self.objekttyp, windrichtung=windrichtung, senkrechte_flaeche_typ=self.flaeche_typ, zone=zone,
                             punkte=self.eckpunkte,
-                            protokoll=protokoll, kontext=seg_ctx
+                            protokoll=protokoll, breadcrumb=seg_bc
                         )
                         _bezugsflaeche = projizierte_flaeche(
                             norm, objekttyp=self.objekttyp, punkte=eckpunkte_lokal,
-                            protokoll=protokoll, kontext=seg_ctx
+                            protokoll=protokoll, breadcrumb=seg_bc
                         )
                         _windkraft = windkraft(
                             norm, objekttyp=self.objekttyp, kraftbeiwert=_kraftbeiwert.wert, staudruck=staudruck, projizierte_flaeche=_bezugsflaeche.wert, senkrechte_flaeche_typ=self.flaeche_typ,
-                            protokoll=protokoll, kontext=seg_ctx
+                            protokoll=protokoll, breadcrumb=seg_bc
                         )
                         _windkraft_vec = windkraft_zu_vektor(
                             norm, objekttyp=self.objekttyp, punkte=eckpunkte_lokal, windkraft=_windkraft.wert, windrichtung=windrichtung, senkrechte_flaeche_typ=self.flaeche_typ,
-                            protokoll=protokoll, kontext=seg_ctx
+                            protokoll=protokoll, breadcrumb=seg_bc
                         )
 
                         einzelkraefte_vektoren.append(_windkraft_vec.wert)
@@ -375,11 +362,9 @@ class senkrechteFlaeche:
                 zonen = [Zone.A, Zone.B, Zone.C, Zone.D]
 
                 if 90.0-_EPS < winkel <= 90.0+_EPS:
-                    lastfall_ctx = merge_kontext(wand_ctx, {
-                        "lastfall_index": 1,
-                    })
+                    lastfall_bc = merge_breadcrumb(base_bc, [bc_step("lastfall", 1)])
                 else:
-                    lastfall_ctx = wand_ctx
+                    lastfall_bc = base_bc
 
                 # Iteration über horizontale Zonen
                 for i in range(len(trennpunkte_unterkante)-1):
@@ -389,9 +374,7 @@ class senkrechteFlaeche:
                     teilvektor_unterkante = vektor_zwischen_punkten(unten_start, unten_ende)
                     zone = zonen[i]
 
-                    zonen_ctx = merge_kontext(lastfall_ctx, {
-                        "zone": zone.value,
-                    })
+                    zonen_bc = merge_breadcrumb(lastfall_bc, [bc_step("zone", zone.value)])
 
                     # Segmentierung nach Höhenbereichen
                     segmente = segmentiere_strecke_nach_hoehenbereichen(
@@ -401,11 +384,11 @@ class senkrechteFlaeche:
                         protokolliere_msg(
                             protokoll, severity=Severity.ERROR, code="WAND/NO_WIND_SEGMENTS",
                             text="Wand liegt in keinem Windbereich.",
-                            kontext=base_ctx,
+                            breadcrumb=zonen_bc, meta=wand_meta,
                         )
                         return []
                     
-                    # Iteration über vertikale Zonen
+                    # Iteration über vertikale Segmente
                     for j, seg in enumerate(segmente):
                         unten_start_lokal = seg["start_lokal"]
                         unten_ende_lokal = vektoren_addieren([unten_start_lokal, teilvektor_unterkante])
@@ -414,26 +397,24 @@ class senkrechteFlaeche:
                         eckpunkte_lokal = [ unten_start_lokal, unten_ende_lokal, oben_ende_lokal, oben_start_lokal ]
                         staudruck   = seg["staudruck"]
 
-                        seg_ctx = merge_kontext(zonen_ctx, {
-                            "segment_index": j,
-                        })
+                        seg_bc = merge_breadcrumb(zonen_bc, [bc_step("segment", j)])
 
                         _kraftbeiwert = kraftbeiwert(
                             norm, objekttyp=self.objekttyp, windrichtung=windrichtung, senkrechte_flaeche_typ=self.flaeche_typ, zone=zone,
                             punkte=self.eckpunkte,
-                            protokoll=protokoll, kontext=seg_ctx
+                            protokoll=protokoll, breadcrumb=seg_bc
                         )
                         _bezugsflaeche = projizierte_flaeche(
                             norm, objekttyp=self.objekttyp, punkte=eckpunkte_lokal,
-                            protokoll=protokoll, kontext=seg_ctx
+                            protokoll=protokoll, breadcrumb=seg_bc
                         )
                         _windkraft = windkraft(
                             norm, objekttyp=self.objekttyp, kraftbeiwert=_kraftbeiwert.wert, staudruck=staudruck, projizierte_flaeche=_bezugsflaeche.wert, senkrechte_flaeche_typ=self.flaeche_typ,
-                            protokoll=protokoll, kontext=seg_ctx
+                            protokoll=protokoll, breadcrumb=seg_bc
                         )
                         _windkraft_vec = windkraft_zu_vektor(
                             norm, objekttyp=self.objekttyp, punkte=eckpunkte_lokal, windkraft=_windkraft.wert, windrichtung=windrichtung, senkrechte_flaeche_typ=self.flaeche_typ,
-                            protokoll=protokoll, kontext=seg_ctx
+                            protokoll=protokoll, breadcrumb=seg_bc
                         )
 
                         einzelkraefte_vektoren.append(_windkraft_vec.wert)
@@ -461,6 +442,7 @@ class senkrechteFlaeche:
                     severity=Severity.ERROR,
                     code="WINDKRAEFTE/NOT_IMPLEMENTED",
                     text=f"Windkraefte für Flächetyp {self.flaeche_typ.value} sind noch nicht implementiert.",
-                    kontext=base_ctx,
+                    breadcrumb=base_bc,
+                    meta=flaeche_meta,
             )
             return []

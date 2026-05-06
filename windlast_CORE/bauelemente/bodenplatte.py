@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from windlast_CORE.materialdaten.catalog import catalog
 from windlast_CORE.datenstruktur.konstanten import PhysikKonstanten, aktuelle_konstanten
-from windlast_CORE.datenstruktur.zwischenergebnis import Protokoll, merge_kontext, protokolliere_msg, protokolliere_doc, make_docbundle
+from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_breadcrumb, bc_step, protokolliere_msg, protokolliere_ergebnis, set_winner
 from typing import List, Optional
 from windlast_CORE.rechenfunktionen import (
     Vec3,
@@ -46,14 +46,12 @@ class Bodenplatte:
         return self.mittelpunkt[2]
     
     def gewichtskraefte(
-        self, *, protokoll: Optional[Protokoll] = None, kontext: Optional[dict] = None
+        self, *, protokoll: Optional[Protokoll] = None, breadcrumb: Optional[list] = None
     ) -> List[Kraefte]:
-        base_ctx = merge_kontext(kontext, {
-            "funktion": "Gewichtskräfte",
-            "element_id": self.element_id_intern,
-            "objekttyp": self.objekttyp.value,
-            "objekt_name": self.anzeigename,
-        })
+        base_bc = breadcrumb if breadcrumb is not None else []
+        base_meta = {
+            "funktion": "Bodenplatte.gewichtskraefte",
+        }
         try:
             specs = catalog.get_bodenplatte(self.name_intern)
             gewichtskraft = -1 * float(specs.gewicht) * aktuelle_konstanten().erdbeschleunigung  # [N]
@@ -61,18 +59,20 @@ class Bodenplatte:
             protokolliere_msg(
                 protokoll, severity=Severity.ERROR, code="BOP/LOOKUP_FAILED",
                 text=f"Bodenplatte '{self.name_intern}': Katalogzugriff fehlgeschlagen ({e}).",
-                kontext=base_ctx,
+                breadcrumb=base_bc,
+                meta=base_meta,
             )
             return []
 
         try:
-            ecken = self.eckpunkte(protokoll=protokoll, kontext=base_ctx)
+            ecken = self.eckpunkte(protokoll=protokoll, breadcrumb=base_bc)
             schwerpunkt = flaechenschwerpunkt(ecken) if ecken else self.mittelpunkt
         except Exception as e:
             protokolliere_msg(
                 protokoll, severity=Severity.ERROR, code="BOP/ECKPUNKTE_FAILED",
                 text=f"Eckpunkte/Schwerpunkt konnten nicht ermittelt werden ({e}).",
-                kontext=base_ctx,
+                breadcrumb=base_bc,
+                meta=base_meta,
             )
             ecken = []
             schwerpunkt = self.mittelpunkt
@@ -80,16 +80,17 @@ class Bodenplatte:
         einzelkraefte_vektoren: list[Vec3] = [(0.0, 0.0, gewichtskraft)]
         angriffsbereiche: list[list[Vec3]] = [ecken]
 
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(
-        #         titel="Gewichtskraft F_G",
-        #         wert= -1 * gewichtskraft,
-        #         formel="F_G = m · g",
-        #         einheit="N",
-        #     ),
-        #     kontext=base_ctx,
-        # )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=base_bc,
+            name="gewichtskraft",
+            wert= -1 * gewichtskraft,
+            label="Gewichtskraft F_G",
+            formelzeichen="F_G",
+            formel="F_G = m · g",
+            einheit="N",
+            meta=base_meta,
+        )
 
         return [Kraefte(
             element_id_intern=self.element_id_intern,
@@ -101,35 +102,31 @@ class Bodenplatte:
         )]
     
     def reibwert_effektiv(
-        self, norm: Norm, *, protokoll: Optional[Protokoll] = None, kontext: Optional[dict] = None
+        self, norm: Norm, *, protokoll: Optional[Protokoll] = None, breadcrumb: Optional[list] = None
     ) -> float:
-        base_ctx = merge_kontext(kontext, {
-            "funktion": "Reibwert",
-            "element_id": self.element_id_intern,
-            "objekt_name": self.anzeigename,
-        })
+        base_bc = breadcrumb if breadcrumb is not None else []
+        base_meta = {
+            "funktion": "Bodenplatte.reibwert_effektiv",
+        }
         material = catalog.get_bodenplatte(self.name_intern).material
         materialfolge = [material, self.gummimatte, self.untergrund]
         return reibwert_fn(
-            norm, materialfolge, protokoll=protokoll, kontext=base_ctx
+            norm, materialfolge, protokoll=protokoll, breadcrumb=base_bc, meta=base_meta
         ).wert
     
     def reibkraefte(
         self, norm: Norm, belastung: Vec3, *,
-        protokoll: Optional[Protokoll] = None, kontext: Optional[dict] = None
+        protokoll: Optional[Protokoll] = None, breadcrumb: Optional[list] = None
     ) -> List[Kraefte]:
-        base_ctx = merge_kontext(kontext, {
-            "funktion": "Reibkräfte",
-            "element_id": self.element_id_intern,
-            "objekttyp": self.objekttyp.value,
-            "objekt_name": self.anzeigename,
-            "belastung": belastung,
-        })
+        base_bc = breadcrumb if breadcrumb is not None else []
+        base_meta = {
+            "funktion": "Bodenplatte.reibkraefte",
+        }
         # Reibwert ermitteln
         material = catalog.get_bodenplatte(self.name_intern).material
         _materialfolge = [material, self.gummimatte, self.untergrund]
         _reibwert = reibwert_fn(
-            norm, _materialfolge, protokoll=protokoll, kontext=base_ctx
+            norm, _materialfolge, protokoll=protokoll, breadcrumb=base_bc, meta=base_meta
         ).wert
 
         # Belastungsrichtung prüfen
@@ -156,12 +153,13 @@ class Bodenplatte:
             )
         
         try:
-            angriffsbereich = self.eckpunkte(protokoll=protokoll, kontext=base_ctx)
+            angriffsbereich = self.eckpunkte(protokoll=protokoll, breadcrumb=base_bc)
         except Exception as e:
             protokolliere_msg(
                 protokoll, severity=Severity.ERROR, code="BOP/ECKPUNKTE_FAILED",
                 text=f"Eckpunkte konnten für Reibkraft nicht ermittelt werden ({e}).",
-                kontext=base_ctx,
+                breadcrumb=base_bc,
+                meta=base_meta,
             )
             angriffsbereich = []
 
@@ -174,14 +172,12 @@ class Bodenplatte:
         )]
     
     def eckpunkte(
-        self, *, protokoll: Optional[Protokoll] = None, kontext: Optional[dict] = None
+        self, *, protokoll: Optional[Protokoll] = None, breadcrumb: Optional[list] = None
     ) -> List[Vec3]:
-        base_ctx = merge_kontext(kontext, {
-            "funktion": "Eckpunkte",
-            "element_id": self.element_id_intern,
-            "objekttyp": self.objekttyp.value,
-            "objekt_name": self.anzeigename,
-        })
+        base_bc = breadcrumb if breadcrumb is not None else []
+        base_meta = {
+            "funktion": "Bodenplatte.eckpunkte",
+        }
 
         form: FormTyp
 
@@ -191,7 +187,8 @@ class Bodenplatte:
             protokolliere_msg(
                 protokoll, severity=Severity.ERROR, code="BOP/BREITE_INVALID",
                 text=f"Bodenplatte '{self.name_intern}' hat keine gültige Breite.",
-                kontext=merge_kontext(base_ctx, {"breite": breite}),
+                breadcrumb=base_bc,
+                meta=base_meta,
             )
             return []
         tiefe = spec.tiefe
@@ -199,7 +196,8 @@ class Bodenplatte:
             protokolliere_msg(
                 protokoll, severity=Severity.ERROR, code="BOP/TIEFE_INVALID",
                 text=f"Bodenplatte '{self.name_intern}' hat keine gültige Tiefe.",
-                kontext=merge_kontext(base_ctx, {"tiefe": tiefe}),
+                breadcrumb=base_bc,
+                meta=base_meta,
             )
             return []
         anzahl_ecken = spec.anzahl_ecken
@@ -207,7 +205,8 @@ class Bodenplatte:
             protokolliere_msg(
                 protokoll, severity=Severity.ERROR, code="BOP/ECKENZAHL_INVALID",
                 text=f"Bodenplatte '{self.name_intern}' hat keine gültige Eckenzahl.",
-                kontext=merge_kontext(base_ctx, {"anzahl_ecken": anzahl_ecken}),
+                breadcrumb=base_bc,
+                meta=base_meta,
             )
             return []
         
@@ -254,6 +253,7 @@ class Bodenplatte:
             protokolliere_msg(
                 protokoll, severity=Severity.ERROR, code="BOP/FORM_UNSUPPORTED",
                 text=f"Eckpunkte für Form {form.name} noch nicht implementiert.",
-                kontext=base_ctx,
+                breadcrumb=base_bc,
+                meta=base_meta,
             )
             return []

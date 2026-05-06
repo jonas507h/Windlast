@@ -4,14 +4,7 @@ import warnings
 
 from windlast_CORE.datenstruktur.enums import Betriebszustand, Windzone, Schutzmassnahmen, Zeitfaktor, Norm, Severity
 from windlast_CORE.datenstruktur.zeit import Dauer
-from windlast_CORE.datenstruktur.zwischenergebnis import (
-    Zwischenergebnis_Liste,
-    Protokoll,
-    merge_kontext,
-    make_docbundle,
-    protokolliere_msg,
-    protokolliere_doc,
-)
+from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis_Liste, Protokoll, merge_breadcrumb, bc_step, protokolliere_msg, protokolliere_ergebnis, set_winner
 from windlast_CORE.datenstruktur.konstanten import _EPS
 from windlast_CORE.datenstruktur.zeit import convert_dauer
 
@@ -161,13 +154,14 @@ def _winddruck_DinEn13814_2005_06(
     windzone: Optional[Windzone],
     *,
     protokoll: Optional[Protokoll] = None,
-    kontext: Optional[dict] = None,
+    breadcrumb: Optional[list] = None,
 ) -> Tuple[Zwischenergebnis_Liste, Zwischenergebnis_Liste]:
-    base_ctx = merge_kontext(kontext, {
-        "funktion": "Staudruecke",
-        "norm": "DIN EN 13814:2005-06",
+    base_bc = breadcrumb if breadcrumb is not None else []
+    base_meta = {
+        "funktion": "winddruck_DInEn13814_2005_06",
+        "windzone": getattr(windzone, "value", str(windzone)),
         "betriebszustand": getattr(zustand, "value", str(zustand)),
-    })
+    }
 
     # 1) Obergrenzen & Staudrücke für den gesetzten Betriebszustand
     try:
@@ -176,7 +170,8 @@ def _winddruck_DinEn13814_2005_06(
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="STAUD/STATE_UNKNOWN",
             text=f"Keine Staudruckdaten für Betriebszustand '{zustand.value}'.",
-            kontext=base_ctx,
+            breadcrumb=base_bc,
+            meta=base_meta,
         )
         nan = Zwischenergebnis_Liste(wert=[float("nan")])
         return nan, nan
@@ -191,8 +186,9 @@ def _winddruck_DinEn13814_2005_06(
     if h > max_obergrenze + _EPS:
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="STAUD/HEIGHT_EXCEEDS_MAX",
-            text=f"Gesamthöhe {h:.3f} m überschreitet die höchste Obergrenze {max_obergrenze:.3f} m (DIN EN 13814:2005-06: {zustand.value}).",
-            kontext=merge_kontext(base_ctx, {"gesamthoehe": f"{h}m", "z_max": f"{max_obergrenze}m"}),
+            text=f"Gesamthöhe {h:.1f} m überschreitet die höchste Obergrenze {max_obergrenze:.1f} m (DIN EN 13814:2005-06: {zustand.value}).",
+            breadcrumb=base_bc,
+            meta=base_meta,
         )
         nan = Zwischenergebnis_Liste(wert=[float("nan")])
         return nan, nan
@@ -204,37 +200,30 @@ def _winddruck_DinEn13814_2005_06(
             protokolliere_msg(
                 protokoll, severity=Severity.WARN, code="STAUD/WINDZONE_CRITICAL",
                 text=f"Die Windgeschwindigkeiten in Windzone '{windzone.value}' überschreiten die für die Anwendung der DIN EN 13814:2005-06 zulässigen Werte.",
-                kontext=merge_kontext(base_ctx, {"windzone": windzone.value}),
+                breadcrumb=base_bc,
+                meta=base_meta,
             )
 
-    # 4) Zwei Zwischenergebnisse bauen: (a) Obergrenzen, (b) Staudrücke
-    # protokolliere_doc(
-    #     protokoll,
-    #     bundle=make_docbundle(
-    #         titel="Obergrenzen z_max",
-    #         wert=obergrenzen,
-    #         einheit="m",
-    #         formel="z_max Klassen",
-    #         quelle_formel="DIN EN 13814:2005-06 (Tabelle q vs. Bauhöhe)",
-    #         formelzeichen=["z_max"],
-    #         quelle_formelzeichen=["DIN EN 13814:2005-06"],
-    #     ),
-    #     kontext=base_ctx,
-    # )
-    # protokolliere_doc(
-    #     protokoll,
-    #     bundle=make_docbundle(
-    #         titel="Staudrücke q",
-    #         wert=q_werte,
-    #         einheit="N/m²",
-    #         formel="q(z)",
-    #         quelle_formel="DIN EN 13814:2005-06 (Tabelle q vs. Bauhöhe)",
-    #         formelzeichen=["q"],
-    #         quelle_formelzeichen=["DIN EN 13814:2005-06"],
-    #     ),
-    #     kontext=base_ctx,
-    # )
-
+    protokolliere_ergebnis(
+        protokoll,
+        breadcrumb=base_bc,
+        name="obergrenzen",
+        wert=obergrenzen,
+        label="Obergrenzen z_max",
+        formelzeichen="z_max",
+        einheit="m",
+        meta=base_meta,
+    )
+    protokolliere_ergebnis(
+        protokoll,
+        breadcrumb=base_bc,
+        name="staudruecke",
+        wert=q_werte,
+        label="Staudrücke q",
+        formelzeichen="q",
+        einheit="N/m²",
+        meta=base_meta,
+    )
     return Zwischenergebnis_Liste(wert=obergrenzen), Zwischenergebnis_Liste(wert=q_werte)
 
 def _winddruck_DinEn17879_2024_08(
@@ -244,13 +233,13 @@ def _winddruck_DinEn17879_2024_08(
     windzone: Optional[Windzone],
     *,
     protokoll: Optional[Protokoll] = None,
-    kontext: Optional[dict] = None,
+    breadcrumb: Optional[list] = None,
 ) -> Tuple[Zwischenergebnis_Liste, Zwischenergebnis_Liste]:
-    base_ctx = merge_kontext(kontext, {
-        "funktion": "Staudruecke",
-        "norm": "DIN EN 17879:2024-08",
+    base_bc = breadcrumb if breadcrumb is not None else []
+    base_meta = {
+        "funktion": "winddruck_DInEn17879_2024_08",
         "zustand": getattr(zustand, "value", str(zustand)),
-    })
+    }
 
     # 1) Obergrenzen & Staudrücke für den gesetzten Betriebszustand
     try:
@@ -259,7 +248,8 @@ def _winddruck_DinEn17879_2024_08(
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="STAUD/STATE_UNKNOWN",
             text=f"Keine Staudruckdaten für Betriebszustand '{zustand.value}' (DIN EN 17879:2024-08).",
-            kontext=base_ctx,
+            breadcrumb=base_bc,
+            meta=base_meta,
         )
         nan = Zwischenergebnis_Liste(wert=[float("nan")])
         return nan, nan
@@ -274,42 +264,35 @@ def _winddruck_DinEn17879_2024_08(
     if h > max_obergrenze + _EPS:
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="STAUD/HEIGHT_EXCEEDS_MAX",
-            text=f"Gesamthöhe {h:.3f} m überschreitet die höchste Obergrenze {max_obergrenze:.3f} m (DIN EN 17879:2024-08: {zustand.value}).",
-            kontext=merge_kontext(base_ctx, {"gesamthoehe": f"{h}m", "z_max": f"{max_obergrenze}m"}),
+            text=f"Gesamthöhe {h:.1f} m überschreitet die höchste Obergrenze {max_obergrenze:.1f} m (DIN EN 17879:2024-08: {zustand.value}).",
+            breadcrumb=base_bc,
+            meta=base_meta,
         )
         nan = Zwischenergebnis_Liste(wert=[float("nan")])
         return nan, nan
 
     # 3) (keine Aufstelldauer-Prüfung in 17879)
 
-    # 4) Zwei Zwischenergebnisse: (a) Obergrenzen, (b) Staudrücke
-    # protokolliere_doc(
-    #     protokoll,
-    #     bundle=make_docbundle(
-    #         titel="Obergrenzen z_max",
-    #         wert=obergrenzen,
-    #         einheit="m",
-    #         formel="z_max Klassen",
-    #         quelle_formel="DIN EN 17879:2024-08 (Tabelle q vs. Bauhöhe)",
-    #         formelzeichen=["z_max"],
-    #         quelle_formelzeichen=["DIN EN 17879:2024-08"],
-    #     ),
-    #     kontext=base_ctx,
-    # )
-    # protokolliere_doc(
-    #     protokoll,
-    #     bundle=make_docbundle(
-    #         titel="Staudrücke q",
-    #         wert=q_werte,
-    #         einheit="N/m²",
-    #         formel="q(z)",
-    #         quelle_formel="DIN EN 17879:2024-08 (Tabelle q vs. Bauhöhe)",
-    #         formelzeichen=["q"],
-    #         quelle_formelzeichen=["DIN EN 17879:2024-08"],
-    #     ),
-    #     kontext=base_ctx,
-    # )
-
+    protokolliere_ergebnis(
+        protokoll,
+        breadcrumb=base_bc,
+        name="obergrenzen",
+        wert=obergrenzen,
+        label="Obergrenzen z_max",
+        formelzeichen="z_max",
+        einheit="m",
+        meta=base_meta,
+    )
+    protokolliere_ergebnis(
+        protokoll,
+        breadcrumb=base_bc,
+        name="staudruecke",
+        wert=q_werte,
+        label="Staudrücke q",
+        formelzeichen="q",
+        einheit="N/m²",
+        meta=base_meta,
+    )
     return Zwischenergebnis_Liste(wert=obergrenzen), Zwischenergebnis_Liste(wert=q_werte)
 
 def _geschwindigkeitsdruck_DinEn1991_1_4_2010_12(
@@ -319,20 +302,22 @@ def _geschwindigkeitsdruck_DinEn1991_1_4_2010_12(
     windzone: Optional[Windzone],
     *,
     protokoll: Optional[Protokoll] = None,
-    kontext: Optional[dict] = None,
+    breadcrumb: Optional[list] = None,
 ) -> Tuple[Zwischenergebnis_Liste, Zwischenergebnis_Liste]:
-    base_ctx = merge_kontext(kontext, {
-        "funktion": "Staudruecke",
-        "norm": "DIN EN 1991-1-4:2010-12",
+    base_bc = breadcrumb if breadcrumb is not None else []
+    base_meta = {
+        "funktion": "geschwindigkeitsdruck_DinEn1991_1_4_2010_12",
         "zustand": getattr(zustand, "value", str(zustand)),
         "windzone": getattr(windzone, "value", str(windzone)),
-    })
+        "aufstelldauer": f"{aufstelldauer.wert} {aufstelldauer.einheit.value}" if aufstelldauer else "None",
+    }
 
     if windzone is None:
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="STAUD/WINDZONE_REQUIRED",
             text="Windzone muss für DIN EN 1991-1-4:2010-12 gesetzt sein.",
-            kontext=base_ctx,
+            breadcrumb=base_bc,
+            meta=base_meta,
         )
         nan = Zwischenergebnis_Liste(wert=[float("nan")])
         return nan, nan
@@ -344,7 +329,8 @@ def _geschwindigkeitsdruck_DinEn1991_1_4_2010_12(
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="STAUD/WINDZONE_UNKNOWN",
             text=f"Keine Geschwindigkeitsdruck-Daten für Windzone '{windzone.value}'.",
-            kontext=base_ctx,
+            breadcrumb=base_bc,
+            meta=base_meta,
         )
         nan = Zwischenergebnis_Liste(wert=[float("nan")])
         return nan, nan
@@ -358,8 +344,9 @@ def _geschwindigkeitsdruck_DinEn1991_1_4_2010_12(
         max_og = obergrenzen_sorted[-1]
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="STAUD/HEIGHT_EXCEEDS_MAX",
-            text=f"Gesamthöhe {h:.3f} m überschreitet die höchste definierte Obergrenze {max_og:.3f} m (DIN EN 1991-1-4:2010-12, Windzone: {windzone.value}).",
-            kontext=merge_kontext(base_ctx, {"gesamthoehe": f"{h}m", "z_max": f"{max_og}m"}),
+            text=f"Gesamthöhe {h:.1f} m überschreitet die höchste definierte Obergrenze {max_og:.1f} m (DIN EN 1991-1-4:2010-12, Windzone: {windzone.value}).",
+            breadcrumb=base_bc,
+            meta=base_meta,
         )
         nan = Zwischenergebnis_Liste(wert=[float("nan")])
         return nan, nan
@@ -390,46 +377,39 @@ def _geschwindigkeitsdruck_DinEn1991_1_4_2010_12(
             protokolliere_msg(
                 protokoll, severity=Severity.WARN, code="STAUD/ABMINDERUNG_AN",
                 text=("Abminderungen der Windlasten nach DIN EN 1991-1-4:2010-12/NA sind bei Bauten, die jederzeit errichtet und demontiert werden können (z.B. fliegende Bauten), nicht zulässig."),
-                kontext=merge_kontext(base_ctx, {"aufstelldauer_monate": dauer_monate, "faktor": faktor}),
+                breadcrumb=base_bc,
+                meta=base_meta,
             )
             if dauer_tage > 3.0 + _EPS and dauer_monate < 3.0 - _EPS:
                 protokolliere_msg(
                     protokoll, severity=Severity.WARN, code="STAUD/ABMINDERUNG_JAHRESZEIT",
                     text=("Die verwendete Aufstelldauer zwischen 3 Tagen und 3 Monaten führt zu einer Abminderung des Staudrucks, die nur für den Zeitraum von Mai bis August zulässig ist."),
-                    kontext=merge_kontext(base_ctx, {"aufstelldauer_monate": dauer_monate, "faktor": faktor}),
+                    breadcrumb=base_bc,
+                    meta=base_meta,
                 )
             q_eff = q_basis * faktor
         # else: Dauer oberhalb der höchsten Obergrenze → faktor=1.0 implizit, keine Warnung
 
-    # 4) Zwei Zwischenergebnisse: (a) [q_eff], (b) [z_max]
-    # protokolliere_doc(
-    #     protokoll,
-    #     bundle=make_docbundle(
-    #         titel="z_max (Klassen-Obergrenze zu h)",
-    #         wert=[gueltige_obergrenze],
-    #         einheit="m",
-    #         formel="z_max (zu h)",
-    #         quelle_formel="DIN EN 1991-1-4:2010-12 (Zonen-Tabelle)",
-    #         formelzeichen=["z_max"],
-    #         quelle_formelzeichen=["DIN EN 1991-1-4:2010-12"],
-    #     ),
-    #     kontext=base_ctx,
-    # )
-    # protokolliere_doc(
-    #     protokoll,
-    #     bundle=make_docbundle(
-    #         titel="Geschwindigkeitsdruck q",
-    #         wert=[q_eff],
-    #         einheit="N/m²",
-    #         formel="q(z=h)",
-    #         quelle_formel="DIN EN 1991-1-4:2010-12 (Zonen-Tabelle); ggf. Faktor für vorübergehenden Zustand",
-    #         formelzeichen=["q"],
-    #         quelle_formelzeichen=["DIN EN 1991-1-4:2010-12"],
-    #         einzelwerte=[q_basis],
-    #     ),
-    #     kontext=base_ctx,
-    # )
-
+    protokolliere_ergebnis(
+        protokoll,
+        breadcrumb=base_bc,
+        name="z_max",
+        wert=gueltige_obergrenze,
+        label="Obergrenze z_max",
+        formelzeichen="z_max",
+        einheit="m",
+        meta=base_meta,
+    )
+    protokolliere_ergebnis(
+        protokoll,
+        breadcrumb=base_bc,
+        name="q_eff",
+        wert=q_eff,
+        label="Effektiver Geschwindigkeitsdruck q",
+        formelzeichen="q_eff",
+        einheit="N/m²",
+        meta=base_meta,
+    )
     return Zwischenergebnis_Liste(wert=[gueltige_obergrenze]), Zwischenergebnis_Liste(wert=[q_eff])
 
 # ----------------------------
@@ -454,15 +434,12 @@ def staudruecke(
     aufstelldauer: Optional[Dauer] = None,
     windzone: Optional[Windzone] = None,
     protokoll: Optional[Protokoll] = None,
-    kontext: Optional[dict] = None,
+    breadcrumb: Optional[list] = None,
 ) -> Tuple[Zwischenergebnis_Liste, Zwischenergebnis_Liste]:
-    base_ctx = merge_kontext(kontext, {
-        "funktion": "Staudruecke",
-        "norm": getattr(norm, "value", str(norm)),
-        "zustand": getattr(zustand, "value", str(zustand)),
-        "windzone": getattr(windzone, "value", str(windzone)) if windzone is not None else None,
-        "nachweis": "BASIS",
-    })
+    base_bc = breadcrumb if breadcrumb is not None else []
+    base_meta = {
+        "funktion": "staudruecke",
+    }
 
     try:
         _validate_inputs(norm, konstruktion, zustand, aufstelldauer, windzone)
@@ -471,24 +448,33 @@ def staudruecke(
     except (TypeError, ValueError) as e:
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="STAUD/INPUT_INVALID",
-            text=str(e), kontext=base_ctx,
+            text=str(e), breadcrumb=base_bc, meta=base_meta,
         )
         nan = Zwischenergebnis_Liste(wert=[float("nan")])
-        # Minimal-Doku mitschreiben
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(titel="Obergrenzen z_max", wert=[float("nan")]),
-        #     kontext=merge_kontext(base_ctx, {"nan": True}),
-        # )
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(titel="Staudrücke q", wert=[float("nan")]),
-        #     kontext=merge_kontext(base_ctx, {"nan": True}),
-        # )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=base_bc,
+            name="z_max",
+            wert=float("nan"),
+            label="Obergrenzen z_max",
+            formelzeichen="z_max",
+            einheit="m",
+            meta=base_meta,
+        )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=base_bc,
+            name="q",
+            wert=float("nan"),
+            label="Staudrücke q",
+            formelzeichen="q",
+            einheit="N/m²",
+            meta=base_meta,
+        )
         return nan, nan
     
     funktion = _DISPATCH.get(norm, _DISPATCH[Norm.DEFAULT])
     return funktion(
         konstruktion, zustand, aufstelldauer, windzone,
-        protokoll=protokoll, kontext=base_ctx,
+        protokoll=protokoll, breadcrumb=base_bc
     )

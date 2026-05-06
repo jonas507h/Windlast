@@ -4,14 +4,7 @@ from typing import Dict, Callable, Optional
 import math
 
 from windlast_CORE.datenstruktur.enums import Norm, ObjektTyp, Severity, senkrechteFlaecheTyp
-from windlast_CORE.datenstruktur.zwischenergebnis import (
-    Zwischenergebnis,
-    Protokoll,
-    merge_kontext,
-    make_docbundle,
-    protokolliere_msg,
-    protokolliere_doc,
-)
+from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_breadcrumb, bc_step, protokolliere_msg, protokolliere_ergebnis, set_winner
 
 def _validate_inputs(
     objekttyp: ObjektTyp,
@@ -44,86 +37,75 @@ def _windkraft_default(
     senkrechte_flaeche_typ: Optional[senkrechteFlaecheTyp] = None,
     *,
     protokoll: Optional[Protokoll] = None,
-    kontext: Optional[dict] = None,
+    breadcrumb: Optional[list] = None,
 ) -> Zwischenergebnis:
+    base_bc = breadcrumb if breadcrumb is not None else []
+    base_meta = {
+        "funktion": "_windkraft_default",
+        "objekttyp": getattr(objekttyp, "value", str(objekttyp)),
+    }
     if objekttyp == ObjektTyp.TRAVERSE:
         wert = kraftbeiwert * staudruck * projizierte_flaeche
-
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(
-        #         titel="Windkraft F_w",
-        #         wert=wert,
-        #         einzelwerte=[kraftbeiwert, staudruck, projizierte_flaeche],
-        #         formel="F_W = c_f · q · A",
-        #         quelle_formel="DIN EN 1991-1-4:2010-12, Abschnitt 5.3",
-        #         einheit="N",
-        #     ),
-        #     kontext=merge_kontext(kontext, {
-        #         "funktion": "Windkraft",
-        #         "objekttyp": getattr(objekttyp, "value", str(objekttyp)),
-        #     }),
-        # )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=base_bc,
+            name="windkraft",
+            wert=wert,
+            label="Windkraft F_W",
+            formelzeichen="F_W",
+            formel="F_W = c_f · q · A",
+            einheit="N",
+            meta=base_meta,
+        )
         return Zwischenergebnis(wert=wert)
     
     elif objekttyp == ObjektTyp.ROHR:
         wert = kraftbeiwert * staudruck * projizierte_flaeche
-
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(
-        #         titel="Windkraft F_w",
-        #         wert=wert,
-        #         einzelwerte=[kraftbeiwert, staudruck, projizierte_flaeche],
-        #         formel="F_W = c_f · q · A",
-        #         quelle_formel="DIN EN 1991-1-4:2010-12, Abschnitt 5.3",
-        #         einheit="N",
-        #     ),
-        #     kontext=merge_kontext(kontext, {
-        #         "funktion": "Windkraft",
-        #         "objekttyp": getattr(objekttyp, "value", str(objekttyp)),
-        #     }),
-        # )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=base_bc,
+            name="windkraft",
+            wert=wert,
+            label="Windkraft F_W",
+            formelzeichen="F_W",
+            formel="F_W = c_f · q · A",
+            einheit="N",
+            meta=base_meta,
+        )
         return Zwischenergebnis(wert=wert)
     
     elif objekttyp == ObjektTyp.SENKRECHTE_FLAECHE:
+        flaeche_meta = {
+            **base_meta,
+            "senkrechte_flaeche_typ": getattr(senkrechte_flaeche_typ, "value", str(senkrechte_flaeche_typ)),
+        }
         if senkrechte_flaeche_typ == senkrechteFlaecheTyp.ANZEIGETAFEL:
             wert = kraftbeiwert * staudruck * projizierte_flaeche
-
-            # protokolliere_doc(
-            #     protokoll,
-            #     bundle=make_docbundle(
-            #         titel="Windkraft F_w",
-            #         wert=wert,
-            #         einzelwerte=[kraftbeiwert, staudruck, projizierte_flaeche],
-            #         formel="F_W = c_f · q · A",
-            #         quelle_formel="DIN EN 1991-1-4:2010-12, Abschnitt 5.3",
-            #         einheit="N",
-            #     ),
-            #     kontext=merge_kontext(kontext, {
-            #         "funktion": "Windkraft",
-            #         "objekttyp": getattr(objekttyp, "value", str(objekttyp)),
-            #     }),
-            # )
+            protokolliere_ergebnis(
+                protokoll,
+                breadcrumb=base_bc,
+                name="windkraft",
+                wert=wert,
+                label="Windkraft F_W",
+                formelzeichen="F_W",
+                formel="F_W = c_f · q · A",
+                einheit="N",
+                meta=flaeche_meta,
+            )
             return Zwischenergebnis(wert=wert)
         elif senkrechte_flaeche_typ == senkrechteFlaecheTyp.WAND:
             wert = kraftbeiwert * staudruck * projizierte_flaeche
-
-            # protokolliere_doc(
-            #     protokoll,
-            #     bundle=make_docbundle(
-            #         titel="Windkraft F_w",
-            #         wert=wert,
-            #         einzelwerte=[kraftbeiwert, staudruck, projizierte_flaeche],
-            #         formel="F_W = c_p,net · q · A",
-            #         quelle_formel="DIN EN 1991-1-4:2010-12, Abschnitte 5.2 & 5.3",
-            #         einheit="N",
-            #     ),
-            #     kontext=merge_kontext(kontext, {
-            #         "funktion": "Windkraft",
-            #         "objekttyp": getattr(objekttyp, "value", str(objekttyp)),
-            #     }),
-            # )
+            protokolliere_ergebnis(
+                protokoll,
+                breadcrumb=base_bc,
+                name="windkraft",
+                wert=wert,
+                label="Windkraft F_W",
+                formelzeichen="F_W",
+                formel="F_W = c_f · q · A",
+                einheit="N",
+                meta=flaeche_meta,
+            )
             return Zwischenergebnis(wert=wert)
         else:
             wert = float("nan")
@@ -132,7 +114,8 @@ def _windkraft_default(
                 severity=Severity.ERROR,
                 code="WINDKRAFT/UNKNOWN_SENKRECHTEFLAECHE_TYP",
                 text=f"Unbekannter Typ für senkrechte Fläche: '{senkrechte_flaeche_typ.name}'.",
-                kontext=kontext,
+                breadcrumb=base_bc,
+                meta=flaeche_meta,
             )
     
     else:
@@ -142,13 +125,19 @@ def _windkraft_default(
             severity=Severity.ERROR,
             code="WINDKRAFT/NOT_IMPLEMENTED",
             text=f"Windkraft für Objekttyp '{objekttyp.value}' ist noch nicht implementiert.",
-            kontext=kontext,
+            breadcrumb=base_bc,
+            meta=base_meta,
         )
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(titel="Windkraft F_w", wert=float("nan")),
-        #     kontext=kontext,
-        # )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=base_bc,
+            name="windkraft",
+            wert=float("nan"),
+            label="Windkraft F_W",
+            formelzeichen="F_W",
+            einheit="N",
+            meta=base_meta,
+        )
         return Zwischenergebnis(wert=float("nan"))
 
 _DISPATCH: Dict[Norm, Callable[..., Zwischenergebnis]] = {
@@ -165,13 +154,12 @@ def windkraft(
 
     *,
     protokoll: Optional[Protokoll] = None,
-    kontext: Optional[dict] = None,
+    breadcrumb: Optional[list] = None,
 ) -> Zwischenergebnis:
-    base_ctx = merge_kontext(kontext, {
-        "funktion": "Windkraft",
-        "objekttyp": getattr(objekttyp, "value", str(objekttyp)),
-        "norm": getattr(norm, "value", str(norm)),
-    })
+    base_bc = breadcrumb if breadcrumb is not None else []
+    base_meta = {
+        "funktion": "windkraft",
+    }
 
     try:
         _validate_inputs(objekttyp, kraftbeiwert, staudruck, projizierte_flaeche, senkrechte_flaeche_typ)
@@ -183,17 +171,23 @@ def windkraft(
             severity=Severity.ERROR,
             code="WINDKRAFT/INPUT_INVALID",
             text=str(e),
-            kontext=base_ctx,
+            breadcrumb=base_bc,
+            meta=base_meta,
         )
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(titel="Windkraft F_w", wert=float("nan")),
-        #     kontext=merge_kontext(base_ctx, {"nan": True}),
-        # )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=base_bc,
+            name="windkraft",
+            wert=float("nan"),
+            label="Windkraft F_W",
+            formelzeichen="F_W",
+            einheit="N",
+            meta=base_meta,
+        )
         return Zwischenergebnis(wert=float("nan"))
     
     funktion = _DISPATCH.get(norm, _DISPATCH[Norm.DEFAULT])
     return funktion(
         objekttyp, kraftbeiwert, staudruck, projizierte_flaeche, senkrechte_flaeche_typ,
-        protokoll=protokoll, kontext=base_ctx,
+        protokoll=protokoll, breadcrumb=base_bc,
     )

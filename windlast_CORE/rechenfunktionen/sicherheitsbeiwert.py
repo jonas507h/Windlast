@@ -2,14 +2,7 @@
 from __future__ import annotations
 from typing import Dict, Callable, Optional
 
-from windlast_CORE.datenstruktur.zwischenergebnis import (
-    Zwischenergebnis,
-    Protokoll,
-    merge_kontext,
-    make_docbundle,
-    protokolliere_msg,
-    protokolliere_doc,
-)
+from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_breadcrumb, bc_step, protokolliere_msg, protokolliere_ergebnis, set_winner
 from windlast_CORE.datenstruktur.enums import Norm, Lasttyp, Variabilitaet, Severity
 from windlast_CORE.datenstruktur.kraefte import Kraefte
 
@@ -23,19 +16,17 @@ def _validate_inputs(norm: Norm, kraft: Kraefte, ist_guenstig: bool) -> None:
     if not hasattr(kraft, "typ") or not hasattr(kraft, "variabilitaet"):
         raise TypeError("kraft muss Felder 'typ' und 'variabilitaet' besitzen.")
 
-def _beiwert_default(
+def _sicherheitsbeiwert_default(
     kraft: Kraefte,
     ist_guenstig: bool,
     *,
     protokoll: Optional[Protokoll] = None,
-    kontext: Optional[dict] = None,
+    breadcrumb: Optional[list] = None,
 ) -> Zwischenergebnis:
-    base_ctx = merge_kontext(kontext, {
-        "funktion": "Sicherheitsbeiwert",
-        "lasttyp": getattr(kraft.typ, "value", str(getattr(kraft, "typ", None))),
-        "variabilitaet": getattr(kraft.variabilitaet, "value", str(getattr(kraft, "variabilitaet", None))),
-        "ist_guenstig": ist_guenstig,
-    })
+    base_bc = breadcrumb if breadcrumb is not None else []
+    base_meta = {
+        "funktion": "sicherheitsbeiwert_default"
+    }
 
     gamma: Optional[float] = None
     formel: str = ""
@@ -68,32 +59,34 @@ def _beiwert_default(
             protokolliere_msg(
                 protokoll, severity=Severity.ERROR, code="SICHB/UNKNOWN_LASTTYP",
                 text=f"Unbekannter Lasttyp: {kraft.typ}",
-                kontext=base_ctx,
+                breadcrumb=base_bc,
             )
-            # protokolliere_doc(
-            #     protokoll,
-            #     bundle=make_docbundle(titel=titel, wert=float("nan")),
-            #     kontext=merge_kontext(base_ctx, {"nan": True}),
-            # )
+            protokolliere_ergebnis(
+                protokoll,
+                breadcrumb=base_bc,
+                name="sicherheitsbeiwert",
+                wert=float("nan"),
+                label="Sicherheitsbeiwert γ",
+                formelzeichen="γ",
+                meta=base_meta,
+            )
             return Zwischenergebnis(wert=float("nan"))
-
-    # protokolliere_doc(
-    #     protokoll,
-    #     bundle=make_docbundle(
-    #         titel=titel,
-    #         wert=gamma,
-    #         formel=formel,
-    #         quelle_formel="DIN EN 17879:2024-08 / DIN EN 13814:2005-06",
-    #         formelzeichen=["γ"],
-    #         quelle_formelzeichen=["---"],
-    #     ),
-    #     kontext=base_ctx,
-    # )
+        
+    protokolliere_ergebnis(
+        protokoll,
+        breadcrumb=base_bc,
+        name="sicherheitsbeiwert",
+        wert=gamma,
+        label="Sicherheitsbeiwert γ",
+        formelzeichen="γ",
+        formel=formel,
+        meta=base_meta,
+    )
     return Zwischenergebnis(wert=gamma)
 
 # Norm-Dispatch (derzeit alle Normen → default)
 _DISPATCH: Dict[Norm, Callable[..., Zwischenergebnis]] = {
-    Norm.DEFAULT: _beiwert_default,
+    Norm.DEFAULT: _sicherheitsbeiwert_default,
 }
 
 def sicherheitsbeiwert(
@@ -102,29 +95,30 @@ def sicherheitsbeiwert(
     ist_guenstig: bool,
     *,
     protokoll: Optional[Protokoll] = None,
-    kontext: Optional[dict] = None,
+    breadcrumb: Optional[list] = None,
 ) -> Zwischenergebnis:
-    base_ctx = merge_kontext(kontext, {
-        "funktion": "Sicherheitsbeiwert",
-        "norm": getattr(norm, "value", str(norm)),
-        "lasttyp": getattr(kraft.typ, "value", str(getattr(kraft, "typ", None))),
-        "variabilitaet": getattr(kraft.variabilitaet, "value", str(getattr(kraft, "variabilitaet", None))),
-        "ist_guenstig": ist_guenstig,
-    })
+    base_bc = breadcrumb if breadcrumb is not None else []
+    base_meta = {
+        "funktion": "sicherheitsbeiwert",
+    }
 
     try:
         _validate_inputs(norm, kraft, ist_guenstig)
     except (TypeError, ValueError) as e:
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="SICHB/INPUT_INVALID",
-            text=str(e), kontext=base_ctx,
+            text=str(e), breadcrumb=base_bc, meta=base_meta,
         )
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(titel="Sicherheitsbeiwert γ", wert=float("nan")),
-        #     kontext=merge_kontext(base_ctx, {"nan": True}),
-        # )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=base_bc,
+            name="sicherheitsbeiwert",
+            wert=float("nan"),
+            label="Sicherheitsbeiwert γ",
+            formelzeichen="γ",
+            meta=base_meta,
+        )
         return Zwischenergebnis(wert=float("nan"))
 
     fn = _DISPATCH.get(norm, _DISPATCH[Norm.DEFAULT])
-    return fn(kraft, ist_guenstig, protokoll=protokoll, kontext=base_ctx)
+    return fn(kraft, ist_guenstig, protokoll=protokoll, breadcrumb=base_bc)

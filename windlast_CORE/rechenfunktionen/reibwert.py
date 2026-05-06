@@ -4,14 +4,7 @@ from __future__ import annotations
 from typing import List, Optional, Sequence, Dict, Tuple, Iterable, Set
 
 from windlast_CORE.datenstruktur.enums import MaterialTyp, Norm, Severity
-from windlast_CORE.datenstruktur.zwischenergebnis import (
-    Zwischenergebnis,
-    Protokoll,
-    merge_kontext,
-    make_docbundle,
-    protokolliere_msg,
-    protokolliere_doc,
-)
+from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_breadcrumb, bc_step, protokolliere_msg, protokolliere_ergebnis, set_winner
 from windlast_CORE.materialdaten.catalog import catalog
 from windlast_CORE.materialdaten.reibwert_data import DATA_REIBWERTE
 
@@ -42,13 +35,12 @@ def reibwert(
     materialfolge: Sequence[Optional[MaterialTyp]],
     *,
     protokoll: Optional[Protokoll] = None,
-    kontext: Optional[dict] = None,
+    breadcrumb: Optional[list] = None,
 ) -> Zwischenergebnis:
-    
-    base_ctx = merge_kontext(kontext, {
-        "funktion": "Reibwert",
-        "norm": getattr(norm, "value", str(norm)),
-    })
+    base_bc = breadcrumb if breadcrumb is not None else []
+    base_meta = {
+        "funktion": "reibwert",
+    }
 
     # 1) None rausfiltern
     cleaned: List[MaterialTyp] = [m for m in materialfolge if m is not None]
@@ -58,13 +50,18 @@ def reibwert(
             severity=Severity.ERROR,
             code="REIB/INPUT_INVALID",
             text="Es werden mindestens zwei reale Materialien benötigt.",
-            kontext=base_ctx,
+            breadcrumb=base_bc,
+            meta=base_meta,
         )
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(titel="Effektiver Reibwert μ_eff", wert=None),
-        #     kontext=merge_kontext(base_ctx, {"None": True}),
-        # )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=base_bc,
+            name="reibwert",
+            wert=float("nan"),
+            label="Effektiver Reibwert μ_eff",
+            formelzeichen="μ_eff",
+            meta=base_meta,
+        )
         return Zwischenergebnis(wert=None)
 
     # 2) Reibwerte Quellen ermitteln
@@ -87,7 +84,8 @@ def reibwert(
                         severity=Severity.HINT,
                         code="REIB/FALLBACK_NORM",
                         text=f"Für Paarung {a.value}–{b.value} wurde auf {used_norm.value} zurückgegriffen.",
-                        kontext=merge_kontext(base_ctx, {"paarung": (a.value, b.value), "norm_used": used_norm.value}),
+                        breadcrumb=base_bc,
+                        meta=base_meta,
                     )
     except KeyError as e:
         protokolliere_msg(
@@ -95,13 +93,18 @@ def reibwert(
             severity=Severity.ERROR,
             code="REIB/PAIR_UNKNOWN",
             text=str(e),
-            kontext=base_ctx,
+            breadcrumb=base_bc,
+            meta=base_meta,
         )
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(titel="Effektiver Reibwert μ_eff", wert=None),
-        #     kontext=merge_kontext(base_ctx, {"None": True}),
-        # )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=base_bc,
+            name="reibwert",
+            wert=float("nan"),
+            label="Effektiver Reibwert μ_eff",
+            formelzeichen="μ_eff",
+            meta=base_meta,
+        )
         return Zwischenergebnis(wert=None)
 
     # 3) effektiver Reibwert ist das Minimum
@@ -115,22 +118,20 @@ def reibwert(
         severity=Severity.INFO,
         code="REIB/PAIR_GOVERNING",
         text=f"Maßgebend ist die Paarung {a_gov.value}–{b_gov.value} mit μ={reibwert_eff:.3f}.",
-        kontext=merge_kontext(base_ctx, {"paarung": (a_gov.value, b_gov.value)}),
+        breadcrumb=base_bc,
+        meta=base_meta,
     )
 
-    # 4) in Zwischenergebnis schreiben
-    # protokolliere_doc(
-    #     protokoll,
-    #     bundle=make_docbundle(
-    #         titel="Effektiver Reibwert μ_eff",
-    #         wert=reibwert_eff,
-    #         formel="μ_eff = min(μ_i)",
-    #         quelle_formel="Konservatives Verfahren: kleinster Reibwert maßgebend.",
-    #         einzelwerte=einzelwerte,
-    #         quelle_einzelwerte=quelle_einzelwerte,
-    #     ),
-    #     kontext=base_ctx,
-    # )
+    protokolliere_ergebnis(
+        protokoll,
+        breadcrumb=base_bc,
+        name="reibwert",
+        wert=reibwert_eff,
+        label="Effektiver Reibwert μ_eff",
+        formelzeichen="μ_eff",
+        formel="μ_eff = min(μ_i)",
+        meta=base_meta,
+    )
 
     return Zwischenergebnis(wert=reibwert_eff)
 

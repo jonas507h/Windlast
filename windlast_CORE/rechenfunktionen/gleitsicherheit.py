@@ -4,7 +4,7 @@ from math import inf
 from typing import Dict, Callable, Sequence, List, Optional
 from collections.abc import Sequence as _SeqABC
 
-from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_kontext, protokolliere_msg, protokolliere_doc, protokolliere_decision, make_docbundle, make_protokoll, merge_protokoll, collect_docs
+from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_breadcrumb, bc_step, protokolliere_msg, protokolliere_ergebnis, set_winner
 from windlast_CORE.datenstruktur.enums import Norm, RechenmethodeGleiten, VereinfachungKonstruktion, Lasttyp, Variabilitaet, Severity
 from windlast_CORE.datenstruktur.konstanten import _EPS, aktuelle_konstanten
 from windlast_CORE.rechenfunktionen.sicherheitsbeiwert import sicherheitsbeiwert
@@ -18,25 +18,6 @@ from windlast_CORE.rechenfunktionen.standsicherheit_utils import (
     gleit_envelope_pro_bauelement,
 )
 from windlast_CORE.rechenfunktionen.geom3d import Vec3, vektoren_addieren, vektor_laenge
-
-def _emit_docs_with_role(*, dst_protokoll, docs, base_ctx: dict, role: str, extra_ctx: dict | None = None):
-    """
-    Nur Top-Level-Vergleichswerte dürfen 'entscheidungsrelevant' bleiben.
-    """
-    TOPLEVEL = {"dir_sicherheit", "dir_min_sicherheit", "dir_ballast"}
-    for bundle, ctx in docs:
-        ktx = merge_kontext(base_ctx, ctx or {})
-        doc_type = (ktx.get("doc_type") or (ctx or {}).get("doc_type"))
-
-        eff_role = role
-        if role == "entscheidungsrelevant" and doc_type not in TOPLEVEL:
-            eff_role = "irrelevant"
-
-        ktx["rolle"] = eff_role
-        if extra_ctx:
-            ktx.update(extra_ctx)
-        protokolliere_doc(dst_protokoll, bundle=bundle, kontext=ktx)
-
 
 def _validate_inputs(
     konstruktion,
@@ -98,35 +79,30 @@ def _gleitsicherheit_DinEn13814_2005_06(
     vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
     anzahl_windrichtungen: int = 4,
     protokoll: Optional[Protokoll] = None,
-    kontext: Optional[dict] = None,
+    breadcrumb: Optional[list] = None,
 ) -> List[Zwischenergebnis]:
-    base_ctx = merge_kontext(kontext, {
-        "funktion": "Gleitsicherheit",
-        "norm": "DIN EN 13814:2005-06",
-        "methode": methode.value,
-    })
+    base_bc = breadcrumb if breadcrumb is not None else []
 
     if vereinfachung_konstruktion is not VereinfachungKonstruktion.KEINE:
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="GLEIT/NOT_IMPLEMENTED",
             text=f"Vereinfachung '{vereinfachung_konstruktion.value}' ist noch nicht implementiert.",
-            kontext=base_ctx,
+            breadcrumb=base_bc,
         )
         return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
 
     if methode is RechenmethodeGleiten.MIN_REIBWERT:
-        reibwert_min = ermittle_min_reibwert(norm,konstruktion, protokoll=protokoll, kontext=base_ctx)
+        reibwert_min = ermittle_min_reibwert(norm,konstruktion, protokoll=protokoll, breadcrumb=base_bc)
 
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(
-        #         titel="Minimaler Reibwert μ_min",
-        #         wert=reibwert_min,
-        #         formel="μ_min = min(μ_Bauelemente)",
-        #         formelzeichen=["μ_Bauelemente"],
-        #     ),
-        #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "min_reibwert"}),
-        # )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb = base_bc,
+            name="min_reibwert",
+            wert=reibwert_min,
+            label="Minimaler Reibwert μ_min",
+            formelzeichen="μ_min",
+            formel="μ_min = min(μ_Bauelemente)"
+        )
 
         sicherheit_min_global = inf
         ballast_erforderlich_max = 0.0
@@ -136,12 +112,12 @@ def _gleitsicherheit_DinEn13814_2005_06(
             Einzelkraefte = [(0.0, 0.0, 0.0)],
             Angriffsflaeche_Einzelkraefte=[[(0.0, 0.0, 0.0)]],
         )
-        sicherheitsbeiwert_ballast = sicherheitsbeiwert(norm, ballastkraft_dummy, ist_guenstig=True, protokoll=protokoll, kontext=base_ctx)
+        sicherheitsbeiwert_ballast = sicherheitsbeiwert(norm, ballastkraft_dummy, ist_guenstig=True, protokoll=protokoll, breadcrumb=base_bc)
         pool = obtain_pool(konstruktion, reset_berechnungen)
         dir_records = []
 
-        for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen, protokoll=protokoll, kontext=base_ctx):
-            sub_prot = make_protokoll()
+        for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen, protokoll=protokoll, breadcrumb=base_bc):
+            richtung_bc = merge_breadcrumb(base_bc, [bc_step("windrichtung_deg", f"{winkel}°", ebene_label="Windrichtung")])
             lastset = get_or_create_lastset(
                 pool,
                 konstruktion,
@@ -151,8 +127,8 @@ def _gleitsicherheit_DinEn13814_2005_06(
                 staudruecke=staudruecke,
                 obergrenzen=obergrenzen,
                 konst=konst,
-                protokoll=sub_prot,
-                kontext=merge_kontext(base_ctx, {"nachweis": "LOADS"}),
+                protokoll=protokoll,
+                kontext=richtung_bc
             )
             kraefte_nach_element = lastset.kraefte_nach_element
 
@@ -164,37 +140,39 @@ def _gleitsicherheit_DinEn13814_2005_06(
             total_normal_up = 0.0
             total_normal_down = 0.0
 
-            richtung_ctx = merge_kontext(base_ctx, {"windrichtung_deg": f"{winkel}°", "windrichtung": richtung, "nachweis": "GLEIT"})
-
             for element, lastfaelle_elem in kraefte_nach_element.items():
-                H_vec, N_down, N_up = gleit_envelope_pro_bauelement(norm, lastfaelle_elem, protokoll=sub_prot, kontext=merge_kontext(richtung_ctx, {"element_id": str(element)}))
-                # protokolliere_doc(
-                #     sub_prot,
-                #     bundle=make_docbundle(
-                #         titel="Horizontalkraft H",
-                #         wert=H_vec,
-                #         einheit="N",
-                #     ),
-                #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "element_horizontalkraft", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
-                # )
-                # protokolliere_doc(
-                #     sub_prot,
-                #     bundle=make_docbundle(
-                #         titel="Normalkraft N_down",
-                #         wert=N_down,
-                #         einheit="N",
-                #     ),
-                #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "element_normalkraft_down", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
-                # )
-                # protokolliere_doc(
-                #     sub_prot,
-                #     bundle=make_docbundle(
-                #         titel="Normalkraft N_up",
-                #         wert=N_up,
-                #         einheit="N",
-                #     ),
-                #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "element_normalkraft_up", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
-                # )
+                element_bc = merge_breadcrumb(richtung_bc, [bc_step("element_id", str(element), ebene_label="Bauelement")])
+                H_vec, N_down, N_up = gleit_envelope_pro_bauelement(norm, lastfaelle_elem, protokoll=protokoll, breadcrumb=element_bc)
+                protokolliere_ergebnis(
+                    protokoll,
+                    breadcrumb=element_bc,
+                    name="horizontalkraft",
+                    wert=H_vec,
+                    label="Horizontalkraft H",
+                    formelzeichen="H",
+                    einheit="N",
+                    priority=10, 
+                )
+                protokolliere_ergebnis(
+                    protokoll,
+                    breadcrumb=element_bc,
+                    name="normalkraft_down",
+                    wert=N_down,
+                    label="Normalkraft N_down",
+                    formelzeichen="N_down",
+                    einheit="N",
+                    priority=10, 
+                )
+                protokolliere_ergebnis(
+                    protokoll,
+                    breadcrumb=element_bc,
+                    name="normalkraft_up",
+                    wert=N_up,
+                    label="Normalkraft N_up",
+                    formelzeichen="N_up",
+                    einheit="N",
+                    priority=10, 
+                )
                 total_horizontal = vektoren_addieren([total_horizontal, H_vec])
                 total_normal_up += N_up
                 total_normal_down += N_down
@@ -204,77 +182,72 @@ def _gleitsicherheit_DinEn13814_2005_06(
             reibkraft = reibwert_min * normal_effektiv
 
             # === Zwischendocs (Aggregat der Richtung) ===
-            # protokolliere_doc(
-            #     sub_prot,
-            #     bundle=make_docbundle(
-            #         titel="Summe Horizontalbetrag |H|",
-            #         wert=horizontal_betrag,
-            #         einheit="N",
-            #         formel="|T| = √(T_x² + T_y² + T_z²)",
-            #         formelzeichen=["T_x", "T_y", "T_z"],
-            #     ),
-            #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "horizontal_betrag", "windrichtung_deg": f"{winkel}°"}),
-            # )
-            # protokolliere_doc(
-            #     sub_prot,
-            #     bundle=make_docbundle(
-            #         titel="Summe Normalkräfte ΣN_down",
-            #         wert=total_normal_down,
-            #         einheit="N",
-            #         formel="ΣN_down = N_{down,Element}",
-            #         formelzeichen=["N_{down,Element}"],
-            #     ),
-            #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "normal_down", "windrichtung_deg": f"{winkel}°"}),
-            # )
-            # protokolliere_doc(
-            #     sub_prot,
-            #     bundle=make_docbundle(
-            #         titel="Summe Normalkräfte ΣN_up",
-            #         wert=total_normal_up,
-            #         einheit="N",
-            #         formel="ΣN_up = N_{up,Element}",
-            #         formelzeichen=["N_{up,Element}"],
-            #     ),
-            #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "normal_up", "windrichtung_deg": f"{winkel}°"}),
-            # )
-            # protokolliere_doc(
-            #     sub_prot,
-            #     bundle=make_docbundle(
-            #         titel="Effektive Normalkraft N_eff",
-            #         wert=normal_effektiv,
-            #         einheit="N",
-            #         formel="N_eff = max(0, ΣN_down − ΣN_up)",
-            #         formelzeichen=["ΣN_down", "ΣN_up"],
-            #     ),
-            #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "normal_effektiv", "windrichtung_deg": f"{winkel}°"}),
-            # )
-            # protokolliere_doc(
-            #     sub_prot,
-            #     bundle=make_docbundle(
-            #         titel="Reibkraft R",
-            #         wert=reibkraft,
-            #         einheit="N",
-            #         formel="R = μ_min · N_eff",
-            #         formelzeichen=["μ_min", "N_eff"],
-            #     ),
-            #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "reibkraft", "windrichtung_deg": f"{winkel}°"}),
-            # )
+            protokolliere_ergebnis(
+                protokoll,
+                breadcrumb=richtung_bc,
+                name="horizontal_betrag",
+                wert=horizontal_betrag,
+                label="Summe Horizontalbetrag |H|",
+                formelzeichen="|H|",
+                einheit="N",
+                priority=7,
+            )
+            protokolliere_ergebnis(
+                protokoll,
+                breadcrumb=richtung_bc,
+                name="normal_down",
+                wert=total_normal_down,
+                label="Summe Normalkräfte ΣN_down",
+                formelzeichen="ΣN_down",
+                einheit="N",
+                priority=7,
+            )
+            protokolliere_ergebnis(
+                protokoll,
+                breadcrumb=richtung_bc,
+                name="normal_up",
+                wert=total_normal_up,
+                label="Summe Normalkräfte ΣN_up",
+                formelzeichen="ΣN_up",
+                einheit="N",
+                priority=7,
+            )
+            protokolliere_ergebnis(
+                protokoll,
+                breadcrumb=richtung_bc,
+                name="normal_effektiv",
+                wert=normal_effektiv,
+                label="Effektive Normalkraft N_eff",
+                formelzeichen="N_eff",
+                formel="N_eff = max(0, ΣN_down − ΣN_up)",
+                einheit="N",
+                priority=7,
+            )
+            protokolliere_ergebnis(
+                protokoll,
+                breadcrumb=richtung_bc,
+                name="reibkraft",
+                wert=reibkraft,
+                label="Reibkraft R",
+                formelzeichen="R",
+                formel="R = μ_min · N_eff",
+                einheit="N",
+                priority=7,
+            )
 
             if horizontal_betrag > _EPS:
                 sicherheit = reibkraft / horizontal_betrag
                 dir_min_sicherheit = min(dir_min_sicherheit, sicherheit)
                 
-            # protokolliere_doc(
-            #     sub_prot,
-            #     bundle=make_docbundle(
-            #         titel=f"Richtungs-Sicherheit S_gleit,{int(winkel)}°",
-            #         wert=sicherheit,
-            #         formel="S = R / T",
-            #         formelzeichen=["R", "T"],
-            #         quelle_formel="---",
-            #     ),
-            #     kontext={"nachweis": "GLEIT", "doc_type": "dir_sicherheit", "windrichtung_deg": f"{winkel}°"},
-            # )
+            protokolliere_ergebnis(
+                protokoll,
+                breadcrumb=richtung_bc,
+                name="richtung_sicherheit_gleit",
+                wert=sicherheit,
+                label=f"Richtungs-Sicherheit S_gleit,{int(winkel)}°",
+                formelzeichen=f"S_gleit,{int(winkel)}°",
+                priority=10,
+            )
 
             if reibwert_min <= _EPS:
                 if horizontal_betrag > _EPS:
@@ -289,26 +262,22 @@ def _gleitsicherheit_DinEn13814_2005_06(
                 dir_ballast_max = ballastkraft
 
             # Ballast-Doc (Richtung)
-            # protokolliere_doc(
-            #     sub_prot,
-            #     bundle=make_docbundle(
-            #         titel=f"Richtungs-Ballast m_Ballast,gleit,{int(winkel)}°",
-            #         wert=ballastkraft,
-            #         einheit="kg",
-            #         formel="Δm_Ballast,gleit = T/μ + ΣN_up − ΣN_down",
-            #         formelzeichen=["T", "μ", "N_up", "N_down"],
-            #         quelle_formel="---",
-            #     ),
-            #     kontext={"nachweis": "GLEIT", "doc_type": "dir_ballast", "windrichtung_deg": f"{winkel}°"},
-            # )
+            protokolliere_ergebnis(
+                protokoll,
+                breadcrumb=richtung_bc,
+                name="richtung_ballast_gleit",
+                wert=ballastkraft,
+                label=f"Richtungs-Ballast m_Ballast,gleit,{int(winkel)}°",
+                formelzeichen=f"m_Ballast,gleit,{int(winkel)}°",
+                einheit="N",
+                priority=10,
+            )
 
             # Record ablegen (WICHTIG: innerhalb der Schleife!)
             dir_records.append({
                 "windrichtung_deg": f"{winkel}°",
                 "dir_min_sicherheit": dir_min_sicherheit,
                 "dir_ballast_max": dir_ballast_max,
-                "docs": collect_docs(sub_prot),
-                "sub_prot": sub_prot,
             })
 
         # --- Globale Entscheidung & Rollenvergabe ---
@@ -317,23 +286,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
 
         winner_idx = min(range(len(dir_records)), key=lambda i: dir_records[i]["dir_min_sicherheit"])
         winner = dir_records[winner_idx]
-
-        # Messages: Gewinner alles, Verlierer nur Errors
-        for i, rec in enumerate(dir_records):
-            if i == winner_idx:
-                merge_protokoll(rec["sub_prot"], protokoll, only_errors=False)
-            else:
-                merge_protokoll(rec["sub_prot"], protokoll, only_errors=True)
-
-        # Docs mit Rollen ausspielen
-        for i, rec in enumerate(dir_records):
-            role = "relevant" if i == winner_idx else "entscheidungsrelevant"
-            _emit_docs_with_role(
-                dst_protokoll=protokoll,
-                docs=rec["docs"],
-                base_ctx=merge_kontext(base_ctx, {"nachweis": "GLEIT", "windrichtung_deg": rec["windrichtung_deg"]}),
-                role=role,
-            )
+        set_winner(protokoll, merge_breadcrumb(base_bc, [bc_step("windrichtung_deg", winner["windrichtung_deg"])]))
 
         sicherheit_min_global = dir_records[winner_idx]["dir_min_sicherheit"]
         ballast_erforderlich_max = dir_records[winner_idx]["dir_ballast_max"]
@@ -342,36 +295,24 @@ def _gleitsicherheit_DinEn13814_2005_06(
         erdbeschleunigung = aktuelle_konstanten().erdbeschleunigung
         ballast_kg = ballast_erforderlich_max / erdbeschleunigung
 
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(
-        #         titel="Gleitsicherheit S_gleit",
-        #         wert=sicherheit_min_global,
-        #         formel="S = R / T",
-        #         formelzeichen=["R", "T"],
-        #         quelle_formel="---",
-        #     ),
-        #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "rolle": "relevant"}),
-        # )
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(
-        #         titel="Erforderlicher Ballast m_Ballast,gleit",
-        #         wert=ballast_kg,
-        #         einheit="kg",
-        #         formel="Δm_Ballast,gleit = T/μ + ΣN_up − ΣN_down",
-        #         formelzeichen=["T", "μ", "N_up", "N_down"],
-        #         quelle_formel="---",
-        #     ),
-        #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "ballast_pro_sicherheit", "quelle_nachweis": "GLEIT", "rolle": "relevant"}),
-        # )
-
-        #Entscheidung protokollieren
-        protokolliere_decision(
+        protokolliere_ergebnis(
             protokoll,
-            key="windrichtung_deg",
-            value=dir_records[winner_idx]["windrichtung_deg"],
-            scope={"nachweis": "GLEIT"},
+            breadcrumb=base_bc,
+            name="gleitsicherheit",
+            wert=sicherheit_min_global,
+            label="Gleitsicherheit S_gleit",
+            formelzeichen="S_gleit",
+            priority=10,
+        )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=base_bc,
+            name="ballast_gleit",
+            wert=ballast_kg,
+            label="Erforderlicher Ballast m_Ballast,gleit",
+            formelzeichen="m_Ballast,gleit",
+            einheit="kg",
+            priority=10,
         )
 
         return [Zwischenergebnis(wert=sicherheit_min_global), Zwischenergebnis(wert=ballast_kg)]
@@ -380,7 +321,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="GLEIT/METHOD_NI",
             text=f"Methode '{methode.value}' ({methode.name}) ist noch nicht implementiert.",
-            kontext=base_ctx,
+            breadcrumb=base_bc,
         )
         return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
 
@@ -396,35 +337,30 @@ def _gleitsicherheit_DinEn17879_2024_08(
     vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
     anzahl_windrichtungen: int = 4,
     protokoll: Optional[Protokoll] = None,
-    kontext: Optional[dict] = None
+    breadcrumb: Optional[list] = None,
 ) -> List[Zwischenergebnis]:
-    base_ctx = merge_kontext(kontext, {
-        "funktion": "Gleitsicherheit",
-        "norm": "DIN EN 17879:2024-08",
-        "methode": methode.value,
-    })
+    base_bc = breadcrumb if breadcrumb is not None else []
 
     if vereinfachung_konstruktion is not VereinfachungKonstruktion.KEINE:
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="GLEIT/NOT_IMPLEMENTED",
             text=f"Vereinfachung '{vereinfachung_konstruktion.value}' ist noch nicht implementiert.",
-            kontext=base_ctx,
+            breadcrumb=base_bc,
         )
         return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
 
     if methode is RechenmethodeGleiten.MIN_REIBWERT:
-        reibwert_min = ermittle_min_reibwert(norm,konstruktion, protokoll=protokoll, kontext=base_ctx)
+        reibwert_min = ermittle_min_reibwert(norm,konstruktion, protokoll=protokoll, breadcrumb=base_bc)
 
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(
-        #         titel="Minimaler Reibwert μ_min",
-        #         wert=reibwert_min,
-        #         formel="μ_min = min(μ_Bauelemente)",
-        #         formelzeichen=["μ_Bauelemente"],
-        #     ),
-        #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "min_reibwert"}),
-        # )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb = base_bc,
+            name="min_reibwert",
+            wert=reibwert_min,
+            label="Minimaler Reibwert μ_min",
+            formelzeichen="μ_min",
+            formel="μ_min = min(μ_Bauelemente)"
+        )
 
         sicherheit_min_global = inf
         ballast_erforderlich_max = 0.0
@@ -434,12 +370,12 @@ def _gleitsicherheit_DinEn17879_2024_08(
             Einzelkraefte = [(0.0, 0.0, 0.0)],
             Angriffsflaeche_Einzelkraefte=[[(0.0, 0.0, 0.0)]],
         )
-        sicherheitsbeiwert_ballast = sicherheitsbeiwert(norm, ballastkraft_dummy, ist_guenstig=True, protokoll=protokoll, kontext=base_ctx)
+        sicherheitsbeiwert_ballast = sicherheitsbeiwert(norm, ballastkraft_dummy, ist_guenstig=True, protokoll=protokoll, breadcrumb=base_bc)
         pool = obtain_pool(konstruktion, reset_berechnungen)
         dir_records = []
 
-        for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen, protokoll=protokoll, kontext=base_ctx):
-            sub_prot = make_protokoll()
+        for winkel, richtung in generiere_windrichtungen(anzahl=anzahl_windrichtungen, protokoll=protokoll, breadcrumb=base_bc):
+            richtung_bc = merge_breadcrumb(base_bc, [bc_step("windrichtung_deg", f"{winkel}°", ebene_label="Windrichtung")])
             lastset = get_or_create_lastset(
                 pool,
                 konstruktion,
@@ -449,8 +385,8 @@ def _gleitsicherheit_DinEn17879_2024_08(
                 staudruecke=staudruecke,
                 obergrenzen=obergrenzen,
                 konst=konst,
-                protokoll=sub_prot,
-                kontext=merge_kontext(base_ctx, {"nachweis": "LOADS"}),
+                protokoll=protokoll,
+                kontext=richtung_bc
             )
             kraefte_nach_element = lastset.kraefte_nach_element
 
@@ -462,37 +398,39 @@ def _gleitsicherheit_DinEn17879_2024_08(
             total_normal_up = 0.0
             total_normal_down = 0.0
 
-            richtung_ctx = merge_kontext(base_ctx, {"windrichtung_deg": f"{winkel}°", "windrichtung": richtung, "nachweis": "GLEIT"})
-
             for element, lastfaelle_elem in kraefte_nach_element.items():
-                H_vec, N_down, N_up = gleit_envelope_pro_bauelement(norm, lastfaelle_elem, protokoll=sub_prot, kontext=merge_kontext(richtung_ctx, {"element_id": str(element)}))
-                # protokolliere_doc(
-                #     sub_prot,
-                #     bundle=make_docbundle(
-                #         titel="Horizontalkraft H",
-                #         wert=H_vec,
-                #         einheit="N",
-                #     ),
-                #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "element_horizontalkraft", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
-                # )
-                # protokolliere_doc(
-                #     sub_prot,
-                #     bundle=make_docbundle(
-                #         titel="Normalkraft N_down",
-                #         wert=N_down,
-                #         einheit="N",
-                #     ),
-                #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "element_normalkraft_down", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
-                # )
-                # protokolliere_doc(
-                #     sub_prot,
-                #     bundle=make_docbundle(
-                #         titel="Normalkraft N_up",
-                #         wert=N_up,
-                #         einheit="N",
-                #     ),
-                #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "element_normalkraft_up", "windrichtung_deg": f"{winkel}°", "element_id": str(element)}),
-                # )
+                element_bc = merge_breadcrumb(richtung_bc, [bc_step("element_id", str(element), ebene_label="Bauelement")])
+                H_vec, N_down, N_up = gleit_envelope_pro_bauelement(norm, lastfaelle_elem, protokoll=protokoll, breadcrumb=element_bc)
+                protokolliere_ergebnis(
+                    protokoll,
+                    breadcrumb=element_bc,
+                    name="horizontalkraft",
+                    wert=H_vec,
+                    label="Horizontalkraft H",
+                    formelzeichen="H",
+                    einheit="N",
+                    priority=10, 
+                )
+                protokolliere_ergebnis(
+                    protokoll,
+                    breadcrumb=element_bc,
+                    name="normalkraft_down",
+                    wert=N_down,
+                    label="Normalkraft N_down",
+                    formelzeichen="N_down",
+                    einheit="N",
+                    priority=10, 
+                )
+                protokolliere_ergebnis(
+                    protokoll,
+                    breadcrumb=element_bc,
+                    name="normalkraft_up",
+                    wert=N_up,
+                    label="Normalkraft N_up",
+                    formelzeichen="N_up",
+                    einheit="N",
+                    priority=10, 
+                )
                 total_horizontal = vektoren_addieren([total_horizontal, H_vec])
                 total_normal_up += N_up
                 total_normal_down += N_down
@@ -502,82 +440,79 @@ def _gleitsicherheit_DinEn17879_2024_08(
             reibkraft = reibwert_min * normal_effektiv
 
             # === Zwischendocs (Aggregat der Richtung) ===
-            # protokolliere_doc(
-            #     sub_prot,
-            #     bundle=make_docbundle(
-            #         titel="Summe Horizontalbetrag |H|",
-            #         wert=horizontal_betrag,
-            #         einheit="N",
-            #         formel="|T| = √(T_x² + T_y² + T_z²)",
-            #         formelzeichen=["T_x", "T_y", "T_z"],
-            #     ),
-            #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "horizontal_betrag", "windrichtung_deg": f"{winkel}°"}),
-            # )
-            # protokolliere_doc(
-            #     sub_prot,
-            #     bundle=make_docbundle(
-            #         titel="Summe Normalkräfte ΣN_down",
-            #         wert=total_normal_down,
-            #         einheit="N",
-            #         formel="ΣN_down = N_{down,Element}",
-            #         formelzeichen=["N_{down,Element}"],
-            #     ),
-            #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "normal_down", "windrichtung_deg": f"{winkel}°"}),
-            # )
-            # protokolliere_doc(
-            #     sub_prot,
-            #     bundle=make_docbundle(
-            #         titel="Summe Normalkräfte ΣN_up",
-            #         wert=total_normal_up,
-            #         einheit="N",
-            #         formel="ΣN_up = N_{up,Element}",
-            #         formelzeichen=["N_{up,Element}"],
-            #     ),
-            #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "normal_up", "windrichtung_deg": f"{winkel}°"}),
-            # )
-            # protokolliere_doc(
-            #     sub_prot,
-            #     bundle=make_docbundle(
-            #         titel="Effektive Normalkraft N_eff",
-            #         wert=normal_effektiv,
-            #         einheit="N",
-            #         formel="N_eff = max(0, ΣN_down − ΣN_up)",
-            #         formelzeichen=["ΣN_down", "ΣN_up"],
-            #     ),
-            #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "normal_effektiv", "windrichtung_deg": f"{winkel}°"}),
-            # )
-            # protokolliere_doc(
-            #     sub_prot,
-            #     bundle=make_docbundle(
-            #         titel="Reibkraft R",
-            #         wert=reibkraft,
-            #         einheit="N",
-            #         formel="R = μ_min · N_eff",
-            #         formelzeichen=["μ_min", "N_eff"],
-            #     ),
-            #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "doc_type": "reibkraft", "windrichtung_deg": f"{winkel}°"}),
-            # )
+            protokolliere_ergebnis(
+                protokoll,
+                breadcrumb=richtung_bc,
+                name="horizontal_betrag",
+                wert=horizontal_betrag,
+                label="Summe Horizontalbetrag |H|",
+                formelzeichen="|H|",
+                einheit="N",
+                priority=7,
+            )
+            protokolliere_ergebnis(
+                protokoll,
+                breadcrumb=richtung_bc,
+                name="normal_down",
+                wert=total_normal_down,
+                label="Summe Normalkräfte ΣN_down",
+                formelzeichen="ΣN_down",
+                einheit="N",
+                priority=7,
+            )
+            protokolliere_ergebnis(
+                protokoll,
+                breadcrumb=richtung_bc,
+                name="normal_up",
+                wert=total_normal_up,
+                label="Summe Normalkräfte ΣN_up",
+                formelzeichen="ΣN_up",
+                einheit="N",
+                priority=7,
+            )
+            protokolliere_ergebnis(
+                protokoll,
+                breadcrumb=richtung_bc,
+                name="normal_effektiv",
+                wert=normal_effektiv,
+                label="Effektive Normalkraft N_eff",
+                formelzeichen="N_eff",
+                formel="N_eff = max(0, ΣN_down − ΣN_up)",
+                einheit="N",
+                priority=7,
+            )
+            protokolliere_ergebnis(
+                protokoll,
+                breadcrumb=richtung_bc,
+                name="reibkraft",
+                wert=reibkraft,
+                label="Reibkraft R",
+                formelzeichen="R",
+                formel="R = μ_min · N_eff",
+                einheit="N",
+                priority=7,
+            )
 
             if horizontal_betrag > _EPS:
                 sicherheit = reibkraft / horizontal_betrag
                 dir_min_sicherheit = min(dir_min_sicherheit, sicherheit)
-                # protokolliere_doc(
-                #     sub_prot,
-                #     bundle=make_docbundle(
-                #         titel=f"Richtungs-Sicherheit S_gleit,{int(winkel)}°",
-                #         wert=sicherheit,
-                #         formel="S = R / T",
-                #         formelzeichen=["R", "T"],
-                #         quelle_formel="---",
-                #     ),
-                #     kontext={"nachweis": "GLEIT", "doc_type": "dir_sicherheit", "windrichtung_deg": f"{winkel}°"},
-                # )
+                
+            protokolliere_ergebnis(
+                protokoll,
+                breadcrumb=richtung_bc,
+                name="richtung_sicherheit_gleit",
+                wert=sicherheit,
+                label=f"Richtungs-Sicherheit S_gleit,{int(winkel)}°",
+                formelzeichen=f"S_gleit,{int(winkel)}°",
+                priority=10,
+            )
 
             if reibwert_min <= _EPS:
                 if horizontal_betrag > _EPS:
                     ballastkraft = inf
                 else:
-                    ballastkraft = max(0.0, total_normal_up - total_normal_down) / sicherheitsbeiwert_ballast.wert
+                    # ballastkraft = max(0.0, total_normal_up - total_normal_down) / sicherheitsbeiwert_ballast.wert
+                    ballastkraft = 0.0
             else:
                 ballastkraft = max(0.0, horizontal_betrag / reibwert_min + total_normal_up - total_normal_down) / sicherheitsbeiwert_ballast.wert
 
@@ -585,26 +520,22 @@ def _gleitsicherheit_DinEn17879_2024_08(
                 dir_ballast_max = ballastkraft
 
             # Ballast-Doc (Richtung)
-            # protokolliere_doc(
-            #     sub_prot,
-            #     bundle=make_docbundle(
-            #         titel=f"Richtungs-Ballast m_Ballast,gleit,{int(winkel)}°",
-            #         wert=ballastkraft,
-            #         einheit="kg",
-            #         formel=f"m_Ballast,gleit,{int(winkel)}° = T/μ + ΣN_up − ΣN_down",
-            #         formelzeichen=["T", "μ", "N_up", "N_down"],
-            #         quelle_formel="---",
-            #     ),
-            #     kontext={"nachweis": "GLEIT", "doc_type": "dir_ballast", "windrichtung_deg": f"{winkel}°"},
-            # )
+            protokolliere_ergebnis(
+                protokoll,
+                breadcrumb=richtung_bc,
+                name="richtung_ballast_gleit",
+                wert=ballastkraft,
+                label=f"Richtungs-Ballast m_Ballast,gleit,{int(winkel)}°",
+                formelzeichen=f"m_Ballast,gleit,{int(winkel)}°",
+                einheit="N",
+                priority=10,
+            )
 
             # Record ablegen (WICHTIG: innerhalb der Schleife!)
             dir_records.append({
                 "windrichtung_deg": f"{winkel}°",
                 "dir_min_sicherheit": dir_min_sicherheit,
                 "dir_ballast_max": dir_ballast_max,
-                "docs": collect_docs(sub_prot),
-                "sub_prot": sub_prot,
             })
 
         # --- Globale Entscheidung & Rollenvergabe ---
@@ -613,23 +544,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
 
         winner_idx = min(range(len(dir_records)), key=lambda i: dir_records[i]["dir_min_sicherheit"])
         winner = dir_records[winner_idx]
-
-        # Messages: Gewinner alles, Verlierer nur Errors
-        for i, rec in enumerate(dir_records):
-            if i == winner_idx:
-                merge_protokoll(rec["sub_prot"], protokoll, only_errors=False)
-            else:
-                merge_protokoll(rec["sub_prot"], protokoll, only_errors=True)
-
-        # Docs mit Rollen ausspielen
-        for i, rec in enumerate(dir_records):
-            role = "relevant" if i == winner_idx else "entscheidungsrelevant"
-            _emit_docs_with_role(
-                dst_protokoll=protokoll,
-                docs=rec["docs"],
-                base_ctx=merge_kontext(base_ctx, {"nachweis": "GLEIT", "windrichtung_deg": rec["windrichtung_deg"]}),
-                role=role,
-            )
+        set_winner(protokoll, merge_breadcrumb(base_bc, [bc_step("windrichtung_deg", winner["windrichtung_deg"])]))
 
         sicherheit_min_global = dir_records[winner_idx]["dir_min_sicherheit"]
         ballast_erforderlich_max = dir_records[winner_idx]["dir_ballast_max"]
@@ -638,45 +553,33 @@ def _gleitsicherheit_DinEn17879_2024_08(
         erdbeschleunigung = aktuelle_konstanten().erdbeschleunigung
         ballast_kg = ballast_erforderlich_max / erdbeschleunigung
 
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(
-        #         titel="Gleitsicherheit S_gleit",
-        #         wert=sicherheit_min_global,
-        #         formel="S_gleit = R / T",
-        #         formelzeichen=["R", "T"],
-        #         quelle_formel="---",
-        #     ),
-        #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "rolle": "relevant"}),
-        # )
-        # protokolliere_doc(
-        #     protokoll,
-        #     bundle=make_docbundle(
-        #         titel="Erforderlicher Ballast m_Ballast,gleit",
-        #         wert=ballast_kg,
-        #         einheit="kg",
-        #         formel="m_Ballast,gleit = T/μ + ΣN_up − ΣN_down",
-        #         formelzeichen=["T", "μ", "N_up", "N_down"],
-        #         quelle_formel="---",
-        #     ),
-        #     kontext=merge_kontext(base_ctx, {"nachweis": "GLEIT", "rolle": "relevant"}),
-        # )
-
-        #Entscheidung protokollieren
-        protokolliere_decision(
+        protokolliere_ergebnis(
             protokoll,
-            key="windrichtung_deg",
-            value=dir_records[winner_idx]["windrichtung_deg"],
-            scope={"nachweis": "GLEIT"},
+            breadcrumb=base_bc,
+            name="gleitsicherheit",
+            wert=sicherheit_min_global,
+            label="Gleitsicherheit S_gleit",
+            formelzeichen="S_gleit",
+            priority=10,
+        )
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=base_bc,
+            name="ballast_gleit",
+            wert=ballast_kg,
+            label="Erforderlicher Ballast m_Ballast,gleit",
+            formelzeichen="m_Ballast,gleit",
+            einheit="kg",
+            priority=10,
         )
 
         return [Zwischenergebnis(wert=sicherheit_min_global), Zwischenergebnis(wert=ballast_kg)]
-    
+
     else:
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="GLEIT/METHOD_NI",
             text=f"Methode '{methode.value}' ({methode.name}) ist noch nicht implementiert.",
-            kontext=base_ctx,
+            breadcrumb=base_bc,
         )
         return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
     
@@ -698,13 +601,9 @@ def gleitsicherheit(
     vereinfachung_konstruktion: VereinfachungKonstruktion = VereinfachungKonstruktion.KEINE,
     anzahl_windrichtungen: int = 4,
     protokoll: Optional[Protokoll] = None,
-    kontext: Optional[dict] = None,
+    breadcrumb: Optional[list] = None,
 ) -> List[Zwischenergebnis]:
-    base_ctx = merge_kontext(kontext, {
-        "funktion": "Gleitsicherheit",
-        "norm": getattr(norm, "value", str(norm)),
-        "anzahl_windrichtungen": anzahl_windrichtungen,
-    })
+    base_bc = merge_breadcrumb(breadcrumb, [bc_step("nachweis", "GLEIT")])
 
     try:
         _validate_inputs(
@@ -721,7 +620,7 @@ def gleitsicherheit(
     except Exception as e:
         protokolliere_msg(
             protokoll, severity=Severity.ERROR, code="GLEIT/INPUT_INVALID",
-            text=str(e), kontext=base_ctx,
+            text=str(e), breadcrumb=base_bc,
         )
         return [Zwischenergebnis(wert=float("nan")), Zwischenergebnis(wert=float("nan"))]
     
@@ -737,6 +636,6 @@ def gleitsicherheit(
         vereinfachung_konstruktion=vereinfachung_konstruktion,
         anzahl_windrichtungen=anzahl_windrichtungen,
         protokoll=protokoll,
-        kontext=base_ctx,
+        breadcrumb=base_bc,
     )
     
