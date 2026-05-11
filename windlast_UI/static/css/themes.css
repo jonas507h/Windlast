@@ -16,7 +16,7 @@
 
   /* Brand / Accent */
   --master-accent: #fdc300;          /* intensiver Akzent */
-  --master-accent-2: #fdc300;        /* etwas abgedunkelt für Flächen */
+  --master-accent-2: #ffedc2;        /* etwas abgedunkelt für Flächen */
   --master-accent-3: #575756;        /* für Linien, Konturen */
   --master-on-accent: #3c3c3b;       /* Text auf Akzentflächen */
 
@@ -78,14 +78,15 @@
   --border: var(--master-border);
   --muted: var(--master-muted);
   --link: var(--master-link);
+  --hover-bg: var(--master-overlay-3);
 
   /* Controls & Tabs */
-  --button-bg: var(--master-accent-2);
+  --button-bg: var(--master-accent);
   --button-border: var(--master-accent);
   --button-text: var(--master-on-accent);
-  --button-hover-bg: var(--master-overlay-3);
-  --button-active-text: var(--master-on-accent);
-  --button-active-bg: var(--master-accent);
+  --button-sec-bg: var(--master-accent-2);
+  --button-sec-border: var(--master-accent);
+  --button-sec-text: var(--master-text);
   --tab-bg: var(--master-surface-2);
   --tab-active-border: var(--master-accent);
   --modal-shadow: var(--master-shadow-strong);
@@ -220,8 +221,8 @@
   --preview-wall-fill: var(--master-surface-3);
 
   --preview-dimension-line: var(--master-accent);
-  --preview-dimension-text-fill: var(--master-on-accent);
-  --preview-dimension-text-outline: var(--master-accent-2);
+  --preview-dimension-text-fill: var(--master-text);
+  --preview-dimension-text-outline: var(--master-text);
   --preview-dimension-text-bg: var(--master-accent-2);
   --preview-dimension-text-border: var(--master-accent);
 }
@@ -244,7 +245,7 @@
 
   /* Brand / Accent */
   --master-accent: #fdc300;          /* intensiver Akzent */
-  --master-accent-2: #fdc300;        /* etwas abgedunkelt für Flächen */
+  --master-accent-2: #ffedc2;       /* etwas abgedunkelt für Flächen */
   --master-accent-3: #575756;        /* für Linien, Konturen */
   --master-on-accent: #3c3c3b;       /* Text auf Akzentflächen */
 
@@ -306,14 +307,15 @@
   --border: var(--master-border);
   --muted: var(--master-muted);
   --link: var(--master-link);
+  --hover-bg: var(--master-overlay-3);
 
   /* Controls & Tabs */
-  --button-bg: var(--master-accent-2);
+  --button-bg: var(--master-accent);
   --button-border: var(--master-accent);
   --button-text: var(--master-on-accent);
-  --button-hover-bg: var(--master-overlay-3);
-  --button-active-text: var(--master-on-accent);
-  --button-active-bg: var(--master-accent);
+  --button-sec-bg: var(--master-accent-2);
+  --button-sec-border: var(--master-accent);
+  --button-sec-text: var(--master-text);
   --tab-bg: var(--master-surface-2);
   --tab-active-border: var(--master-accent);
   --modal-shadow: var(--master-shadow-strong);
@@ -448,8 +450,8 @@
   --preview-wall-fill: var(--master-surface-3);
 
   --preview-dimension-line: var(--master-accent);
-  --preview-dimension-text-fill: var(--master-on-accent);
-  --preview-dimension-text-outline: var(--master-accent-2);
+  --preview-dimension-text-fill: var(--master-text);
+  --preview-dimension-text-outline: var(--master-text);
   --preview-dimension-text-bg: var(--master-accent-2);
   --preview-dimension-text-border: var(--master-accent);
 }
@@ -472,9 +474,9 @@
 
   /* Brand / Accent */
   --master-accent: #fed462;          /* intensiver Akzent */
-  --master-accent-2: #191919;        /* etwas abgedunkelt für Flächen */
+  --master-accent-2: #1b1b1b;       /* etwas abgedunkelt für Flächen */
   --master-accent-3: #c6c6c6;        /* für Linien, Konturen */
-  --master-on-accent: #fed462;       /* Text auf Akzentflächen */
+  --master-on-accent: #333333;       /* Text auf Akzentflächen */
 
   --master-hit-bg: rgba(255, 215, 0, 0.35);
   --master-hit-border: rgba(180, 140, 0, 0.8);
@@ -534,14 +536,15 @@
   --border: var(--master-border);
   --muted: var(--master-muted);
   --link: var(--master-link);
+  --hover-bg: var(--master-overlay-3);
 
   /* Controls & Tabs */
-  --button-bg: var(--master-accent-2);
+  --button-bg: var(--master-accent);
   --button-border: var(--master-accent);
   --button-text: var(--master-on-accent);
-  --button-hover-bg: var(--master-overlay-3);
-  --button-active-text: var(--master-on-accent);
-  --button-active-bg: var(--master-accent);
+  --button-sec-bg: var(--master-accent-2);
+  --button-sec-border: var(--master-accent);
+  --button-sec-text: var(--master-text);
   --tab-bg: var(--master-surface-2);
   --tab-active-border: var(--master-accent);
   --modal-shadow: var(--master-shadow-strong);
@@ -676,8 +679,8 @@
   --preview-wall-fill: var(--master-surface-3);
 
   --preview-dimension-line: var(--master-accent);
-  --preview-dimension-text-fill: var(--master-on-accent);
-  --preview-dimension-text-outline: var(--master-accent-2);
+  --preview-dimension-text-fill: var(--master-text);
+  --preview-dimension-text-outline: var(--master-text);
   --preview-dimension-text-bg: var(--master-accent-2);
   --preview-dimension-text-border: var(--master-accent);
 }
@@ -762,14 +765,15 @@
   --border: var(--master-border);
   --muted: var(--master-muted);
   --link: var(--master-link);
+  --hover-bg: var(--master-overlay-3);
 
   /* Controls & Tabs */
-  --button-bg: var(--master-accent-2);
+  --button-bg: var(--master-accent);
   --button-border: var(--master-accent);
   --button-text: var(--master-on-accent);
-  --button-hover-bg: var(--master-overlay-3);
-  --button-active-text: var(--master-on-accent);
-  --button-active-bg: var(--master-accent);
+  --button-sec-bg: var(--master-accent-3);
+  --button-sec-border: var(--master-accent);
+  --button-sec-text: var(--master-text);
   --tab-bg: var(--master-surface-2);
   --tab-active-border: var(--master-accent);
   --modal-shadow: var(--master-shadow-strong);
@@ -904,8 +908,8 @@
   --preview-wall-fill: var(--master-surface-3);
 
   --preview-dimension-line: var(--master-accent);
-  --preview-dimension-text-fill: var(--master-on-accent);
-  --preview-dimension-text-outline: var(--master-accent-2);
+  --preview-dimension-text-fill: var(--master-text);
+  --preview-dimension-text-outline: var(--master-text);
   --preview-dimension-text-bg: var(--master-accent-2);
   --preview-dimension-text-border: var(--master-accent);
 }

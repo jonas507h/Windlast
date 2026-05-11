@@ -2,6 +2,7 @@ import { escapeHtml, formatNumberDE, formatVectorDE, formatMathWithSubSup } from
 import { listEbenen, listGruppen, listErgebnisse, listMessages, makePathLabel } from "./tree.js";
 import { renderTree } from "./render_tree.js";
 import { renderBreadcrumb } from "./render_breadcrumb.js";
+import { renderNavigation } from "./render_navigation.js";
 
 function formatValue(value) {
   if (Array.isArray(value)) return formatVectorDE(value, 4);
@@ -58,6 +59,7 @@ export function renderErgebnisModalContent(rootNode, { startPath = null } = {}) 
     <section class="erg-detail-pane">
       <div class="erg-detail-header">
         <div class="erg-breadcrumb-slot"></div>
+        <div class="erg-navigation-slot"></div>
       </div>
       <div class="erg-detail-content"></div>
     </section>
@@ -65,6 +67,7 @@ export function renderErgebnisModalContent(rootNode, { startPath = null } = {}) 
 
   const treePane = shell.querySelector(".erg-tree-pane");
   const breadcrumbSlot = shell.querySelector(".erg-breadcrumb-slot");
+  const navigationSlot = shell.querySelector(".erg-navigation-slot");
   const contentEl = shell.querySelector(".erg-detail-content");
 
   function renderDetails(nodeInfo) {
@@ -89,6 +92,36 @@ export function renderErgebnisModalContent(rootNode, { startPath = null } = {}) 
           if (targetEntry) {
             tree.select(targetEntry.id);
           }
+        },
+      })
+    );
+
+    navigationSlot.replaceChildren(
+      renderNavigation({
+        nodeInfo,
+        onUp: () => {
+          if (!nodeInfo.path.length) {
+            tree.select("root");
+            return;
+          }
+
+          const parentPath = nodeInfo.path.slice(0, -1);
+          if (!parentPath.length) {
+            tree.select("root");
+          } else {
+            tree.selectPath(parentPath);
+          }
+        },
+        onChild: (child) => {
+          const childPath = [
+            ...nodeInfo.path,
+            {
+              ebene: child.ebene,
+              gruppe: child.gruppe,
+            },
+          ];
+
+          tree.selectPath(childPath);
         },
       })
     );
