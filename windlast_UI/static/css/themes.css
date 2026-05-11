@@ -83,6 +83,9 @@
   --button-bg: var(--master-accent-2);
   --button-border: var(--master-accent);
   --button-text: var(--master-on-accent);
+  --button-hover-bg: var(--master-overlay-3);
+  --button-active-text: var(--master-on-accent);
+  --button-active-bg: var(--master-accent);
   --tab-bg: var(--master-surface-2);
   --tab-active-border: var(--master-accent);
   --modal-shadow: var(--master-shadow-strong);
@@ -308,6 +311,9 @@
   --button-bg: var(--master-accent-2);
   --button-border: var(--master-accent);
   --button-text: var(--master-on-accent);
+  --button-hover-bg: var(--master-overlay-3);
+  --button-active-text: var(--master-on-accent);
+  --button-active-bg: var(--master-accent);
   --tab-bg: var(--master-surface-2);
   --tab-active-border: var(--master-accent);
   --modal-shadow: var(--master-shadow-strong);
@@ -533,6 +539,9 @@
   --button-bg: var(--master-accent-2);
   --button-border: var(--master-accent);
   --button-text: var(--master-on-accent);
+  --button-hover-bg: var(--master-overlay-3);
+  --button-active-text: var(--master-on-accent);
+  --button-active-bg: var(--master-accent);
   --tab-bg: var(--master-surface-2);
   --tab-active-border: var(--master-accent);
   --modal-shadow: var(--master-shadow-strong);
@@ -758,6 +767,9 @@
   --button-bg: var(--master-accent-2);
   --button-border: var(--master-accent);
   --button-text: var(--master-on-accent);
+  --button-hover-bg: var(--master-overlay-3);
+  --button-active-text: var(--master-on-accent);
+  --button-active-bg: var(--master-accent);
   --tab-bg: var(--master-surface-2);
   --tab-active-border: var(--master-accent);
   --modal-shadow: var(--master-shadow-strong);
@@ -828,11 +840,6 @@
   --role-rel-fg: var(--master-relevant-fg);
   --role-irr-bg: var(--master-irrelevant-bg);
   --role-irr-fg: var(--master-irrelevant-fg);
-
-  /* Ergebnismodal */
-  --erg-tree-btn-hover-bg: var(--master-surface-2);
-  --erg-tree-btn-active-bg: var(--master-accent);
-  --erg-tree-btn-active-fg: var(--master-bg);
 
   /* Wiki */
   --wiki-header-bg: var(--master-overlay-2);

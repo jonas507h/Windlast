@@ -1,6 +1,7 @@
 import { escapeHtml, formatNumberDE, formatVectorDE, formatMathWithSubSup } from "../../utils/formatierung.js";
 import { listEbenen, listGruppen, listErgebnisse, listMessages, makePathLabel } from "./tree.js";
 import { renderTree } from "./render_tree.js";
+import { renderBreadcrumb } from "./render_breadcrumb.js";
 
 function formatValue(value) {
   if (Array.isArray(value)) return formatVectorDE(value, 4);
@@ -41,7 +42,7 @@ function renderMessageItem(message) {
   `;
 }
 
-export function renderErgebnisModalContent(rootNode) {
+export function renderErgebnisModalContent(rootNode, { startPath = null } = {}) {
   const state = { nodes: new Map(), selectedId: null };
 
   const rootId = "root";
@@ -56,15 +57,14 @@ export function renderErgebnisModalContent(rootNode) {
 
     <section class="erg-detail-pane">
       <div class="erg-detail-header">
-        <h4 class="erg-detail-title">Root</h4>
+        <div class="erg-breadcrumb-slot"></div>
       </div>
-
       <div class="erg-detail-content"></div>
     </section>
   `;
 
   const treePane = shell.querySelector(".erg-tree-pane");
-  const titleEl = shell.querySelector(".erg-detail-title");
+  const breadcrumbSlot = shell.querySelector(".erg-breadcrumb-slot");
   const contentEl = shell.querySelector(".erg-detail-content");
 
   function renderDetails(nodeInfo) {
@@ -72,7 +72,26 @@ export function renderErgebnisModalContent(rootNode) {
     const ergebnisse = listErgebnisse(node);
     const messages = listMessages(node);
 
-    titleEl.textContent = makePathLabel(nodeInfo.path);
+    breadcrumbSlot.replaceChildren(
+      renderBreadcrumb({
+        path: nodeInfo.path,
+        onSelectPath: (pathIndex) => {
+          if (pathIndex < 0) {
+            tree.select("root");
+            return;
+          }
+
+          const targetPath = nodeInfo.path.slice(0, pathIndex + 1);
+          const targetEntry = [...tree.state.nodes.values()].find((entry) => {
+            return JSON.stringify(entry.path) === JSON.stringify(targetPath);
+          });
+
+          if (targetEntry) {
+            tree.select(targetEntry.id);
+          }
+        },
+      })
+    );
 
     const resultsHtml = ergebnisse.length
       ? `<ul class="erg-result-list">${ergebnisse.map(renderResultItem).join("")}</ul>`
@@ -101,7 +120,11 @@ export function renderErgebnisModalContent(rootNode) {
 
   treePane.appendChild(tree.element);
 
-  tree.select("root");
+  if (startPath && !tree.selectPath(startPath)) {
+    tree.select("root");
+  } else if (!startPath) {
+    tree.select("root");
+  }
 
   return shell;
 }

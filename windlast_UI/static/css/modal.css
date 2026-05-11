@@ -549,7 +549,7 @@
 .erg-tree-view {
   font-size: 0.82rem;
   line-height: 1.15;
-  color: var(--master-text);
+  color: var(--text);
 }
 
 .erg-tree-list,
@@ -562,7 +562,7 @@
 .erg-tree-children {
   margin-left: 0.8rem;
   padding-left: 0.45rem;
-  border-left: 1px solid var(--master-border);
+  border-left: 1px solid var(--border);
 }
 
 .erg-tree-node {
@@ -583,7 +583,7 @@
   padding: 0;
   border: 0;
   background: transparent;
-  color: var(--master-muted);
+  color: var(--muted);
   cursor: pointer;
   line-height: 1;
 }
@@ -598,7 +598,7 @@
   min-width: 0;
   border: 0;
   background: transparent;
-  color: var(--master-text);
+  color: var(--text);
   text-align: left;
   border-radius: 6px;
   padding: 0.12rem 0.35rem;
@@ -609,23 +609,23 @@
 }
 
 .erg-tree-select:hover {
-  background: var(--master-surface-2);
+  background: var(--button-hover-bg);
 }
 
 .erg-tree-select.active {
-  background: var(--master-accent);
-  color: var(--master-bg);
+  background: var(--button-active-bg);
+  color: var(--button-active-text);
 }
 
 .erg-tree-key,
 .erg-tree-eq {
-  color: var(--master-muted);
+  color: var(--muted);
   font-size: 0.75rem;
 }
 
 .erg-tree-select.active .erg-tree-key,
 .erg-tree-select.active .erg-tree-eq {
-  color: var(--master-bg);
+  color: var(--button-active-text);
 }
 
 .erg-tree-label {
@@ -637,4 +637,61 @@
 .erg-tree-winner {
   margin-left: auto;
   font-weight: 700;
+}
+
+.erg-breadcrumb-box {
+  border: 1px solid var(--border);
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 0.35rem 0.5rem;
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.erg-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  white-space: nowrap;
+}
+
+.erg-breadcrumb-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.erg-breadcrumb-sep {
+  color: var(--muted);
+  opacity: 0.75;
+}
+
+.erg-breadcrumb-btn {
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  border-radius: 7px;
+  padding: 0.18rem 0.35rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  font-size: 0.78rem;
+}
+
+.erg-breadcrumb-btn:hover {
+  background: var(--button-hover-bg);
+}
+
+.erg-breadcrumb-key {
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.erg-breadcrumb-label {
+  font-weight: 600;
 }

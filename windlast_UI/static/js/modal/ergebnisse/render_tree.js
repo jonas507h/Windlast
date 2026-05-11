@@ -193,9 +193,43 @@ export function renderTree({ rootNode, onSelect }) {
     }
   });
 
+  function pathsEqual(a = [], b = []) {
+    if (a.length !== b.length) return false;
+    return a.every((step, i) =>
+      String(step.ebene) === String(b[i].ebene) &&
+      String(step.gruppe) === String(b[i].gruppe)
+    );
+  }
+
+  function selectPath(path) {
+    const target = [...state.nodes.values()].find((entry) => pathsEqual(entry.path, path));
+    if (!target) return false;
+
+    // Eltern aufklappen
+    for (let i = 0; i <= target.path.length; i++) {
+      const partial = target.path.slice(0, i);
+      const entry = [...state.nodes.values()].find((e) => pathsEqual(e.path, partial));
+      if (!entry) continue;
+
+      const li = root.querySelector(`[data-tree-node="${CSS.escape(entry.id)}"]`);
+      const children = li?.querySelector(":scope > .erg-tree-children");
+      const toggle = li?.querySelector(":scope > .erg-tree-row > .erg-tree-toggle");
+
+      if (children && toggle && children.hasAttribute("hidden")) {
+        children.removeAttribute("hidden");
+        toggle.textContent = "▾";
+        toggle.setAttribute("aria-expanded", "true");
+      }
+    }
+
+    setSelected(target.id);
+    return true;
+  }
+
   return {
     element: root,
     state,
     select: setSelected,
+    selectPath,
   };
 }

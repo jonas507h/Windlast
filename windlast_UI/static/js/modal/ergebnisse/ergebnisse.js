@@ -1,6 +1,7 @@
 import { getNormDisplayName, displayAltName } from "../../utils/formatierung.js";
 import { getScenarioRoot } from "./tree.js";
 import { renderErgebnisModalContent } from "./render.js";
+import { getScenarioPath } from "./tree.js";
 
 let DEPS = {
   getVM: null,
@@ -36,14 +37,14 @@ export function openErgebnisseModal(normKey, szenario = null) {
   const tree = VM?.payload?.ergebnis || VM?.tree || null;
   if (!tree) return;
 
-  const scenarioRoot = getScenarioRoot(tree, normKey, szenario);
-  if (!scenarioRoot) return;
+  const startPath = getScenarioPath(normKey, szenario);
+  if (!startPath.length) return;
 
   const normName = getNormDisplayName(normKey);
   const niceScenario = szenario ? displayAltName(szenario) : "Hauptberechnung";
   const title = `Ergebnisse – ${normName} (${niceScenario})`;
 
-  const body = renderErgebnisModalContent(scenarioRoot);
+  const body = renderErgebnisModalContent(tree, { startPath });
   const buildModal = DEPS.buildModal || fallbackBuildModal;
   const wrap = buildModal(title, body);
 
