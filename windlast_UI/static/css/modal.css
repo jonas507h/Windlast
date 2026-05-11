@@ -641,25 +641,27 @@
   background: var(--bg);
   border-radius: 10px;
   padding: 0.35rem 0.5rem;
-  overflow-x: auto;
   max-width: 100%;
 }
 
 .erg-breadcrumb {
   display: flex;
+  flex-wrap: wrap; /* <-- wichtig */
   align-items: center;
   gap: 0.25rem;
+
   list-style: none;
   margin: 0;
   padding: 0;
-  white-space: nowrap;
 }
 
 .erg-breadcrumb-item {
   display: flex;
   align-items: center;
   gap: 0.25rem;
+
   min-width: 0;
+  max-width: 100%;
 }
 
 .erg-breadcrumb-sep {
@@ -678,7 +680,11 @@
   display: inline-flex;
   align-items: baseline;
   gap: 0.25rem;
+
   font-size: 0.78rem;
+
+  min-width: 0;
+  max-width: 100%;
 }
 
 .erg-breadcrumb-btn:hover {
@@ -688,8 +694,13 @@
 .erg-breadcrumb-key {
   color: var(--muted);
   font-size: 0.7rem;
+
+  flex: 0 0 auto;
 }
 
 .erg-breadcrumb-label {
   font-weight: 600;
+
+  min-width: 0;
+  overflow-wrap: anywhere; /* <-- lange Namen umbrechen */
 }
