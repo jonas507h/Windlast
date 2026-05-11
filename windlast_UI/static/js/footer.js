@@ -1,6 +1,6 @@
 // footer.js  (als ES Module laden)
 import { configureMeldungen, setupMeldungenUI } from "./modal/meldungen.js";
-import { configureErgebnisse, setupErgebnisseUI } from "./modal/ergebnisse.js";
+import { configureErgebnisse, setupErgebnisseUI } from "./modal/ergebnisse/ergebnisse.js";
 import { displayAltName } from "./utils/formatierung.js";
 import { getNorminfo } from "./modal/norminfo.js";
 

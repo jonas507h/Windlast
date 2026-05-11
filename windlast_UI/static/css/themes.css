@@ -829,6 +829,11 @@
   --role-irr-bg: var(--master-irrelevant-bg);
   --role-irr-fg: var(--master-irrelevant-fg);
 
+  /* Ergebnismodal */
+  --erg-tree-btn-hover-bg: var(--master-surface-2);
+  --erg-tree-btn-active-bg: var(--master-accent);
+  --erg-tree-btn-active-fg: var(--master-bg);
+
   /* Wiki */
   --wiki-header-bg: var(--master-overlay-2);
   --wiki-header-border: var(--master-overlay-3);

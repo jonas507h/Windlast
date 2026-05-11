@@ -62,17 +62,21 @@
     }
   }
 
-  function open(content, { onOpen } = {}) {
+  function open(content, { onOpen, dialogClass } = {}) {
     lastFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
+    dialogEl.className = "modal-dialog";
+    if (dialogClass) dialogEl.classList.add(dialogClass);
+
     setContent(content);
     setVisible(true);
-    // Fokus ins Dialogfenster
     (root.querySelector(".modal-close") || dialogEl).focus({ preventScroll: true });
     onOpen && onOpen(dialogEl);
   }
 
   function close() {
     setVisible(false);
+    dialogEl.className = "modal-dialog";
     setContent("");
     if (lastFocused && document.contains(lastFocused)) {
       lastFocused.focus({ preventScroll: true });

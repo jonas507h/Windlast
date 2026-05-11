@@ -95,59 +95,59 @@
    =========================================== */
 
 /* Card-Wrapper je Ebene */
-#modal-root .group-card {
+/* #modal-root .group-card {
   border: 1px solid var(--border);
   border-radius: 10px;
   background: var(--panel);
   overflow: hidden;
-  margin: 6px 4px;        /* mehr vertikaler Abstand + ein Tick horizontal */
-}
+  margin: 6px 4px;
+} */
 
 /* erste Ebene darf ruhig ein bisschen "luftiger" sein */
-#modal-root .doc-groups > .group-card {
+/* #modal-root .doc-groups > .group-card {
   margin: 8px 0;
-}
+} */
 
 /* verschachtelte Cards leicht eingerückt,
    damit sich die Rahmen nicht direkt berühren */
-#modal-root .group-card .group-card {
+/* #modal-root .group-card .group-card {
   margin: 6px 8px;
-}
+} */
 
 /* leichte optische Unterschiede je Ebene (optional) */
-#modal-root .axis-card { border-radius: 8px; }
+/* #modal-root .axis-card { border-radius: 8px; }
 #modal-root .elem-card { border-style: solid; }
-#modal-root .axis-card { border-style: solid; }
+#modal-root .axis-card { border-style: solid; } */
 
 /* Details selbst ohne eigenen Border/Hintergrund */
-#modal-root .dir-group,
+/* #modal-root .dir-group,
 #modal-root .elem-group,
 #modal-root .axis-group {
   border: none;
   background: transparent;
   border-radius: 0;
-}
+} */
 
 /* Zähler (z. B. (13)) – Standard im Modal */
-#modal-root .muted {
+/* #modal-root .muted {
   font-size: .9em;
   margin-left: .4rem;
   color: var(--muted);
-}
+} */
 
 /* Unterelemente in der Card leicht eingerückt (historische Klassen) */
-#modal-root .dir-card   .elem-groups   { padding: 4px 14px 4px 14px; }
+/* #modal-root .dir-card   .elem-groups   { padding: 4px 14px 4px 14px; }
 #modal-root .elem-card  .axis-groups   { padding: 4px 12px 4px 12px; }
-#modal-root .axis-card  .doc-list      { padding: 4px 12px 4px 12px; }
+#modal-root .axis-card  .doc-list      { padding: 4px 12px 4px 12px; } */
 
 /* === Listeneinträge innerhalb der Achsen === */
-#modal-root .doc-list {
+/* #modal-root .doc-list {
   list-style: none;
   margin: 4px 0 8px 0;
   padding: 0;
-}
+} */
 
-#modal-root .doc-list .doc-li {
+/* #modal-root .doc-list .doc-li {
   display: grid;
   grid-template-columns: auto auto 1fr;
   align-items: baseline;
@@ -157,21 +157,21 @@
   position: relative;
   border-radius: 4px;
   margin-bottom: 1px;
-}
+} */
 
 /* 1. Kind = Label, 2. Kind = "=", 3. Kind = Wert */
-#modal-root .doc-list .doc-li > :nth-child(1) { justify-self: start; white-space: nowrap; }
+/* #modal-root .doc-list .doc-li > :nth-child(1) { justify-self: start; white-space: nowrap; }
 #modal-root .doc-list .doc-li > :nth-child(2) { justify-self: start; opacity: .85; white-space: nowrap; }
-#modal-root .doc-list .doc-li > :nth-child(3) { justify-self: end;   white-space: nowrap; }
+#modal-root .doc-list .doc-li > :nth-child(3) { justify-self: end;   white-space: nowrap; } */
 
 /* ===== Nachweis-Filter / Chips ===== */
-#modal-root .nachweis-filter {
+/* #modal-root .nachweis-filter {
   display: flex;
   gap: .5rem;
   margin: .5rem 0 .75rem;
-}
+} */
 
-#modal-root .nachweis-filter .nf-chip {
+/* #modal-root .nachweis-filter .nf-chip {
   color: var(--text);
   background: var(--panel);
   border: 1px solid var(--border);
@@ -183,9 +183,9 @@
   appearance: none;
   -webkit-appearance: none;
   outline: none;
-}
+} */
 
-#modal-root .nachweis-filter .nf-chip:hover {
+/* #modal-root .nachweis-filter .nf-chip:hover {
   filter: brightness(0.97);
 }
 
@@ -199,13 +199,13 @@
   color: var(--text);
 }
 
-/* Badge im Chip */
+
 #modal-root .nachweis-filter .nf-chip .muted {
   color: var(--muted);
-}
+} */
 
 /* ===== Rollen-Highlighting für Zwischenergebnisse ===== */
-#modal-root .doc-list .doc-li.role-key {
+/* #modal-root .doc-list .doc-li.role-key {
   background-color: var(--role-key-bg);
   color: var(--role-key-fg);
 }
@@ -216,29 +216,29 @@
 #modal-root .doc-list .doc-li.role-irr {
   background-color: var(--role-irr-bg);
   color: var(--role-irr-fg);
-}
+} */
 
 /* ===== Generisches Summary-Styling für alle Gruppen ===== */
-#modal-root .group-card > details > summary {
+/* #modal-root .group-card > details > summary {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 8px 12px;
   font-weight: 600;
   position: relative;
-  padding-left: 1.2em; /* Platz für den Pfeil */
+  padding-left: 1.2em;
   cursor: pointer;
   user-select: none;
-  border-bottom: 1px solid var(--border); /* Trennlinie unter jedem Titel */
-}
+  border-bottom: 1px solid var(--border);
+} */
 
 /* native Marker ausblenden */
-#modal-root .group-card > details > summary::-webkit-details-marker {
+/* #modal-root .group-card > details > summary::-webkit-details-marker {
   display: none;
-}
+} */
 
 /* Pfeil vor jedem Summary */
-#modal-root .group-card > details > summary::before {
+/* #modal-root .group-card > details > summary::before {
   content: "▸";
   position: absolute;
   left: 0.3em;
@@ -246,12 +246,12 @@
   transform: translateY(-50%);
   opacity: 0.8;
   font-size: 0.9em;
-}
+} */
 
 /* Geöffnet: Pfeil nach unten */
-#modal-root .group-card > details[open] > summary::before {
+/* #modal-root .group-card > details[open] > summary::before {
   content: "▾";
-}
+} */
 
 /* ==========================
    Passwort-Modal
@@ -374,4 +374,168 @@
 #modal-root .settings-check-sub {
   color: var(--muted);
   font-size: 0.85rem;
+}
+
+/* ==========================
+   Ergebnisse-Modal
+   ========================== */
+
+.modal-dialog-wide {
+  width: min(96vw, 1500px);
+  max-width: min(96vw, 1500px);
+  height: min(92vh, 980px);
+}
+
+.modal-dialog-wide .modal-content {
+  height: 100%;
+  min-height: 0;
+}
+
+.ergebnisse-modal {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: 1rem;
+  height: calc(92vh - 5rem);
+  min-height: 520px;
+}
+
+.erg-tree-pane,
+.erg-detail-pane {
+  min-height: 0;
+  border: 1px solid var(--border);
+  background: var(--field-bg);
+  border-radius: 14px;
+}
+
+.erg-tree-pane {
+  overflow: auto;
+  padding: 0.75rem;
+}
+
+.erg-detail-pane {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.erg-detail-header {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--field-bg);
+}
+
+.erg-detail-title {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.erg-detail-content {
+  overflow: auto;
+  padding: 1rem;
+}
+
+.erg-tree,
+.erg-tree-groups {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.erg-tree-children {
+  margin-left: 0.85rem;
+  padding-left: 0.65rem;
+  border-left: 1px solid var(--border);
+}
+
+.erg-tree-level-label {
+  margin: 0.75rem 0 0.35rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.erg-tree-root,
+.erg-tree-btn {
+  width: 100%;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  padding: 0.38rem 0.5rem;
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+.erg-tree-root:hover,
+.erg-tree-btn:hover {
+  background: var(--erg-tree-btn-hover-bg);
+}
+
+.erg-tree-root.active,
+.erg-tree-btn.active {
+  background: var(--erg-tree-btn-active-bg);
+  color: var(--erg-tree-btn-active-fg);
+}
+
+.erg-tree-winner {
+  float: right;
+  font-weight: 700;
+}
+
+.erg-section-title {
+  margin: 0 0 0.65rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.erg-result-list,
+.erg-message-list {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+}
+
+.erg-result-item,
+.erg-message-item {
+  border: 1px solid var(--border);
+  background: var(--field-bg);
+  color: var(--text);
+  border-radius: 12px;
+  padding: 0.7rem 0.85rem;
+  margin-bottom: 0.55rem;
+}
+
+.erg-result-main {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.erg-result-label {
+  font-weight: 650;
+}
+
+.erg-result-symbol {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.erg-result-value {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+
+.erg-result-formula {
+  margin-top: 0.35rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.erg-empty {
+  color: var(--muted);
 }
