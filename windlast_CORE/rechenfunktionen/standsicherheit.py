@@ -513,6 +513,6 @@ def standsicherheit(
     tree = collect_tree(prot) or prot.root
 
     # DEBUG
-    debug_tree(tree,output_dir="debug_output")
+    # debug_tree(tree,output_dir="debug_output")
 
     return tree

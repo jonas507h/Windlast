@@ -111,7 +111,7 @@ class Bodenplatte:
         material = catalog.get_bodenplatte(self.name_intern).material
         materialfolge = [material, self.gummimatte, self.untergrund]
         return reibwert_fn(
-            norm, materialfolge, protokoll=protokoll, breadcrumb=base_bc, meta=base_meta
+            norm, materialfolge, protokoll=protokoll, breadcrumb=base_bc
         ).wert
     
     def reibkraefte(

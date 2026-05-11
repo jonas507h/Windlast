@@ -1,5 +1,28 @@
 (function (global) {
-  const SEVS = ["error","warn","hint","info"];
+  const SEVS = ["error", "warn", "hint", "info"];
+
+  const API_TO_TREE_NORM = {
+    EN_13814_2005: "DIN_EN_13814_2005_06",
+    EN_17879_2024: "DIN_EN_17879_2024_08",
+    EN_1991_1_4_2010: "DIN_EN_1991_1_4_2010_12",
+  };
+
+  const TREE_TO_API_NORM = Object.fromEntries(
+    Object.entries(API_TO_TREE_NORM).map(([api, tree]) => [tree, api])
+  );
+
+  const RESULT_BY_ROW_KEY = {
+    kipp: "sicherheit_kipp",
+    gleit: "sicherheit_gleit",
+    abhebe: "sicherheit_abhebe",
+    ballast: "ballast_max",
+  };
+
+  const DEFAULT_SCENARIO_BY_NORM = {
+    EN_13814_2005: "AUSSER_BETRIEB",
+    EN_17879_2024: "AUSSER_BETRIEB",
+    EN_1991_1_4_2010: "STANDARD",
+  };
 
   function normalizeSeverity(s) {
     if (!s) return null;
@@ -10,111 +33,242 @@
     return SEVS.includes(s) ? s : null;
   }
 
-  function createZeroCounts() { return { error:0, warn:0, hint:0, info:0 }; }
+  function createZeroCounts() {
+    return { error: 0, warn: 0, hint: 0, info: 0 };
+  }
+
+  function normalizeValue(v) {
+    if (v === undefined) return null;
+    if (v === "Infinity") return "INF";
+    if (v === "-Infinity") return "-INF";
+    if (v === "NaN") return null;
+    return v;
+  }
+
+  function groupLabel(gruppe) {
+    return gruppe?.label || gruppe?.name || "";
+  }
+
+  function findEbene(container, ebeneName) {
+    const ebenen = Array.isArray(container?.ebenen) ? container.ebenen : [];
+    return ebenen.find((e) => e?.name === ebeneName) || null;
+  }
+
+  function findGruppe(container, ebeneName, gruppeName) {
+    const ebene = findEbene(container, ebeneName);
+    if (!ebene) return null;
+    const gruppen = Array.isArray(ebene.gruppen) ? ebene.gruppen : [];
+    return gruppen.find((g) => String(g?.name) === String(gruppeName)) || null;
+  }
+
+  function listGruppen(container, ebeneName) {
+    const ebene = findEbene(container, ebeneName);
+    return Array.isArray(ebene?.gruppen) ? ebene.gruppen : [];
+  }
+
+  function findResult(gruppe, resultName) {
+    const ergebnisse = Array.isArray(gruppe?.ergebnisse) ? gruppe.ergebnisse : [];
+    return ergebnisse.find((r) => r?.name === resultName) || null;
+  }
+
+  function makeMessageObject(message, context = {}) {
+    if (!message) return null;
+    const sev = normalizeSeverity(message.severity);
+    return {
+      severity: sev,
+      text: message.text == null ? null : String(message.text),
+      code: message.code == null ? null : String(message.code),
+      context: { ...context, ...(message.meta || {}) },
+      meta: message.meta || {},
+    };
+  }
+
+  function collectMessagesRecursive(container, context = {}, out = []) {
+    const ownMessages = Array.isArray(container?.messages) ? container.messages : [];
+    for (const msg of ownMessages) {
+      const m = makeMessageObject(msg, context);
+      if (m) out.push(m);
+    }
+
+    const ebenen = Array.isArray(container?.ebenen) ? container.ebenen : [];
+    for (const ebene of ebenen) {
+      const gruppen = Array.isArray(ebene?.gruppen) ? ebene.gruppen : [];
+      for (const gruppe of gruppen) {
+        collectMessagesRecursive(
+          gruppe,
+          { ...context, [ebene.name]: gruppe.name },
+          out
+        );
+      }
+    }
+
+    return out;
+  }
+
+  function collectDocsRecursive(container, context = {}, out = []) {
+    const ergebnisse = Array.isArray(container?.ergebnisse) ? container.ergebnisse : [];
+    for (const e of ergebnisse) {
+      out.push({
+        title: e.label || e.name,
+        value: normalizeValue(e.wert),
+        unit: e.einheit || null,
+        formula: e.formel || null,
+        symbols: e.formelzeichen || null,
+        context: { ...context, ...(e.meta || {}) },
+        raw: e,
+      });
+    }
+
+    const ebenen = Array.isArray(container?.ebenen) ? container.ebenen : [];
+    for (const ebene of ebenen) {
+      const gruppen = Array.isArray(ebene?.gruppen) ? ebene.gruppen : [];
+      for (const gruppe of gruppen) {
+        collectDocsRecursive(
+          gruppe,
+          { ...context, [ebene.name]: gruppe.name },
+          out
+        );
+      }
+    }
+
+    return out;
+  }
+
+  function addCountsFromMessages(countsMap, scenarioName, messages) {
+    const c = (countsMap[scenarioName] ||= createZeroCounts());
+
+    for (const m of messages || []) {
+      const sev = normalizeSeverity(m?.severity);
+      if (!sev) continue;
+      c[sev] += 1;
+    }
+  }
+
+  function extractNachweisValues(scenarioGroup) {
+    const values = {
+      kipp: null,
+      gleit: null,
+      abhebe: null,
+      ballast: null,
+    };
+
+    const nachweise = {
+      kipp: "KIPP",
+      gleit: "GLEIT",
+      abhebe: "ABHEBE",
+      ballast: "BALLAST",
+    };
+
+    for (const [rowKey, nachweisName] of Object.entries(nachweise)) {
+      const nachweisGroup = findGruppe(scenarioGroup, "nachweis", nachweisName);
+      const resultName = RESULT_BY_ROW_KEY[rowKey];
+      const result = findResult(nachweisGroup, resultName);
+      values[rowKey] = normalizeValue(result?.wert);
+    }
+
+    return values;
+  }
+
+  function isMainScenario(apiNormKey, scenarioName, scenarioIndex) {
+    const defaultScenario = DEFAULT_SCENARIO_BY_NORM[apiNormKey];
+    if (defaultScenario) return scenarioName === defaultScenario;
+    return scenarioIndex === 0;
+  }
 
   const ResultsIndex = {
     build(payload) {
       const idx = Object.create(ResultsIndex._proto);
-      idx.payload = payload || { normen: {} };
 
-      // --- NEU: Container für Docs & Messages (Haupt + Alternativen) ---
-      idx.docsMainByNorm = {};
-      idx.docsByAlt      = {};
-      idx.msgsMainByNorm = {};
-      idx.msgsByAlt      = {};
+      idx.payload = payload || {};
+      idx.tree = payload?.ergebnis || payload || {};
 
-      // --- Counts wie gehabt (jetzt inkl. Alternativen) ---
-      idx.counts = {}; // counts[normKey][scenario] => {error,warn,hint,info}
-
-      // --- Anzeigename für Alternativen ---
+      idx.mainValues = {};
+      idx.altValues = {};
       idx.altLabelsByNorm = {};
 
-      for (const [normKey, norm] of Object.entries(idx.payload.normen || {})) {
-        // 1) Haupt-Docs/-Messages in den Index legen
-        const mainDocs = Array.isArray(norm?.docs) ? norm.docs : [];
-        const mainMsgs = Array.isArray(norm?.messages) ? norm.messages : [];
-        idx.docsMainByNorm[normKey] = mainDocs;
-        idx.msgsMainByNorm[normKey] = mainMsgs;
+      idx.docsMainByNorm = {};
+      idx.docsByAlt = {};
+      idx.msgsMainByNorm = {};
+      idx.msgsByAlt = {};
 
-        // 2) Alternativen-Container initialisieren
-        idx.docsByAlt[normKey] = {};
-        idx.msgsByAlt[normKey] = {};
+      idx.counts = {};
+
+      const normGroups = listGruppen(idx.tree, "norm");
+
+      for (const normGroup of normGroups) {
+        const treeNormKey = String(normGroup?.name || "");
+        const normKey = TREE_TO_API_NORM[treeNormKey] || treeNormKey;
+
+        idx.mainValues[normKey] = { kipp: null, gleit: null, abhebe: null, ballast: null };
+        idx.altValues[normKey] = {};
         idx.altLabelsByNorm[normKey] = {};
 
-        // 3) Counts-Map für diese Norm vorbereiten
-        const c = {};
-        const ensure = (sc) => (c[sc] ||= createZeroCounts());
+        idx.docsMainByNorm[normKey] = [];
+        idx.docsByAlt[normKey] = {};
+        idx.msgsMainByNorm[normKey] = [];
+        idx.msgsByAlt[normKey] = {};
 
-        // ---- Counts & Ablage: Haupt-Messages (Szenario "_gesamt" oder aus context.szenario) ----
-        for (const m of mainMsgs) {
-          const sev = normalizeSeverity(m?.severity);
-          if (!sev) continue;
-          const ctx = m?.context || {};
-          const rawScen = (ctx.szenario ?? ctx.scenario);
-          const scen = (rawScen === undefined || rawScen === null || String(rawScen).trim() === "")
-            ? "_gesamt"
-            : String(rawScen);
-          ensure(scen)[sev] += 1;
-        }
+        idx.counts[normKey] = {};
 
-        // ---- Alternativen einlesen (Docs & Messages) ----
-        const alts = norm?.alternativen || {};
-        for (const [altName, altVal] of Object.entries(alts)) {
-          const altDocs = Array.isArray(altVal?.docs) ? altVal.docs : [];
-          const altMsgs = Array.isArray(altVal?.messages) ? altVal.messages : [];
+        const scenarioGroups = listGruppen(normGroup, "szenario");
 
-          idx.docsByAlt[normKey][altName] = altDocs;
-          idx.msgsByAlt[normKey][altName] = altMsgs;
+        scenarioGroups.forEach((scenarioGroup, scenarioIndex) => {
+          const scenarioName = String(scenarioGroup?.name || "");
+          const scenarioLabel = groupLabel(scenarioGroup) || scenarioName;
 
-          // NEU: Anzeigename aus Payload (Fallback = altName)
-          const label = (altVal && altVal.anzeigename) ? String(altVal.anzeigename) : String(altName);
-          idx.altLabelsByNorm[normKey][altName] = label;
+          const values = extractNachweisValues(scenarioGroup);
+          const messages = collectMessagesRecursive(scenarioGroup, {
+            norm: treeNormKey,
+            szenario: scenarioName,
+          });
+          const docs = collectDocsRecursive(scenarioGroup, {
+            norm: treeNormKey,
+            szenario: scenarioName,
+          });
 
-          // Counts: für Alternativen unter eigenem Szenario (Alt-Name) zählen;
-          // falls Messages bereits context.szenario tragen, nehmen wir das, sonst fallback = altName
-          for (const m of altMsgs) {
-            const sev = normalizeSeverity(m?.severity);
-            if (!sev) continue;
-            const ctx = m?.context || {};
-            const rawScen = (ctx.szenario ?? ctx.scenario);
-            const scen = (rawScen === undefined || rawScen === null || String(rawScen).trim() === "")
-              ? String(altName)
-              : String(rawScen);
-            ensure(scen)[sev] += 1;
+          const main = isMainScenario(normKey, scenarioName, scenarioIndex);
+
+          if (main) {
+            idx.mainValues[normKey] = values;
+            idx.msgsMainByNorm[normKey] = messages;
+            idx.docsMainByNorm[normKey] = docs;
+          } else {
+            idx.altValues[normKey][scenarioName] = {
+              anzeigename: scenarioLabel,
+              ...values,
+            };
+            idx.altLabelsByNorm[normKey][scenarioName] = scenarioLabel;
+            idx.msgsByAlt[normKey][scenarioName] = messages;
+            idx.docsByAlt[normKey][scenarioName] = docs;
           }
-        }
 
-        // 4) Counts-Ergebnis für diese Norm ablegen
-        idx.counts[normKey] = c;
+          addCountsFromMessages(idx.counts[normKey], main ? "_gesamt" : scenarioName, messages);
+        });
       }
 
       return idx;
     },
 
     _proto: {
-      // ---- Wertezugriff (Hauptwerte) ----
       getMainValue(normKey, key) {
-        const v = this.payload?.normen?.[normKey]?.[key];
-        return v === undefined ? null : v; // float | "INF" | "-INF" | null
-      },
-
-      // ---- Wertezugriff (Alternativen) ----
-      listAlternativen(normKey) {
-        const alts = this.payload?.normen?.[normKey]?.alternativen || {};
-        return Object.keys(alts);
-      },
-      getAltValue(normKey, altName, key) {
-        const v = this.payload?.normen?.[normKey]?.alternativen?.[altName]?.[key];
+        const v = this.mainValues?.[normKey]?.[key];
         return v === undefined ? null : v;
       },
+
+      listAlternativen(normKey) {
+        return Object.keys(this.altValues?.[normKey] || {});
+      },
+
+      getAltValue(normKey, altName, key) {
+        const v = this.altValues?.[normKey]?.[altName]?.[key];
+        return v === undefined ? null : v;
+      },
+
       getAltLabel(normKey, altName) {
         const byNorm = this.altLabelsByNorm?.[normKey] || {};
         return byNorm[altName] || altName;
       },
 
-      // ==================== DOCS (Zwischenergebnisse) ====================
-
-      // Direkter Zugriff: Haupt vs. Alternative
       getDocs(normKey, altName = null) {
         if (altName) {
           return this.docsByAlt?.[normKey]?.[altName] || [];
@@ -122,32 +276,25 @@
         return this.docsMainByNorm?.[normKey] || [];
       },
 
-      // Szenario-basiert (wie bei Messages):
-      // - scenario === null / "" / "_gesamt" -> Haupt-Daten
-      // - scenario == Alt-Name              -> Alternative
-      // - sonst: Filter auf Haupt über context.szenario / context.scenario
       listDocs(normKey, scenario = null) {
         if (scenario == null || String(scenario).trim() === "" || scenario === "_gesamt") {
           return this.getDocs(normKey, null);
         }
-        const altNames = new Set(this.listAlternativen(normKey));
+
         const sc = String(scenario).trim();
+        const altNames = new Set(this.listAlternativen(normKey));
         if (altNames.has(sc)) return this.getDocs(normKey, sc);
 
-        // Fallback: seltene Sonder-Szenarien in Haupt über Kontext
-        const main = this.getDocs(normKey, null);
-        return main.filter(d => (d?.context?.szenario ?? d?.context?.scenario ?? "") === sc);
+        return this.getDocs(normKey, null).filter((d) => {
+          const ctx = d?.context || {};
+          return String(ctx.szenario || "") === sc;
+        });
       },
 
-      // Nur Haupt-Docs (ohne Alternativen)
       listDocsMainOnly(normKey) {
-        // Haupt enthält bereits keine Alt-Docs mehr (die liegen in alternativen[].docs)
         return this.getDocs(normKey, null);
       },
 
-      // ==================== MESSAGES ====================
-
-      // Direkter Zugriff: Haupt vs. Alternative
       getMessages(normKey, altName = null) {
         if (altName) {
           return this.msgsByAlt?.[normKey]?.[altName] || [];
@@ -155,81 +302,70 @@
         return this.msgsMainByNorm?.[normKey] || [];
       },
 
-      // Texte statt ganzer Objekte (komfortabel für Tooltips/Badges)
       getMessageTexts(normKey, altName = null) {
-        const arr = this.getMessages(normKey, altName);
-        return arr.map(m => m?.text).filter(Boolean);
+        return this.getMessages(normKey, altName)
+          .map((m) => m?.text)
+          .filter(Boolean);
       },
 
-      // ---- Meldungs-Zählungen (Counts bleiben wie gebaut) ----
       getCounts(normKey, scenario = "_gesamt") {
         const byNorm = this.counts?.[normKey] || {};
         const c = byNorm[scenario] || createZeroCounts();
-        return { error:c.error, warn:c.warn, hint:c.hint, info:c.info };
+        return { error: c.error, warn: c.warn, hint: c.hint, info: c.info };
       },
 
-      // Summen über alle Szenarien
       getCountsAllScenarios(normKey) {
         const byNorm = this.counts?.[normKey] || {};
         const sum = createZeroCounts();
+
         for (const c of Object.values(byNorm)) {
-          sum.error += c.error; sum.warn += c.warn; sum.hint += c.hint; sum.info += c.info;
+          sum.error += c.error;
+          sum.warn += c.warn;
+          sum.hint += c.hint;
+          sum.info += c.info;
         }
+
         return sum;
       },
 
-      // Nur Hauptberechnung (Alternativen sind bereits separiert)
       getCountsMainOnly(normKey) {
-        const byNorm = this.counts?.[normKey] || {};
-        const altNames = Object.keys(this.payload?.normen?.[normKey]?.alternativen || {});
-        const sum = createZeroCounts();
-        for (const [sc, c] of Object.entries(byNorm)) {
-          if (altNames.includes(sc)) continue;
-          sum.error += c.error; sum.warn += c.warn; sum.hint += c.hint; sum.info += c.info;
-        }
-        return sum;
+        return this.getCounts(normKey, "_gesamt");
       },
 
-      // ============ Back-compat Wrapper (optional) ============
-      // Falls alter Code noch mit scenario-Strings arbeitet:
-      // - scenario === null           -> Haupt
-      // - scenario === "_gesamt"      -> Haupt
-      // - scenario == <Alt-Name>      -> Alternative
       listMessageTexts(normKey, scenario = null) {
         if (scenario == null || String(scenario).trim() === "" || scenario === "_gesamt") {
           return this.getMessageTexts(normKey, null);
         }
-        // Wenn es eine Alternative ist, hole deren Liste:
-        const altNames = new Set(this.listAlternativen(normKey));
+
         const sc = String(scenario).trim();
+        const altNames = new Set(this.listAlternativen(normKey));
         if (altNames.has(sc)) return this.getMessageTexts(normKey, sc);
 
-        // Fallback: seltene Sonder-Szenarien in Haupt filtern (sollte es kaum geben)
-        const main = this.getMessages(normKey, null);
-        return main
-          .filter(m => (m?.context?.szenario ?? m?.context?.scenario ?? "") === sc)
-          .map(m => m?.text).filter(Boolean);
+        return this.getMessages(normKey, null)
+          .filter((m) => String(m?.context?.szenario || "") === sc)
+          .map((m) => m?.text)
+          .filter(Boolean);
       },
 
       listMessages(normKey, scenario = null) {
         if (scenario == null || String(scenario).trim() === "" || scenario === "_gesamt") {
           return this.getMessages(normKey, null);
         }
-        const altNames = new Set(this.listAlternativen(normKey));
+
         const sc = String(scenario).trim();
+        const altNames = new Set(this.listAlternativen(normKey));
         if (altNames.has(sc)) return this.getMessages(normKey, sc);
 
-        // Fallback-Filter auf Haupt (wie oben)
-        const main = this.getMessages(normKey, null);
-        return main.filter(m => (m?.context?.szenario ?? m?.context?.scenario ?? "") === sc);
+        return this.getMessages(normKey, null).filter((m) => {
+          const ctx = m?.context || {};
+          return String(ctx.szenario || "") === sc;
+        });
       },
 
-      // Alt: Nur Haupt-Messages
       listMessagesMainOnly(normKey) {
-        // Früher: Filter nötig. Jetzt: Haupt enthält schon keine Alt-Messages mehr.
         return this.getMessages(normKey, null);
       },
-    }
+    },
   };
 
   global.ResultsIndex = ResultsIndex;
