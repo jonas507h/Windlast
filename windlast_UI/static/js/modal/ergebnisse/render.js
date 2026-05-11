@@ -20,7 +20,7 @@ function renderResultItem(ergebnis) {
   const label = ergebnis.label || ergebnis.name || "—";
   const unit = ergebnis.einheit ? ` ${escapeHtml(ergebnis.einheit)}` : "";
   const formula = ergebnis.formel ? `<div class="erg-result-formula">${formatMathWithSubSup(ergebnis.formel)}</div>` : "";
-  const symbol = ergebnis.formelzeichen ? `<span class="erg-result-symbol">${escapeHtml(String(ergebnis.formelzeichen))}</span>` : "";
+  const symbol = ergebnis.formelzeichen ? `<span class="erg-result-symbol">${formatMathWithSubSup(ergebnis.formelzeichen)}</span>` : "";
 
   return `
     <li class="erg-result-item" data-meta-json="${escapeHtml(resultTooltipMeta(ergebnis))}">

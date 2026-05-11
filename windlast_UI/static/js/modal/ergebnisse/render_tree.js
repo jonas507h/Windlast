@@ -66,7 +66,7 @@ function renderGroup({ ebene, gruppe, state, path }) {
           class="erg-tree-select"
           data-tree-select="${id}"
         >
-          <span class="erg-tree-key">${esc(ebene.name)}</span>
+          <span class="erg-tree-key">${esc(ebene.label || ebene.name)}</span>
           <span class="erg-tree-eq">=</span>
           <span class="erg-tree-label">${esc(gruppe.label || gruppe.name)}</span>
           ${winner ? `<span class="erg-tree-winner">✓</span>` : ""}
