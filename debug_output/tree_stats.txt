@@ -1,9 +1,9 @@
 TREE STATS
 ===========
 ebenen: 3589
-gruppen: 6483
-ergebnisse: 12465
-messages: 10
+gruppen: 6478
+ergebnisse: 12475
+messages: 22
 max_depth: 8
 
 Top result names:
@@ -45,7 +45,7 @@ Top level names:
    120  segment
     40  achse_index
     15  windrichtung_deg
-     5  nachweis
+     5  sicherheiten
      3  szenario
      1  norm
 

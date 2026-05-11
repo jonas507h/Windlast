@@ -15,10 +15,21 @@
                 {
                   "name": "AUSSER_BETRIEB",
                   "label": "Außer Betrieb",
+                  "ergebnisse": [
+                    {
+                      "name": "ballast_max",
+                      "wert": 440.33629890921895,
+                      "label": "Erforderlicher Ballast",
+                      "formelzeichen": "m_Ballast,max",
+                      "formel": "m_Ballast,max = max(m_Ballast,kipp, m_Ballast,gleit, m_Ballast,abheb)",
+                      "einheit": "kg",
+                      "priority": 10
+                    }
+                  ],
                   "ebenen": [
                     {
-                      "name": "nachweis",
-                      "label": "Nachweis",
+                      "name": "sicherheiten",
+                      "label": "Sicherheiten",
                       "gruppen": [
                         {
                           "name": "LOADS",
@@ -66,7 +77,7 @@
                         {
                           "name": "KIPP",
                           "label": "Kippsicherheit",
-                          "winner": false,
+                          "winner": true,
                           "ergebnisse": [
                             {
                               "name": "anz_kippachsen",
@@ -24785,11 +24796,11 @@
                         {
                           "name": "GLEIT",
                           "label": "Gleitsicherheit",
-                          "winner": true,
+                          "winner": false,
                           "ergebnisse": [
                             {
                               "name": "min_reibwert",
-                              "wert": 0.0,
+                              "wert": 0.6,
                               "label": "Minimaler Reibwert μ_min",
                               "formelzeichen": "μ_min",
                               "formel": "μ_min = min(μ_Bauelemente)",
@@ -24811,7 +24822,7 @@
                             },
                             {
                               "name": "sicherheit_gleit",
-                              "wert": 0.0,
+                              "wert": 1.1914751657048064,
                               "label": "Gleitsicherheit S_gleit",
                               "formelzeichen": "S_gleit",
                               "priority": 10,
@@ -24821,7 +24832,7 @@
                             },
                             {
                               "name": "ballast_gleit",
-                              "wert": "Infinity",
+                              "wert": 0.0,
                               "label": "Erforderlicher Ballast m_Ballast,gleit",
                               "formelzeichen": "m_Ballast,gleit",
                               "einheit": "kg",
@@ -24837,26 +24848,84 @@
                               "gruppen": [
                                 {
                                   "name": "Bodenplatte_1",
+                                  "ergebnisse": [
+                                    {
+                                      "name": "reibwert",
+                                      "wert": 0.6,
+                                      "label": "Effektiver Reibwert μ_eff",
+                                      "formelzeichen": "μ_eff",
+                                      "formel": "μ_eff = min(μ_i)",
+                                      "priority": 0,
+                                      "meta": {
+                                        "funktion": "reibwert"
+                                      }
+                                    }
+                                  ],
                                   "messages": [
                                     {
-                                      "code": "GLEIT/MU_READ_FAIL",
-                                      "severity": "ERROR",
-                                      "text": "Reibwert-Ermittlung für Element 3 fehlgeschlagen: reibwert() got an unexpected keyword argument 'meta'",
+                                      "code": "REIB/FALLBACK_NORM",
+                                      "severity": "HINT",
+                                      "text": "Für Paarung Stahl–Gummi wurde auf DIN EN 17879:2024-08 zurückgegriffen.",
                                       "meta": {
-                                        "funktion": "ermittle_min_reibwert"
+                                        "funktion": "reibwert"
+                                      }
+                                    },
+                                    {
+                                      "code": "REIB/FALLBACK_NORM",
+                                      "severity": "HINT",
+                                      "text": "Für Paarung Gummi–Beton wurde auf DIN EN 17879:2024-08 zurückgegriffen.",
+                                      "meta": {
+                                        "funktion": "reibwert"
+                                      }
+                                    },
+                                    {
+                                      "code": "REIB/PAIR_GOVERNING",
+                                      "severity": "INFO",
+                                      "text": "Maßgebend ist die Paarung Stahl–Gummi mit μ=0.600.",
+                                      "meta": {
+                                        "funktion": "reibwert"
                                       }
                                     }
                                   ]
                                 },
                                 {
                                   "name": "Bodenplatte_2",
+                                  "ergebnisse": [
+                                    {
+                                      "name": "reibwert",
+                                      "wert": 0.6,
+                                      "label": "Effektiver Reibwert μ_eff",
+                                      "formelzeichen": "μ_eff",
+                                      "formel": "μ_eff = min(μ_i)",
+                                      "priority": 0,
+                                      "meta": {
+                                        "funktion": "reibwert"
+                                      }
+                                    }
+                                  ],
                                   "messages": [
                                     {
-                                      "code": "GLEIT/MU_READ_FAIL",
-                                      "severity": "ERROR",
-                                      "text": "Reibwert-Ermittlung für Element 4 fehlgeschlagen: reibwert() got an unexpected keyword argument 'meta'",
+                                      "code": "REIB/FALLBACK_NORM",
+                                      "severity": "HINT",
+                                      "text": "Für Paarung Stahl–Gummi wurde auf DIN EN 17879:2024-08 zurückgegriffen.",
                                       "meta": {
-                                        "funktion": "ermittle_min_reibwert"
+                                        "funktion": "reibwert"
+                                      }
+                                    },
+                                    {
+                                      "code": "REIB/FALLBACK_NORM",
+                                      "severity": "HINT",
+                                      "text": "Für Paarung Gummi–Beton wurde auf DIN EN 17879:2024-08 zurückgegriffen.",
+                                      "meta": {
+                                        "funktion": "reibwert"
+                                      }
+                                    },
+                                    {
+                                      "code": "REIB/PAIR_GOVERNING",
+                                      "severity": "INFO",
+                                      "text": "Maßgebend ist die Paarung Stahl–Gummi mit μ=0.600.",
+                                      "meta": {
+                                        "funktion": "reibwert"
                                       }
                                     }
                                   ]
@@ -24869,7 +24938,7 @@
                               "gruppen": [
                                 {
                                   "name": "0.0°",
-                                  "winner": true,
+                                  "winner": false,
                                   "ergebnisse": [
                                     {
                                       "name": "horizontal_betrag",
@@ -24918,7 +24987,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -24930,7 +24999,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 2.0938370893111307,
                                       "label": "Richtungs-Sicherheit S_gleit,0°",
                                       "formelzeichen": "S_gleit,0°",
                                       "priority": 10,
@@ -24940,7 +25009,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 0.0,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,0°",
                                       "formelzeichen": "m_Ballast,gleit,0°",
                                       "einheit": "N",
@@ -26062,7 +26131,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -26074,7 +26143,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 1.201683624425919,
                                       "label": "Richtungs-Sicherheit S_gleit,45°",
                                       "formelzeichen": "S_gleit,45°",
                                       "priority": 10,
@@ -26084,7 +26153,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 0.0,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,45°",
                                       "formelzeichen": "m_Ballast,gleit,45°",
                                       "einheit": "N",
@@ -27157,7 +27226,7 @@
                                 },
                                 {
                                   "name": "90.0°",
-                                  "winner": false,
+                                  "winner": true,
                                   "ergebnisse": [
                                     {
                                       "name": "horizontal_betrag",
@@ -27206,7 +27275,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -27218,7 +27287,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 1.1914751657048064,
                                       "label": "Richtungs-Sicherheit S_gleit,90°",
                                       "formelzeichen": "S_gleit,90°",
                                       "priority": 10,
@@ -27228,7 +27297,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 0.0,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,90°",
                                       "formelzeichen": "m_Ballast,gleit,90°",
                                       "einheit": "N",
@@ -28350,7 +28419,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -28362,7 +28431,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 1.2016836244259193,
                                       "label": "Richtungs-Sicherheit S_gleit,135°",
                                       "formelzeichen": "S_gleit,135°",
                                       "priority": 10,
@@ -28372,7 +28441,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 0.0,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,135°",
                                       "formelzeichen": "m_Ballast,gleit,135°",
                                       "einheit": "N",
@@ -29494,7 +29563,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -29506,7 +29575,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 2.0938370893111307,
                                       "label": "Richtungs-Sicherheit S_gleit,180°",
                                       "formelzeichen": "S_gleit,180°",
                                       "priority": 10,
@@ -29516,7 +29585,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 0.0,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,180°",
                                       "formelzeichen": "m_Ballast,gleit,180°",
                                       "einheit": "N",
@@ -30638,7 +30707,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -30650,7 +30719,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 1.2016836244259193,
                                       "label": "Richtungs-Sicherheit S_gleit,225°",
                                       "formelzeichen": "S_gleit,225°",
                                       "priority": 10,
@@ -30660,7 +30729,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 0.0,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,225°",
                                       "formelzeichen": "m_Ballast,gleit,225°",
                                       "einheit": "N",
@@ -31782,7 +31851,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -31794,7 +31863,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 1.1914751657048064,
                                       "label": "Richtungs-Sicherheit S_gleit,270°",
                                       "formelzeichen": "S_gleit,270°",
                                       "priority": 10,
@@ -31804,7 +31873,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 0.0,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,270°",
                                       "formelzeichen": "m_Ballast,gleit,270°",
                                       "einheit": "N",
@@ -32926,7 +32995,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -32938,7 +33007,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 1.201683624425919,
                                       "label": "Richtungs-Sicherheit S_gleit,315°",
                                       "formelzeichen": "S_gleit,315°",
                                       "priority": 10,
@@ -32948,7 +33017,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 0.0,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,315°",
                                       "formelzeichen": "m_Ballast,gleit,315°",
                                       "einheit": "N",
@@ -38551,21 +38620,6 @@
                               ]
                             }
                           ]
-                        },
-                        {
-                          "name": "BALLAST",
-                          "label": "Ballast",
-                          "ergebnisse": [
-                            {
-                              "name": "ballast_max",
-                              "wert": "Infinity",
-                              "label": "Erforderlicher Ballast",
-                              "formelzeichen": "m_Ballast,max",
-                              "formel": "m_Ballast,max = max(m_Ballast,kipp, m_Ballast,gleit, m_Ballast,abheb)",
-                              "einheit": "kg",
-                              "priority": 10
-                            }
-                          ]
                         }
                       ]
                     }
@@ -38574,10 +38628,21 @@
                 {
                   "name": "IN_BETRIEB",
                   "label": "mit Schutzmaßnahmen",
+                  "ergebnisse": [
+                    {
+                      "name": "ballast_max",
+                      "wert": 149.5350279481251,
+                      "label": "Erforderlicher Ballast",
+                      "formelzeichen": "m_Ballast,max",
+                      "formel": "m_Ballast,max = max(m_Ballast,kipp, m_Ballast,gleit, m_Ballast,abheb)",
+                      "einheit": "kg",
+                      "priority": 10
+                    }
+                  ],
                   "ebenen": [
                     {
-                      "name": "nachweis",
-                      "label": "Nachweis",
+                      "name": "sicherheiten",
+                      "label": "Sicherheiten",
                       "gruppen": [
                         {
                           "name": "LOADS",
@@ -38625,7 +38690,7 @@
                         {
                           "name": "KIPP",
                           "label": "Kippsicherheit",
-                          "winner": false,
+                          "winner": true,
                           "ergebnisse": [
                             {
                               "name": "anz_kippachsen",
@@ -63344,11 +63409,11 @@
                         {
                           "name": "GLEIT",
                           "label": "Gleitsicherheit",
-                          "winner": true,
+                          "winner": false,
                           "ergebnisse": [
                             {
                               "name": "min_reibwert",
-                              "wert": 0.0,
+                              "wert": 0.6,
                               "label": "Minimaler Reibwert μ_min",
                               "formelzeichen": "μ_min",
                               "formel": "μ_min = min(μ_Bauelemente)",
@@ -63370,7 +63435,7 @@
                             },
                             {
                               "name": "sicherheit_gleit",
-                              "wert": 0.0,
+                              "wert": 2.085081539983411,
                               "label": "Gleitsicherheit S_gleit",
                               "formelzeichen": "S_gleit",
                               "priority": 10,
@@ -63380,7 +63445,7 @@
                             },
                             {
                               "name": "ballast_gleit",
-                              "wert": "Infinity",
+                              "wert": 0.0,
                               "label": "Erforderlicher Ballast m_Ballast,gleit",
                               "formelzeichen": "m_Ballast,gleit",
                               "einheit": "kg",
@@ -63396,26 +63461,84 @@
                               "gruppen": [
                                 {
                                   "name": "Bodenplatte_1",
+                                  "ergebnisse": [
+                                    {
+                                      "name": "reibwert",
+                                      "wert": 0.6,
+                                      "label": "Effektiver Reibwert μ_eff",
+                                      "formelzeichen": "μ_eff",
+                                      "formel": "μ_eff = min(μ_i)",
+                                      "priority": 0,
+                                      "meta": {
+                                        "funktion": "reibwert"
+                                      }
+                                    }
+                                  ],
                                   "messages": [
                                     {
-                                      "code": "GLEIT/MU_READ_FAIL",
-                                      "severity": "ERROR",
-                                      "text": "Reibwert-Ermittlung für Element 3 fehlgeschlagen: reibwert() got an unexpected keyword argument 'meta'",
+                                      "code": "REIB/FALLBACK_NORM",
+                                      "severity": "HINT",
+                                      "text": "Für Paarung Stahl–Gummi wurde auf DIN EN 17879:2024-08 zurückgegriffen.",
                                       "meta": {
-                                        "funktion": "ermittle_min_reibwert"
+                                        "funktion": "reibwert"
+                                      }
+                                    },
+                                    {
+                                      "code": "REIB/FALLBACK_NORM",
+                                      "severity": "HINT",
+                                      "text": "Für Paarung Gummi–Beton wurde auf DIN EN 17879:2024-08 zurückgegriffen.",
+                                      "meta": {
+                                        "funktion": "reibwert"
+                                      }
+                                    },
+                                    {
+                                      "code": "REIB/PAIR_GOVERNING",
+                                      "severity": "INFO",
+                                      "text": "Maßgebend ist die Paarung Stahl–Gummi mit μ=0.600.",
+                                      "meta": {
+                                        "funktion": "reibwert"
                                       }
                                     }
                                   ]
                                 },
                                 {
                                   "name": "Bodenplatte_2",
+                                  "ergebnisse": [
+                                    {
+                                      "name": "reibwert",
+                                      "wert": 0.6,
+                                      "label": "Effektiver Reibwert μ_eff",
+                                      "formelzeichen": "μ_eff",
+                                      "formel": "μ_eff = min(μ_i)",
+                                      "priority": 0,
+                                      "meta": {
+                                        "funktion": "reibwert"
+                                      }
+                                    }
+                                  ],
                                   "messages": [
                                     {
-                                      "code": "GLEIT/MU_READ_FAIL",
-                                      "severity": "ERROR",
-                                      "text": "Reibwert-Ermittlung für Element 4 fehlgeschlagen: reibwert() got an unexpected keyword argument 'meta'",
+                                      "code": "REIB/FALLBACK_NORM",
+                                      "severity": "HINT",
+                                      "text": "Für Paarung Stahl–Gummi wurde auf DIN EN 17879:2024-08 zurückgegriffen.",
                                       "meta": {
-                                        "funktion": "ermittle_min_reibwert"
+                                        "funktion": "reibwert"
+                                      }
+                                    },
+                                    {
+                                      "code": "REIB/FALLBACK_NORM",
+                                      "severity": "HINT",
+                                      "text": "Für Paarung Gummi–Beton wurde auf DIN EN 17879:2024-08 zurückgegriffen.",
+                                      "meta": {
+                                        "funktion": "reibwert"
+                                      }
+                                    },
+                                    {
+                                      "code": "REIB/PAIR_GOVERNING",
+                                      "severity": "INFO",
+                                      "text": "Maßgebend ist die Paarung Stahl–Gummi mit μ=0.600.",
+                                      "meta": {
+                                        "funktion": "reibwert"
                                       }
                                     }
                                   ]
@@ -63428,7 +63551,7 @@
                               "gruppen": [
                                 {
                                   "name": "0.0°",
-                                  "winner": true,
+                                  "winner": false,
                                   "ergebnisse": [
                                     {
                                       "name": "horizontal_betrag",
@@ -63477,7 +63600,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -63489,7 +63612,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 3.664214906294479,
                                       "label": "Richtungs-Sicherheit S_gleit,0°",
                                       "formelzeichen": "S_gleit,0°",
                                       "priority": 10,
@@ -63499,7 +63622,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 0.0,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,0°",
                                       "formelzeichen": "m_Ballast,gleit,0°",
                                       "einheit": "N",
@@ -64621,7 +64744,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -64633,7 +64756,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 2.102946342745358,
                                       "label": "Richtungs-Sicherheit S_gleit,45°",
                                       "formelzeichen": "S_gleit,45°",
                                       "priority": 10,
@@ -64643,7 +64766,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 0.0,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,45°",
                                       "formelzeichen": "m_Ballast,gleit,45°",
                                       "einheit": "N",
@@ -65716,7 +65839,7 @@
                                 },
                                 {
                                   "name": "90.0°",
-                                  "winner": false,
+                                  "winner": true,
                                   "ergebnisse": [
                                     {
                                       "name": "horizontal_betrag",
@@ -65765,7 +65888,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -65777,7 +65900,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 2.085081539983411,
                                       "label": "Richtungs-Sicherheit S_gleit,90°",
                                       "formelzeichen": "S_gleit,90°",
                                       "priority": 10,
@@ -65787,7 +65910,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 0.0,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,90°",
                                       "formelzeichen": "m_Ballast,gleit,90°",
                                       "einheit": "N",
@@ -66909,7 +67032,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -66921,7 +67044,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 2.1029463427453585,
                                       "label": "Richtungs-Sicherheit S_gleit,135°",
                                       "formelzeichen": "S_gleit,135°",
                                       "priority": 10,
@@ -66931,7 +67054,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 0.0,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,135°",
                                       "formelzeichen": "m_Ballast,gleit,135°",
                                       "einheit": "N",
@@ -68053,7 +68176,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -68065,7 +68188,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 3.664214906294479,
                                       "label": "Richtungs-Sicherheit S_gleit,180°",
                                       "formelzeichen": "S_gleit,180°",
                                       "priority": 10,
@@ -68075,7 +68198,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 0.0,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,180°",
                                       "formelzeichen": "m_Ballast,gleit,180°",
                                       "einheit": "N",
@@ -69197,7 +69320,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -69209,7 +69332,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 2.1029463427453585,
                                       "label": "Richtungs-Sicherheit S_gleit,225°",
                                       "formelzeichen": "S_gleit,225°",
                                       "priority": 10,
@@ -69219,7 +69342,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 0.0,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,225°",
                                       "formelzeichen": "m_Ballast,gleit,225°",
                                       "einheit": "N",
@@ -70341,7 +70464,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -70353,7 +70476,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 2.085081539983411,
                                       "label": "Richtungs-Sicherheit S_gleit,270°",
                                       "formelzeichen": "S_gleit,270°",
                                       "priority": 10,
@@ -70363,7 +70486,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 0.0,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,270°",
                                       "formelzeichen": "m_Ballast,gleit,270°",
                                       "einheit": "N",
@@ -71485,7 +71608,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -71497,7 +71620,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 2.1029463427453585,
                                       "label": "Richtungs-Sicherheit S_gleit,315°",
                                       "formelzeichen": "S_gleit,315°",
                                       "priority": 10,
@@ -71507,7 +71630,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 0.0,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,315°",
                                       "formelzeichen": "m_Ballast,gleit,315°",
                                       "einheit": "N",
@@ -77110,21 +77233,6 @@
                               ]
                             }
                           ]
-                        },
-                        {
-                          "name": "BALLAST",
-                          "label": "Ballast",
-                          "ergebnisse": [
-                            {
-                              "name": "ballast_max",
-                              "wert": "Infinity",
-                              "label": "Erforderlicher Ballast",
-                              "formelzeichen": "m_Ballast,max",
-                              "formel": "m_Ballast,max = max(m_Ballast,kipp, m_Ballast,gleit, m_Ballast,abheb)",
-                              "einheit": "kg",
-                              "priority": 10
-                            }
-                          ]
                         }
                       ]
                     }
@@ -77145,10 +77253,21 @@
                 {
                   "name": "AUSSER_BETRIEB",
                   "label": "Außer Betrieb",
+                  "ergebnisse": [
+                    {
+                      "name": "ballast_max",
+                      "wert": 634.2038128832814,
+                      "label": "Erforderlicher Ballast",
+                      "formelzeichen": "m_Ballast,max",
+                      "formel": "m_Ballast,max = max(m_Ballast,kipp, m_Ballast,gleit, m_Ballast,abheb)",
+                      "einheit": "kg",
+                      "priority": 10
+                    }
+                  ],
                   "ebenen": [
                     {
-                      "name": "nachweis",
-                      "label": "Nachweis",
+                      "name": "sicherheiten",
+                      "label": "Sicherheiten",
                       "gruppen": [
                         {
                           "name": "LOADS",
@@ -77198,7 +77317,7 @@
                         {
                           "name": "KIPP",
                           "label": "Kippsicherheit",
-                          "winner": false,
+                          "winner": true,
                           "ergebnisse": [
                             {
                               "name": "anz_kippachsen",
@@ -101917,11 +102036,11 @@
                         {
                           "name": "GLEIT",
                           "label": "Gleitsicherheit",
-                          "winner": true,
+                          "winner": false,
                           "ergebnisse": [
                             {
                               "name": "min_reibwert",
-                              "wert": 0.0,
+                              "wert": 0.6,
                               "label": "Minimaler Reibwert μ_min",
                               "formelzeichen": "μ_min",
                               "formel": "μ_min = min(μ_Bauelemente)",
@@ -101943,7 +102062,7 @@
                             },
                             {
                               "name": "sicherheit_gleit",
-                              "wert": 0.0,
+                              "wert": 0.9267029066592939,
                               "label": "Gleitsicherheit S_gleit",
                               "formelzeichen": "S_gleit",
                               "priority": 10,
@@ -101953,7 +102072,7 @@
                             },
                             {
                               "name": "ballast_gleit",
-                              "wert": "Infinity",
+                              "wert": 18.84030740412387,
                               "label": "Erforderlicher Ballast m_Ballast,gleit",
                               "formelzeichen": "m_Ballast,gleit",
                               "einheit": "kg",
@@ -101969,26 +102088,52 @@
                               "gruppen": [
                                 {
                                   "name": "Bodenplatte_1",
+                                  "ergebnisse": [
+                                    {
+                                      "name": "reibwert",
+                                      "wert": 0.6,
+                                      "label": "Effektiver Reibwert μ_eff",
+                                      "formelzeichen": "μ_eff",
+                                      "formel": "μ_eff = min(μ_i)",
+                                      "priority": 0,
+                                      "meta": {
+                                        "funktion": "reibwert"
+                                      }
+                                    }
+                                  ],
                                   "messages": [
                                     {
-                                      "code": "GLEIT/MU_READ_FAIL",
-                                      "severity": "ERROR",
-                                      "text": "Reibwert-Ermittlung für Element 3 fehlgeschlagen: reibwert() got an unexpected keyword argument 'meta'",
+                                      "code": "REIB/PAIR_GOVERNING",
+                                      "severity": "INFO",
+                                      "text": "Maßgebend ist die Paarung Stahl–Gummi mit μ=0.600.",
                                       "meta": {
-                                        "funktion": "ermittle_min_reibwert"
+                                        "funktion": "reibwert"
                                       }
                                     }
                                   ]
                                 },
                                 {
                                   "name": "Bodenplatte_2",
+                                  "ergebnisse": [
+                                    {
+                                      "name": "reibwert",
+                                      "wert": 0.6,
+                                      "label": "Effektiver Reibwert μ_eff",
+                                      "formelzeichen": "μ_eff",
+                                      "formel": "μ_eff = min(μ_i)",
+                                      "priority": 0,
+                                      "meta": {
+                                        "funktion": "reibwert"
+                                      }
+                                    }
+                                  ],
                                   "messages": [
                                     {
-                                      "code": "GLEIT/MU_READ_FAIL",
-                                      "severity": "ERROR",
-                                      "text": "Reibwert-Ermittlung für Element 4 fehlgeschlagen: reibwert() got an unexpected keyword argument 'meta'",
+                                      "code": "REIB/PAIR_GOVERNING",
+                                      "severity": "INFO",
+                                      "text": "Maßgebend ist die Paarung Stahl–Gummi mit μ=0.600.",
                                       "meta": {
-                                        "funktion": "ermittle_min_reibwert"
+                                        "funktion": "reibwert"
                                       }
                                     }
                                   ]
@@ -102001,7 +102146,7 @@
                               "gruppen": [
                                 {
                                   "name": "0.0°",
-                                  "winner": true,
+                                  "winner": false,
                                   "ergebnisse": [
                                     {
                                       "name": "horizontal_betrag",
@@ -102050,7 +102195,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -102062,7 +102207,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 1.628539958353102,
                                       "label": "Richtungs-Sicherheit S_gleit,0°",
                                       "formelzeichen": "S_gleit,0°",
                                       "priority": 10,
@@ -102072,7 +102217,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 0.0,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,0°",
                                       "formelzeichen": "m_Ballast,gleit,0°",
                                       "einheit": "N",
@@ -103194,7 +103339,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -103206,7 +103351,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 0.9346428189979369,
                                       "label": "Richtungs-Sicherheit S_gleit,45°",
                                       "formelzeichen": "S_gleit,45°",
                                       "priority": 10,
@@ -103216,7 +103361,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 163.40238938856055,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,45°",
                                       "formelzeichen": "m_Ballast,gleit,45°",
                                       "einheit": "N",
@@ -104289,7 +104434,7 @@
                                 },
                                 {
                                   "name": "90.0°",
-                                  "winner": false,
+                                  "winner": true,
                                   "ergebnisse": [
                                     {
                                       "name": "horizontal_betrag",
@@ -104338,7 +104483,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -104350,7 +104495,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 0.9267029066592939,
                                       "label": "Richtungs-Sicherheit S_gleit,90°",
                                       "formelzeichen": "S_gleit,90°",
                                       "priority": 10,
@@ -104360,7 +104505,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 184.82341563445516,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,90°",
                                       "formelzeichen": "m_Ballast,gleit,90°",
                                       "einheit": "N",
@@ -105482,7 +105627,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -105494,7 +105639,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 0.934642818997937,
                                       "label": "Richtungs-Sicherheit S_gleit,135°",
                                       "formelzeichen": "S_gleit,135°",
                                       "priority": 10,
@@ -105504,7 +105649,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 163.4023893885601,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,135°",
                                       "formelzeichen": "m_Ballast,gleit,135°",
                                       "einheit": "N",
@@ -106626,7 +106771,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -106638,7 +106783,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 1.628539958353102,
                                       "label": "Richtungs-Sicherheit S_gleit,180°",
                                       "formelzeichen": "S_gleit,180°",
                                       "priority": 10,
@@ -106648,7 +106793,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 0.0,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,180°",
                                       "formelzeichen": "m_Ballast,gleit,180°",
                                       "einheit": "N",
@@ -107770,7 +107915,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -107782,7 +107927,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 0.9346428189979372,
                                       "label": "Richtungs-Sicherheit S_gleit,225°",
                                       "formelzeichen": "S_gleit,225°",
                                       "priority": 10,
@@ -107792,7 +107937,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 163.4023893885601,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,225°",
                                       "formelzeichen": "m_Ballast,gleit,225°",
                                       "einheit": "N",
@@ -108914,7 +109059,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -108926,7 +109071,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 0.9267029066592939,
                                       "label": "Richtungs-Sicherheit S_gleit,270°",
                                       "formelzeichen": "S_gleit,270°",
                                       "priority": 10,
@@ -108936,7 +109081,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 184.82341563445516,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,270°",
                                       "formelzeichen": "m_Ballast,gleit,270°",
                                       "einheit": "N",
@@ -110058,7 +110203,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -110070,7 +110215,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 0.9346428189979372,
                                       "label": "Richtungs-Sicherheit S_gleit,315°",
                                       "formelzeichen": "S_gleit,315°",
                                       "priority": 10,
@@ -110080,7 +110225,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 163.4023893885601,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,315°",
                                       "formelzeichen": "m_Ballast,gleit,315°",
                                       "einheit": "N",
@@ -115683,21 +115828,6 @@
                               ]
                             }
                           ]
-                        },
-                        {
-                          "name": "BALLAST",
-                          "label": "Ballast",
-                          "ergebnisse": [
-                            {
-                              "name": "ballast_max",
-                              "wert": "Infinity",
-                              "label": "Erforderlicher Ballast",
-                              "formelzeichen": "m_Ballast,max",
-                              "formel": "m_Ballast,max = max(m_Ballast,kipp, m_Ballast,gleit, m_Ballast,abheb)",
-                              "einheit": "kg",
-                              "priority": 10
-                            }
-                          ]
                         }
                       ]
                     }
@@ -115706,10 +115836,21 @@
                 {
                   "name": "IN_BETRIEB",
                   "label": "mit Schutzmaßnahmen",
+                  "ergebnisse": [
+                    {
+                      "name": "ballast_max",
+                      "wert": 110.76152515331256,
+                      "label": "Erforderlicher Ballast",
+                      "formelzeichen": "m_Ballast,max",
+                      "formel": "m_Ballast,max = max(m_Ballast,kipp, m_Ballast,gleit, m_Ballast,abheb)",
+                      "einheit": "kg",
+                      "priority": 10
+                    }
+                  ],
                   "ebenen": [
                     {
-                      "name": "nachweis",
-                      "label": "Nachweis",
+                      "name": "sicherheiten",
+                      "label": "Sicherheiten",
                       "gruppen": [
                         {
                           "name": "LOADS",
@@ -115759,7 +115900,7 @@
                         {
                           "name": "KIPP",
                           "label": "Kippsicherheit",
-                          "winner": false,
+                          "winner": true,
                           "ergebnisse": [
                             {
                               "name": "anz_kippachsen",
@@ -140478,11 +140619,11 @@
                         {
                           "name": "GLEIT",
                           "label": "Gleitsicherheit",
-                          "winner": true,
+                          "winner": false,
                           "ergebnisse": [
                             {
                               "name": "min_reibwert",
-                              "wert": 0.0,
+                              "wert": 0.6,
                               "label": "Minimaler Reibwert μ_min",
                               "formelzeichen": "μ_min",
                               "formel": "μ_min = min(μ_Bauelemente)",
@@ -140504,7 +140645,7 @@
                             },
                             {
                               "name": "sicherheit_gleit",
-                              "wert": 0.0,
+                              "wert": 2.3167572666482346,
                               "label": "Gleitsicherheit S_gleit",
                               "formelzeichen": "S_gleit",
                               "priority": 10,
@@ -140514,7 +140655,7 @@
                             },
                             {
                               "name": "ballast_gleit",
-                              "wert": "Infinity",
+                              "wert": 0.0,
                               "label": "Erforderlicher Ballast m_Ballast,gleit",
                               "formelzeichen": "m_Ballast,gleit",
                               "einheit": "kg",
@@ -140530,26 +140671,52 @@
                               "gruppen": [
                                 {
                                   "name": "Bodenplatte_1",
+                                  "ergebnisse": [
+                                    {
+                                      "name": "reibwert",
+                                      "wert": 0.6,
+                                      "label": "Effektiver Reibwert μ_eff",
+                                      "formelzeichen": "μ_eff",
+                                      "formel": "μ_eff = min(μ_i)",
+                                      "priority": 0,
+                                      "meta": {
+                                        "funktion": "reibwert"
+                                      }
+                                    }
+                                  ],
                                   "messages": [
                                     {
-                                      "code": "GLEIT/MU_READ_FAIL",
-                                      "severity": "ERROR",
-                                      "text": "Reibwert-Ermittlung für Element 3 fehlgeschlagen: reibwert() got an unexpected keyword argument 'meta'",
+                                      "code": "REIB/PAIR_GOVERNING",
+                                      "severity": "INFO",
+                                      "text": "Maßgebend ist die Paarung Stahl–Gummi mit μ=0.600.",
                                       "meta": {
-                                        "funktion": "ermittle_min_reibwert"
+                                        "funktion": "reibwert"
                                       }
                                     }
                                   ]
                                 },
                                 {
                                   "name": "Bodenplatte_2",
+                                  "ergebnisse": [
+                                    {
+                                      "name": "reibwert",
+                                      "wert": 0.6,
+                                      "label": "Effektiver Reibwert μ_eff",
+                                      "formelzeichen": "μ_eff",
+                                      "formel": "μ_eff = min(μ_i)",
+                                      "priority": 0,
+                                      "meta": {
+                                        "funktion": "reibwert"
+                                      }
+                                    }
+                                  ],
                                   "messages": [
                                     {
-                                      "code": "GLEIT/MU_READ_FAIL",
-                                      "severity": "ERROR",
-                                      "text": "Reibwert-Ermittlung für Element 4 fehlgeschlagen: reibwert() got an unexpected keyword argument 'meta'",
+                                      "code": "REIB/PAIR_GOVERNING",
+                                      "severity": "INFO",
+                                      "text": "Maßgebend ist die Paarung Stahl–Gummi mit μ=0.600.",
                                       "meta": {
-                                        "funktion": "ermittle_min_reibwert"
+                                        "funktion": "reibwert"
                                       }
                                     }
                                   ]
@@ -140562,7 +140729,7 @@
                               "gruppen": [
                                 {
                                   "name": "0.0°",
-                                  "winner": true,
+                                  "winner": false,
                                   "ergebnisse": [
                                     {
                                       "name": "horizontal_betrag",
@@ -140611,7 +140778,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -140623,7 +140790,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 4.071349895882755,
                                       "label": "Richtungs-Sicherheit S_gleit,0°",
                                       "formelzeichen": "S_gleit,0°",
                                       "priority": 10,
@@ -140633,7 +140800,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 0.0,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,0°",
                                       "formelzeichen": "m_Ballast,gleit,0°",
                                       "einheit": "N",
@@ -141755,7 +141922,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -141767,7 +141934,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 2.336607047494842,
                                       "label": "Richtungs-Sicherheit S_gleit,45°",
                                       "formelzeichen": "S_gleit,45°",
                                       "priority": 10,
@@ -141777,7 +141944,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 0.0,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,45°",
                                       "formelzeichen": "m_Ballast,gleit,45°",
                                       "einheit": "N",
@@ -142850,7 +143017,7 @@
                                 },
                                 {
                                   "name": "90.0°",
-                                  "winner": false,
+                                  "winner": true,
                                   "ergebnisse": [
                                     {
                                       "name": "horizontal_betrag",
@@ -142899,7 +143066,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -142911,7 +143078,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 2.3167572666482346,
                                       "label": "Richtungs-Sicherheit S_gleit,90°",
                                       "formelzeichen": "S_gleit,90°",
                                       "priority": 10,
@@ -142921,7 +143088,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 0.0,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,90°",
                                       "formelzeichen": "m_Ballast,gleit,90°",
                                       "einheit": "N",
@@ -144043,7 +144210,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -144055,7 +144222,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 2.336607047494842,
                                       "label": "Richtungs-Sicherheit S_gleit,135°",
                                       "formelzeichen": "S_gleit,135°",
                                       "priority": 10,
@@ -144065,7 +144232,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 0.0,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,135°",
                                       "formelzeichen": "m_Ballast,gleit,135°",
                                       "einheit": "N",
@@ -145187,7 +145354,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -145199,7 +145366,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 4.071349895882755,
                                       "label": "Richtungs-Sicherheit S_gleit,180°",
                                       "formelzeichen": "S_gleit,180°",
                                       "priority": 10,
@@ -145209,7 +145376,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 0.0,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,180°",
                                       "formelzeichen": "m_Ballast,gleit,180°",
                                       "einheit": "N",
@@ -146331,7 +146498,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -146343,7 +146510,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 2.3366070474948426,
                                       "label": "Richtungs-Sicherheit S_gleit,225°",
                                       "formelzeichen": "S_gleit,225°",
                                       "priority": 10,
@@ -146353,7 +146520,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 0.0,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,225°",
                                       "formelzeichen": "m_Ballast,gleit,225°",
                                       "einheit": "N",
@@ -147475,7 +147642,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -147487,7 +147654,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 2.3167572666482346,
                                       "label": "Richtungs-Sicherheit S_gleit,270°",
                                       "formelzeichen": "S_gleit,270°",
                                       "priority": 10,
@@ -147497,7 +147664,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 0.0,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,270°",
                                       "formelzeichen": "m_Ballast,gleit,270°",
                                       "einheit": "N",
@@ -148619,7 +148786,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -148631,7 +148798,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 2.336607047494842,
                                       "label": "Richtungs-Sicherheit S_gleit,315°",
                                       "formelzeichen": "S_gleit,315°",
                                       "priority": 10,
@@ -148641,7 +148808,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 0.0,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,315°",
                                       "formelzeichen": "m_Ballast,gleit,315°",
                                       "einheit": "N",
@@ -154244,21 +154411,6 @@
                               ]
                             }
                           ]
-                        },
-                        {
-                          "name": "BALLAST",
-                          "label": "Ballast",
-                          "ergebnisse": [
-                            {
-                              "name": "ballast_max",
-                              "wert": "Infinity",
-                              "label": "Erforderlicher Ballast",
-                              "formelzeichen": "m_Ballast,max",
-                              "formel": "m_Ballast,max = max(m_Ballast,kipp, m_Ballast,gleit, m_Ballast,abheb)",
-                              "einheit": "kg",
-                              "priority": 10
-                            }
-                          ]
                         }
                       ]
                     }
@@ -154279,10 +154431,21 @@
                 {
                   "name": "STANDARD",
                   "label": "Standard",
+                  "ergebnisse": [
+                    {
+                      "name": "ballast_max",
+                      "wert": 1021.9388408314067,
+                      "label": "Erforderlicher Ballast",
+                      "formelzeichen": "m_Ballast,max",
+                      "formel": "m_Ballast,max = max(m_Ballast,kipp, m_Ballast,gleit, m_Ballast,abheb)",
+                      "einheit": "kg",
+                      "priority": 10
+                    }
+                  ],
                   "ebenen": [
                     {
-                      "name": "nachweis",
-                      "label": "Nachweis",
+                      "name": "sicherheiten",
+                      "label": "Sicherheiten",
                       "gruppen": [
                         {
                           "name": "LOADS",
@@ -154322,7 +154485,7 @@
                         {
                           "name": "KIPP",
                           "label": "Kippsicherheit",
-                          "winner": false,
+                          "winner": true,
                           "ergebnisse": [
                             {
                               "name": "anz_kippachsen",
@@ -179041,11 +179204,11 @@
                         {
                           "name": "GLEIT",
                           "label": "Gleitsicherheit",
-                          "winner": true,
+                          "winner": false,
                           "ergebnisse": [
                             {
                               "name": "min_reibwert",
-                              "wert": 0.0,
+                              "wert": 0.6,
                               "label": "Minimaler Reibwert μ_min",
                               "formelzeichen": "μ_min",
                               "formel": "μ_min = min(μ_Bauelemente)",
@@ -179067,7 +179230,7 @@
                             },
                             {
                               "name": "sicherheit_gleit",
-                              "wert": 0.0,
+                              "wert": 0.6415635507641265,
                               "label": "Gleitsicherheit S_gleit",
                               "formelzeichen": "S_gleit",
                               "priority": 10,
@@ -179077,7 +179240,7 @@
                             },
                             {
                               "name": "ballast_gleit",
-                              "wert": "Infinity",
+                              "wert": 133.0804440281789,
                               "label": "Erforderlicher Ballast m_Ballast,gleit",
                               "formelzeichen": "m_Ballast,gleit",
                               "einheit": "kg",
@@ -179093,26 +179256,84 @@
                               "gruppen": [
                                 {
                                   "name": "Bodenplatte_1",
+                                  "ergebnisse": [
+                                    {
+                                      "name": "reibwert",
+                                      "wert": 0.6,
+                                      "label": "Effektiver Reibwert μ_eff",
+                                      "formelzeichen": "μ_eff",
+                                      "formel": "μ_eff = min(μ_i)",
+                                      "priority": 0,
+                                      "meta": {
+                                        "funktion": "reibwert"
+                                      }
+                                    }
+                                  ],
                                   "messages": [
                                     {
-                                      "code": "GLEIT/MU_READ_FAIL",
-                                      "severity": "ERROR",
-                                      "text": "Reibwert-Ermittlung für Element 3 fehlgeschlagen: reibwert() got an unexpected keyword argument 'meta'",
+                                      "code": "REIB/FALLBACK_NORM",
+                                      "severity": "HINT",
+                                      "text": "Für Paarung Stahl–Gummi wurde auf DIN EN 17879:2024-08 zurückgegriffen.",
                                       "meta": {
-                                        "funktion": "ermittle_min_reibwert"
+                                        "funktion": "reibwert"
+                                      }
+                                    },
+                                    {
+                                      "code": "REIB/FALLBACK_NORM",
+                                      "severity": "HINT",
+                                      "text": "Für Paarung Gummi–Beton wurde auf DIN EN 17879:2024-08 zurückgegriffen.",
+                                      "meta": {
+                                        "funktion": "reibwert"
+                                      }
+                                    },
+                                    {
+                                      "code": "REIB/PAIR_GOVERNING",
+                                      "severity": "INFO",
+                                      "text": "Maßgebend ist die Paarung Stahl–Gummi mit μ=0.600.",
+                                      "meta": {
+                                        "funktion": "reibwert"
                                       }
                                     }
                                   ]
                                 },
                                 {
                                   "name": "Bodenplatte_2",
+                                  "ergebnisse": [
+                                    {
+                                      "name": "reibwert",
+                                      "wert": 0.6,
+                                      "label": "Effektiver Reibwert μ_eff",
+                                      "formelzeichen": "μ_eff",
+                                      "formel": "μ_eff = min(μ_i)",
+                                      "priority": 0,
+                                      "meta": {
+                                        "funktion": "reibwert"
+                                      }
+                                    }
+                                  ],
                                   "messages": [
                                     {
-                                      "code": "GLEIT/MU_READ_FAIL",
-                                      "severity": "ERROR",
-                                      "text": "Reibwert-Ermittlung für Element 4 fehlgeschlagen: reibwert() got an unexpected keyword argument 'meta'",
+                                      "code": "REIB/FALLBACK_NORM",
+                                      "severity": "HINT",
+                                      "text": "Für Paarung Stahl–Gummi wurde auf DIN EN 17879:2024-08 zurückgegriffen.",
                                       "meta": {
-                                        "funktion": "ermittle_min_reibwert"
+                                        "funktion": "reibwert"
+                                      }
+                                    },
+                                    {
+                                      "code": "REIB/FALLBACK_NORM",
+                                      "severity": "HINT",
+                                      "text": "Für Paarung Gummi–Beton wurde auf DIN EN 17879:2024-08 zurückgegriffen.",
+                                      "meta": {
+                                        "funktion": "reibwert"
+                                      }
+                                    },
+                                    {
+                                      "code": "REIB/PAIR_GOVERNING",
+                                      "severity": "INFO",
+                                      "text": "Maßgebend ist die Paarung Stahl–Gummi mit μ=0.600.",
+                                      "meta": {
+                                        "funktion": "reibwert"
                                       }
                                     }
                                   ]
@@ -179125,7 +179346,7 @@
                               "gruppen": [
                                 {
                                   "name": "0.0°",
-                                  "winner": true,
+                                  "winner": false,
                                   "ergebnisse": [
                                     {
                                       "name": "horizontal_betrag",
@@ -179174,7 +179395,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -179186,7 +179407,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 1.1274507403983014,
                                       "label": "Richtungs-Sicherheit S_gleit,0°",
                                       "formelzeichen": "S_gleit,0°",
                                       "priority": 10,
@@ -179196,7 +179417,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 0.0,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,0°",
                                       "formelzeichen": "m_Ballast,gleit,0°",
                                       "einheit": "N",
@@ -180318,7 +180539,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -180330,7 +180551,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 0.6470604131524179,
                                       "label": "Richtungs-Sicherheit S_gleit,45°",
                                       "formelzeichen": "S_gleit,45°",
                                       "priority": 10,
@@ -180340,7 +180561,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 1274.577673561254,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,45°",
                                       "formelzeichen": "m_Ballast,gleit,45°",
                                       "einheit": "N",
@@ -181413,7 +181634,7 @@
                                 },
                                 {
                                   "name": "90.0°",
-                                  "winner": false,
+                                  "winner": true,
                                   "ergebnisse": [
                                     {
                                       "name": "horizontal_betrag",
@@ -181462,7 +181683,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -181474,7 +181695,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 0.6415635507641265,
                                       "label": "Richtungs-Sicherheit S_gleit,90°",
                                       "formelzeichen": "S_gleit,90°",
                                       "priority": 10,
@@ -181484,7 +181705,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 1305.519155916435,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,90°",
                                       "formelzeichen": "m_Ballast,gleit,90°",
                                       "einheit": "N",
@@ -182606,7 +182827,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -182618,7 +182839,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 0.6470604131524179,
                                       "label": "Richtungs-Sicherheit S_gleit,135°",
                                       "formelzeichen": "S_gleit,135°",
                                       "priority": 10,
@@ -182628,7 +182849,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 1274.577673561254,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,135°",
                                       "formelzeichen": "m_Ballast,gleit,135°",
                                       "einheit": "N",
@@ -183750,7 +183971,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -183762,7 +183983,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 1.1274507403983014,
                                       "label": "Richtungs-Sicherheit S_gleit,180°",
                                       "formelzeichen": "S_gleit,180°",
                                       "priority": 10,
@@ -183772,7 +183993,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 0.0,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,180°",
                                       "formelzeichen": "m_Ballast,gleit,180°",
                                       "einheit": "N",
@@ -184894,7 +185115,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -184906,7 +185127,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 0.647060413152418,
                                       "label": "Richtungs-Sicherheit S_gleit,225°",
                                       "formelzeichen": "S_gleit,225°",
                                       "priority": 10,
@@ -184916,7 +185137,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 1274.5776735612535,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,225°",
                                       "formelzeichen": "m_Ballast,gleit,225°",
                                       "einheit": "N",
@@ -186038,7 +186259,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -186050,7 +186271,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 0.6415635507641265,
                                       "label": "Richtungs-Sicherheit S_gleit,270°",
                                       "formelzeichen": "S_gleit,270°",
                                       "priority": 10,
@@ -186060,7 +186281,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 1305.519155916435,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,270°",
                                       "formelzeichen": "m_Ballast,gleit,270°",
                                       "einheit": "N",
@@ -187182,7 +187403,7 @@
                                     },
                                     {
                                       "name": "reibkraft",
-                                      "wert": 0.0,
+                                      "wert": 1402.0452,
                                       "label": "Reibkraft R",
                                       "formelzeichen": "R",
                                       "formel": "R = μ_min · N_eff",
@@ -187194,7 +187415,7 @@
                                     },
                                     {
                                       "name": "richtung_sicherheit_gleit",
-                                      "wert": 0.0,
+                                      "wert": 0.6470604131524179,
                                       "label": "Richtungs-Sicherheit S_gleit,315°",
                                       "formelzeichen": "S_gleit,315°",
                                       "priority": 10,
@@ -187204,7 +187425,7 @@
                                     },
                                     {
                                       "name": "richtung_ballast_gleit",
-                                      "wert": "Infinity",
+                                      "wert": 1274.577673561254,
                                       "label": "Richtungs-Ballast m_Ballast,gleit,315°",
                                       "formelzeichen": "m_Ballast,gleit,315°",
                                       "einheit": "N",
@@ -192805,21 +193026,6 @@
                                   ]
                                 }
                               ]
-                            }
-                          ]
-                        },
-                        {
-                          "name": "BALLAST",
-                          "label": "Ballast",
-                          "ergebnisse": [
-                            {
-                              "name": "ballast_max",
-                              "wert": "Infinity",
-                              "label": "Erforderlicher Ballast",
-                              "formelzeichen": "m_Ballast,max",
-                              "formel": "m_Ballast,max = max(m_Ballast,kipp, m_Ballast,gleit, m_Ballast,abheb)",
-                              "einheit": "kg",
-                              "priority": 10
                             }
                           ]
                         }

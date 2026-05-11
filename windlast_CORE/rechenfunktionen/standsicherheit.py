@@ -75,7 +75,7 @@ def _ermittle_staudruecke(
 
     loads_bc = merge_breadcrumb(
         breadcrumb,
-        [bc_step("nachweis", "LOADS", ebene_label="Nachweis", gruppe_label="Lasten")]
+        [bc_step("sicherheiten", "LOADS", ebene_label="Sicherheiten", gruppe_label="Lasten")]
     )
 
     try:
@@ -150,7 +150,7 @@ def _rechne_drei_nachweise(
 
     kipp_bc = merge_breadcrumb(
         breadcrumb,
-        [bc_step("nachweis", "KIPP", ebene_label="Nachweis", gruppe_label="Kippsicherheit")]
+        [bc_step("sicherheiten", "KIPP", ebene_label="Sicherheiten", gruppe_label="Kippsicherheit")]
     )
     try:
         r = konstruktion.berechne_kippsicherheit(
@@ -196,7 +196,7 @@ def _rechne_drei_nachweise(
 
     gleit_bc = merge_breadcrumb(
         breadcrumb,
-        [bc_step("nachweis", "GLEIT", ebene_label="Nachweis", gruppe_label="Gleitsicherheit")]
+        [bc_step("sicherheiten", "GLEIT", ebene_label="Sicherheiten", gruppe_label="Gleitsicherheit")]
     )
     try:
         r = konstruktion.berechne_gleitsicherheit(
@@ -242,7 +242,7 @@ def _rechne_drei_nachweise(
 
     abhebe_bc = merge_breadcrumb(
         breadcrumb,
-        [bc_step("nachweis", "ABHEBE", ebene_label="Nachweis", gruppe_label="Abhebesicherheit")]
+        [bc_step("sicherheiten", "ABHEBE", ebene_label="Sicherheiten", gruppe_label="Abhebesicherheit")]
     )
     try:
         r = konstruktion.berechne_abhebesicherheit(
@@ -294,10 +294,7 @@ def _rechne_drei_nachweise(
     if b_abhebe is not None:
         ballast_pairs.append((Nachweis.ABHEBE, b_abhebe))
 
-    ballast_bc = merge_breadcrumb(
-        breadcrumb,
-        [bc_step("nachweis", "BALLAST", ebene_label="Nachweis", gruppe_label="Ballast")]
-    )
+    ballast_bc = breadcrumb
 
     if ballast_pairs:
         ballast_quelle, ballast_wert = max(ballast_pairs, key=lambda p: p[1])
@@ -513,6 +510,6 @@ def standsicherheit(
     tree = collect_tree(prot) or prot.root
 
     # DEBUG
-    # debug_tree(tree,output_dir="debug_output")
+    debug_tree(tree,output_dir="debug_output")
 
     return tree

@@ -152,19 +152,27 @@
       ballast: null,
     };
 
-    const nachweise = {
+    const sicherheiten = {
       kipp: "KIPP",
       gleit: "GLEIT",
       abhebe: "ABHEBE",
-      ballast: "BALLAST",
     };
 
-    for (const [rowKey, nachweisName] of Object.entries(nachweise)) {
-      const nachweisGroup = findGruppe(scenarioGroup, "nachweis", nachweisName);
+    for (const [rowKey, sicherheitName] of Object.entries(sicherheiten)) {
+      const sicherheitGroup = findGruppe(
+        scenarioGroup,
+        "sicherheiten",
+        sicherheitName
+      );
+
       const resultName = RESULT_BY_ROW_KEY[rowKey];
-      const result = findResult(nachweisGroup, resultName);
+      const result = findResult(sicherheitGroup, resultName);
+
       values[rowKey] = normalizeValue(result?.wert);
     }
+
+    const ballastResult = findResult(scenarioGroup, "ballast_max");
+    values.ballast = normalizeValue(ballastResult?.wert);
 
     return values;
   }
