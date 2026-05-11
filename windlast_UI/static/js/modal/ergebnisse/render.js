@@ -1,5 +1,6 @@
 import { escapeHtml, formatNumberDE, formatVectorDE, formatMathWithSubSup } from "../../utils/formatierung.js";
 import { listEbenen, listGruppen, listErgebnisse, listMessages, makePathLabel } from "./tree.js";
+import { renderTree } from "./render_tree.js";
 
 function formatValue(value) {
   if (Array.isArray(value)) return formatVectorDE(value, 4);
@@ -40,52 +41,6 @@ function renderMessageItem(message) {
   `;
 }
 
-function makeNodeId() {
-  return `erg-node-${Math.random().toString(36).slice(2)}`;
-}
-
-function renderTreeLevel(container, state, path = []) {
-  const ebenen = listEbenen(container);
-  if (!ebenen.length) return "";
-
-  return ebenen.map(ebene => {
-    const gruppen = listGruppen(ebene);
-    if (!gruppen.length) return "";
-
-    const groupsHtml = gruppen.map(gruppe => {
-      const id = makeNodeId();
-      state.nodes.set(id, { node: gruppe, path: [...path, {
-        ebene: ebene.name,
-        ebeneLabel: ebene.label,
-        gruppe: gruppe.name,
-        gruppeLabel: gruppe.label,
-      }] });
-
-      const winnerMark = gruppe.winner === true ? `<span class="erg-tree-winner">✓</span>` : "";
-      const label = gruppe.label || gruppe.name;
-
-      return `
-        <li class="erg-tree-group">
-          <button type="button" class="erg-tree-btn" data-node-id="${id}">
-            <span class="erg-tree-name">${escapeHtml(label)}</span>
-            ${winnerMark}
-          </button>
-          <div class="erg-tree-children">
-            ${renderTreeLevel(gruppe, state, state.nodes.get(id).path)}
-          </div>
-        </li>
-      `;
-    }).join("");
-
-    return `
-      <li class="erg-tree-level">
-        <div class="erg-tree-level-label">${escapeHtml(ebene.label || ebene.name)}</div>
-        <ul class="erg-tree-groups">${groupsHtml}</ul>
-      </li>
-    `;
-  }).join("");
-}
-
 export function renderErgebnisModalContent(rootNode) {
   const state = { nodes: new Map(), selectedId: null };
 
@@ -97,21 +52,18 @@ export function renderErgebnisModalContent(rootNode) {
   shell.className = "ergebnisse-modal";
 
   shell.innerHTML = `
-    <aside class="erg-tree-pane">
-      <button type="button" class="erg-tree-root active" data-node-id="${rootId}">Root</button>
-      <ul class="erg-tree">
-        ${renderTreeLevel(rootNode, state)}
-      </ul>
-    </aside>
+    <aside class="erg-tree-pane"></aside>
 
     <section class="erg-detail-pane">
       <div class="erg-detail-header">
         <h4 class="erg-detail-title">Root</h4>
       </div>
+
       <div class="erg-detail-content"></div>
     </section>
   `;
 
+  const treePane = shell.querySelector(".erg-tree-pane");
   const titleEl = shell.querySelector(".erg-detail-title");
   const contentEl = shell.querySelector(".erg-detail-content");
 
@@ -140,23 +92,16 @@ export function renderErgebnisModalContent(rootNode) {
     `;
   }
 
-  shell.addEventListener("click", (ev) => {
-    const btn = ev.target.closest("[data-node-id]");
-    if (!btn) return;
-
-    const id = btn.dataset.nodeId;
-    const nodeInfo = state.nodes.get(id);
-    if (!nodeInfo) return;
-
-    shell.querySelectorAll(".erg-tree-btn.active, .erg-tree-root.active")
-      .forEach(el => el.classList.remove("active"));
-
-    btn.classList.add("active");
-    state.selectedId = id;
-    renderDetails(nodeInfo);
+  const tree = renderTree({
+    rootNode,
+    onSelect: (nodeInfo) => {
+      renderDetails(nodeInfo);
+    },
   });
 
-  renderDetails(state.nodes.get(rootId));
+  treePane.appendChild(tree.element);
+
+  tree.select("root");
 
   return shell;
 }

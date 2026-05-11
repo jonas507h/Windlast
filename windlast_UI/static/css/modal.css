@@ -384,19 +384,25 @@
   width: min(96vw, 1500px);
   max-width: min(96vw, 1500px);
   height: min(92vh, 980px);
+  max-height: 92vh;
 }
 
 .modal-dialog-wide .modal-content {
   height: 100%;
+  max-height: 100%;
   min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .ergebnisse-modal {
+  flex: 1;
+  min-height: 0;
   display: grid;
   grid-template-columns: 320px minmax(0, 1fr);
   gap: 1rem;
-  height: calc(92vh - 5rem);
-  min-height: 520px;
+  overflow: hidden;
 }
 
 .erg-tree-pane,
@@ -405,15 +411,14 @@
   border: 1px solid var(--border);
   background: var(--field-bg);
   border-radius: 14px;
+  overflow: hidden;
 }
 
 .erg-tree-pane {
-  overflow: auto;
-  padding: 0.75rem;
+  overflow-y: auto;
 }
 
 .erg-detail-pane {
-  overflow: hidden;
   display: flex;
   flex-direction: column;
 }
@@ -431,8 +436,9 @@
 }
 
 .erg-detail-content {
-  overflow: auto;
-  padding: 1rem;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .erg-tree,
@@ -538,4 +544,97 @@
 
 .erg-empty {
   color: var(--muted);
+}
+
+.erg-tree-view {
+  font-size: 0.82rem;
+  line-height: 1.15;
+  color: var(--master-text);
+}
+
+.erg-tree-list,
+.erg-tree-children {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.erg-tree-children {
+  margin-left: 0.8rem;
+  padding-left: 0.45rem;
+  border-left: 1px solid var(--master-border);
+}
+
+.erg-tree-node {
+  margin: 0;
+  padding: 0;
+}
+
+.erg-tree-row {
+  display: flex;
+  align-items: center;
+  min-height: 1.35rem;
+  gap: 0.15rem;
+}
+
+.erg-tree-toggle {
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--master-muted);
+  cursor: pointer;
+  line-height: 1;
+}
+
+.erg-tree-toggle:disabled {
+  cursor: default;
+  opacity: 0.35;
+}
+
+.erg-tree-select {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--master-text);
+  text-align: left;
+  border-radius: 6px;
+  padding: 0.12rem 0.35rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.erg-tree-select:hover {
+  background: var(--master-surface-2);
+}
+
+.erg-tree-select.active {
+  background: var(--master-accent);
+  color: var(--master-bg);
+}
+
+.erg-tree-key,
+.erg-tree-eq {
+  color: var(--master-muted);
+  font-size: 0.75rem;
+}
+
+.erg-tree-select.active .erg-tree-key,
+.erg-tree-select.active .erg-tree-eq {
+  color: var(--master-bg);
+}
+
+.erg-tree-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.erg-tree-winner {
+  margin-left: auto;
+  font-weight: 700;
 }
