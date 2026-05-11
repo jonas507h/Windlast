@@ -158,6 +158,7 @@ class Konstruktion:
         anzahl_windrichtungen: int = 4,
         protokoll: Optional[Protokoll] = None,
         breadcrumb: Optional[list] = None,
+        loads_breadcrumb: Optional[list] = None,
     ) -> List[Zwischenergebnis]:
         base_bc = breadcrumb if breadcrumb is not None else []
         base_meta = {
@@ -176,6 +177,7 @@ class Konstruktion:
             anzahl_windrichtungen=anzahl_windrichtungen,
             protokoll=protokoll,
             breadcrumb=base_bc,
+            loads_breadcrumb=loads_breadcrumb,
         )
 
     def berechne_gleitsicherheit(
@@ -191,6 +193,7 @@ class Konstruktion:
         anzahl_windrichtungen: int = 4,
         protokoll: Optional[Protokoll] = None,
         breadcrumb: Optional[list] = None,
+        loads_breadcrumb: Optional[list] = None,
     ) -> List[Zwischenergebnis]:
         base_bc = breadcrumb if breadcrumb is not None else []
         base_meta = {
@@ -209,6 +212,7 @@ class Konstruktion:
             anzahl_windrichtungen=anzahl_windrichtungen,
             protokoll=protokoll,
             breadcrumb=base_bc,
+            loads_breadcrumb=loads_breadcrumb,
         )
 
     def berechne_abhebesicherheit(
@@ -224,6 +228,7 @@ class Konstruktion:
         anzahl_windrichtungen: int = 4,
         protokoll: Optional[Protokoll] = None,
         breadcrumb: Optional[list] = None,
+        loads_breadcrumb: Optional[list] = None,
     ) -> List[Zwischenergebnis]:
         base_bc = breadcrumb if breadcrumb is not None else []
         base_meta = {
@@ -242,6 +247,7 @@ class Konstruktion:
             anzahl_windrichtungen=anzahl_windrichtungen,
             protokoll=protokoll,
             breadcrumb=base_bc,
+            loads_breadcrumb=loads_breadcrumb,
         )
 
     def gesamtgewicht(self) -> float:

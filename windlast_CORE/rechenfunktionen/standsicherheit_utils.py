@@ -37,6 +37,65 @@ def generiere_windrichtungen(
 
     return result
 
+def merge_kraefte_nach_element(
+    *maps: Dict[str, List[Kraefte]],
+) -> Dict[str, List[Kraefte]]:
+    out: Dict[str, List[Kraefte]] = {}
+
+    for m in maps:
+        for element_id, kraefte_liste in (m or {}).items():
+            key = str(element_id)
+            out.setdefault(key, []).extend(kraefte_liste or [])
+
+    return out
+
+def ermittle_gewichtskraefte(
+    konstruktion,
+    *,
+    protokoll: Optional[Protokoll] = None,
+    breadcrumb: Optional[list] = None,
+) -> Dict[str, List[Kraefte]]:
+    base_bc = merge_breadcrumb(
+        breadcrumb,
+        [bc_step("kraefte", "gewichtslasten", ebene_label="Kräfte", gruppe_label="Gewichtslasten")]
+    )
+    base_meta = {"funktion": "ermittle_gewichtskraefte"}
+
+    kraefte_nach_element: Dict[str, List[Kraefte]] = {}
+
+    for idx, elem in enumerate(getattr(konstruktion, "bauelemente", []) or []):
+        element_id = getattr(elem, "element_id_intern", None) or f"elem_{idx}"
+
+        elem_bc = merge_breadcrumb(
+            base_bc,
+            [bc_step("element_id", str(element_id), ebene_label="Bauelement")]
+        )
+
+        fn_gewicht = getattr(elem, "gewichtskraefte", None)
+        if not callable(fn_gewicht):
+            continue
+
+        try:
+            kraefte_gewicht = fn_gewicht(
+                protokoll=protokoll,
+                breadcrumb=elem_bc,
+            )
+
+            if kraefte_gewicht:
+                kraefte_nach_element.setdefault(str(element_id), []).extend(kraefte_gewicht)
+
+        except Exception as e:
+            protokolliere_msg(
+                protokoll,
+                severity=Severity.ERROR,
+                code="UTILS/GEWICHT_FAIL",
+                text=f"gewichtskraefte() für Element {idx} fehlgeschlagen: {e}",
+                breadcrumb=elem_bc,
+                meta=base_meta,
+            )
+
+    return kraefte_nach_element
+
 def ermittle_kraefte_pro_windrichtung(
     konstruktion,
     norm: Norm,
@@ -45,64 +104,56 @@ def ermittle_kraefte_pro_windrichtung(
     obergrenzen: Sequence[float],
     konst,
     *,
+    winkel_deg: float,
     protokoll: Optional[Protokoll] = None,
-    breadcrumb: Optional[list] = None
+    breadcrumb: Optional[list] = None,
 ) -> Dict[str, List[Kraefte]]:
-    base_bc = breadcrumb if breadcrumb is not None else []
-    base_meta = {
-        "funktion": "ermittle_kraefte_pro_windrichtung",
-    }
+    base_bc = merge_breadcrumb(
+        breadcrumb,
+        [
+            bc_step("kraefte", "windlasten", ebene_label="Kräfte", gruppe_label="Windlasten"),
+            bc_step("windrichtung_deg", f"{winkel_deg}°", ebene_label="Windrichtung"),
+        ],
+    )
+    base_meta = {"funktion": "ermittle_kraefte_pro_windrichtung"}
 
-    # 1)Wind- & Gewichtskräfte aller Bauelemente holen
-    kraefte_windrichtung: List[Kraefte] = []
+    kraefte_nach_element: Dict[str, List[Kraefte]] = {}
 
     for idx, elem in enumerate(getattr(konstruktion, "bauelemente", []) or []):
-        elem_bc = merge_breadcrumb(base_bc, [bc_step("element_id", f"{getattr(elem, 'element_id_intern', None)}")])
-        # Gewicht
-        fn_gewicht = getattr(elem, "gewichtskraefte", None)
-        if callable(fn_gewicht):
-            try:
-                kraefte_gewicht = fn_gewicht(protokoll=protokoll, breadcrumb=elem_bc)
-                if kraefte_gewicht:
-                    kraefte_windrichtung.extend(kraefte_gewicht)
-            except Exception as e:
-                protokolliere_msg(
-                    protokoll, severity=Severity.ERROR,
-                    code="UTILS/GEWICHT_FAIL",
-                    text=f"gewichtskraefte() für Element {idx} fehlgeschlagen: {e}",
-                    breadcrumb=elem_bc,
-                    meta=base_meta,
-                )
+        element_id = getattr(elem, "element_id_intern", None) or f"elem_{idx}"
 
-        # Wind
+        elem_bc = merge_breadcrumb(
+            base_bc,
+            [bc_step("element_id", str(element_id), ebene_label="Bauelement")]
+        )
+
         fn_wind = getattr(elem, "windkraefte", None)
-        if callable(fn_wind):
-            try:
-                kraefte_wind = fn_wind(
-                    norm=norm,
-                    windrichtung=windrichtung,
-                    staudruecke=staudruecke,
-                    obergrenzen=obergrenzen,
-                    konst=konst,
-                    protokoll=protokoll,
-                    breadcrumb=elem_bc,
-                )
-                if kraefte_wind:
-                    kraefte_windrichtung.extend(kraefte_wind)
-            except Exception as e:
-                protokolliere_msg(
-                    protokoll, severity=Severity.ERROR,
-                    code="UTILS/WIND_FAIL",
-                    text=f"windkraefte() für Element {idx} fehlgeschlagen: {e}",
-                    breadcrumb=elem_bc,
-                    meta=base_meta,
-                )
-    
-    # 2) Nach Bauelement gruppieren (erwartet: element_id_intern gesetzt)
-    kraefte_nach_element: Dict[str, List[Kraefte]] = {}
-    for k in kraefte_windrichtung:
-        key = k.element_id_intern or f"elem_{id(k)}"  # Fallback, falls ID fehlt
-        kraefte_nach_element.setdefault(key, []).append(k)
+        if not callable(fn_wind):
+            continue
+
+        try:
+            kraefte_wind = fn_wind(
+                norm=norm,
+                windrichtung=windrichtung,
+                staudruecke=staudruecke,
+                obergrenzen=obergrenzen,
+                konst=konst,
+                protokoll=protokoll,
+                breadcrumb=elem_bc,
+            )
+
+            if kraefte_wind:
+                kraefte_nach_element.setdefault(str(element_id), []).extend(kraefte_wind)
+
+        except Exception as e:
+            protokolliere_msg(
+                protokoll,
+                severity=Severity.ERROR,
+                code="UTILS/WIND_FAIL",
+                text=f"windkraefte() für Element {idx} fehlgeschlagen: {e}",
+                breadcrumb=elem_bc,
+                meta=base_meta,
+            )
 
     return kraefte_nach_element
 
@@ -135,28 +186,53 @@ def get_or_create_lastset(
     obergrenzen: Sequence[float],
     konst,
     protokoll: Optional[Protokoll] = None,
-    breadcrumb: Optional[list] = None
+    breadcrumb: Optional[list] = None,
 ) -> LastSet:
     base_bc = breadcrumb if breadcrumb is not None else []
-    base_meta = {
-        "funktion": "get_or_create_lastset",
-    }
-
     key = _angle_key(winkel_deg)
+
+    # 1) Fertiges kombiniertes LastSet schon vorhanden?
     ls = pool.nach_winkel.get(key)
-    if ls is None:
-        kbe = ermittle_kraefte_pro_windrichtung(
+    if ls is not None:
+        return ls
+
+    # 2) Gewichtskräfte einmalig berechnen
+    if pool.gewicht_nach_element is None:
+        pool.gewicht_nach_element = ermittle_gewichtskraefte(
+            konstruktion,
+            protokoll=protokoll,
+            breadcrumb=base_bc,
+        )
+
+    # 3) Windkräfte für diese Richtung berechnen
+    wind_nach_element = pool.wind_nach_winkel.get(key)
+    if wind_nach_element is None:
+        wind_nach_element = ermittle_kraefte_pro_windrichtung(
             konstruktion,
             norm=norm,
             windrichtung=windrichtung,
+            winkel_deg=winkel_deg,
             staudruecke=staudruecke,
             obergrenzen=obergrenzen,
             konst=konst,
             protokoll=protokoll,
             breadcrumb=base_bc,
         )
-        ls = LastSet(winkel_deg=winkel_deg, windrichtung=windrichtung, kraefte_nach_element=kbe)
-        pool.nach_winkel[key] = ls
+        pool.wind_nach_winkel[key] = wind_nach_element
+
+    # 4) Kombiniertes LastSet bauen: Gewicht + Wind dieser Richtung
+    kraefte_nach_element = merge_kraefte_nach_element(
+        pool.gewicht_nach_element,
+        wind_nach_element,
+    )
+
+    ls = LastSet(
+        winkel_deg=winkel_deg,
+        windrichtung=windrichtung,
+        kraefte_nach_element=kraefte_nach_element,
+    )
+
+    pool.nach_winkel[key] = ls
     return ls
 
 # Kippsicherheit Utils --------------------------------------------

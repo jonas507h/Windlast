@@ -1,8 +1,8 @@
 TREE STATS
 ===========
-ebenen: 3589
-gruppen: 6478
-ergebnisse: 12475
+ebenen: 3609
+gruppen: 6473
+ergebnisse: 12300
 messages: 22
 max_depth: 8
 
@@ -17,7 +17,6 @@ Top result names:
    320  lastfall_horizontalkraft_vektor
    320  lastfall_horizontalkraft_betrag
    320  lastfall_normalkraft_effektiv
-   200  gewichtskraft
    200  horizontalkraft
    200  normalkraft_down
    200  normalkraft_up
@@ -37,14 +36,16 @@ Top result names:
    120  abminderungsfaktor_schlankheit
    120  kraftbeiwert
    120  windkraft
+   120  windkraft_vektor
 
 Top level names:
   1920  lastfall_index
   1200  lasttyp
-   285  element_id
+   290  element_id
    120  segment
     40  achse_index
-    15  windrichtung_deg
+    20  windrichtung_deg
+    10  kraefte
      5  sicherheiten
      3  szenario
      1  norm

@@ -80,11 +80,13 @@ def _kippsicherheit_DinEn13814_2005_06(
     anzahl_windrichtungen: int = 4,
     protokoll: Optional[Protokoll] = None,
     breadcrumb: Optional[list] = None,
+    loads_breadcrumb: Optional[list] = None,
 ) -> List[Zwischenergebnis]:
     base_bc = breadcrumb if breadcrumb is not None else []
     base_meta = {
         "funktion": "kippsicherheit_DinEn13814_2005_06",
     }
+    loads_bc = loads_breadcrumb if loads_breadcrumb is not None else base_bc
 
     if vereinfachung_konstruktion is not VereinfachungKonstruktion.KEINE:
         protokolliere_msg(
@@ -130,7 +132,7 @@ def _kippsicherheit_DinEn13814_2005_06(
                 obergrenzen=obergrenzen,
                 konst=konst,
                 protokoll=protokoll,
-                breadcrumb=richtung_bc,
+                breadcrumb=loads_bc,
             )
             kraefte_nach_element = lastset.kraefte_nach_element
 
@@ -353,11 +355,13 @@ def _kippsicherheit_DinEn17879_2024_08(
     anzahl_windrichtungen: int = 4,
     protokoll: Optional[Protokoll] = None,
     breadcrumb: Optional[list] = None,
+    loads_breadcrumb: Optional[list] = None,
 ) -> List[Zwischenergebnis]:
     base_bc = breadcrumb if breadcrumb is not None else []
     base_meta = {
         "funktion": "kippsicherheit_DinEn17879_2024_08",
     }
+    loads_bc = loads_breadcrumb if loads_breadcrumb is not None else base_bc
 
     if vereinfachung_konstruktion is not VereinfachungKonstruktion.KEINE:
         protokolliere_msg(
@@ -403,7 +407,7 @@ def _kippsicherheit_DinEn17879_2024_08(
                 obergrenzen=obergrenzen,
                 konst=konst,
                 protokoll=protokoll,
-                breadcrumb=richtung_bc,
+                breadcrumb=loads_bc,
             )
             kraefte_nach_element = lastset.kraefte_nach_element
 
@@ -632,6 +636,7 @@ def kippsicherheit(
     anzahl_windrichtungen: int = 4,
     protokoll: Optional[Protokoll] = None,
     breadcrumb: Optional[list] = None,
+    loads_breadcrumb: Optional[list] = None,
 ) -> List[Zwischenergebnis]:
     base_bc = breadcrumb if breadcrumb is not None else []
     base_meta = {
@@ -677,4 +682,5 @@ def kippsicherheit(
         anzahl_windrichtungen=anzahl_windrichtungen,
         protokoll=protokoll,
         breadcrumb=base_bc,
+        loads_breadcrumb=loads_breadcrumb,
     )

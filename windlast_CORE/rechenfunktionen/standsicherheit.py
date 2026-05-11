@@ -75,10 +75,11 @@ def _ermittle_staudruecke(
 
     loads_bc = merge_breadcrumb(
         breadcrumb,
-        [bc_step("sicherheiten", "LOADS", ebene_label="Sicherheiten", gruppe_label="Lasten")]
+        [bc_step("kraefte", "windkraefte", ebene_label="Kräfte", gruppe_label="Windkräfte")]
     )
 
     try:
+        # TODO: Warum??? was ist s.modus?
         if s.modus == "betrieb":
             zl1, zl2 = staudruecke(
                 s.norm, konstruktion, s.betriebszustand,
@@ -144,6 +145,11 @@ def _rechne_drei_nachweise(
     protokoll: Optional[Protokoll] = None,
     breadcrumb: Optional[list] = None,
 ) -> Tuple[Optional[float], Optional[float], Optional[float]]:
+    
+    loads_bc = merge_breadcrumb(
+        breadcrumb,
+        [bc_step("kraefte", "windkraefte", ebene_label="Kräfte", gruppe_label="Windkräfte")]
+    )
 
     v_kipp = v_gleit = v_abhebe = None
     b_kipp = b_gleit = b_abhebe = None
@@ -162,6 +168,7 @@ def _rechne_drei_nachweise(
             anzahl_windrichtungen=anzahl_windrichtungen,
             protokoll=protokoll,
             breadcrumb=kipp_bc,
+            loads_breadcrumb=loads_bc,
         )
         v_kipp = float(r[0].wert)
         b_kipp = float(r[1].wert)
@@ -208,6 +215,7 @@ def _rechne_drei_nachweise(
             anzahl_windrichtungen=anzahl_windrichtungen,
             protokoll=protokoll,
             breadcrumb=gleit_bc,
+            loads_breadcrumb=loads_bc,
         )
         v_gleit = float(r[0].wert)
         b_gleit = float(r[1].wert)
@@ -254,6 +262,7 @@ def _rechne_drei_nachweise(
             anzahl_windrichtungen=anzahl_windrichtungen,
             protokoll=protokoll,
             breadcrumb=abhebe_bc,
+            loads_breadcrumb=loads_bc,
         )
         v_abhebe = float(r[0].wert)
         b_abhebe = float(r[1].wert)
