@@ -49,46 +49,48 @@ class KonstruktionInput(BaseModel):
 # Output-Modelle
 # =========================
 
-NumberLike = float | str | None  # "INF" | "-INF" | None | float
+class ErgebnisOut(BaseModel):
+    name: str
+    wert: Any
+    label: Optional[str] = None
+    formelzeichen: Any = None
+    formel: Optional[str] = None
+    einheit: Optional[str] = None
+    priority: int = 0
+    meta: Dict[str, Any] = Field(default_factory=dict)
 
-class ResultDoc(BaseModel):
-    title: Optional[str] = None
-    value: Any = None
-    unit: Optional[str] = None
-    formula: Optional[str] = None
-    formula_source: Optional[str] = None
-    symbols: Optional[List[Any]] = None
-    symbols_source: Optional[List[Any]] = None
-    items: Optional[List[Any]] = None          # i.d.R. Liste von ["Name", Wert]-Paaren
-    items_source: Optional[List[Any]] = None
-    context: Dict[str, Any] = Field(default_factory=dict)
 
-class ResultMessage(BaseModel):
-    # wir erlauben jeden String für mögliche Erweiterungen; Tooltips filtern/normalisieren später
-    severity: str | None = None      # "error" | "warn" | "hint" | "info" | ...
-    text: str | None = None
-    code: str | None = None
-    context: Dict[str, Any] = Field(default_factory=dict)
+class MessageOut(BaseModel):
+    code: str
+    severity: Any
+    text: str
+    meta: Dict[str, Any] = Field(default_factory=dict)
 
-class ResultNormAltVals(BaseModel):
-    anzeigename: Optional[str] = None
-    kipp:    NumberLike
-    gleit:   NumberLike
-    abhebe:  NumberLike
-    ballast: NumberLike = None  # kg
-    messages: List[ResultMessage] = Field(default_factory=list)
-    docs: List[ResultDoc] = Field(default_factory=list)
 
-class ResultNormVals(BaseModel):
-    kipp:    NumberLike
-    gleit:   NumberLike
-    abhebe:  NumberLike
-    ballast: NumberLike = None  # kg
-    alternativen: Dict[str, ResultNormAltVals] | None = None  # z.B. {"IN_BETRIEB": {...}}
-    # NEU: flache Nachrichtenliste pro Norm (Text, Severity, Kontext)
-    messages: List[ResultMessage] = Field(default_factory=list)
-    docs: List[ResultDoc] = Field(default_factory=list)
+class GruppeOut(BaseModel):
+    name: str
+    label: Optional[str] = None
+    winner: Optional[bool] = None
+    ergebnisse: List[ErgebnisOut] = Field(default_factory=list)
+    messages: List[MessageOut] = Field(default_factory=list)
+    ebenen: List["EbeneOut"] = Field(default_factory=list)
+    meta: Dict[str, Any] = Field(default_factory=dict)
+
+
+class EbeneOut(BaseModel):
+    name: str
+    label: Optional[str] = None
+    gruppen: List[GruppeOut] = Field(default_factory=list)
+    meta: Dict[str, Any] = Field(default_factory=dict)
+
+
+class ErgebnisBaumOut(BaseModel):
+    ebenen: List[EbeneOut] = Field(default_factory=list)
+    ergebnisse: List[ErgebnisOut] = Field(default_factory=list)
+    messages: List[MessageOut] = Field(default_factory=list)
+    meta: Dict[str, Any] = Field(default_factory=dict)
+
 
 class Result(BaseModel):
-    normen: Dict[str, ResultNormVals]
-    meta: Dict[str, Any]
+    ergebnis: ErgebnisBaumOut
+    meta: Dict[str, Any] = Field(default_factory=dict)
