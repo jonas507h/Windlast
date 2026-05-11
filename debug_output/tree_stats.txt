@@ -1,10 +1,10 @@
 TREE STATS
 ===========
-ebenen: 3609
-gruppen: 6513
-ergebnisse: 12510
+ebenen: 3589
+gruppen: 6483
+ergebnisse: 12465
 messages: 10
-max_depth: 9
+max_depth: 8
 
 Top result names:
   2330  sicherheitsbeiwert
@@ -44,9 +44,8 @@ Top level names:
    285  element_id
    120  segment
     40  achse_index
-    20  nachweis
     15  windrichtung_deg
-     5  quelle_nachweis
+     5  nachweis
      3  szenario
      1  norm
 

@@ -166,25 +166,25 @@ def _rechne_drei_nachweise(
         v_kipp = float(r[0].wert)
         b_kipp = float(r[1].wert)
 
-        protokolliere_ergebnis(
-            protokoll,
-            breadcrumb=kipp_bc,
-            name="kippsicherheit",
-            label="Kippsicherheit",
-            formelzeichen="S_kipp",
-            wert=v_kipp,
-            priority=10,
-        )
-        protokolliere_ergebnis(
-            protokoll,
-            breadcrumb=kipp_bc,
-            name="ballast_kipp",
-            label="Erforderlicher Ballast aus Kippen",
-            formelzeichen="m_Ballast,kipp",
-            wert=b_kipp,
-            einheit="kg",
-            priority=10,
-        )
+        # protokolliere_ergebnis(
+        #     protokoll,
+        #     breadcrumb=kipp_bc,
+        #     name="kippsicherheit",
+        #     label="Kippsicherheit",
+        #     formelzeichen="S_kipp",
+        #     wert=v_kipp,
+        #     priority=10,
+        # )
+        # protokolliere_ergebnis(
+        #     protokoll,
+        #     breadcrumb=kipp_bc,
+        #     name="ballast_kipp",
+        #     label="Erforderlicher Ballast aus Kippen",
+        #     formelzeichen="m_Ballast,kipp",
+        #     wert=b_kipp,
+        #     einheit="kg",
+        #     priority=10,
+        # )
     except Exception as e:
         protokolliere_msg(
             protokoll,
@@ -212,25 +212,25 @@ def _rechne_drei_nachweise(
         v_gleit = float(r[0].wert)
         b_gleit = float(r[1].wert)
 
-        protokolliere_ergebnis(
-            protokoll,
-            breadcrumb=gleit_bc,
-            name="gleitsicherheit",
-            label="Gleitsicherheit",
-            formelzeichen="S_gleit",
-            wert=v_gleit,
-            priority=10,
-        )
-        protokolliere_ergebnis(
-            protokoll,
-            breadcrumb=gleit_bc,
-            name="ballast_gleit",
-            label="Erforderlicher Ballast aus Gleiten",
-            formelzeichen="m_Ballast,gleit",
-            wert=b_gleit,
-            einheit="kg",
-            priority=10,
-        )
+        # protokolliere_ergebnis(
+        #     protokoll,
+        #     breadcrumb=gleit_bc,
+        #     name="gleitsicherheit",
+        #     label="Gleitsicherheit",
+        #     formelzeichen="S_gleit",
+        #     wert=v_gleit,
+        #     priority=10,
+        # )
+        # protokolliere_ergebnis(
+        #     protokoll,
+        #     breadcrumb=gleit_bc,
+        #     name="ballast_gleit",
+        #     label="Erforderlicher Ballast aus Gleiten",
+        #     formelzeichen="m_Ballast,gleit",
+        #     wert=b_gleit,
+        #     einheit="kg",
+        #     priority=10,
+        # )
     except Exception as e:
         protokolliere_msg(
             protokoll,
@@ -258,25 +258,25 @@ def _rechne_drei_nachweise(
         v_abhebe = float(r[0].wert)
         b_abhebe = float(r[1].wert)
 
-        protokolliere_ergebnis(
-            protokoll,
-            breadcrumb=abhebe_bc,
-            name="abhebesicherheit",
-            label="Abhebesicherheit",
-            formelzeichen="S_abhebe",
-            wert=v_abhebe,
-            priority=10,
-        )
-        protokolliere_ergebnis(
-            protokoll,
-            breadcrumb=abhebe_bc,
-            name="ballast_abhebe",
-            label="Erforderlicher Ballast aus Abheben",
-            formelzeichen="m_Ballast,abhebe",
-            wert=b_abhebe,
-            einheit="kg",
-            priority=10,
-        )
+        # protokolliere_ergebnis(
+        #     protokoll,
+        #     breadcrumb=abhebe_bc,
+        #     name="abhebesicherheit",
+        #     label="Abhebesicherheit",
+        #     formelzeichen="S_abhebe",
+        #     wert=v_abhebe,
+        #     priority=10,
+        # )
+        # protokolliere_ergebnis(
+        #     protokoll,
+        #     breadcrumb=abhebe_bc,
+        #     name="ballast_abhebe",
+        #     label="Erforderlicher Ballast aus Abheben",
+        #     formelzeichen="m_Ballast,abhebe",
+        #     wert=b_abhebe,
+        #     einheit="kg",
+        #     priority=10,
+        # )
     except Exception as e:
         protokolliere_msg(
             protokoll,
@@ -302,25 +302,32 @@ def _rechne_drei_nachweise(
     if ballast_pairs:
         ballast_quelle, ballast_wert = max(ballast_pairs, key=lambda p: p[1])
 
-        for quelle, wert in ballast_pairs:
-            quelle_bc = merge_breadcrumb(
-                ballast_bc,
-                [bc_step("quelle_nachweis", quelle.name, ebene_label="Quelle Nachweis", gruppe_label=quelle.name)]
-            )
-            protokolliere_ergebnis(
-                protokoll,
-                breadcrumb=quelle_bc,
-                name="ballast_kandidat",
-                label=f"Ballast-Kandidat {quelle.name}",
-                formelzeichen=f"m_Ballast,{quelle.name.lower()}",
-                wert=wert,
-                einheit="kg",
-                priority=5,
-            )
+        if ballast_quelle.name == "KIPP":
+            ballast_winner_bc = kipp_bc
+        elif ballast_quelle.name == "GLEIT":
+            ballast_winner_bc = gleit_bc
+        elif ballast_quelle.name == "ABHEBE":
+            ballast_winner_bc = abhebe_bc
+
+        # for quelle, wert in ballast_pairs:
+        #     quelle_bc = merge_breadcrumb(
+        #         ballast_bc,
+        #         [bc_step("quelle_nachweis", quelle.name, ebene_label="Quelle Nachweis", gruppe_label=quelle.name)]
+        #     )
+        #     protokolliere_ergebnis(
+        #         protokoll,
+        #         breadcrumb=quelle_bc,
+        #         name="ballast_kandidat",
+        #         label=f"Ballast-Kandidat {quelle.name}",
+        #         formelzeichen=f"m_Ballast,{quelle.name.lower()}",
+        #         wert=wert,
+        #         einheit="kg",
+        #         priority=5,
+        #     )
 
         set_winner(
             protokoll,
-            merge_breadcrumb(ballast_bc, [bc_step("quelle_nachweis", ballast_quelle.name)])
+            ballast_winner_bc,
         )
 
         protokolliere_ergebnis(
@@ -506,6 +513,6 @@ def standsicherheit(
     tree = collect_tree(prot) or prot.root
 
     # DEBUG
-    # debug_tree(tree,output_dir="debug_output")
+    debug_tree(tree,output_dir="debug_output")
 
     return tree

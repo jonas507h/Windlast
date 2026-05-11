@@ -313,7 +313,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
         protokolliere_ergebnis(
             protokoll,
             breadcrumb=base_bc,
-            name="gleitsicherheit",
+            name="sicherheit_gleit",
             wert=sicherheit_min_global,
             label="Gleitsicherheit S_gleit",
             formelzeichen="S_gleit",
@@ -589,7 +589,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
         protokolliere_ergebnis(
             protokoll,
             breadcrumb=base_bc,
-            name="gleitsicherheit",
+            name="sicherheit_gleit",
             wert=sicherheit_min_global,
             label="Gleitsicherheit S_gleit",
             formelzeichen="S_gleit",
@@ -639,7 +639,7 @@ def gleitsicherheit(
     protokoll: Optional[Protokoll] = None,
     breadcrumb: Optional[list] = None,
 ) -> List[Zwischenergebnis]:
-    base_bc = merge_breadcrumb(breadcrumb, [bc_step("nachweis", "GLEIT")])
+    base_bc = breadcrumb if breadcrumb is not None else []
     base_meta = {
         "funktion": "gleitsicherheit",
     }

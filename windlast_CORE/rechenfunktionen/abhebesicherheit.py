@@ -230,7 +230,7 @@ def _abhebesicherheit_DinEn13814_2005_06(
         protokolliere_ergebnis(
             protokoll,
             breadcrumb=base_bc,
-            name="abhebesicherheit",
+            name="sicherheit_abhebe",
             label="Abhebesicherheit",
             formelzeichen="S_abhebe",
             wert=sicherheit_min_global,
@@ -428,7 +428,7 @@ def _abhebesicherheit_DinEn17879_2024_08(
         protokolliere_ergebnis(
             protokoll,
             breadcrumb=base_bc,
-            name="abhebesicherheit",
+            name="sicherheit_abhebe",
             label="Abhebesicherheit",
             formelzeichen="S_abhebe",
             wert=sicherheit_min_global,
@@ -485,7 +485,7 @@ def abhebesicherheit(
     protokoll: Optional[Protokoll] = None,
     breadcrumb: Optional[list] = None,
 ) -> List[Zwischenergebnis]:
-    base_bc = merge_breadcrumb(breadcrumb, [bc_step("nachweis", "ABHEBE")])
+    base_bc = breadcrumb if breadcrumb is not None else []
     base_meta = {
         "funktion": "abhebesicherheit",
     }

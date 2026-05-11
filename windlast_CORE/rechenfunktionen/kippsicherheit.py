@@ -633,7 +633,7 @@ def kippsicherheit(
     protokoll: Optional[Protokoll] = None,
     breadcrumb: Optional[list] = None,
 ) -> List[Zwischenergebnis]:
-    base_bc = merge_breadcrumb(breadcrumb, [bc_step("nachweis", "KIPP")])
+    base_bc = breadcrumb if breadcrumb is not None else []
     base_meta = {
         "funktion": "kippsicherheit",
     }
