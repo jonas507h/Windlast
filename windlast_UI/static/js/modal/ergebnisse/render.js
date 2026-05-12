@@ -35,10 +35,16 @@ function renderResultItem(ergebnis) {
 }
 
 function renderMessageItem(message) {
+  const severity = String(message.severity || "").toLowerCase();
+
   return `
-    <li class="erg-message-item erg-message-${escapeHtml(String(message.severity || "").toLowerCase())}">
-      <strong>${escapeHtml(message.code || "")}</strong>
-      <span>${escapeHtml(message.text || "")}</span>
+    <li
+      class="erg-message-item erg-message-${escapeHtml(severity)}"
+      data-message-code="${escapeHtml(message.code || "")}"
+      data-message-severity="${escapeHtml(severity)}"
+      data-message-meta="${escapeHtml(JSON.stringify(message.meta || {}))}"
+    >
+      <span class="erg-message-text">${escapeHtml(message.text || "")}</span>
     </li>
   `;
 }

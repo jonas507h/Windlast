@@ -117,6 +117,87 @@ export function registerErgebnisseMetaTooltip() {
   registerErgebnisseMetaTooltip.__done = true;
 }
 
+export function registerErgebnisseMessageTooltip() {
+  if (registerErgebnisseMessageTooltip.__done) return;
+
+  const Tooltip = DEPS.Tooltip || window.Tooltip;
+  if (!Tooltip) {
+    if (!registerErgebnisseMessageTooltip.__retries) registerErgebnisseMessageTooltip.__retries = 0;
+    if (registerErgebnisseMessageTooltip.__retries < 50) {
+      registerErgebnisseMessageTooltip.__retries++;
+      setTimeout(registerErgebnisseMessageTooltip, 100);
+    }
+    return;
+  }
+
+  Tooltip.register("#modal-root .erg-message-item, #modal-root .erg-message-item *", {
+    predicate: (el) => {
+      return !!el.closest(".erg-message-item");
+    },
+    content: (_ev, el) => {
+      const li = el.closest(".erg-message-item");
+      if (!li) return "";
+
+      const code = li.getAttribute("data-message-code") || "";
+      const severity = li.getAttribute("data-message-severity") || "";
+      const metaRaw = li.getAttribute("data-message-meta") || "{}";
+
+      let meta = {};
+      try {
+        meta = JSON.parse(metaRaw);
+      } catch {}
+
+      const root = document.createElement("div");
+      root.className = "ctx-tooltip";
+
+      if (severity) {
+        const row = document.createElement("div");
+        row.className = "ctx-row";
+        row.innerHTML = `<span class="ctx-k">Severity: </span><span class="ctx-v">${severity}</span>`;
+        root.appendChild(row);
+      }
+
+      if (code) {
+        const row = document.createElement("div");
+        row.className = "ctx-row";
+        row.innerHTML = `<span class="ctx-k">Code: </span><span class="ctx-v">${code}</span>`;
+        root.appendChild(row);
+      }
+
+      const metaEntries = Object.entries(meta || {});
+      if (metaEntries.length) {
+        const divider = document.createElement("div");
+        divider.className = "tt-divider";
+        root.appendChild(divider);
+
+        for (const [k, v] of metaEntries) {
+          const row = document.createElement("div");
+          row.className = "ctx-row";
+
+          const key = document.createElement("span");
+          key.className = "ctx-k";
+          key.textContent = `${k}: `;
+
+          const val = document.createElement("span");
+          val.className = "ctx-v";
+          val.textContent = typeof v === "string"
+            ? v
+            : JSON.stringify(v);
+
+          row.appendChild(key);
+          row.appendChild(val);
+          root.appendChild(row);
+        }
+      }
+
+      return root;
+    },
+    delay: 80,
+  });
+
+  registerErgebnisseMessageTooltip.__done = true;
+}
+
 export function setupErgebnisseTriggers() {
   const showFlag = !!(window.APP_STATE?.flags?.open_zwischenergebnis_modal);
   if (!showFlag) return;
@@ -146,5 +227,6 @@ export function setupErgebnisseTriggers() {
 
 export function setupErgebnisseUI() {
   registerErgebnisseMetaTooltip();
+  registerErgebnisseMessageTooltip();
   setupErgebnisseTriggers();
 }

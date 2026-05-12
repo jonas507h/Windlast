@@ -500,6 +500,30 @@
   margin-bottom: 0.55rem;
 }
 
+.erg-message-error {
+  background: var(--msg-error-bg);
+  color: var(--msg-error-fg);
+  border-color: var(--msg-error-bg);
+}
+
+.erg-message-warn {
+  background: var(--msg-warn-bg);
+  color: var(--msg-warn-fg);
+  border-color: var(--msg-warn-bg);
+}
+
+.erg-message-hint {
+  background: var(--msg-hint-bg);
+  color: var(--msg-hint-fg);
+  border-color: var(--msg-hint-bg);
+}
+
+.erg-message-info {
+  background: var(--msg-info-bg);
+  color: var(--msg-info-fg);
+  border-color: var(--msg-info-bg);
+}
+
 .erg-result-main {
   display: flex;
   align-items: baseline;
