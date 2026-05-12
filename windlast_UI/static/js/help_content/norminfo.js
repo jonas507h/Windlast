@@ -9,7 +9,7 @@ export const NORM_HELP_PAGES = [
        Die Software unterstützt die Berechnung nach folgenden Normen:
       </p>
       <p>
-        [[norm:DIN_EN_13814_2005|DIN EN 13814:2005-06 – Fliegende Bauten und Anlagen für Veranstaltungsplätze und Vergnügungsparks – Sicherheit]]
+        [[norm:DIN_EN_13814_2005_06|DIN EN 13814:2005-06 – Fliegende Bauten und Anlagen für Veranstaltungsplätze und Vergnügungsparks – Sicherheit]]
       </p>
       <ul>
         <li>Baurechtlich eingeführt für fliegende Bauten</li>
@@ -17,7 +17,7 @@ export const NORM_HELP_PAGES = [
         <li>Greift bei der Windkraftberechnung auf DIN EN 1991-1-4 zurück</li>
       </ul>
       <p>
-        [[norm:DIN_EN_17879_2024|DIN EN 17879:2024-08 – Event-Strukturen – Sicherheit]]
+        [[norm:DIN_EN_17879_2024_08|DIN EN 17879:2024-08 – Event-Strukturen – Sicherheit]]
       </p>
       <ul>
         <li>Nicht baurechtlich eingeführt</li>
@@ -25,7 +25,7 @@ export const NORM_HELP_PAGES = [
         <li>Greift bei der Windkraftberechnung auf DIN EN 1991-1-4 zurück</li>
       </ul>
       <p>
-        [[norm:DIN_EN_1991_1_4_2010|DIN EN 1991-1-4:2010 – Eurocode 1: Einwirkungen auf Tragwerke – Teil 1-4: Windlasten]]
+        [[norm:DIN_EN_1991_1_4_2010_12|DIN EN 1991-1-4:2010-12 – Eurocode 1: Einwirkungen auf Tragwerke – Teil 1-4: Windlasten]]
       </p>
       <ul>
         <li>Baurechtlich eingeführt</li>
@@ -35,8 +35,8 @@ export const NORM_HELP_PAGES = [
     `
   },
   {
-    id: "norm:DIN_EN_13814_2005",
-    normKey: "EN_13814_2005",
+    id: "norm:DIN_EN_13814_2005_06",
+    normKey: "DIN_EN_13814_2005_06",
     title: "DIN EN 13814:2005-06 – Fliegende Bauten und Anlagen für Veranstaltungsplätze und Vergnügungsparks – Sicherheit",
     shortTitle: "DIN EN 13814:2005-06",
     stand: "19.11.2025",
@@ -52,28 +52,28 @@ export const NORM_HELP_PAGES = [
         <li>Ab einer Windgeschwindigkeit von 25 m/s in 10 m Höhe muss die Anlage geschützt und angemessen verstärkt werden</li>
       </ul>
       <p>
-        Für komplexere Bauwerke, höhere Windgeschwindigkeiten oder exponierte Standorte ist die Anwendung der DIN EN 13814:2005-06 nicht vorgesehen. Hier sind gesonderte Nachweise nach [[norm:DIN_EN_1991_1_4_2010|DIN EN 1991-1-4]] erforderlich.
+        Für komplexere Bauwerke, höhere Windgeschwindigkeiten oder exponierte Standorte ist die Anwendung der DIN EN 13814:2005-06 nicht vorgesehen. Hier sind gesonderte Nachweise nach [[norm:DIN_EN_1991_1_4_2010_12|DIN EN 1991-1-4]] erforderlich.
       </p>
       <p>
         <b>Diese Software liefert einen solchen Nachweis auch bei der Berechnung nach DIN EN 1991-1-4 nicht. Wendet euch hier an einen Statiker.</b>
       </p>
       <p>
         Es besteht die Möglichkeit, die angenommenen Staudrücke abzumindern, wenn bestimmte Schutzmaßnahmen möglich sind. Bei der Hauptberechnung werden diese Abminderungen nicht berücksichtigt.
-        Bei nicht gewährleisteter Standsicherheit werden die Abminderungen automatisch in einer zweiten Berechnung berücksichtigt. Details hierzu findet ihr [[norm:DIN_EN_13814_2005:IN_BETRIEB|hier]].
+        Bei nicht gewährleisteter Standsicherheit werden die Abminderungen automatisch in einer zweiten Berechnung berücksichtigt. Details hierzu findet ihr [[norm:DIN_EN_13814_2005_06:IN_BETRIEB|hier]].
       </p>
     `
   },
   {
-    id: "norm:DIN_EN_13814_2005:IN_BETRIEB",
-    normKey: "EN_13814_2005",
+    id: "norm:DIN_EN_13814_2005_06:IN_BETRIEB",
+    normKey: "DIN_EN_13814_2005_06",
     szenario: "IN_BETRIEB",
     title: "DIN EN 13814:2005-06 – Berücksichtigung von möglichen Schutzmaßnahmen",
     shortTitle: "Schutzmaßnahmen",
     stand: "19.11.2025",
-    pfad: ["norm:allgemein","norm:DIN_EN_13814_2005"],
+    pfad: ["norm:allgemein","norm:DIN_EN_13814_2005_06"],
     body: `
       <p>
-        Bei der Berechnung nach [[norm:DIN_EN_13814_2005|DIN EN 13814:2005-06]] können Abminderungen der Staudrücke berücksichtigt werden, wenn bestimmte Schutzmaßnahmen möglich sind. Bei der Berechnung &bdquo;mit Schutzmaßnahmen&ldquo; wurden diese Abminderungen berücksichtigt.
+        Bei der Berechnung nach [[norm:DIN_EN_13814_2005_06|DIN EN 13814:2005-06]] können Abminderungen der Staudrücke berücksichtigt werden, wenn bestimmte Schutzmaßnahmen möglich sind. Bei der Berechnung &bdquo;mit Schutzmaßnahmen&ldquo; wurden diese Abminderungen berücksichtigt.
         Sollen die hier aufgelisteten Werte verwendet werden, müssen ab einer Windgeschwindigkeit von 15 m/s Schutzmaßnahmen getroffen werden.
         In unseren Bereich sind zum Beispiel folgende Schutzmaßnahmen möglich:
       </p>
@@ -92,8 +92,8 @@ export const NORM_HELP_PAGES = [
     `
   },
   {
-    id: "norm:DIN_EN_17879_2024",
-    normKey: "EN_17879_2024",
+    id: "norm:DIN_EN_17879_2024_08",
+    normKey: "DIN_EN_17879_2024_08",
     szenario: "IN_BETRIEB",
     title: "DIN EN 17879:2024-08 – Event-Strukturen – Sicherheit",
     shortTitle: "DIN EN 17879:2024-08",
@@ -104,32 +104,32 @@ export const NORM_HELP_PAGES = [
         Diese Norm regelt unter anderem die Windlastberechnung für Event-Strukturen, unabhängig von der baurechtlichen Einordnung der Strukturen.
         Dabei gibt sie Staudrücke und ein Verfahren zum Standsicherheitsnachweis vor, verweist zur Berechnung der Windkräfte jedoch auf die DIN EN 1991-1-4.
         Sie ist in Deutschland allerdings <b>nicht baurechtlich eingeführt.</b>
-        Staudrücke werden entweder nach [[norm:DIN_EN_1991_1_4_2010|DIN EN 1991-1-4]] unter Berücksichtigung eines Wahrscheinlichkeitsfaktors von 0,85 oder vereinfacht mithilfe einer Tabelle ermittelt.
+        Staudrücke werden entweder nach [[norm:DIN_EN_1991_1_4_2010_12|DIN EN 1991-1-4]] unter Berücksichtigung eines Wahrscheinlichkeitsfaktors von 0,85 oder vereinfacht mithilfe einer Tabelle ermittelt.
         Diese Software verwendet die tabellarische Methode, weshalb die Maximalhöhe der Konstruktionen auf 30m begrenzt ist.
       </p>
       <p>
-        Für komplexere Bauwerke oder exponierte Standorte sind gesonderte Nachweise nach [[norm:DIN_EN_1991_1_4_2010|DIN EN 1991-1-4]] erforderlich.
+        Für komplexere Bauwerke oder exponierte Standorte sind gesonderte Nachweise nach [[norm:DIN_EN_1991_1_4_2010_12|DIN EN 1991-1-4]] erforderlich.
       </p>
       <p>
         <b>Diese Software liefert einen solchen Nachweis auch bei der Berechnung nach DIN EN 1991-1-4 nicht. Wendet euch hier an einen Statiker.</b>
       </p>
       <p>
         Es besteht die Möglichkeit, die angenommenen Staudrücke abzumindern, wenn bestimmte Schutzmaßnahmen möglich sind. Bei der Hauptberechnung werden diese Abminderungen nicht berücksichtigt.
-        Bei nicht gewährleisteter Standsicherheit werden die Abminderungen automatisch in einer zweiten Berechnung berücksichtigt. Details hierzu findet ihr [[norm:DIN_EN_17879_2024:IN_BETRIEB|hier]].
+        Bei nicht gewährleisteter Standsicherheit werden die Abminderungen automatisch in einer zweiten Berechnung berücksichtigt. Details hierzu findet ihr [[norm:DIN_EN_17879_2024_08:IN_BETRIEB|hier]].
       </p>
     `
   },
   {
-    id: "norm:DIN_EN_17879_2024:IN_BETRIEB",
-    normKey: "EN_17879_2024",
+    id: "norm:DIN_EN_17879_2024_08:IN_BETRIEB",
+    normKey: "DIN_EN_17879_2024_08",
     szenario: "IN_BETRIEB",
     title: "DIN EN 17879:2024-08 – Berücksichtigung von möglichen Schutzmaßnahmen",
     shortTitle: "Schutzmaßnahmen",
     stand: "19.11.2025",
-    pfad: ["norm:allgemein","norm:DIN_EN_17879_2024"],
+    pfad: ["norm:allgemein","norm:DIN_EN_17879_2024_08"],
     body: `
       <p>
-        Bei der Berechnung nach [[norm:DIN_EN_17879_2024|DIN EN 17879:2024-08]] können Abminderungen der Staudrücke berücksichtigt werden, wenn bestimmte Schutzmaßnahmen möglich sind. Bei der Berechnung &bdquo;mit Schutzmaßnahmen&ldquo; wurden diese Abminderungen berücksichtigt.
+        Bei der Berechnung nach [[norm:DIN_EN_17879_2024_08|DIN EN 17879:2024-08]] können Abminderungen der Staudrücke berücksichtigt werden, wenn bestimmte Schutzmaßnahmen möglich sind. Bei der Berechnung &bdquo;mit Schutzmaßnahmen&ldquo; wurden diese Abminderungen berücksichtigt.
         Sollen die hier aufgelisteten Werte verwendet werden, müssen vor Überschreiten der Windgeschwindigkeit von 20 m/s gemessen in 10m Höhe Schutzmaßnahmen getroffen werden.
         In unseren Bereich sind zum Beispiel folgende Schutzmaßnahmen möglich:
       </p>
@@ -148,8 +148,8 @@ export const NORM_HELP_PAGES = [
     `
   },
   {
-    id: "norm:DIN_EN_1991_1_4_2010",
-    normKey: "EN_1991_1_4_2010",
+    id: "norm:DIN_EN_1991_1_4_2010_12",
+    normKey: "DIN_EN_1991_1_4_2010_12",
     title: "DIN EN 1991-1-4:2010-12 – Eurocode 1: Einwirkungen auf Tragwerke – Teil 1-4: Windlasten",
     shortTitle: "DIN EN 1991-1-4:2010-12",
     stand: "10.12.2025",
@@ -170,7 +170,7 @@ export const NORM_HELP_PAGES = [
         Daher sind die Ergebnisse der Berechnung nach DIN EN 1991-1-4 konservativer als bei den anderen Normen.
         Der nationale Anhang beschreibt zwar die Möglichkeit, für kurze Aufstelldauern und mit möglichen Sicherungsmaßnahmen die Staudrücke abzumindern, jedoch dürfen diese Abminderungen für unsere Einsatzzwecke nicht ohne Weiteres angewendet werden.
         Diese Software kann diese Abminderungen aber berücksichtigen. Sobald ihr eine [[header:aufstelldauer|Aufstelldauer]] eingebt, werden die Abminderungen automatisch auch in der Hauptberechnung berücksichtigt.
-        <b>Bevor ihr eine Aufstelldauer eingebt oder Sicherungsmaßnahmen bei der DIN EN 1991-1-4 berücksichtigt, lest euch unbedingt den [[norm:DIN_EN_1991_1_4_2010:abminderungen|entsprechenden Abschnitt]] dazu durch.</b>
+        <b>Bevor ihr eine Aufstelldauer eingebt oder Sicherungsmaßnahmen bei der DIN EN 1991-1-4 berücksichtigt, lest euch unbedingt den [[norm:DIN_EN_1991_1_4_2010_12:abminderungen|entsprechenden Abschnitt]] dazu durch.</b>
       </p>
       <p>
         Bei der Windkraftermittlung kommen in dieser Software drei verschiedene Verfahren zur Anwendung, je nach Art des Bauteils:
@@ -186,11 +186,11 @@ export const NORM_HELP_PAGES = [
     `
   },
   {
-    id: "norm:DIN_EN_1991_1_4_2010:abminderungen",
+    id: "norm:DIN_EN_1991_1_4_2010_12:abminderungen",
     title: "DIN EN 1991-1-4:2010-12 – Abminderung von Staudrücken",
     shortTitle: "Abminderung von Staudrücken",
     stand: "10.12.2025",
-    pfad: ["norm:allgemein", "norm:DIN_EN_1991_1_4_2010"],
+    pfad: ["norm:allgemein", "norm:DIN_EN_1991_1_4_2010_12"],
     body: `
       <p>
         Der nationale Anhang zur DIN EN 1991-1-4 beschreibt die Möglichkeit, bei kurzen Aufstelldauern bis zu 24 Monaten Staudrücke abzumindern (vgl. DIN EN 1991-1-4/NA:2010-12, Abschnitt NA.B.5).
@@ -206,21 +206,21 @@ export const NORM_HELP_PAGES = [
       <p>
         Die Abminderungen sind zum einen von der Aufstelldauer und zum andern von möglichen Sicherungsmaßnahmen abhängig. Bei der Aufstelldauer wird unterschieden zwischen Dauern bis zu 3 Tagen, bis zu 3 Monaten von Mai bis August,
         bis zu 12 Monaten und bis zu 24 Monaten.
-        Bei den Sicherungsmaßnahmen wird unterschieden zwischen [[norm:DIN_EN_1991_1_4_2010:SCHUETZEND|schützenden]] und [[norm:DIN_EN_1991_1_4_2010:VERSTAERKEND|verstärkenden]] Maßnahmen. Schützende Maßnahmen sind zum Beispiel das Abnehmen von Planen oder die Evakuierung der Konstruktion und der umliegenden Bereiche.
+        Bei den Sicherungsmaßnahmen wird unterschieden zwischen [[norm:DIN_EN_1991_1_4_2010_12:SCHUETZEND|schützenden]] und [[norm:DIN_EN_1991_1_4_2010_12:VERSTAERKEND|verstärkenden]] Maßnahmen. Schützende Maßnahmen sind zum Beispiel das Abnehmen von Planen oder die Evakuierung der Konstruktion und der umliegenden Bereiche.
         Verstärkende Maßnahmen sind zum Beispiel das Anbringen von zusätzlichen Abspannungen.
       </p>
     `
   },
   {
-    id: "norm:DIN_EN_1991_1_4_2010:SCHUETZEND",
-    normKey: "EN_1991_1_4_2010:SCHUETZEND",
+    id: "norm:DIN_EN_1991_1_4_2010_12:SCHUETZEND",
+    normKey: "DIN_EN_1991_1_4_2010_12:SCHUETZEND",
     title: "DIN EN 1991-1-4:2010-12 – Berücksichtigung schützender Sicherungsmaßnahmen",
     shortTitle: "Schützende Sicherungsmaßnahmen",
     stand: "10.12.2025",
-    pfad: ["norm:allgemein", "norm:DIN_EN_1991_1_4_2010"],
+    pfad: ["norm:allgemein", "norm:DIN_EN_1991_1_4_2010_12"],
     body: `
       <p>
-        Bei der Berechnung nach [[norm:DIN_EN_1991_1_4_2010|DIN EN 1991-1-4:2010-12]] können Abminderungen der Staudrücke berücksichtigt werden, wenn bestimmte Sicherungsmaßnahmen möglich sind.
+        Bei der Berechnung nach [[norm:DIN_EN_1991_1_4_2010_12|DIN EN 1991-1-4:2010-12]] können Abminderungen der Staudrücke berücksichtigt werden, wenn bestimmte Sicherungsmaßnahmen möglich sind.
         Bei der Berechnung &bdquo;mit schützenden Sicherungsmaßnahmen&ldquo; wurden diese Abminderungen berücksichtigt. <b>Diese Abminderungen sind in unserem Bereich meist nicht zulässig.</b> Mehr dazu im entsprechenden Abschnitt unten.<br>
         Sollen die hier aufgelisteten Werte verwendet werden, muss die Wetterlage ausreichend genau beobachtet werden und vor Aufkommen eines Sturms die Sicherungsmaßnahmen umgesetzt sein.
         In unseren Bereich sind zum Beispiel folgende schützende Sicherungsmaßnahmen möglich:
@@ -237,19 +237,19 @@ export const NORM_HELP_PAGES = [
         Wird als Sicherungsmaßnahme die Konstruktion verändert (z.&nbsp;B. Abnehmen von Planen), muss für die Konstruktion in diesem Zustand ebenfalls ein Standsicherheitsnachweis geführt werden.
         <b>Dieser Nachweis wird von dieser Software nicht automatisch geführt.</b>
       </p>
-      <help-include page="norm:DIN_EN_1991_1_4_2010:abminderungen" auto-level="true"></help-include>
+      <help-include page="norm:DIN_EN_1991_1_4_2010_12:abminderungen" auto-level="true"></help-include>
     `
   },
   {
-    id: "norm:DIN_EN_1991_1_4_2010:VERSTAERKEND",
-    normKey: "EN_1991_1_4_2010:VERSTAERKEND",
+    id: "norm:DIN_EN_1991_1_4_2010_12:VERSTAERKEND",
+    normKey: "DIN_EN_1991_1_4_2010_12:VERSTAERKEND",
     title: "DIN EN 1991-1-4:2010-12 – Berücksichtigung verstärkender Sicherungsmaßnahmen",
     shortTitle: "Verstärkende Sicherungsmaßnahmen",
     stand: "10.12.2025",
-    pfad: ["norm:allgemein", "norm:DIN_EN_1991_1_4_2010"],
+    pfad: ["norm:allgemein", "norm:DIN_EN_1991_1_4_2010_12"],
     body: `
       <p>
-        Bei der Berechnung nach [[norm:DIN_EN_1991_1_4_2010|DIN EN 1991-1-4:2010-12]] können Abminderungen der Staudrücke berücksichtigt werden, wenn bestimmte Sicherungsmaßnahmen möglich sind.
+        Bei der Berechnung nach [[norm:DIN_EN_1991_1_4_2010_12|DIN EN 1991-1-4:2010-12]] können Abminderungen der Staudrücke berücksichtigt werden, wenn bestimmte Sicherungsmaßnahmen möglich sind.
         Bei der Berechnung &bdquo;mit verstärkenden Sicherungsmaßnahmen&ldquo; wurden diese Abminderungen berücksichtigt. <b>Diese Abminderungen sind in unserem Bereich meist nicht zulässig.</b> Mehr dazu im entsprechenden Abschnitt unten.<br>
         Sollen die hier aufgelisteten Werte verwendet werden, muss die Wetterlage ausreichend genau beobachtet werden und vor Aufkommen eines Sturms die Sicherungsmaßnahmen umgesetzt sein.
         In unseren Bereich ist als verstärkende Sicherungsmaßnahme zum Beispiel das Anbringen von zusätzlichen Abspannungen möglich.
@@ -262,7 +262,7 @@ export const NORM_HELP_PAGES = [
         Wird als Sicherungsmaßnahme die Konstruktion verändert (z.&nbsp;B. Abnehmen von Planen), muss für die Konstruktion in diesem Zustand ebenfalls ein Standsicherheitsnachweis geführt werden.
         <b>Dieser Nachweis wird von dieser Software nicht automatisch geführt.</b>
       </p>
-      <help-include page="norm:DIN_EN_1991_1_4_2010:abminderungen" auto-level="true"></help-include>
+      <help-include page="norm:DIN_EN_1991_1_4_2010_12:abminderungen" auto-level="true"></help-include>
     `
   },
 ];

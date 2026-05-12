@@ -24,40 +24,40 @@ export function findGruppe(node, ebeneName, gruppeName) {
 }
 
 export function getScenarioPath(normKey, szenario = null) {
-  const normMap = {
-    EN_13814_2005: "DIN_EN_13814_2005_06",
-    EN_17879_2024: "DIN_EN_17879_2024_08",
-    EN_1991_1_4_2010: "DIN_EN_1991_1_4_2010_12",
-  };
+  // const normMap = {
+  //   EN_13814_2005: "DIN_EN_13814_2005_06",
+  //   EN_17879_2024: "DIN_EN_17879_2024_08",
+  //   EN_1991_1_4_2010: "DIN_EN_1991_1_4_2010_12",
+  // };
 
   const defaults = {
-    EN_13814_2005: "AUSSER_BETRIEB",
-    EN_17879_2024: "AUSSER_BETRIEB",
-    EN_1991_1_4_2010: "STANDARD",
+    DIN_EN_13814_2005: "AUSSER_BETRIEB",
+    DIN_EN_17879_2024: "AUSSER_BETRIEB",
+    DIN_EN_1991_1_4_2010: "STANDARD",
   };
 
   return [
-    { ebene: "norm", gruppe: normMap[normKey] || normKey },
+    { ebene: "norm", gruppe: normKey },
     { ebene: "szenario", gruppe: szenario || defaults[normKey] || null },
   ].filter((step) => step.gruppe != null);
 }
 
 export function getScenarioRoot(tree, normKey, szenario) {
-  const normMap = {
-    EN_13814_2005: "DIN_EN_13814_2005_06",
-    EN_17879_2024: "DIN_EN_17879_2024_08",
-    EN_1991_1_4_2010: "DIN_EN_1991_1_4_2010_12",
-  };
+  // const normMap = {
+  //   EN_13814_2005: "DIN_EN_13814_2005_06",
+  //   EN_17879_2024: "DIN_EN_17879_2024_08",
+  //   EN_1991_1_4_2010: "DIN_EN_1991_1_4_2010_12",
+  // };
 
-  const treeNorm = normMap[normKey] || normKey;
+  const treeNorm = normKey;
   const normGroup = findGruppe(tree, "norm", treeNorm);
   if (!normGroup) return null;
 
   if (!szenario) {
     const defaults = {
-      EN_13814_2005: "AUSSER_BETRIEB",
-      EN_17879_2024: "AUSSER_BETRIEB",
-      EN_1991_1_4_2010: "STANDARD",
+      DIN_EN_13814_2005: "AUSSER_BETRIEB",
+      DIN_EN_17879_2024: "AUSSER_BETRIEB",
+      DIN_EN_1991_1_4_2010: "STANDARD",
     };
     szenario = defaults[normKey] || null;
   }

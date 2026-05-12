@@ -21,9 +21,9 @@ export const ERGEBNISSE_HELP_PAGES = [
         Die Ergebnisse dieser Berechnungen werden in den unteren Blöcken dargestellt. Details zu den einzelnen Normen findet ihr hier:
       </p>
       <ul>
-        <li>[[norm:DIN_EN_13814_2005|DIN EN 13814:2005-06 – Fliegende Bauten und Anlagen für Veranstaltungsplätze und Vergnügungsparks – Sicherheit]]</li>
-        <li>[[norm:DIN_EN_17879_2024|DIN EN 17879:2024-08 – Event-Strukturen – Sicherheit]]</li>
-        <li>[[norm:DIN_EN_1991_1_4_2010|DIN EN 1991-1-4:2010-12 – Eurocode 1: Einwirkungen auf Tragwerke – Teil 1-4: Windlasten]]</li>
+        <li>[[norm:DIN_EN_13814_2005_06|DIN EN 13814:2005-06 – Fliegende Bauten und Anlagen für Veranstaltungsplätze und Vergnügungsparks – Sicherheit]]</li>
+        <li>[[norm:DIN_EN_17879_2024_08|DIN EN 17879:2024-08 – Event-Strukturen – Sicherheit]]</li>
+        <li>[[norm:DIN_EN_1991_1_4_2010_12|DIN EN 1991-1-4:2010-12 – Eurocode 1: Einwirkungen auf Tragwerke – Teil 1-4: Windlasten]]</li>
       </ul>
       <p>
         In den Titelzellen erscheint nach einer Berechnung rechts eine farblich hinterlegte Zahl. Diese Zahl gibt die Anzahl der [[meldungen:allgemein|Meldungen]]
@@ -48,7 +48,7 @@ export const ERGEBNISSE_HELP_PAGES = [
     pfad: ["ergebnisse:allgemein"],
     body: `
       <p>
-        Im Rahmen des Standsicherheitsnachweises nach [[norm:DIN_EN_13814_2005|DIN EN 13814:2005-06]] oder [[norm:DIN_EN_17879_2024|DIN EN 17879:2024-08]]
+        Im Rahmen des Standsicherheitsnachweises nach [[norm:DIN_EN_13814_2005_06|DIN EN 13814:2005-06]] oder [[norm:DIN_EN_17879_2024_08|DIN EN 17879:2024-08]]
         sind jeweils Kippsicherheit, Gleitsicherheit und Abhebesicherheit zu prüfen.
         Im Grundsatz muss dafür die Summe der stabilisierenden Kräfte multipliziert mit den jeweiligen Teilsicherheitsbeiwerten größer sein als die Summe der
         destabilisierenden Kräfte, ebenfalls multipliziert mit den jeweiligen Teilsicherheitsbeiwerten. Diese Bedingung ist bei einem Sicherheitswert von 1,00 genau erfüllt.

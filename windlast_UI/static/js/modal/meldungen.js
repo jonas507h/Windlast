@@ -1,161 +1,172 @@
-// modal/meldungen.js
+// modal/meldungen.js (ES module)
+import { sortMessagesBySeverity } from "../utils/formatierung.js";
 import { buildMeldungTooltipContent } from "../tooltip/meldungen.js";
+import { listEbenen, listGruppen, findEbene, findGruppe } from "../utils/tree.js";
 
 let DEPS = {
   getVM: null,
-  getMessages: null,
+  buildModal: null,
   Modal: null,
   Tooltip: null,
-  buildModal: null,
 };
 
+// Aufrufer konfiguriert Dependencies einmalig
 export function configureMeldungen({
   vm,
   getVM,
-  getMessages,
+  buildModal,
   Modal,
   Tooltip,
-  buildModal,
 } = {}) {
-  DEPS.getVM = getVM || (vm ? () => vm : DEPS.getVM);
-  if (getMessages) DEPS.getMessages = getMessages;
+  DEPS.getVM = getVM || (vm ? () => vm : null);
+
+  if (!DEPS.getVM) {
+    console.warn("[meldungen] configureMeldungen: getVM/vm fehlt");
+  }
+
+  if (buildModal) DEPS.buildModal = buildModal;
   if (Modal) DEPS.Modal = Modal;
   if (Tooltip) DEPS.Tooltip = Tooltip;
-  if (buildModal) DEPS.buildModal = buildModal;
 }
 
-function escapeHtml(value) {
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-function normalizeSeverity(severity) {
-  return String(severity || "").toLowerCase();
-}
-
-function fallbackBuildModal(titleText, bodyNode) {
+function _fallbackBuildModal(titleText, bodyNodeOrHtml) {
   const wrap = document.createElement("div");
-
   const h = document.createElement("h3");
   h.textContent = titleText;
   h.className = "modal-title";
   wrap.appendChild(h);
-
-  if (bodyNode instanceof Node) {
-    wrap.appendChild(bodyNode);
-  }
-
+  const cont = document.createElement("div");
+  if (typeof bodyNodeOrHtml === "string") cont.innerHTML = bodyNodeOrHtml;
+  else if (bodyNodeOrHtml instanceof Node) cont.appendChild(bodyNodeOrHtml);
+  wrap.appendChild(cont);
   return wrap;
 }
 
-function renderMessageItem(message) {
-  const severity = normalizeSeverity(message?.severity);
-  const meta = message?.meta || {};
-
-  return `
-    <li
-      class="msg-modal-item msg-modal-${escapeHtml(severity)}"
-      data-message-code="${escapeHtml(message?.code || "")}"
-      data-message-severity="${escapeHtml(severity)}"
-      data-message-meta="${escapeHtml(JSON.stringify(meta))}"
-    >
-      <span class="msg-modal-severity">${escapeHtml(severity || "info")}</span>
-      <span class="msg-modal-text">${escapeHtml(message?.text || "")}</span>
-    </li>
-  `;
+// Hilfsfunktion: nur erstes Vorkommen je Anzeige-Text behalten
+function dedupeMessagesByText(list) {
+  const seen = new Set();
+  const out = [];
+  for (const m of (list || [])) {
+    const key = String(m?.text ?? "")
+      .replace(/\s+/g, " ")  // Whitespace normalisieren (wie Anzeige)
+      .trim();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(m);
+  }
+  return out;
 }
 
-function renderMessages(messages = []) {
-  const root = document.createElement("div");
-  root.className = "msg-modal";
+export function openMeldungenModal(normKey, szenario = null) {
+  const VM = DEPS.getVM?.();
+  if (!VM) return;
 
-  if (!messages.length) {
-    root.innerHTML = `<p class="msg-modal-empty">Keine Meldungen vorhanden.</p>`;
-    return root;
+  const msgsRaw = szenario
+    ? (VM.listMessages ? VM.listMessages(normKey, szenario) : [])
+    : (VM.listMessagesMainOnly ? VM.listMessagesMainOnly(normKey) : []);
+
+  // Flag: doppelte Meldungen anzeigen?
+  const showDup = !!(window.APP_STATE?.flags?.show_doppelte_meldungen);
+  const msgs = showDup ? msgsRaw : dedupeMessagesByText(msgsRaw);
+
+  const tree = VM?.payload?.ergebnis || VM?.tree || null;
+
+  const normGroup = tree
+    ? findGruppe(tree, "norm", normKey)
+    : null;
+
+  const scenarioGroup = normGroup && szenario
+    ? findGruppe(normGroup, "szenario", szenario)
+    : null;
+
+  const normName =
+    normGroup?.label ||
+    normGroup?.name ||
+    normKey ||
+    "Unbekannte Norm";
+
+  const scenarioName =
+    scenarioGroup?.label ||
+    scenarioGroup?.name ||
+    szenario ||
+    "Hauptberechnung";
+
+  const title = `Meldungen – ${normName} (${scenarioName})`;
+
+  const buildModal = DEPS.buildModal || _fallbackBuildModal;
+  const wrap = buildModal(title, document.createElement("div"));
+  const contentRoot = wrap.lastElementChild;
+
+  // --- Fragezeichen-Button ---
+  const titleEl = wrap.querySelector(".modal-title");
+  if (titleEl) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "help-icon-btn";
+    btn.style.marginLeft = "8px";
+    btn.textContent = "?";
+
+    const helpId = `meldungen:allgemein`;
+
+    btn.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      ev.preventDefault();
+      if (window.HELP?.open) {
+        window.HELP.open(helpId);
+      }
+    });
+
+    // Button in den Titel hängen
+    titleEl.appendChild(btn);
   }
 
-  root.innerHTML = `
-    <ul class="msg-modal-list">
-      ${messages.map(renderMessageItem).join("")}
-    </ul>
-  `;
-
-  return root;
-}
-
-export function openMeldungenModal(normKeyOrMessages = null, scenario = null) {
-  let messages = [];
-
-  if (Array.isArray(normKeyOrMessages)) {
-    messages = normKeyOrMessages;
+  if (!msgs || msgs.length === 0) {
+    const p = document.createElement("p");
+    p.textContent = "Keine Meldungen vorhanden.";
+    contentRoot.appendChild(p);
   } else {
-    const normKey = normKeyOrMessages;
+    const ul = document.createElement("ul");
+    ul.className = "messages-list";
+    for (const m of sortMessagesBySeverity(msgs)) {
+      const li = document.createElement("li");
+      const line = document.createElement("div");
+      const sev = (m.severity || "").toLowerCase();
 
-    if (DEPS.getMessages) {
-      messages = DEPS.getMessages(normKey, scenario) || [];
-    } else {
-      const VM = DEPS.getVM?.();
-      messages = VM?.listMessages?.(normKey, scenario) || [];
+      line.className = `tt-line ${["error","warn","hint","info"].includes(sev) ? sev : "info"}`;
+      line.textContent = m.text || "";
+
+      li.appendChild(line);
+
+      li.setAttribute("data-message-code", m.code || "");
+      li.setAttribute("data-message-severity", sev || "");
+      try {
+        li.setAttribute("data-message-meta", JSON.stringify(m.meta || {}));
+      } catch {
+        li.setAttribute("data-message-meta", "{}");
+      }
+
+      ul.appendChild(li); // <- fehlt
     }
+    contentRoot.appendChild(ul);
   }
-
-  const body = renderMessages(messages);
-  const buildModal = DEPS.buildModal || fallbackBuildModal;
-  const wrap = buildModal("Meldungen", body);
 
   (DEPS.Modal || window.Modal)?.open(wrap);
-  registerMeldungenTooltip();
-}
-
-export function setupMeldungenTriggers() {
-  if (setupMeldungenTriggers.__done) return;
-  setupMeldungenTriggers.__done = true;
-
-  document.addEventListener("click", (ev) => {
-    const badge = ev.target.closest(".results-table .count-badge");
-    if (!badge) return;
-
-    const th = badge.closest("th[data-norm-key]");
-    if (!th) return;
-
-    const normKey = th.dataset.normKey || null;
-    const szenario = th.dataset.szenario || null;
-
-    if (!normKey) return;
-
-    ev.preventDefault();
-    ev.stopPropagation();
-
-    openMeldungenModal(normKey, szenario);
-  });
 }
 
 export function registerMeldungenTooltip() {
-  if (registerMeldungenTooltip.__done) return;
-
   const Tooltip = DEPS.Tooltip || window.Tooltip;
-  if (!Tooltip) {
-    if (!registerMeldungenTooltip.__retries) {
-      registerMeldungenTooltip.__retries = 0;
-    }
+  if (!Tooltip || registerMeldungenTooltip.__done) return;
+  registerMeldungenTooltip.__done = true;
 
-    if (registerMeldungenTooltip.__retries < 50) {
-      registerMeldungenTooltip.__retries++;
-      setTimeout(registerMeldungenTooltip, 100);
-    }
-
-    return;
-  }
-
-  Tooltip.register(".msg-modal-item, .msg-modal-item *", {
-    predicate: (el) => !!el.closest(".msg-modal-item"),
+  Tooltip.register("#modal-root .messages-list li", {
+    predicate: (el) => {
+      const showFlag = !!(window.APP_STATE?.flags?.show_meldungen_tooltip);
+      if (!showFlag) return false;
+      return !!el.closest(".messages-list li");
+    },
 
     content: (_ev, el) => {
-      const li = el.closest(".msg-modal-item");
+      const li = el.closest(".messages-list li");
       if (!li) return "";
 
       let meta = {};
@@ -172,8 +183,30 @@ export function registerMeldungenTooltip() {
 
     delay: 80,
   });
+}
 
-  registerMeldungenTooltip.__done = true;
+export function setupMeldungenTriggers() {
+  if (setupMeldungenTriggers.__done) return;
+  setupMeldungenTriggers.__done = true;
+
+  document.addEventListener("click", (ev) => {
+    const badge = ev.target.closest(".results-table .count-badge");
+    if (!badge) return;
+
+    const altTh = badge.closest(".results-table .alt-title th[data-norm-key][data-szenario]");
+    const mainTh = badge.closest(".results-table thead th[data-norm-key]");
+
+    const th = altTh || mainTh;
+    if (!th) return;
+
+    const normKey = th.dataset.normKey;
+    const szenario = altTh ? th.dataset.szenario : null;
+
+    ev.preventDefault();
+    ev.stopPropagation();
+
+    openMeldungenModal(normKey, szenario);
+  });
 }
 
 export function setupMeldungenUI() {

@@ -12,7 +12,7 @@ function esc(value) {
 export function renderBreadcrumb({ path = [], onSelectPath } = {}) {
   const root = document.createElement("nav");
   root.className = "erg-breadcrumb-box";
-  root.setAttribute("aria-label", "Ergebnis-Pfad");
+  root.setAttribute("aria-label", "Ergebnis-Pfad")
 
   const items = [
     {

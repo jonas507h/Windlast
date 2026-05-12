@@ -1,5 +1,5 @@
 import { escapeHtml, formatNumberDE, formatVectorDE, formatMathWithSubSup } from "../../utils/formatierung.js";
-import { listEbenen, listGruppen, listErgebnisse, listMessages, makePathLabel } from "./tree.js";
+import { listEbenen, listGruppen, listErgebnisse, listMessages, makePathLabel } from "../../utils/tree.js";
 import { renderTree } from "./render_tree.js";
 import { renderBreadcrumb } from "./render_breadcrumb.js";
 import { renderNavigation } from "./render_navigation.js";

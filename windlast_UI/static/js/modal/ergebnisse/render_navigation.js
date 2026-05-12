@@ -55,7 +55,7 @@ export function renderNavigation({ nodeInfo, onUp, onChild } = {}) {
                 data-child-index="${i}"
                 title="${esc(child.ebeneLabel)}"
               >
-                <span class="erg-nav-child-key">${esc(child.ebene)}</span>
+                <span class="erg-nav-child-key">${esc(child.ebeneLabel)}</span>
                 <span class="erg-nav-child-label">${esc(child.gruppeLabel)}</span>
                 ${child.winner ? `<span class="erg-nav-winner">✓</span>` : ""}
               </button>

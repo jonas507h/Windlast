@@ -3,15 +3,15 @@
 (function (global) {
   const SEVS = ["error", "warn", "hint", "info"];
 
-  const API_TO_TREE_NORM = {
-    EN_13814_2005: "DIN_EN_13814_2005_06",
-    EN_17879_2024: "DIN_EN_17879_2024_08",
-    EN_1991_1_4_2010: "DIN_EN_1991_1_4_2010_12",
-  };
+  // const API_TO_TREE_NORM = {
+  //   EN_13814_2005: "DIN_EN_13814_2005_06",
+  //   EN_17879_2024: "DIN_EN_17879_2024_08",
+  //   EN_1991_1_4_2010: "DIN_EN_1991_1_4_2010_12",
+  // };
 
-  const TREE_TO_API_NORM = Object.fromEntries(
-    Object.entries(API_TO_TREE_NORM).map(([api, tree]) => [tree, api])
-  );
+  // const TREE_TO_API_NORM = Object.fromEntries(
+  //   Object.entries(API_TO_TREE_NORM).map(([api, tree]) => [tree, api])
+  // );
 
   const RESULT_BY_ROW_KEY = {
     kipp: "sicherheit_kipp",
@@ -21,9 +21,9 @@
   };
 
   const DEFAULT_SCENARIO_BY_NORM = {
-    EN_13814_2005: "AUSSER_BETRIEB",
-    EN_17879_2024: "AUSSER_BETRIEB",
-    EN_1991_1_4_2010: "STANDARD",
+    DIN_EN_13814_2005: "AUSSER_BETRIEB",
+    DIN_EN_17879_2024: "AUSSER_BETRIEB",
+    DIN_EN_1991_1_4_2010: "STANDARD",
   };
 
   function normalizeSeverity(s) {
@@ -200,7 +200,7 @@
 
       for (const normGroup of normGroups) {
         const treeNormKey = String(normGroup?.name || "");
-        const normKey = TREE_TO_API_NORM[treeNormKey] || treeNormKey;
+        const normKey = treeNormKey;
 
         idx.mainValues[normKey] = { kipp: null, gleit: null, abhebe: null, ballast: null };
         idx.altValues[normKey] = {};

@@ -1,4 +1,4 @@
-import { getScenarioPath, findGruppe } from "./tree.js";
+import { getScenarioPath, findGruppe } from "../../utils/tree.js";
 import { renderErgebnisModalContent } from "./render.js";
 import { buildMeldungTooltipContent } from "../../tooltip/meldungen.js";
 import { buildErgebnisTooltipContent } from "../../tooltip/ergebnisse.js";

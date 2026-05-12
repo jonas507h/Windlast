@@ -12,12 +12,12 @@ const ALT_ORDER = [
 ];
 const ALT_ORDER_INDEX = new Map(ALT_ORDER.map((name, idx) => [name, idx]));
 
-const NORM_ID = {
-  "EN_13814_2005": "en13814_2005",
-  "EN_17879_2024": "en17879_2024",
-  "EN_1991_1_4_2010": "en1991_2010",
-};
-const COLS = ["EN_13814_2005", "EN_17879_2024", "EN_1991_1_4_2010"];
+// const NORM_ID = {
+//   "EN_13814_2005": "en13814_2005",
+//   "EN_17879_2024": "en17879_2024",
+//   "EN_1991_1_4_2010": "en1991_2010",
+// };
+const COLS = ["DIN_EN_13814_2005_06", "DIN_EN_17879_2024_08", "DIN_EN_1991_1_4_2010_12"];
 const ROWS = [
   { key: "kipp",    label: "Kippsicherheit",   isSafety: true  },
   { key: "gleit",   label: "Gleitsicherheit",  isSafety: true  },
@@ -278,10 +278,11 @@ function _clearAltRows() {
 function parseCellId(id) {
   const m = /^([a-z]+)_(.+)$/.exec(id || "");
   if (!m) return null;
-  const key = m[1];
-  const suf = m[2];
-  const normKey = Object.entries(NORM_ID).find(([, v]) => v === suf)?.[0] || null;
-  return { key, suf, normKey };
+
+  return {
+    key: m[1],
+    normKey: m[2],
+  };
 }
 
 function setDatasetFromId(el, id) {
@@ -487,8 +488,8 @@ function addHelpIconButtonsToNormHeaders() {
     btn.textContent = "?";
     btn.setAttribute("aria-label", "Hilfe zu dieser Norm");
     btn.dataset.helpId = szenario
-      ? `norm:DIN_${normKey}:${szenario}`
-      : `norm:DIN_${normKey}`;
+      ? `norm:${normKey}:${szenario}`
+      : `norm:${normKey}`;
 
     th.classList.add("norminfo-header");
     th.appendChild(btn);
@@ -544,13 +545,11 @@ function updateFooter(payload) {
 
   // Hauptwerte setzen (über VM, nicht direkt aus payload)
   for (const normKey of COLS) {
-    const suf = NORM_ID[normKey];
-    if (!suf) continue;
 
-    setCell(`kipp_${suf}`,   ResultsVM.getMainValue(normKey, "kipp"));
-    setCell(`gleit_${suf}`,  ResultsVM.getMainValue(normKey, "gleit"));
-    setCell(`abhebe_${suf}`, ResultsVM.getMainValue(normKey, "abhebe"));
-    setBallastCell(`ballast_${suf}`, ResultsVM.getMainValue(normKey, "ballast"));
+    setCell(`kipp_${normKey}`,   ResultsVM.getMainValue(normKey, "kipp"));
+    setCell(`gleit_${normKey}`,  ResultsVM.getMainValue(normKey, "gleit"));
+    setCell(`abhebe_${normKey}`, ResultsVM.getMainValue(normKey, "abhebe"));
+    setBallastCell(`ballast_${normKey}`, ResultsVM.getMainValue(normKey, "ballast"));
   }
 
   // Alternativen rendern (neu: auf Basis der VM)
