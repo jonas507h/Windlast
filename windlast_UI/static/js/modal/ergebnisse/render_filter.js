@@ -1,11 +1,17 @@
+import { searchFilters } from "./suche_ergebnisse.js";
+
 export function renderFilterBar({
   query = "",
   activeFilters = [],
   onSearchInput = null,
   onSearchSubmit = null,
+  onSelectFilter = null,
   onRemoveFilter = null,
   onClearFilters = null,
 } = {}) {
+  let selectedIndex = 0;
+  let matches = searchFilters(query);
+
   const root = document.createElement("div");
   root.className = "erg-filter";
 
@@ -17,6 +23,8 @@ export function renderFilterBar({
         placeholder="Ergebnisse durchsuchen oder Filter eingeben…"
         value="${escapeAttr(query)}"
       />
+
+      <div class="erg-filter-suggestions" hidden></div>
     </form>
 
     <div class="erg-filter-chips">
@@ -34,14 +42,85 @@ export function renderFilterBar({
 
   const form = root.querySelector(".erg-filter-search");
   const input = root.querySelector(".erg-filter-input");
+  const suggestions = root.querySelector(".erg-filter-suggestions");
+
+  function renderSuggestions() {
+    matches = searchFilters(input.value);
+    selectedIndex = matches.length ? Math.min(selectedIndex, matches.length - 1) : 0;
+
+    if (!input.value.trim() || !matches.length) {
+      suggestions.hidden = true;
+      suggestions.innerHTML = "";
+      return;
+    }
+
+    suggestions.hidden = false;
+    suggestions.innerHTML = matches.map((match, index) => `
+      <button
+        class="erg-filter-suggestion ${index === selectedIndex ? "active" : ""}"
+        type="button"
+        data-filter-index="${index}"
+      >
+        <span class="erg-filter-suggestion-group">${escapeHtml(match.groupLabel)}</span>
+        <span class="erg-filter-suggestion-label">${escapeHtml(match.label)}</span>
+      </button>
+    `).join("");
+  }
+
+  function selectMatch(index) {
+    const match = matches[index];
+    if (!match) return;
+
+    onSelectFilter?.(match);
+
+    input.value = "";
+    matches = [];
+    selectedIndex = 0;
+    suggestions.hidden = true;
+    suggestions.innerHTML = "";
+  }
 
   input?.addEventListener("input", () => {
+    selectedIndex = 0;
+    renderSuggestions();
     onSearchInput?.(input.value);
+  });
+
+  input?.addEventListener("keydown", (ev) => {
+    if (!matches.length) return;
+
+    if (ev.key === "ArrowDown") {
+      ev.preventDefault();
+      selectedIndex = Math.min(selectedIndex + 1, matches.length - 1);
+      renderSuggestions();
+    }
+
+    if (ev.key === "ArrowUp") {
+      ev.preventDefault();
+      selectedIndex = Math.max(selectedIndex - 1, 0);
+      renderSuggestions();
+    }
+
+    if (ev.key === "Enter") {
+      ev.preventDefault();
+      selectMatch(selectedIndex);
+    }
+
+    if (ev.key === "Escape") {
+      suggestions.hidden = true;
+    }
   });
 
   form?.addEventListener("submit", (ev) => {
     ev.preventDefault();
-    onSearchSubmit?.(input?.value || "");
+    if (matches.length) selectMatch(selectedIndex);
+    else onSearchSubmit?.(input?.value || "");
+  });
+
+  suggestions?.addEventListener("click", (ev) => {
+    const btn = ev.target.closest("[data-filter-index]");
+    if (!btn) return;
+    selectMatch(Number(btn.dataset.filterIndex));
   });
 
   root.querySelectorAll("[data-remove-filter]").forEach((btn) => {
@@ -54,11 +133,13 @@ export function renderFilterBar({
     onClearFilters?.();
   });
 
+  renderSuggestions();
+
   return root;
 }
 
 function renderFilterChip(filter) {
-  const id = String(filter.id ?? filter.key ?? filter.name ?? "");
+  const id = makeFilterId(filter);
   const label = filter.label ?? filter.name ?? id;
 
   return `
@@ -72,6 +153,10 @@ function renderFilterChip(filter) {
       <span class="erg-filter-chip-remove" aria-hidden="true">×</span>
     </button>
   `;
+}
+
+export function makeFilterId(filter) {
+  return `${filter.groupName}:${filter.name}`;
 }
 
 function escapeHtml(value) {

@@ -3,7 +3,8 @@ import { listEbenen, listGruppen, listErgebnisse, listMessages, makePathLabel } 
 import { renderTree } from "./render_tree.js";
 import { renderBreadcrumb } from "./render_breadcrumb.js";
 import { renderNavigation } from "./render_navigation.js";
-import { renderFilterBar } from "./render_filter.js";
+import { renderFilterBar, makeFilterId } from "./render_filter.js";
+import { applyErgebnisFilters } from "./filter_ergebnisse.js";
 
 function formatValue(value) {
   if (Array.isArray(value)) return formatVectorDE(value, 4);
@@ -51,6 +52,12 @@ function renderMessageItem(message) {
 }
 
 export function renderErgebnisModalContent(rootNode, { startPath = null } = {}) {
+  const filterState = {
+    query: "",
+    activeFilters: [],
+    filteredRoot: rootNode,
+  };
+
   const state = { nodes: new Map(), selectedId: null };
 
   const rootId = "root";
@@ -79,23 +86,70 @@ export function renderErgebnisModalContent(rootNode, { startPath = null } = {}) 
   const navigationSlot = shell.querySelector(".erg-navigation-slot");
   const contentEl = shell.querySelector(".erg-detail-content");
 
-  filterSlot.replaceChildren(
-    renderFilterBar({
-      activeFilters: [],
-      onSearchInput: (value) => {
-        console.log("Filter search input:", value);
+  let tree = null;
+
+  function rerenderFilterBar() {
+    filterSlot.replaceChildren(
+      renderFilterBar({
+        query: filterState.query,
+        activeFilters: filterState.activeFilters,
+
+        onSearchInput: (value) => {
+          filterState.query = value;
+        },
+
+        onSelectFilter: (filter) => {
+          const id = makeFilterId(filter);
+          const exists = filterState.activeFilters.some((f) => makeFilterId(f) === id);
+
+          if (!exists) {
+            filterState.activeFilters.push(filter);
+          }
+
+          filterState.query = "";
+          rerenderAll();
+        },
+
+        onRemoveFilter: (id) => {
+          filterState.activeFilters = filterState.activeFilters
+            .filter((filter) => makeFilterId(filter) !== id);
+
+          rerenderAll();
+        },
+
+        onClearFilters: () => {
+          filterState.activeFilters = [];
+          rerenderAll();
+        },
+      })
+    );
+  }
+
+  function rerenderAll() {
+    filterState.filteredRoot = applyErgebnisFilters(rootNode, filterState.activeFilters);
+
+    treePane.replaceChildren();
+    breadcrumbSlot.replaceChildren();
+    navigationSlot.replaceChildren();
+    contentEl.replaceChildren();
+
+    tree = renderTree({
+      rootNode: filterState.filteredRoot,
+      onSelect: (nodeInfo) => {
+        renderDetails(nodeInfo);
       },
-      onSearchSubmit: (value) => {
-        console.log("Filter search submit:", value);
-      },
-      onRemoveFilter: (id) => {
-        console.log("Remove filter:", id);
-      },
-      onClearFilters: () => {
-        console.log("Clear filters");
-      },
-    })
-  );
+    });
+
+    treePane.appendChild(tree.element);
+
+    if (startPath && !tree.selectPath(startPath)) {
+      tree.select("root");
+    } else if (!startPath) {
+      tree.select("root");
+    }
+
+    rerenderFilterBar();
+  }
 
   function renderDetails(nodeInfo) {
     const node = nodeInfo.node;
@@ -171,20 +225,7 @@ export function renderErgebnisModalContent(rootNode, { startPath = null } = {}) 
     `;
   }
 
-  const tree = renderTree({
-    rootNode,
-    onSelect: (nodeInfo) => {
-      renderDetails(nodeInfo);
-    },
-  });
-
-  treePane.appendChild(tree.element);
-
-  if (startPath && !tree.selectPath(startPath)) {
-    tree.select("root");
-  } else if (!startPath) {
-    tree.select("root");
-  }
+  rerenderAll();
 
   return shell;
 }
