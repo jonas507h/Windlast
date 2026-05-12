@@ -3,6 +3,7 @@ import { listEbenen, listGruppen, listErgebnisse, listMessages, makePathLabel } 
 import { renderTree } from "./render_tree.js";
 import { renderBreadcrumb } from "./render_breadcrumb.js";
 import { renderNavigation } from "./render_navigation.js";
+import { renderFilterBar } from "./render_filter.js";
 
 function formatValue(value) {
   if (Array.isArray(value)) return formatVectorDE(value, 4);
@@ -60,6 +61,7 @@ export function renderErgebnisModalContent(rootNode, { startPath = null } = {}) 
   shell.className = "ergebnisse-modal";
 
   shell.innerHTML = `
+    <div class="erg-filter-slot"></div>
     <aside class="erg-tree-pane"></aside>
 
     <section class="erg-detail-pane">
@@ -71,10 +73,29 @@ export function renderErgebnisModalContent(rootNode, { startPath = null } = {}) 
     </section>
   `;
 
+  const filterSlot = shell.querySelector(".erg-filter-slot");
   const treePane = shell.querySelector(".erg-tree-pane");
   const breadcrumbSlot = shell.querySelector(".erg-breadcrumb-slot");
   const navigationSlot = shell.querySelector(".erg-navigation-slot");
   const contentEl = shell.querySelector(".erg-detail-content");
+
+  filterSlot.replaceChildren(
+    renderFilterBar({
+      activeFilters: [],
+      onSearchInput: (value) => {
+        console.log("Filter search input:", value);
+      },
+      onSearchSubmit: (value) => {
+        console.log("Filter search submit:", value);
+      },
+      onRemoveFilter: (id) => {
+        console.log("Remove filter:", id);
+      },
+      onClearFilters: () => {
+        console.log("Clear filters");
+      },
+    })
+  );
 
   function renderDetails(nodeInfo) {
     const node = nodeInfo.node;

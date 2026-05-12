@@ -803,3 +803,103 @@
   font-size: 0.82rem;
   padding: 0.35rem 0;
 }
+
+/* ==========================
+   Ergebnis-Filter
+   ========================== */
+
+.modal-dialog-wide .ergebnisse-modal {
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.modal-dialog-wide .erg-filter-slot {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+.modal-dialog-wide .erg-filter {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.65rem 0.75rem;
+
+  border: 1px solid var(--border);
+  background: var(--field-bg);
+  border-radius: 14px;
+}
+
+.modal-dialog-wide .erg-filter-search {
+  min-width: 0;
+}
+
+.modal-dialog-wide .erg-filter-input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 2.25rem;
+
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+  border-radius: 10px;
+
+  padding: 0 0.75rem;
+  outline: none;
+}
+
+.modal-dialog-wide .erg-filter-input::placeholder {
+  color: var(--muted);
+}
+
+.modal-dialog-wide .erg-filter-input:focus {
+  border-color: var(--tab-active-border);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--tab-active-border) 24%, transparent);
+}
+
+.modal-dialog-wide .erg-filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 1.75rem;
+}
+
+.modal-dialog-wide .erg-filter-empty {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.modal-dialog-wide .erg-filter-chip,
+.modal-dialog-wide .erg-filter-clear {
+  border: 1px solid var(--button-sec-border);
+  background: var(--button-sec-bg);
+  color: var(--button-sec-text);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.modal-dialog-wide .erg-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  max-width: 100%;
+
+  padding: 0.28rem 0.55rem;
+}
+
+.modal-dialog-wide .erg-filter-chip-label {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.modal-dialog-wide .erg-filter-chip-remove {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.modal-dialog-wide .erg-filter-clear {
+  padding: 0.28rem 0.6rem;
+}
+
+.modal-dialog-wide .erg-filter-chip:hover,
+.modal-dialog-wide .erg-filter-clear:hover {
+  filter: brightness(0.95);
+}
