@@ -1,4 +1,4 @@
-import { searchFilters } from "./suche_ergebnisse.js";
+import { searchFilterSuggestions } from "./suche_ergebnisse.js";
 
 export function renderFilterBar({
   query = "",
@@ -6,11 +6,12 @@ export function renderFilterBar({
   onSearchInput = null,
   onSearchSubmit = null,
   onSelectFilter = null,
+  onBranchSearch = null,
   onRemoveFilter = null,
   onClearFilters = null,
 } = {}) {
   let selectedIndex = 0;
-  let matches = searchFilters(query);
+  let matches = searchFilterSuggestions(query);
 
   const root = document.createElement("div");
   root.className = "erg-filter";
@@ -45,7 +46,7 @@ export function renderFilterBar({
   const suggestions = root.querySelector(".erg-filter-suggestions");
 
   function renderSuggestions() {
-    matches = searchFilters(input.value);
+    matches = searchFilterSuggestions(input.value);
     selectedIndex = matches.length ? Math.min(selectedIndex, matches.length - 1) : 0;
 
     if (!input.value.trim() || !matches.length) {
@@ -71,7 +72,11 @@ export function renderFilterBar({
     const match = matches[index];
     if (!match) return;
 
-    onSelectFilter?.(match);
+    if (match.kind === "branch_search") {
+      onBranchSearch?.(match.query);
+    } else {
+      onSelectFilter?.(match);
+    }
 
     input.value = "";
     matches = [];

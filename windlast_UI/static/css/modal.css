@@ -428,7 +428,28 @@
 
   display: grid;
   grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(0, 1fr);
   gap: 1rem;
+}
+
+.modal-dialog-wide .erg-search-results-slot {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  min-width: 0;
+}
+
+.modal-dialog-wide .erg-search-results-slot:empty {
+  display: none;
+}
+
+.modal-dialog-wide .erg-tree-pane {
+  grid-column: 1;
+  grid-row: 3;
+}
+
+.modal-dialog-wide .erg-detail-pane {
+  grid-column: 2;
+  grid-row: 3;
 }
 
 .modal-dialog-wide .erg-tree-pane,
@@ -808,10 +829,6 @@
    Ergebnis-Filter
    ========================== */
 
-.modal-dialog-wide .ergebnisse-modal {
-  grid-template-rows: auto minmax(0, 1fr);
-}
-
 .modal-dialog-wide .erg-filter-slot {
   grid-column: 1 / -1;
   min-width: 0;
@@ -954,4 +971,85 @@
 
 .modal-dialog-wide .erg-filter-suggestion-label {
   font-weight: 650;
+}
+
+/* ==========================
+   Suchergebnisse im Ergebnismodal
+   ========================== */
+
+.modal-dialog-wide .erg-search-results-slot {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+.modal-dialog-wide .erg-search-results-slot:empty {
+  display: none;
+}
+
+.modal-dialog-wide .erg-search-results-panel {
+  border: 1px solid var(--border);
+  background: var(--field-bg);
+  color: var(--text);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.modal-dialog-wide .erg-search-results-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 1rem;
+
+  padding: 0.65rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-dialog-wide .erg-search-results-title {
+  font-weight: 700;
+}
+
+.modal-dialog-wide .erg-search-results-sub {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.modal-dialog-wide .erg-search-results-close {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.modal-dialog-wide .erg-search-results-list {
+  max-height: 260px;
+  overflow: auto;
+  padding: 0.6rem;
+}
+
+.modal-dialog-wide .erg-search-hit {
+  width: 100%;
+  display: grid;
+  gap: 0.35rem;
+
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+  border-radius: 12px;
+  padding: 0.65rem 0.75rem;
+  margin-bottom: 0.5rem;
+
+  text-align: left;
+  cursor: pointer;
+}
+
+.modal-dialog-wide .erg-search-hit:hover {
+  background: var(--hover-bg);
+}
+
+.modal-dialog-wide .erg-search-hit-breadcrumb {
+  color: var(--muted);
+  font-size: 0.76rem;
+  overflow-wrap: anywhere;
 }

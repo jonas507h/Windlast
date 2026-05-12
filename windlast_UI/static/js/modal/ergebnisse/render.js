@@ -5,6 +5,8 @@ import { renderBreadcrumb } from "./render_breadcrumb.js";
 import { renderNavigation } from "./render_navigation.js";
 import { renderFilterBar, makeFilterId } from "./render_filter.js";
 import { applyErgebnisFilters } from "./filter_ergebnisse.js";
+import { searchInBranch } from "./suche_ergebnisse.js";
+import { renderSearchResultsPanel } from "./render_suchergebnisse.js";
 
 function formatValue(value) {
   if (Array.isArray(value)) return formatVectorDE(value, 4);
@@ -58,6 +60,8 @@ export function renderErgebnisModalContent(rootNode, { startPath = null } = {}) 
     filteredRoot: rootNode,
   };
 
+  let currentNodeInfo = { node: rootNode, path: [] };
+
   const state = { nodes: new Map(), selectedId: null };
 
   const rootId = "root";
@@ -69,6 +73,8 @@ export function renderErgebnisModalContent(rootNode, { startPath = null } = {}) 
 
   shell.innerHTML = `
     <div class="erg-filter-slot"></div>
+    <div class="erg-search-results-slot"></div>
+
     <aside class="erg-tree-pane"></aside>
 
     <section class="erg-detail-pane">
@@ -81,6 +87,7 @@ export function renderErgebnisModalContent(rootNode, { startPath = null } = {}) 
   `;
 
   const filterSlot = shell.querySelector(".erg-filter-slot");
+  const searchResultsSlot = shell.querySelector(".erg-search-results-slot");
   const treePane = shell.querySelector(".erg-tree-pane");
   const breadcrumbSlot = shell.querySelector(".erg-breadcrumb-slot");
   const navigationSlot = shell.querySelector(".erg-navigation-slot");
@@ -93,6 +100,27 @@ export function renderErgebnisModalContent(rootNode, { startPath = null } = {}) 
       renderFilterBar({
         query: filterState.query,
         activeFilters: filterState.activeFilters,
+
+        onBranchSearch: (query) => {
+          const hits = searchInBranch(
+            filterState.filteredRoot,
+            currentNodeInfo.path,
+            query
+          );
+
+          searchResultsSlot.replaceChildren(
+            renderSearchResultsPanel({
+              query,
+              hits,
+              onSelectHit: (hit) => {
+                tree.selectPath(hit.path);
+              },
+              onClose: () => {
+                searchResultsSlot.replaceChildren();
+              },
+            })
+          );
+        },
 
         onSearchInput: (value) => {
           filterState.query = value;
@@ -152,6 +180,7 @@ export function renderErgebnisModalContent(rootNode, { startPath = null } = {}) 
   }
 
   function renderDetails(nodeInfo) {
+    currentNodeInfo = nodeInfo;
     const node = nodeInfo.node;
     const ergebnisse = listErgebnisse(node);
     const messages = listMessages(node);
