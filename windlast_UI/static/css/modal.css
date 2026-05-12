@@ -428,7 +428,7 @@
 
   display: grid;
   grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
-  grid-template-rows: auto auto minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
   gap: 1rem;
 }
 
@@ -444,12 +444,12 @@
 
 .modal-dialog-wide .erg-tree-pane {
   grid-column: 1;
-  grid-row: 3;
+  grid-row: 2;
 }
 
 .modal-dialog-wide .erg-detail-pane {
   grid-column: 2;
-  grid-row: 3;
+  grid-row: 2;
 }
 
 .modal-dialog-wide .erg-tree-pane,
@@ -831,8 +831,11 @@
 
 .modal-dialog-wide .erg-filter-slot {
   grid-column: 1 / -1;
+  grid-row: 1;
   min-width: 0;
+  position: relative;
 }
+
 
 .modal-dialog-wide .erg-filter {
   display: grid;
@@ -977,21 +980,25 @@
    Suchergebnisse im Ergebnismodal
    ========================== */
 
-.modal-dialog-wide .erg-search-results-slot {
-  grid-column: 1 / -1;
-  min-width: 0;
-}
-
-.modal-dialog-wide .erg-search-results-slot:empty {
-  display: none;
-}
-
 .modal-dialog-wide .erg-search-results-panel {
+  position: absolute;
+  z-index: 30;
+
+  left: 5%;
+  right: 5%;
+  top: calc(100% + 0.45rem);
+
+  max-height: calc(92vh - 15rem);
+
   border: 1px solid var(--border);
-  background: var(--field-bg);
+  background: var(--panel);
   color: var(--text);
   border-radius: 14px;
+  box-shadow: var(--modal-shadow);
   overflow: hidden;
+
+  display: flex;
+  flex-direction: column;
 }
 
 .modal-dialog-wide .erg-search-results-head {
@@ -1023,7 +1030,9 @@
 }
 
 .modal-dialog-wide .erg-search-results-list {
-  max-height: 260px;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
   overflow: auto;
   padding: 0.6rem;
 }

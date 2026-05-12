@@ -73,7 +73,6 @@ export function renderErgebnisModalContent(rootNode, { startPath = null } = {}) 
 
   shell.innerHTML = `
     <div class="erg-filter-slot"></div>
-    <div class="erg-search-results-slot"></div>
 
     <aside class="erg-tree-pane"></aside>
 
@@ -87,7 +86,6 @@ export function renderErgebnisModalContent(rootNode, { startPath = null } = {}) 
   `;
 
   const filterSlot = shell.querySelector(".erg-filter-slot");
-  const searchResultsSlot = shell.querySelector(".erg-search-results-slot");
   const treePane = shell.querySelector(".erg-tree-pane");
   const breadcrumbSlot = shell.querySelector(".erg-breadcrumb-slot");
   const navigationSlot = shell.querySelector(".erg-navigation-slot");
@@ -102,21 +100,24 @@ export function renderErgebnisModalContent(rootNode, { startPath = null } = {}) 
         activeFilters: filterState.activeFilters,
 
         onBranchSearch: (query) => {
+          filterSlot.querySelector(".erg-search-results-panel")?.remove();
+
           const hits = searchInBranch(
             filterState.filteredRoot,
             currentNodeInfo.path,
             query
           );
 
-          searchResultsSlot.replaceChildren(
+          filterSlot.appendChild(
             renderSearchResultsPanel({
               query,
               hits,
               onSelectHit: (hit) => {
                 tree.selectPath(hit.path);
+                filterSlot.querySelector(".erg-search-results-panel")?.remove();
               },
               onClose: () => {
-                searchResultsSlot.replaceChildren();
+                filterSlot.querySelector(".erg-search-results-panel")?.remove();
               },
             })
           );
