@@ -33,80 +33,85 @@ export const NORM_DISPLAY_NAMES = {
   EN_1991_1_4_2010: "DIN EN 1991-1-4:2010-12"
 };
 
-// Wunschreihenfolge für Kontext-Felder
-export const CONTEXT_ORDER = [
-  "anzahl_windrichtungen",
-  "windrichtung", "windrichtung_deg",
-  "szenario", "scenario", "szenario_anzeigename",
-  "windzone",
-  "nachweis",
-  "abschnitt",
-  "phase",
-  "komponente", "element", "bauteil",
-  "einwirkungsart", "stelle",
-  "element_index",
-  "id", "element_id", "element_id_intern",
-  "objekttyp",
-  "objekt_name",
-  "objekt_name_intern",
-  "funktion",
-  "norm", "norm_label",
-  "methode",
-];
-
-// Anzeigenamen/Aliase für Kontext-Keys
-export const CONTEXT_ALIASES = {
-  funktion: "Funktion",
-  norm: "Norm",
-  nachweis: "Nachweis",
-  abschnitt: "Abschnitt",
-  komponente: "Komponente",
-  element: "Element",
-  bauteil: "Bauteil",
-  element_id: "Element-ID",
-  element_id_intern: "Element-ID (intern)",
-  bodenplatte_name_intern: "Bodenplatte",
-  szenario: "Szenario",
-  scenario: "Szenario",
-  szenario_anzeigename: "Szenario",
-  einwirkungsart: "Einwirkungsart",
-  stelle: "Stelle",
-  id: "ID",
-  gesamt_hoehe: "Gesamthöhe",
-  gesamthoehe: "Gesamthöhe",
-  h_bau: "Gesamthöhe",
-  h_max: "Max. gültige Höhe",
-  z_max: "Max. erlaubte Höhe",
-  windzone: "Windzone",
+const META_KEY_ALIASES = {
+  element_id: "Element",
+  element_index: "Element-Index",
+  segment_index: "Segment-Index",
   windrichtung_deg: "Windrichtung",
-  paarung: "Materialpaarung",
-  norm_used: "Verwendete Norm",
-  segment_index: "Segment",
-  lastfall_index: "Lastfall",
+  funktion: "Funktion",
+  objekttyp: "Objekttyp",
+  nachweis: "Nachweis",
+  quelle_nachweis: "Quelle Nachweis",
+  lastfall_index: "Lastfall-Index",
 };
 
-export const CONTEXT_BLACKLIST = new Set([
-  "szenario",
-  "element_index",
-  "element_id_intern",
-]);
-
-export const CONTEXT_BLACKLIST_PREFIXES = [
-  /^debug_/,
-  /^internal_/,
-];
-
 // ------------------------------------
-// Helfer
+// Allgemein
 // ------------------------------------
-function useDisplayEps() {
-  try {
-    if (typeof window === "undefined") return false;
-    return !!(window.APP_STATE?.flags?.use_eps_on_anzeige);
-  } catch {
-    return false;
-  }
+
+export function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
 }
+
+// zentraler Value→String/HTML (wie im Footer)
+export function formatVal(k, v, { html = false } = {}) {
+  // Nullish → Gedankenstrich
+  if (v === null || v === undefined) return "—";
+
+  // Szenario-Alias
+  if ((k === "szenario" || k === "scenario") && typeof v === "string") {
+    const s = displayAltName(v) || v;
+    return html ? escapeHtml(s) : s;
+  }
+
+  // Booleans → Ja/Nein
+  if (typeof v === "boolean") return v ? "Ja" : "Nein";
+
+  // Arrays → Vektor, falls numerisch; sonst CSV
+  if (Array.isArray(v)) {
+    const numeric = v.every(x => x !== null && x !== undefined && isFinite(Number(x)));
+    if (numeric) return formatVectorDE(v, 4);
+    const items = v.map(x => html ? escapeHtml(String(x)) : String(x));
+    return items.join(", ");
+  }
+
+  // Objekte mit x/y/z → als Vektor behandeln
+  if (v && typeof v === "object" && ["x","y","z"].every(p => p in v)) {
+    return formatVectorDE([v.x, v.y, v.z], 4);
+  }
+
+  // Andere Objekte → kompakt serialisieren (nur Plaintext sinnvoll)
+  if (v && typeof v === "object") {
+    try {
+      const s = JSON.stringify(v);
+      return html ? escapeHtml(s) : s;
+    } catch {
+      const s = String(v);
+      return html ? escapeHtml(s) : s;
+    }
+  }
+
+  // Zahlen / numerische Strings → deutsch + ×10<sup>…</sup>
+  if (typeof v === "number" || (typeof v === "string" && isFinite(Number(v)))) {
+    return formatNumberDE(v, 4);
+  }
+
+  // Fallback String
+  const s = String(v);
+  return html ? escapeHtml(s) : s;
+}
+
+export function prettyVal(k, v) {
+  return formatVal(k, v, { html: false });
+}
+
+export function prettyValHTML(k, v) {
+  return formatVal(k, v, { html: true });
+}
+
+// ------------------------------------
+// Flags
+// ------------------------------------
 
 export function getFlagLabel(flagKey) {
   if (FLAG_LABELS[flagKey]) return FLAG_LABELS[flagKey];
@@ -118,16 +123,29 @@ export function getFlagLabel(flagKey) {
     .replace(/\b\w/g, (m) => m.toUpperCase());
 }
 
-export function displayAltName(name) {
-  return (name && ALT_LABELS[name]) || name || "";
-}
+// ------------------------------------
+// Normen/Szenarien
+// ------------------------------------
 
-export function getNormDisplayName(normKey) {
-  return NORM_DISPLAY_NAMES[normKey] || normKey.replace(/_/g, " ");
-}
+// export function displayAltName(name) {
+//   return (name && ALT_LABELS[name]) || name || "";
+// }
 
-export function escapeHtml(s){
-  return String(s).replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+// export function getNormDisplayName(normKey) {
+//   return NORM_DISPLAY_NAMES[normKey] || normKey.replace(/_/g, " ");
+// }
+
+// ------------------------------------
+// Mathe
+// ------------------------------------
+
+function useDisplayEps() {
+  try {
+    if (typeof window === "undefined") return false;
+    return !!(window.APP_STATE?.flags?.use_eps_on_anzeige);
+  } catch {
+    return false;
+  }
 }
 
 // 1:1 Zahl-/Vektorformatierung (DE, wissenschaftlich bei großen/kleinen Zahlen)
@@ -203,102 +221,34 @@ export function formatMathWithSubSup(input) {
   return out;
 }
 
-// Key → hübscher Labeltext
-export function prettyKey(k) {
-  if (!k || typeof k !== "string") return String(k);
-  if (CONTEXT_ALIASES[k]) return CONTEXT_ALIASES[k];
-  // snake_case → "Snake Case"
-  return k.replace(/_/g, " ").replace(/\b\p{L}/gu, (c) => c.toUpperCase());
-}
-
-// zentraler Value→String/HTML (wie im Footer)
-export function formatVal(k, v, { html = false } = {}) {
-  // Nullish → Gedankenstrich
-  if (v === null || v === undefined) return "—";
-
-  // Szenario-Alias
-  if ((k === "szenario" || k === "scenario") && typeof v === "string") {
-    const s = displayAltName(v) || v;
-    return html ? escapeHtml(s) : s;
-  }
-
-  // Booleans → Ja/Nein
-  if (typeof v === "boolean") return v ? "Ja" : "Nein";
-
-  // Arrays → Vektor, falls numerisch; sonst CSV
-  if (Array.isArray(v)) {
-    const numeric = v.every(x => x !== null && x !== undefined && isFinite(Number(x)));
-    if (numeric) return formatVectorDE(v, 4);
-    const items = v.map(x => html ? escapeHtml(String(x)) : String(x));
-    return items.join(", ");
-  }
-
-  // Objekte mit x/y/z → als Vektor behandeln
-  if (v && typeof v === "object" && ["x","y","z"].every(p => p in v)) {
-    return formatVectorDE([v.x, v.y, v.z], 4);
-  }
-
-  // Andere Objekte → kompakt serialisieren (nur Plaintext sinnvoll)
-  if (v && typeof v === "object") {
-    try {
-      const s = JSON.stringify(v);
-      return html ? escapeHtml(s) : s;
-    } catch {
-      const s = String(v);
-      return html ? escapeHtml(s) : s;
-    }
-  }
-
-  // Zahlen / numerische Strings → deutsch + ×10<sup>…</sup>
-  if (typeof v === "number" || (typeof v === "string" && isFinite(Number(v)))) {
-    return formatNumberDE(v, 4);
-  }
-
-  // Fallback String
-  const s = String(v);
-  return html ? escapeHtml(s) : s;
-}
-
-export function prettyVal(k, v) {
-  return formatVal(k, v, { html: false });
-}
-
-export function prettyValHTML(k, v) {
-  return formatVal(k, v, { html: true });
-}
-
 // ------------------------------------
-// Kontext-Sortierung/-Filter
+// Meta
 // ------------------------------------
-export function isBlacklistedKey(k) {
-  if (!k) return false;
-  if (CONTEXT_BLACKLIST.has(k)) return true;
-  return CONTEXT_BLACKLIST_PREFIXES.some(rx => rx.test(k));
-}
 
-// Sortiert Kontext-Einträge: erst laut CONTEXT_ORDER, dann Rest in Quell-Reihenfolge
-export function orderContextEntries(ctx, pref = CONTEXT_ORDER) {
-  if (!ctx || typeof ctx !== "object") return [];
+export function prettyMetaKey(key) {
+  if (!key) return "";
 
-  const withIndex = [];
-  let i = 0;
-  for (const k in ctx) {
-    if (!Object.hasOwn(ctx, k)) continue;
-    if (isBlacklistedKey(k)) continue;
-    const v = ctx[k];
-    if (v === undefined || v === null || v === "") continue;
-    withIndex.push([k, v, i++]); // [key, value, originalIndex]
+  if (META_KEY_ALIASES[key]) {
+    return META_KEY_ALIASES[key];
   }
 
-  const rank = new Map(pref.map((k, idx) => [k, idx]));
-  withIndex.sort((a, b) => {
-    const ra = rank.has(a[0]) ? rank.get(a[0]) : Infinity;
-    const rb = rank.has(b[0]) ? rank.get(b[0]) : Infinity;
-    if (ra !== rb) return ra - rb;
-    return a[2] - b[2];
-  });
+  return String(key)
+    .replaceAll("_", " ")
+    .replace(/\b\w/g, (m) => m.toUpperCase());
+}
 
-  return withIndex.map(([k, v]) => [k, v]);
+export function prettyMetaValue(value) {
+  if (value == null) return "—";
+
+  if (typeof value === "boolean") {
+    return value ? "Ja" : "Nein";
+  }
+
+  if (Array.isArray(value)) {
+    return value.join(", ");
+  }
+
+  return String(value);
 }
 
 // ------------------------------------
@@ -316,3 +266,50 @@ export function sortMessagesBySeverity(msgs) {
     return ra - rb;
   });
 }
+
+
+
+
+
+// Key → hübscher Labeltext
+// export function prettyKey(k) {
+//   if (!k || typeof k !== "string") return String(k);
+//   if (CONTEXT_ALIASES[k]) return CONTEXT_ALIASES[k];
+//   // snake_case → "Snake Case"
+//   return k.replace(/_/g, " ").replace(/\b\p{L}/gu, (c) => c.toUpperCase());
+// }
+
+
+// ------------------------------------
+// Kontext-Sortierung/-Filter
+// ------------------------------------
+// export function isBlacklistedKey(k) {
+//   if (!k) return false;
+//   if (CONTEXT_BLACKLIST.has(k)) return true;
+//   return CONTEXT_BLACKLIST_PREFIXES.some(rx => rx.test(k));
+// }
+
+// // Sortiert Kontext-Einträge: erst laut CONTEXT_ORDER, dann Rest in Quell-Reihenfolge
+// export function orderContextEntries(ctx, pref = CONTEXT_ORDER) {
+//   if (!ctx || typeof ctx !== "object") return [];
+
+//   const withIndex = [];
+//   let i = 0;
+//   for (const k in ctx) {
+//     if (!Object.hasOwn(ctx, k)) continue;
+//     if (isBlacklistedKey(k)) continue;
+//     const v = ctx[k];
+//     if (v === undefined || v === null || v === "") continue;
+//     withIndex.push([k, v, i++]); // [key, value, originalIndex]
+//   }
+
+//   const rank = new Map(pref.map((k, idx) => [k, idx]));
+//   withIndex.sort((a, b) => {
+//     const ra = rank.has(a[0]) ? rank.get(a[0]) : Infinity;
+//     const rb = rank.has(b[0]) ? rank.get(b[0]) : Infinity;
+//     if (ra !== rb) return ra - rb;
+//     return a[2] - b[2];
+//   });
+
+//   return withIndex.map(([k, v]) => [k, v]);
+// }

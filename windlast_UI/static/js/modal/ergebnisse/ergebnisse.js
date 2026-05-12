@@ -1,7 +1,6 @@
-import { getNormDisplayName, displayAltName } from "../../utils/formatierung.js";
-import { getScenarioRoot } from "./tree.js";
+import { getScenarioPath, findGruppe } from "./tree.js";
 import { renderErgebnisModalContent } from "./render.js";
-import { getScenarioPath } from "./tree.js";
+import { buildMeldungTooltipContent } from "../../tooltip/meldungen.js";
 
 let DEPS = {
   getVM: null,
@@ -40,9 +39,32 @@ export function openErgebnisseModal(normKey, szenario = null) {
   const startPath = getScenarioPath(normKey, szenario);
   if (!startPath.length) return;
 
-  const normName = getNormDisplayName(normKey);
-  const niceScenario = szenario ? displayAltName(szenario) : "Hauptberechnung";
-  const title = `Ergebnisse – ${normName} (${niceScenario})`;
+  const normStep = startPath[0];
+  const scenarioStep = startPath[1];
+
+  const normGroup = normStep
+    ? findGruppe(tree, normStep.ebene, normStep.gruppe)
+    : null;
+
+  const scenarioGroup = (
+    normGroup &&
+    scenarioStep
+  )
+    ? findGruppe(normGroup, scenarioStep.ebene, scenarioStep.gruppe)
+    : null;
+
+  const normName =
+    normGroup?.label ||
+    normGroup?.name ||
+    normKey;
+
+  const scenarioName =
+    scenarioGroup?.label ||
+    scenarioGroup?.name ||
+    szenario ||
+    "Hauptberechnung";
+
+  const title = `Ergebnisse – ${normName} (${scenarioName})`;
 
   const body = renderErgebnisModalContent(tree, { startPath });
   const buildModal = DEPS.buildModal || fallbackBuildModal;
@@ -53,6 +75,7 @@ export function openErgebnisseModal(normKey, szenario = null) {
   });
 
   registerErgebnisseMetaTooltip();
+  registerErgebnisseMessageTooltip();
 }
 
 export function registerErgebnisseMetaTooltip() {
@@ -138,59 +161,16 @@ export function registerErgebnisseMessageTooltip() {
       const li = el.closest(".erg-message-item");
       if (!li) return "";
 
-      const code = li.getAttribute("data-message-code") || "";
-      const severity = li.getAttribute("data-message-severity") || "";
-      const metaRaw = li.getAttribute("data-message-meta") || "{}";
-
       let meta = {};
       try {
-        meta = JSON.parse(metaRaw);
+        meta = JSON.parse(li.getAttribute("data-message-meta") || "{}");
       } catch {}
 
-      const root = document.createElement("div");
-      root.className = "ctx-tooltip";
-
-      if (severity) {
-        const row = document.createElement("div");
-        row.className = "ctx-row";
-        row.innerHTML = `<span class="ctx-k">Severity: </span><span class="ctx-v">${severity}</span>`;
-        root.appendChild(row);
-      }
-
-      if (code) {
-        const row = document.createElement("div");
-        row.className = "ctx-row";
-        row.innerHTML = `<span class="ctx-k">Code: </span><span class="ctx-v">${code}</span>`;
-        root.appendChild(row);
-      }
-
-      const metaEntries = Object.entries(meta || {});
-      if (metaEntries.length) {
-        const divider = document.createElement("div");
-        divider.className = "tt-divider";
-        root.appendChild(divider);
-
-        for (const [k, v] of metaEntries) {
-          const row = document.createElement("div");
-          row.className = "ctx-row";
-
-          const key = document.createElement("span");
-          key.className = "ctx-k";
-          key.textContent = `${k}: `;
-
-          const val = document.createElement("span");
-          val.className = "ctx-v";
-          val.textContent = typeof v === "string"
-            ? v
-            : JSON.stringify(v);
-
-          row.appendChild(key);
-          row.appendChild(val);
-          root.appendChild(row);
-        }
-      }
-
-      return root;
+      return buildMeldungTooltipContent({
+        code: li.getAttribute("data-message-code") || "",
+        severity: li.getAttribute("data-message-severity") || "",
+        meta,
+      });
     },
     delay: 80,
   });

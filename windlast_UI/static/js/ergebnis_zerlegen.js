@@ -1,3 +1,5 @@
+// TODO: aufräumen, hier ist viel Müll drin, den kein Schwein braucht
+
 (function (global) {
   const SEVS = ["error", "warn", "hint", "info"];
 
@@ -71,22 +73,22 @@
     return ergebnisse.find((r) => r?.name === resultName) || null;
   }
 
-  function makeMessageObject(message, context = {}) {
+  function makeMessageObject(message) {
     if (!message) return null;
-    const sev = normalizeSeverity(message.severity);
+
     return {
-      severity: sev,
+      severity: normalizeSeverity(message.severity),
       text: message.text == null ? null : String(message.text),
       code: message.code == null ? null : String(message.code),
-      context: { ...context, ...(message.meta || {}) },
       meta: message.meta || {},
     };
   }
 
-  function collectMessagesRecursive(container, context = {}, out = []) {
+  function collectMessagesRecursive(container, out = []) {
     const ownMessages = Array.isArray(container?.messages) ? container.messages : [];
+
     for (const msg of ownMessages) {
-      const m = makeMessageObject(msg, context);
+      const m = makeMessageObject(msg);
       if (m) out.push(m);
     }
 
@@ -94,19 +96,16 @@
     for (const ebene of ebenen) {
       const gruppen = Array.isArray(ebene?.gruppen) ? ebene.gruppen : [];
       for (const gruppe of gruppen) {
-        collectMessagesRecursive(
-          gruppe,
-          { ...context, [ebene.name]: gruppe.name },
-          out
-        );
+        collectMessagesRecursive(gruppe, out);
       }
     }
 
     return out;
   }
 
-  function collectDocsRecursive(container, context = {}, out = []) {
+  function collectErgebnisseRecursive(container, out = []) {
     const ergebnisse = Array.isArray(container?.ergebnisse) ? container.ergebnisse : [];
+
     for (const e of ergebnisse) {
       out.push({
         title: e.label || e.name,
@@ -114,7 +113,7 @@
         unit: e.einheit || null,
         formula: e.formel || null,
         symbols: e.formelzeichen || null,
-        context: { ...context, ...(e.meta || {}) },
+        meta: e.meta || {},
         raw: e,
       });
     }
@@ -123,11 +122,7 @@
     for (const ebene of ebenen) {
       const gruppen = Array.isArray(ebene?.gruppen) ? ebene.gruppen : [];
       for (const gruppe of gruppen) {
-        collectDocsRecursive(
-          gruppe,
-          { ...context, [ebene.name]: gruppe.name },
-          out
-        );
+        collectErgebnisseRecursive(gruppe, out);
       }
     }
 
@@ -194,8 +189,8 @@
       idx.altValues = {};
       idx.altLabelsByNorm = {};
 
-      idx.docsMainByNorm = {};
-      idx.docsByAlt = {};
+      idx.ergebnisseMainByNorm = {};
+      idx.ergebnisseByAlt = {};
       idx.msgsMainByNorm = {};
       idx.msgsByAlt = {};
 
@@ -211,8 +206,8 @@
         idx.altValues[normKey] = {};
         idx.altLabelsByNorm[normKey] = {};
 
-        idx.docsMainByNorm[normKey] = [];
-        idx.docsByAlt[normKey] = {};
+        idx.ergebnisseMainByNorm[normKey] = [];
+        idx.ergebnisseByAlt[normKey] = {};
         idx.msgsMainByNorm[normKey] = [];
         idx.msgsByAlt[normKey] = {};
 
@@ -225,21 +220,14 @@
           const scenarioLabel = groupLabel(scenarioGroup) || scenarioName;
 
           const values = extractNachweisValues(scenarioGroup);
-          const messages = collectMessagesRecursive(scenarioGroup, {
-            norm: treeNormKey,
-            szenario: scenarioName,
-          });
-          const docs = collectDocsRecursive(scenarioGroup, {
-            norm: treeNormKey,
-            szenario: scenarioName,
-          });
-
+          const messages = collectMessagesRecursive(scenarioGroup);
+          const ergebnisse = collectErgebnisseRecursive(scenarioGroup);
           const main = isMainScenario(normKey, scenarioName, scenarioIndex);
 
           if (main) {
             idx.mainValues[normKey] = values;
             idx.msgsMainByNorm[normKey] = messages;
-            idx.docsMainByNorm[normKey] = docs;
+            idx.ergebnisseMainByNorm[normKey] = ergebnisse;
           } else {
             idx.altValues[normKey][scenarioName] = {
               anzeigename: scenarioLabel,
@@ -247,7 +235,7 @@
             };
             idx.altLabelsByNorm[normKey][scenarioName] = scenarioLabel;
             idx.msgsByAlt[normKey][scenarioName] = messages;
-            idx.docsByAlt[normKey][scenarioName] = docs;
+            idx.ergebnisseByAlt[normKey][scenarioName] = ergebnisse;
           }
 
           addCountsFromMessages(idx.counts[normKey], main ? "_gesamt" : scenarioName, messages);
@@ -277,30 +265,30 @@
         return byNorm[altName] || altName;
       },
 
-      getDocs(normKey, altName = null) {
+      getErgebnisse(normKey, altName = null) {
         if (altName) {
-          return this.docsByAlt?.[normKey]?.[altName] || [];
+          return this.ergebnisseByAlt?.[normKey]?.[altName] || [];
         }
-        return this.docsMainByNorm?.[normKey] || [];
+        return this.ergebnisseMainByNorm?.[normKey] || [];
       },
 
-      listDocs(normKey, scenario = null) {
+      listErgebnisse(normKey, scenario = null) {
         if (scenario == null || String(scenario).trim() === "" || scenario === "_gesamt") {
-          return this.getDocs(normKey, null);
+          return this.getErgebnisse(normKey, null);
         }
 
         const sc = String(scenario).trim();
         const altNames = new Set(this.listAlternativen(normKey));
-        if (altNames.has(sc)) return this.getDocs(normKey, sc);
 
-        return this.getDocs(normKey, null).filter((d) => {
-          const ctx = d?.context || {};
-          return String(ctx.szenario || "") === sc;
-        });
+        if (altNames.has(sc)) {
+          return this.getErgebnisse(normKey, sc);
+        }
+
+        return [];
       },
 
-      listDocsMainOnly(normKey) {
-        return this.getDocs(normKey, null);
+      listErgebnisseMainOnly(normKey) {
+        return this.getErgebnisse(normKey, null);
       },
 
       getMessages(normKey, altName = null) {
@@ -347,12 +335,12 @@
 
         const sc = String(scenario).trim();
         const altNames = new Set(this.listAlternativen(normKey));
-        if (altNames.has(sc)) return this.getMessageTexts(normKey, sc);
 
-        return this.getMessages(normKey, null)
-          .filter((m) => String(m?.context?.szenario || "") === sc)
-          .map((m) => m?.text)
-          .filter(Boolean);
+        if (altNames.has(sc)) {
+          return this.getMessageTexts(normKey, sc);
+        }
+
+        return [];
       },
 
       listMessages(normKey, scenario = null) {
@@ -362,12 +350,12 @@
 
         const sc = String(scenario).trim();
         const altNames = new Set(this.listAlternativen(normKey));
-        if (altNames.has(sc)) return this.getMessages(normKey, sc);
 
-        return this.getMessages(normKey, null).filter((m) => {
-          const ctx = m?.context || {};
-          return String(ctx.szenario || "") === sc;
-        });
+        if (altNames.has(sc)) {
+          return this.getMessages(normKey, sc);
+        }
+
+        return [];
       },
 
       listMessagesMainOnly(normKey) {
