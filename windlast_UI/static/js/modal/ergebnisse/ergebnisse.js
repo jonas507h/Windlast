@@ -1,6 +1,7 @@
 import { getScenarioPath, findGruppe } from "./tree.js";
 import { renderErgebnisModalContent } from "./render.js";
 import { buildMeldungTooltipContent } from "../../tooltip/meldungen.js";
+import { buildErgebnisTooltipContent } from "../../tooltip/ergebnisse.js";
 
 let DEPS = {
   getVM: null,
@@ -106,33 +107,7 @@ export function registerErgebnisseMetaTooltip() {
         meta = JSON.parse(li.getAttribute("data-meta-json") || "{}");
       } catch {}
 
-      const root = document.createElement("div");
-      root.className = "ctx-tooltip";
-
-      const entries = Object.entries(meta || {});
-      if (!entries.length) {
-        root.textContent = "Keine Meta-Daten.";
-        return root;
-      }
-
-      for (const [k, v] of entries) {
-        const row = document.createElement("div");
-        row.className = "ctx-row";
-
-        const key = document.createElement("span");
-        key.className = "ctx-k";
-        key.textContent = `${k}: `;
-
-        const val = document.createElement("span");
-        val.className = "ctx-v";
-        val.textContent = typeof v === "string" ? v : JSON.stringify(v);
-
-        row.appendChild(key);
-        row.appendChild(val);
-        root.appendChild(row);
-      }
-
-      return root;
+      return buildErgebnisTooltipContent(meta);
     },
     delay: 80,
   });
@@ -155,6 +130,8 @@ export function registerErgebnisseMessageTooltip() {
 
   Tooltip.register("#modal-root .erg-message-item, #modal-root .erg-message-item *", {
     predicate: (el) => {
+      const showFlag = !!(window.APP_STATE?.flags?.show_meldungen_tooltip);
+      if (!showFlag) return false;
       return !!el.closest(".erg-message-item");
     },
     content: (_ev, el) => {

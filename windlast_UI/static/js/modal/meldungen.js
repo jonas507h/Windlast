@@ -2,11 +2,27 @@
 import { buildMeldungTooltipContent } from "../tooltip/meldungen.js";
 
 let DEPS = {
+  getVM: null,
   getMessages: null,
   Modal: null,
   Tooltip: null,
   buildModal: null,
 };
+
+export function configureMeldungen({
+  vm,
+  getVM,
+  getMessages,
+  Modal,
+  Tooltip,
+  buildModal,
+} = {}) {
+  DEPS.getVM = getVM || (vm ? () => vm : DEPS.getVM);
+  if (getMessages) DEPS.getMessages = getMessages;
+  if (Modal) DEPS.Modal = Modal;
+  if (Tooltip) DEPS.Tooltip = Tooltip;
+  if (buildModal) DEPS.buildModal = buildModal;
+}
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -19,18 +35,6 @@ function escapeHtml(value) {
 
 function normalizeSeverity(severity) {
   return String(severity || "").toLowerCase();
-}
-
-export function configureMeldungen({
-  getMessages,
-  Modal,
-  Tooltip,
-  buildModal,
-} = {}) {
-  if (getMessages) DEPS.getMessages = getMessages;
-  if (Modal) DEPS.Modal = Modal;
-  if (Tooltip) DEPS.Tooltip = Tooltip;
-  if (buildModal) DEPS.buildModal = buildModal;
 }
 
 function fallbackBuildModal(titleText, bodyNode) {
@@ -83,18 +87,51 @@ function renderMessages(messages = []) {
   return root;
 }
 
-export function openMeldungenModal(messages = null) {
-  const resolvedMessages =
-    messages ||
-    DEPS.getMessages?.() ||
-    [];
+export function openMeldungenModal(normKeyOrMessages = null, scenario = null) {
+  let messages = [];
 
-  const body = renderMessages(resolvedMessages);
+  if (Array.isArray(normKeyOrMessages)) {
+    messages = normKeyOrMessages;
+  } else {
+    const normKey = normKeyOrMessages;
+
+    if (DEPS.getMessages) {
+      messages = DEPS.getMessages(normKey, scenario) || [];
+    } else {
+      const VM = DEPS.getVM?.();
+      messages = VM?.listMessages?.(normKey, scenario) || [];
+    }
+  }
+
+  const body = renderMessages(messages);
   const buildModal = DEPS.buildModal || fallbackBuildModal;
   const wrap = buildModal("Meldungen", body);
 
   (DEPS.Modal || window.Modal)?.open(wrap);
   registerMeldungenTooltip();
+}
+
+export function setupMeldungenTriggers() {
+  if (setupMeldungenTriggers.__done) return;
+  setupMeldungenTriggers.__done = true;
+
+  document.addEventListener("click", (ev) => {
+    const badge = ev.target.closest(".results-table .count-badge");
+    if (!badge) return;
+
+    const th = badge.closest("th[data-norm-key]");
+    if (!th) return;
+
+    const normKey = th.dataset.normKey || null;
+    const szenario = th.dataset.szenario || null;
+
+    if (!normKey) return;
+
+    ev.preventDefault();
+    ev.stopPropagation();
+
+    openMeldungenModal(normKey, szenario);
+  });
 }
 
 export function registerMeldungenTooltip() {
@@ -141,4 +178,5 @@ export function registerMeldungenTooltip() {
 
 export function setupMeldungenUI() {
   registerMeldungenTooltip();
+  setupMeldungenTriggers();
 }

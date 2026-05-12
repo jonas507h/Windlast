@@ -11,7 +11,7 @@ const FLAG_LABELS = {
   show_nichtZertifiziert_warnung: '"Berechnung nicht zertifiziert"-Warnung anzeigen',
   show_doppelte_meldungen: "Doppelte Meldungen anzeigen",
   show_meldungen_tooltip: "Debug-Tooltips für Meldungen anzeigen",
-  show_real_kontext_keys: "Interne Kontext-Schlüssel anzeigen",
+  show_real_meta_keys: "Interne Meta-Schlüssel anzeigen",
   show_nullpunkt: "Nullpunkt anzeigen",
   show_suche_tooltip: "Debug-Tooltip für Suche anzeigen",
   show_test_options_dropdown: "Test-Optionen in den Dropdowns anzeigen",

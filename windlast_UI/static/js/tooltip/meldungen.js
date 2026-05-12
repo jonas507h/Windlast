@@ -45,8 +45,16 @@ export function buildMeldungTooltipContent({
   if (entries.length) {
     if (code || severity) appendDivider(root);
 
+    const realKeyFlag = !!(window.APP_STATE?.flags?.show_real_meta_keys);
+    
     for (const [k, v] of entries) {
-      appendRow(root, prettyMetaKey(k), prettyMetaValue(v));
+      let metaKey = k;
+      let metaValue = v;
+      if (!realKeyFlag) {
+        metaKey = prettyMetaKey(k);
+        metaValue = prettyMetaValue(v);
+      }
+      appendRow(root, metaKey, metaValue);
     }
   }
 
