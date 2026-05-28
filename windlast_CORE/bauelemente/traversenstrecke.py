@@ -151,7 +151,7 @@ class Traversenstrecke:
                 protokoll=protokoll, breadcrumb=seg_bc,
             )
             _abminderungsfaktor_schlankheit = abminderungsfaktor_schlankheit(
-                norm, self.objekttyp, _schlankheit.wert, _voelligkeitsgrad.wert,
+                norm, self.objekttyp, _schlankheit.wert, voelligkeitsgrad=_voelligkeitsgrad.wert,
                 protokoll=protokoll, breadcrumb=seg_bc,
             )
             _kraftbeiwert = kraftbeiwert(

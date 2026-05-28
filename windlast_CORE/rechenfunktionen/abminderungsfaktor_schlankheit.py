@@ -24,7 +24,7 @@ def _validate_inputs(objekttyp: ObjektTyp, schlankheit: float, voelligkeitsgrad:
         raise TypeError("objekttyp muss vom Typ ObjektTyp sein.")
     if schlankheit <= 0:
         raise ValueError("schlankheit muss > 0 sein.")
-    if not (0.0 <= voelligkeitsgrad <= 1.0):
+    if objekttyp != ObjektTyp.ROHR and not (0.0 <= voelligkeitsgrad <= 1.0):
         raise ValueError("voelligkeitsgrad muss im Bereich [0,1] liegen.")
 
 def _abminderungsfaktor_schlankheit_default(
@@ -45,6 +45,10 @@ def _abminderungsfaktor_schlankheit_default(
     base_meta = {
         "funktion": "abminderungsfaktor_schlankheit_default",
     }
+
+    if objekttyp == ObjektTyp.ROHR:
+        # Für Rohre wird der Abminderungsfaktor nicht von der Völligkeit beeinflusst, da sie in der Regel vollständig von Luft umströmt werden.
+        voelligkeitsgrad = 1.0
 
     # Originale Eingaben merken für Logging
     lam_orig = schlankheit
@@ -81,15 +85,26 @@ def _abminderungsfaktor_schlankheit_default(
 
     wert = bilinear_interpolate_grid(_X_Schlankheit, y_inc, z_inc, x, y)
 
-    protokolliere_ergebnis(
-        protokoll,
-        breadcrumb=base_bc,
-        name="abminderungsfaktor_schlankheit",
-        wert=wert,
-        label="Abminderungsfaktor ψ_λ",
-        formelzeichen="ψ_λ",
-        meta=base_meta,
-    )
+    if objekttyp == ObjektTyp.ROHR:
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=base_bc,
+            name="abminderungsfaktor_schlankheit",
+            wert=wert,
+            label="math.abminderungsfaktor_schlankheit_rohr.label",
+            formelzeichen="math.abminderungsfaktor_schlankheit_rohr.symbol",
+            meta=base_meta,
+        )
+    else:
+        protokolliere_ergebnis(
+            protokoll,
+            breadcrumb=base_bc,
+            name="abminderungsfaktor_schlankheit",
+            wert=wert,
+            label="math.abminderungsfaktor_schlankheit.label",
+            formelzeichen="math.abminderungsfaktor_schlankheit.symbol",
+            meta=base_meta,
+        )
 
     return Zwischenergebnis(wert=wert)
 
@@ -101,8 +116,8 @@ def abminderungsfaktor_schlankheit(
     norm: Norm,
     objekttyp: ObjektTyp,
     schlankheit: float,
-    voelligkeitsgrad: float,
     *,
+    voelligkeitsgrad: Optional[float] = None,
     protokoll: Optional[Protokoll] = None,
     breadcrumb: Optional[list] = None,
 ) -> Zwischenergebnis:
@@ -129,8 +144,8 @@ def abminderungsfaktor_schlankheit(
             breadcrumb=base_bc,
             name="abminderungsfaktor_schlankheit",
             wert=float("nan"),
-            label="Abminderungsfaktor ψ_λ",
-            formelzeichen="ψ_λ",
+            label="math.abminderungsfaktor_schlankheit.label",
+            formelzeichen="math.abminderungsfaktor_schlankheit.symbol",
             meta=base_meta,
         )
         return Zwischenergebnis(wert=float("nan"))

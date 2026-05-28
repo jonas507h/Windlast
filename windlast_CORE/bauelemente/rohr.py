@@ -135,14 +135,14 @@ class Rohr:
                 self.rohr_name_intern, windrichtung,
                 protokoll=protokoll, breadcrumb=seg_bc,
             )
-            _eingeschlossene_Flaeche = eingeschlossene_flaeche(
-                norm, self.objekttyp, self.rohr_name_intern, [start_lokal, ende_lokal],
-                protokoll=protokoll, breadcrumb=seg_bc,
-            )
-            _voelligkeitsgrad = voelligkeitsgrad(
-                norm, _bezugsflaeche.wert, _eingeschlossene_Flaeche.wert,
-                protokoll=protokoll, breadcrumb=seg_bc,
-            )
+            # _eingeschlossene_Flaeche = eingeschlossene_flaeche(
+            #     norm, self.objekttyp, self.rohr_name_intern, [start_lokal, ende_lokal],
+            #     protokoll=protokoll, breadcrumb=seg_bc,
+            # )
+            # _voelligkeitsgrad = voelligkeitsgrad(
+            #     norm, _bezugsflaeche.wert, _eingeschlossene_Flaeche.wert,
+            #     protokoll=protokoll, breadcrumb=seg_bc,
+            # )
             _grundkraftbeiwert = grundkraftbeiwert(
                 norm,
                 self.objekttyp,
@@ -152,7 +152,7 @@ class Rohr:
                 protokoll=protokoll, breadcrumb=seg_bc,
             )
             _abminderungsfaktor_schlankheit = abminderungsfaktor_schlankheit(
-                norm, self.objekttyp, _schlankheit.wert, _voelligkeitsgrad.wert,
+                norm, self.objekttyp, _schlankheit.wert,
                 protokoll=protokoll, breadcrumb=seg_bc,
             )
             _kraftbeiwert = kraftbeiwert(

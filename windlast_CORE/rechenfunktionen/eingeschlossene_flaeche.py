@@ -55,10 +55,8 @@ def _eingeschlossene_flaeche_default(
                 breadcrumb=base_bc,
                 name="eingeschlossene_flaeche",
                 wert=float("nan"),
-                label="Eingeschlossene Fläche A_C",
-                formelzeichen="A_C",
-                formel="A_C = L · h",
-                einheit="m²",
+                label="math.eingeschlossene_flaeche_traverse.label",
+                formelzeichen="math.eingeschlossene_flaeche_traverse.symbol",
                 meta=base_meta,
             )
             return Zwischenergebnis(wert=float("nan"))
@@ -70,14 +68,15 @@ def _eingeschlossene_flaeche_default(
             breadcrumb=base_bc,
             name="eingeschlossene_flaeche",
             wert=wert,
-            label="Eingeschlossene Fläche A_C",
-            formelzeichen="A_C",
-            formel="A_C = L · h",
+            label="math.eingeschlossene_flaeche_traverse.label",
+            formelzeichen="math.eingeschlossene_flaeche_traverse.symbol",
+            formel="math.eingeschlossene_flaeche_traverse.formula",
             einheit="m²",
             meta=base_meta,
         )
         return Zwischenergebnis(wert=wert)
-    
+
+# Rohr wird nicht mehr genutzt
     elif objekttyp == ObjektTyp.ROHR:
         startpunkt, endpunkt = punkte[0], punkte[1]
         laenge = abstand_punkte(startpunkt, endpunkt)
@@ -161,8 +160,8 @@ def eingeschlossene_flaeche(
             breadcrumb=base_bc,
             name="eingeschlossene_flaeche",
             wert=float("nan"),
-            label="Eingeschlossene Fläche A_C",
-            formelzeichen="A_C",
+            label="math.eingeschlossene_flaeche.label",
+            formelzeichen="math.eingeschlossene_flaeche.symbol",
             einheit="m²",
             meta=base_meta,
         )
