@@ -119,7 +119,7 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
                 breadcrumb=base_bc,
                 name="grundkraftbeiwert",
                 wert=float("nan"),
-                label="Grundkraftbeiwert c_f,0",
+                label="math.grundkraftbeiwert.label",
                 formelzeichen="c_f,0",
                 meta=base_meta,
             )
@@ -207,7 +207,7 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
                     breadcrumb=base_bc,
                     name="grundkraftbeiwert",
                     wert=float("nan"),
-                    label="Grundkraftbeiwert c_f,0",
+                    label="math.grundkraftbeiwert.label",
                     formelzeichen="c_f,0",
                     meta=base_meta,
                 )
@@ -218,7 +218,7 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
             breadcrumb=base_bc,
             name="grundkraftbeiwert",
             wert=wert,
-            label="Grundkraftbeiwert c_f,0",
+            label="math.grundkraftbeiwert.label",
             formelzeichen="c_f,0",
             meta=base_meta,
         )
@@ -233,7 +233,7 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
                 breadcrumb=base_bc,
                 name="grundkraftbeiwert",
                 wert=0.0,
-                label="Grundkraftbeiwert c_f,0",
+                label="math.grundkraftbeiwert.label",
                 formelzeichen="c_f,0",
                 meta=base_meta,
             )
@@ -255,7 +255,7 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
             breadcrumb=base_bc,
             name="grundkraftbeiwert",
             wert=wert,
-            label="Grundkraftbeiwert c_f,0",
+            label="math.grundkraftbeiwert.label",
             formelzeichen="c_f,0",
             meta=base_meta,
         )
@@ -275,7 +275,7 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
             breadcrumb=base_bc,
             name="grundkraftbeiwert",
             wert=float("nan"),
-            label="Grundkraftbeiwert c_f,0",
+            label="math.grundkraftbeiwert.label",
             formelzeichen="c_f,0",
             meta=base_meta,
         )
@@ -322,7 +322,7 @@ def grundkraftbeiwert(
             breadcrumb=base_bc,
             name="grundkraftbeiwert",
             wert=float("nan"),
-            label="Grundkraftbeiwert c_f,0",
+            label="math.grundkraftbeiwert.label",
             formelzeichen="c_f,0",
             meta=base_meta,
         )

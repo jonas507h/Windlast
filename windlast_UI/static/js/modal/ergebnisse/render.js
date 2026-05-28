@@ -7,6 +7,7 @@ import { renderFilterBar, makeFilterId } from "./render_filter.js";
 import { applyErgebnisFilters } from "./filter_ergebnisse.js";
 import { searchInBranch } from "./suche_ergebnisse.js";
 import { renderSearchResultsPanel } from "./render_suchergebnisse.js";
+import { resolveResource } from "../../resources/resources.js";
 
 function formatValue(value) {
   if (Array.isArray(value)) return formatVectorDE(value, 4);
@@ -21,7 +22,8 @@ function resultTooltipMeta(ergebnis) {
 }
 
 function renderResultItem(ergebnis) {
-  const label = ergebnis.label || ergebnis.name || "—";
+  const labelCode = ergebnis.label || ergebnis.name || "—";
+  const label = resolveResource(labelCode, labelCode);
   const unit = ergebnis.einheit ? ` ${escapeHtml(ergebnis.einheit)}` : "";
   const formula = ergebnis.formel ? `<div class="erg-result-formula">${formatMathWithSubSup(ergebnis.formel)}</div>` : "";
   const symbol = ergebnis.formelzeichen ? `<span class="erg-result-symbol">${formatMathWithSubSup(ergebnis.formelzeichen)}</span>` : "";

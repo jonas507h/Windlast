@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "entries": {
+    "grundkraftbeiwert": {
+      "label": "Grundkraftbeiwert",
+      "symbol": "c_{f,0}"
+    },
+    "winddruck": {
+      "label": "Winddruck",
+      "symbol": "q_p"
+    }
+  }
+}

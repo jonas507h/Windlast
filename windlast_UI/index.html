@@ -220,6 +220,7 @@
   <script type="module" src="/static/js/modal/help.js"></script>
   <script type="module" src="/static/js/modal/einstellungen.js"></script>
   <script src="/static/js/wiki_modal.js"></script>
+  <script type="module" src="/static/js/resources/resources.js"></script>
   <!-- Preview -->
   <script type="module" src="/static/js/preview/tor_preview.js"></script>
   <script type="module" src="/static/js/preview/tisch_preview.js"></script>
@@ -227,6 +228,8 @@
 
   <!-- Dynamisches Laden der Konstruktionen -->
   <script>
+    let __resourcesReady = null;
+
     async function loadKonstruktion(name) {
       const html = await fetch(`partials/konstruktionen/${name}.html`).then(r => r.text());
       const doc = new DOMParser().parseFromString(html, "text/html");
@@ -295,6 +298,27 @@
         btn.setAttribute("aria-current", btn.dataset.view === view ? "page" : "")
       );
     }
+
+    async function initResources() {
+      const mod = await import("/static/js/resources/resources.js");
+      await mod.loadResources();
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      try {
+        __resourcesReady = initResources();
+        await __resourcesReady;
+
+        await switch_konstruktion("tor");
+      } catch (err) {
+        console.error("Fehler beim Start der Anwendung:", err);
+
+        alert(
+          "Die internen Ressourcen konnten nicht geladen werden.\n\n" +
+          "Details siehe Browser-Konsole."
+        );
+      }
+    });
 
     // beim Start Tor laden
     document.addEventListener("DOMContentLoaded", () => switch_konstruktion("tor"));
