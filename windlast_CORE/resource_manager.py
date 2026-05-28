@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-import json
 from pathlib import Path
 from typing import Any
+
+import yaml
 
 
 class ResourceError(RuntimeError):
@@ -18,8 +19,8 @@ class ResourceManager:
 
     def load(self) -> None:
         try:
-            self.index = self._load_json("index.json")
-            self.preferences = self._load_json("preferences.json")
+            self.index = self._load_yaml("index.yaml")
+            self.preferences = self._load_yaml("preferences.yaml")
 
             language = (
                 self.preferences.get("language")
@@ -31,9 +32,14 @@ class ResourceManager:
 
             domains = self.index.get("domains", {})
             if not isinstance(domains, dict):
-                raise ResourceError("index.json: 'domains' muss ein Objekt sein.")
+                raise ResourceError("index.yaml: 'domains' muss ein Objekt sein.")
 
             for domain_name, domain_config in domains.items():
+                if not isinstance(domain_config, dict):
+                    raise ResourceError(
+                        f"index.yaml: Domain '{domain_name}' muss ein Objekt sein."
+                    )
+
                 file_path = domain_config.get(language)
 
                 if not file_path:
@@ -42,7 +48,7 @@ class ResourceManager:
                         f"und Sprache '{language}' definiert."
                     )
 
-                data = self._load_json(file_path)
+                data = self._load_yaml(file_path)
                 entries = data.get("entries")
 
                 if not isinstance(entries, dict):
@@ -71,7 +77,7 @@ class ResourceManager:
     def all(self) -> dict[str, Any]:
         return dict(self.resources)
 
-    def _load_json(self, relative_path: str) -> dict[str, Any]:
+    def _load_yaml(self, relative_path: str) -> dict[str, Any]:
         path = self.resource_dir / relative_path
 
         if not path.exists():
@@ -79,11 +85,17 @@ class ResourceManager:
 
         try:
             with path.open("r", encoding="utf-8") as f:
-                return json.load(f)
-        except json.JSONDecodeError as exc:
-            raise ResourceError(
-                f"Ungültiges JSON in {path}: Zeile {exc.lineno}, Spalte {exc.colno}"
-            ) from exc
+                data = yaml.safe_load(f)
+        except yaml.YAMLError as exc:
+            raise ResourceError(f"Ungültiges YAML in {path}: {exc}") from exc
+
+        if data is None:
+            return {}
+
+        if not isinstance(data, dict):
+            raise ResourceError(f"{path}: Root-Element muss ein Objekt sein.")
+
+        return data
 
     def _flatten_domain(self, domain_name: str, entries: dict[str, Any]) -> None:
         for entry_name, entry_value in entries.items():

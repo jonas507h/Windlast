@@ -1,9 +1,0 @@
-{
-  "schemaVersion": 1,
-  "defaultLanguage": "de",
-  "domains": {
-    "math": {
-      "de": "locales/de/math.json"
-    }
-  }
-}
