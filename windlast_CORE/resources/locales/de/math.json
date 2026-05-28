@@ -160,6 +160,71 @@
         "m_\\text{Ball,Gleit} &= \\frac{F_\\text{Ball,Gleit}}{g}",
         "\\end{aligned}"
       ]
+    },
+    "kipp_kippmoment_element": {
+      "label": "Kippmoment",
+      "symbol": "M_{\\text{Kipp},k}",
+      "formula": "M_{\\text{Kipp},k} = M_{\\text{Kipp},G,k} + M_{\\text{Kipp},W,k}"
+    },
+    "kipp_standmoment_element": {
+      "label": "Standmoment",
+      "symbol": "M_{\\text{Stand},k}",
+      "formula": "M_{\\text{Stand},k} = M_{\\text{Stand},G,k} + M_{\\text{Stand},W,k}"
+    },
+    "kipp_kippmoment_achse": {
+      "label": "Kippmoment",
+      "symbol": "M_{\\text{Kipp},l}",
+      "formula": "M_{\\text{Kipp},l} = \\sum_k M_{\\text{Kipp},k}"
+    },
+    "kipp_standmoment_achse": {
+      "label": "Standmoment",
+      "symbol": "M_{\\text{Stand},l}",
+      "formula": "M_{\\text{Stand},l} = \\sum_k M_{\\text{Stand},k}"
+    },
+    "kipp_sicherheit_achse": {
+      "label": "Kippsicherheit",
+      "symbol": "S_{\\text{Kipp},l}",
+      "formula": [
+        "S_{\\text{Kipp},l} = \\begin{cases}",
+        "0,0 \\quad &\\text{für } M_{\\text{Kipp},l} \\leq 0\\\\",
+        "\\frac{M_{\\text{Stand},l}}{M_{\\text{Kipp},l}} \\quad &\\text{für } M_{\\text{Kipp},l} > 0",
+        "\\end{cases}"
+      ]
+    },
+    "kipp_sicherheit_richtung": {
+      "label": "Kippsicherheit",
+      "symbol": "S_{\\text{Kipp},m}",
+      "formula": "S_{\\text{Kipp},m} = \\min_l S_{\\text{Kipp},l}"
+    },
+    "kipp_sicherheit": {
+      "label": "Kippsicherheit",
+      "symbol": "S_{\\text{Kipp}}",
+      "formula": "S_{\\text{Kipp}} = \\min_m S_{\\text{Kipp},m}"
+    },
+    "kipp_ballast_achse": {
+      "label": "Ballastkraft",
+      "symbol": "F_{\\text{Ball,Kipp},l}",
+      "formula": [
+        "\\begin{aligned}",
+        "\\vec{F}_E &= \\begin{pmatrix} 0 \\\\ 0 \\\\ -1 \\end{pmatrix} \\\\",
+        "M_{\\text{Kipp},1,l} &= \\left(\\left(\\vec{s} - \\vec{p}_{\\text{Achse}}\\right) \\times \\vec{F}_E\\right) \\cdot \\hat{r}_{\\text{Achse}} \\\\",
+        "M_{\\text{Stand},1,l} &= \\max\\left(0, -M_{\\text{Kipp},1,l}\\right) \\\\",
+        "F_{\\text{Ball,Kipp},l} &= \\begin{cases}",
+        "\\infty &\\text{für } M_{\\text{Stand},1,l} \\leq 0 \\\\",
+        "\\frac{M_{\\text{diff},l}}{M_{\\text{Stand},1,l} \\cdot \\gamma_{\\text{Ball}}} &\\text{für } M_{\\text{Stand},1,l} > 0",
+        "\\end{cases}",
+        "\\end{aligned}"
+      ]
+    },
+    "kipp_ballast_richtung": {
+      "label": "Ballastkraft",
+      "symbol": "F_{\\text{Ball,Kipp},m}",
+      "formula": "F_{\\text{Ball,Kipp},m} = \\max_l F_{\\text{Ball,Kipp},l}"
+    },
+    "kipp_ballast": {
+      "label": "Ballast",
+      "symbol": "m_\\text{Ball,Kipp}",
+      "formula": "m_\\text{Ball,Kipp} = \\frac{F_\\text{Ball,Kipp}}{g}"
     }
   }
 }
