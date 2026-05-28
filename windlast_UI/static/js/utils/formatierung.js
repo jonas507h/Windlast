@@ -221,6 +221,66 @@ export function formatMathWithSubSup(input) {
   return out;
 }
 
+export function renderLatex(value, { block = false } = {}) {
+  if (value == null || value === "") return "";
+
+  if (Array.isArray(value)) {
+    return renderLatexLines(value, { block: true });
+  }
+
+  const text = String(value);
+
+  if (text.includes("\n")) {
+    return renderLatexLines(text.split(/\r?\n/), { block: true });
+  }
+
+  return renderLatexSingle(text, { block });
+}
+
+export function renderLatexLines(lines, { block = true } = {}) {
+  const cleanLines = lines
+    .map((line) => String(line ?? "").trim())
+    .filter(Boolean);
+
+  if (!cleanLines.length) return "";
+
+  return `
+    <div class="math-lines ${block ? "math-lines-block" : "math-lines-inline"}">
+      ${cleanLines.map((line) => `
+        <div class="math-line">
+          ${renderLatexSingle(line, { block })}
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderLatexSingle(latex, { block = false } = {}) {
+  const text = String(latex ?? "").trim();
+  if (!text) return "";
+
+  if (!window.katex) {
+    return `<span class="math-fallback">${escapeHtml(text)}</span>`;
+  }
+
+  try {
+    return window.katex.renderToString(text, {
+      throwOnError: false,
+      displayMode: block,
+      strict: false,
+      trust: false,
+      output: "html",
+    });
+  } catch (err) {
+    console.warn("KaTeX render failed:", err, text);
+    return `<span class="math-error">${escapeHtml(text)}</span>`;
+  }
+}
+
+function escapeAttr(value) {
+  return escapeHtml(value);
+}
+
 // ------------------------------------
 // Meta
 // ------------------------------------

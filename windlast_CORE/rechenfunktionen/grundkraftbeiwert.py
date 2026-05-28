@@ -219,7 +219,8 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
             name="grundkraftbeiwert",
             wert=wert,
             label="math.grundkraftbeiwert.label",
-            formelzeichen="c_f,0",
+            formelzeichen="math.grundkraftbeiwert.symbol",
+            formel="math.grundkraftbeiwert.formula",
             meta=base_meta,
         )
         return Zwischenergebnis(wert=wert)

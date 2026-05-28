@@ -3,7 +3,8 @@
   "entries": {
     "grundkraftbeiwert": {
       "label": "Grundkraftbeiwert",
-      "symbol": "c_{f,0}"
+      "symbol": "c_{f,0}",
+      "formula": "c_{f,0} = \\frac{F_{f,0}}{q_p \\cdot A_{ref}}"
     },
     "winddruck": {
       "label": "Winddruck",

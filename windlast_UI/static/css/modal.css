@@ -576,6 +576,21 @@
   color: var(--muted);
 }
 
+.math-lines {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.math-lines-block {
+  margin-top: 0.35rem;
+}
+
+.math-error,
+.math-fallback {
+  font-family: "Cambria Math", "Times New Roman", serif;
+  color: var(--muted);
+}
+
 /* ==========================
    Tree links
    ========================== */

@@ -1,4 +1,4 @@
-import { escapeHtml, formatNumberDE, formatVectorDE, formatMathWithSubSup } from "../../utils/formatierung.js";
+import { escapeHtml, formatNumberDE, formatVectorDE, formatMathWithSubSup, renderLatex } from "../../utils/formatierung.js";
 import { listEbenen, listGruppen, listErgebnisse, listMessages, makePathLabel } from "../../utils/tree.js";
 import { renderTree } from "./render_tree.js";
 import { renderBreadcrumb } from "./render_breadcrumb.js";
@@ -25,17 +25,30 @@ function renderResultItem(ergebnis) {
   const labelCode = ergebnis.label || ergebnis.name || "—";
   const label = resolveResource(labelCode, labelCode);
   const unit = ergebnis.einheit ? ` ${escapeHtml(ergebnis.einheit)}` : "";
-  const formula = ergebnis.formel ? `<div class="erg-result-formula">${formatMathWithSubSup(ergebnis.formel)}</div>` : "";
-  const symbol = ergebnis.formelzeichen ? `<span class="erg-result-symbol">${formatMathWithSubSup(ergebnis.formelzeichen)}</span>` : "";
+  // const formula = ergebnis.formel ? `<div class="erg-result-formula">${formatMathWithSubSup(ergebnis.formel)}</div>` : "";
+  // const symbol = ergebnis.formelzeichen ? `<span class="erg-result-symbol">${formatMathWithSubSup(ergebnis.formelzeichen)}</span>` : "";
+  const symbolCode = ergebnis.formelzeichen;
+  const symbolLatex = symbolCode
+    ? resolveResource(symbolCode, symbolCode)
+    : "";
+  const formulaLatex = ergebnis.formel
+    ? resolveResource(ergebnis.formel, ergebnis.formel)
+    : "";
 
   return `
     <li class="erg-result-item" data-meta-json="${escapeHtml(resultTooltipMeta(ergebnis))}">
       <div class="erg-result-main">
         <span class="erg-result-label">${escapeHtml(label)}</span>
-        ${symbol}
+        ${symbolLatex
+          ? `<span class="erg-result-symbol">${renderLatex(symbolLatex)}</span>`
+          : ""
+        }
         <span class="erg-result-value">${formatValue(ergebnis.wert)}${unit}</span>
       </div>
-      ${formula}
+      ${formulaLatex
+        ? `<div class="erg-result-formula">${renderLatex(formulaLatex, { block: true })}</div>`
+        : ""
+      }
     </li>
   `;
 }
