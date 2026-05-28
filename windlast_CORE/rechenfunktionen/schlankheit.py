@@ -68,8 +68,8 @@ def _schlankheit_DinEn1991_1_4_2010_12(
                 breadcrumb=base_bc,
                 name="schlankheit",
                 wert=float("nan"),
-                label="Schlankheit λ",
-                formelzeichen="λ",
+                label="math.schlankheit_traverse.label",
+                formelzeichen="math.schlankheit_traverse.symbol",
                 meta=base_meta,
             )
             return Zwischenergebnis(wert=float("nan"))
@@ -94,8 +94,9 @@ def _schlankheit_DinEn1991_1_4_2010_12(
             breadcrumb=base_bc,
             name="schlankheit",
             wert=wert,
-            label="Schlankheit λ",
-            formelzeichen="λ",
+            label="math.schlankheit_traverse.label",
+            formelzeichen="math.schlankheit_traverse.symbol",
+            formel="math.schlankheit_traverse.formula",
             meta=base_meta,
         )
         return Zwischenergebnis(wert=wert)
@@ -120,8 +121,8 @@ def _schlankheit_DinEn1991_1_4_2010_12(
                 breadcrumb=base_bc,
                 name="schlankheit",
                 wert=float("nan"),
-                label="Schlankheit λ",
-                formelzeichen="λ",
+                label="math.schlankheit_rohr.label",
+                formelzeichen="math.schlankheit_rohr.symbol",
                 meta=base_meta,
             )
             return Zwischenergebnis(wert=float("nan"))
@@ -146,8 +147,9 @@ def _schlankheit_DinEn1991_1_4_2010_12(
             breadcrumb=base_bc,
             name="schlankheit",
             wert=wert,
-            label="Schlankheit λ",
-            formelzeichen="λ",
+            label="math.schlankheit_rohr.label",
+            formelzeichen="math.schlankheit_rohr.symbol",
+            formel="math.schlankheit_rohr.formula",
             meta=base_meta,
         )
         return Zwischenergebnis(wert=wert)
@@ -194,8 +196,8 @@ def schlankheit(
             breadcrumb=base_bc,
             name="schlankheit",
             wert=float("nan"),
-            label="Schlankheit λ",
-            formelzeichen="λ",
+            label="math.schlankheit.label",
+            formelzeichen="math.schlankheit.symbol",
             meta=base_meta,
         )
         return Zwischenergebnis(wert=float("nan"))

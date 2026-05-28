@@ -58,8 +58,8 @@ def reibwert(
             breadcrumb=base_bc,
             name="reibwert",
             wert=float("nan"),
-            label="Effektiver Reibwert μ_eff",
-            formelzeichen="μ_eff",
+            label="math.reibwert_bodenplatte.label",
+            formelzeichen="math.reibwert_bodenplatte.symbol",
             meta=base_meta,
         )
         return Zwischenergebnis(wert=None)
@@ -101,8 +101,8 @@ def reibwert(
             breadcrumb=base_bc,
             name="reibwert",
             wert=float("nan"),
-            label="Effektiver Reibwert μ_eff",
-            formelzeichen="μ_eff",
+            label="math.reibwert_bodenplatte.label",
+            formelzeichen="math.reibwert_bodenplatte.symbol",
             meta=base_meta,
         )
         return Zwischenergebnis(wert=None)
@@ -127,9 +127,9 @@ def reibwert(
         breadcrumb=base_bc,
         name="reibwert",
         wert=reibwert_eff,
-        label="Effektiver Reibwert μ_eff",
-        formelzeichen="μ_eff",
-        formel="μ_eff = min(μ_i)",
+        label="math.reibwert_bodenplatte.label",
+        formelzeichen="math.reibwert_bodenplatte.symbol",
+        formel="math.reibwert_bodenplatte.formula",
         meta=base_meta,
     )
 

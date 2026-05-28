@@ -6,6 +6,27 @@ entries:
   abminderungsfaktor_schlankheit_rohr:
     label: Abminderungsfaktor zur Berücksichtigung der Schlankheit
     symbol: \psi_\lambda
+  bezugsflaeche:
+    label: Bezugsfläche
+    symbol: A_\text{ref}
+  bezugsflaeche_anzeigetafel:
+    label: Bezugsfläche
+    symbol: A_\text{ref}
+  bezugsflaeche_rohr:
+    label: Bezugsfläche
+    symbol: A_\text{ref,i}
+    formula: A_{ref,i} = l_\text{Rohr} \cdot d_\text{Rohr}
+  bezugsflaeche_traverse:
+    label: Bezugsfläche
+    symbol: A_\text{ref,i}
+    formula: |-
+      \begin{aligned}
+      A_i &= 2 \cdot l_i \cdot d_\text{Gurt} + 3,2 \cdot l_i \cdot d_\text{Brace} \\
+      A_{ref,i} &= A_i
+      \end{aligned}
+  bezugsflaeche_wand:
+    label: Bezugsfläche
+    symbol: A_\text{ref,ij}
   eingeschlossene_flaeche:
     label: Eingeschlossene Fläche
     symbol: A_{C,i}
@@ -15,12 +36,83 @@ entries:
     formula: A_{C,i} = l_i \cdot h_\text{Trav}
   grundkraftbeiwert:
     label: Grundkraftbeiwert
-    symbol: c_{f,0}
-    formula: c_{f,0} = \frac{F_{f,0}}{q_p \cdot A_{ref}}
+    symbol: c_{f,0,i}
+  kraftbeiwert:
+    label: Kraftbeiwert
+    symbol: c_f
+  kraftbeiwert_anzeigetafel:
+    label: Kraftbeiwert
+    symbol: c_f
+    formula: |-
+      c_f = \begin{cases}
+      0 & \text{bei Anströmung parallel zur Fläche} \\
+      1,8 & \text{in allen anderen Fällen}
+      \end{cases}
+  kraftbeiwert_rohr:
+    label: Kraftbeiwert
+    symbol: c_{f,i}
+    formula: c_{f,i} = c_{f,0,i} \cdot \psi_{\lambda,i}
+  kraftbeiwert_traverse:
+    label: Kraftbeiwert
+    symbol: c_{f,i}
+    formula: c_{f,i} = c_{f,0,i} \cdot \psi_{\lambda,i}
+  nettodruckkbeiwert_wand:
+    label: Nettodruckbeiwert
+    symbol: c_{p,net}
   reibwert:
     label: Reibwert
     symbol: \mu
     formula: \mu = \min_k\left(\mu_k\right)
+  reibwert_bodenplatte:
+    label: Reibwert
+    symbol: \mu
+    formula: \mu = \min_i\left(\mu_i\right)
+  reynoldszahl:
+    label: Reynoldszahl
+    symbol: Re
+  reynoldszahl_rohr:
+    label: Reynoldszahl
+    symbol: Re_i
+    formula: Re_i = v_i \cdot \frac{d_\text{Rohr}}{\nu}
+  reynoldszahl_traverse:
+    label: Reynoldszahl
+    symbol: Re_i
+    formula: Re_i = Re_i = v_i \cdot \frac{d_\text{Gurt}}{\nu}
+  schlankheit:
+    label: Schlankheit
+    symbol: \lambda
+  schlankheit_rohr:
+    label: Schlankheit
+    symbol: \lambda
+    formula: |-
+      \begin{aligned}
+      \lambda &= \begin{cases} 
+      k \cdot \frac{l_{Rohr}}{d_{Rohr}} & \lambda \leq 70 \\
+      70 & \lambda > 70
+      \end{cases} \\
+      \text{mit } k &= \begin{cases}
+      1 & l_{Rohr} < 15 \\
+      0,7 & l_{Rohr} \geq 50
+      \end{cases}
+      \end{aligned}
+  schlankheit_traverse:
+    label: Schlankheit
+    symbol: \lambda
+    formula: |-
+      \begin{aligned}
+      \lambda &= \begin{cases}
+      k \cdot \frac{l_{Trav}}{\min\left(h_{Trav}, t_{Trav}\right)} & \lambda \leq 70 \\
+      70 & \lambda > 70
+      \end{cases} \\
+      \text{mit } k &= \begin{cases}
+      2 & l_{Trav} < 15 \\
+      1,4 & l_{Trav} \geq 50
+      \end{cases}
+      \end{aligned}
+  stroemungsgeschwindigkeit:
+    label: Strömungsgeschwindigkeit
+    symbol: v_i
+    formula: v_i = \sqrt{\frac{2 \cdot q_i}{\rho_\text{Luft}}}
 
 # =======================
 # Abhebesicherheit

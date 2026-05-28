@@ -120,7 +120,7 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
                 name="grundkraftbeiwert",
                 wert=float("nan"),
                 label="math.grundkraftbeiwert.label",
-                formelzeichen="c_f,0",
+                formelzeichen="math.grundkraftbeiwert.symbol",
                 meta=base_meta,
             )
             return Zwischenergebnis(wert=float("nan"))
@@ -208,7 +208,7 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
                     name="grundkraftbeiwert",
                     wert=float("nan"),
                     label="math.grundkraftbeiwert.label",
-                    formelzeichen="c_f,0",
+                    formelzeichen="math.grundkraftbeiwert.symbol",
                     meta=base_meta,
                 )
                 return Zwischenergebnis(wert=float("nan"))
@@ -220,7 +220,6 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
             wert=wert,
             label="math.grundkraftbeiwert.label",
             formelzeichen="math.grundkraftbeiwert.symbol",
-            formel="math.grundkraftbeiwert.formula",
             meta=base_meta,
         )
         return Zwischenergebnis(wert=wert)
@@ -235,7 +234,7 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
                 name="grundkraftbeiwert",
                 wert=0.0,
                 label="math.grundkraftbeiwert.label",
-                formelzeichen="c_f,0",
+                formelzeichen="math.grundkraftbeiwert.symbol",
                 meta=base_meta,
             )
             return Zwischenergebnis(wert=0.0)
@@ -257,7 +256,7 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
             name="grundkraftbeiwert",
             wert=wert,
             label="math.grundkraftbeiwert.label",
-            formelzeichen="c_f,0",
+            formelzeichen="math.grundkraftbeiwert.symbol",
             meta=base_meta,
         )
         return Zwischenergebnis(wert=wert)
@@ -277,7 +276,7 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
             name="grundkraftbeiwert",
             wert=float("nan"),
             label="math.grundkraftbeiwert.label",
-            formelzeichen="c_f,0",
+            formelzeichen="math.grundkraftbeiwert.symbol",
             meta=base_meta,
         )
         return Zwischenergebnis(wert=float("nan"))
@@ -324,7 +323,7 @@ def grundkraftbeiwert(
             name="grundkraftbeiwert",
             wert=float("nan"),
             label="math.grundkraftbeiwert.label",
-            formelzeichen="c_f,0",
+            formelzeichen="math.grundkraftbeiwert.symbol",
             meta=base_meta,
         )
         return Zwischenergebnis(wert=float("nan"))

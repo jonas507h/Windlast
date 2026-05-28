@@ -196,7 +196,7 @@ class senkrechteFlaeche:
                 protokoll=protokoll, breadcrumb=base_bc
             )
             _bezugsflaeche = projizierte_flaeche(
-                norm, objekttyp=self.objekttyp, punkte=self.eckpunkte,
+                norm, objekttyp=self.objekttyp, punkte=self.eckpunkte, windrichtung=windrichtung, senkrechte_flaeche_typ=self.flaeche_typ,
                 protokoll=protokoll, breadcrumb=base_bc
             )
             _windkraft = windkraft(

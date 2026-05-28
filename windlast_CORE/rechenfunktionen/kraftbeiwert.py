@@ -105,9 +105,9 @@ def _kraftbeiwert_DinEn1991_1_4_2010_12(
             breadcrumb=base_bc,
             name="kraftbeiwert",
             wert=wert,
-            label="Kraftbeiwert c_f",
-            formelzeichen="c_f",
-            formel="c_f = c_f,0 · ψ_λ",
+            label="math.kraftbeiwert_traverse.label",
+            formelzeichen="math.kraftbeiwert_traverse.symbol",
+            formel="math.kraftbeiwert_traverse.formula",
             meta=base_meta,
         )
         return Zwischenergebnis(wert=wert)
@@ -119,9 +119,9 @@ def _kraftbeiwert_DinEn1991_1_4_2010_12(
             breadcrumb=base_bc,
             name="kraftbeiwert",
             wert=wert,
-            label="Kraftbeiwert c_f",
-            formelzeichen="c_f",
-            formel="c_f = c_f,0 · ψ_λ",
+            label="math.kraftbeiwert_rohr.label",
+            formelzeichen="math.kraftbeiwert_rohr.symbol",
+            formel="math.kraftbeiwert_rohr.formula",
             meta=base_meta,
         )
         return Zwischenergebnis(wert=wert)
@@ -143,27 +143,19 @@ def _kraftbeiwert_DinEn1991_1_4_2010_12(
                     breadcrumb=base_bc,
                     meta=flaeche_meta,
                 )
-                protokolliere_ergebnis(
-                    protokoll,
-                    breadcrumb=base_bc,
-                    name="kraftbeiwert",
-                    wert=wert,
-                    label="Kraftbeiwert c_f",
-                    formelzeichen="c_f",
-                    meta=flaeche_meta,
-                )
             else:
                 wert = 1.8
-                protokolliere_ergebnis(
-                    protokoll,
-                    breadcrumb=base_bc,
-                    name="kraftbeiwert",
-                    wert=wert,
-                    label="Kraftbeiwert c_f",
-                    formelzeichen="c_f",
-                    formel="c_f = 1,8 für Anzeigetafeln",
-                    meta=flaeche_meta,
-                )
+            
+            protokolliere_ergebnis(
+                protokoll,
+                breadcrumb=base_bc,
+                name="kraftbeiwert",
+                wert=wert,
+                label="math.kraftbeiwert_anzeigetafel.label",
+                formelzeichen="math.kraftbeiwert_anzeigetafel.symbol",
+                formel="math.kraftbeiwert_anzeigetafel.formula",
+                meta=flaeche_meta,
+            )
             return Zwischenergebnis(wert=wert)
         elif senkrechte_flaeche_typ == senkrechteFlaecheTyp.WAND:
             wand_meta = {
@@ -186,9 +178,8 @@ def _kraftbeiwert_DinEn1991_1_4_2010_12(
                 breadcrumb=base_bc,
                 name="nettodruckbeiwert",
                 wert=wert,
-                label="Nettodruckbeiwert c_p,net",
-                formelzeichen="c_p,net",
-                formel=f"c_p,net = {wert} für Wand in Zone {zone.value} mit l/h = {verhaeltnis:.2f}",
+                label="math.nettodruckbeiwert_wand.label",
+                formelzeichen="math.nettodruckbeiwert_wand.symbol",
                 meta=wand_meta,
             )
             return Zwischenergebnis(wert=wert)
@@ -206,8 +197,8 @@ def _kraftbeiwert_DinEn1991_1_4_2010_12(
                 breadcrumb=base_bc,
                 name="kraftbeiwert",
                 wert=float("nan"),
-                label="Kraftbeiwert c_f",
-                formelzeichen="c_f",
+                label="math.kraftbeiwert.label",
+                formelzeichen="math.kraftbeiwert.symbol",
                 meta=flaeche_meta,
             )
             return Zwischenergebnis(wert=float("nan"))  
@@ -256,8 +247,8 @@ def kraftbeiwert(
             breadcrumb=base_bc,
             name="kraftbeiwert",
             wert=float("nan"),
-            label="Kraftbeiwert c_f",
-            formelzeichen="c_f",
+            label="math.kraftbeiwert.label",
+            formelzeichen="math.kraftbeiwert.symbol",
             meta=base_meta,
         )
         return Zwischenergebnis(wert=float("nan"))

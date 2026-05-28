@@ -1,7 +1,7 @@
 from typing import Dict, Callable, Optional, Sequence, Tuple
 import math
 from windlast_CORE.datenstruktur.zwischenergebnis import Zwischenergebnis, Protokoll, merge_breadcrumb, bc_step, protokolliere_msg, protokolliere_ergebnis, set_winner
-from windlast_CORE.datenstruktur.enums import Norm, TraversenTyp, ObjektTyp, Severity
+from windlast_CORE.datenstruktur.enums import Norm, TraversenTyp, ObjektTyp, Severity, senkrechteFlaecheTyp
 from windlast_CORE.materialdaten.catalog import catalog
 from windlast_CORE.rechenfunktionen.geom3d import Vec3, vektor_laenge, abstand_punkte, flaecheninhalt_polygon
 from windlast_CORE.datenstruktur.konstanten import _EPS
@@ -11,6 +11,7 @@ def _validate_inputs(
     punkte: Sequence[Vec3],
     objekt_name_intern: Optional[str] = None,
     windrichtung: Optional[Vec3] = None,
+    senkrechte_flaeche_typ: Optional[senkrechteFlaecheTyp] = None,
 ) -> None:
     if not isinstance(objekttyp, ObjektTyp):
         raise TypeError("objekttyp muss vom Typ ObjektTyp sein.")
@@ -38,6 +39,8 @@ def _validate_inputs(
     elif objekttyp == ObjektTyp.SENKRECHTE_FLAECHE:
         if not isinstance(punkte, (list, tuple)) or len(punkte) != 4:
             raise ValueError("Für SENKRECHTE_FLAECHE werden genau 4 Eckpunkte erwartet.")
+        if senkrechte_flaeche_typ is None:
+            raise ValueError("Für SENKRECHTE_FLAECHE wird senkrechte_flaeche_typ benötigt.")
     else:
         # Generisch: mind. 1 Punktliste übergeben
         if not isinstance(punkte, (list, tuple)) or len(punkte) == 0:
@@ -48,6 +51,7 @@ def _projizierte_flaeche_default(
     punkte: Sequence[Vec3],
     objekt_name_intern: Optional[str] = None,
     windrichtung: Optional[Vec3] = None,
+    senkrechte_flaeche_typ: Optional[senkrechteFlaecheTyp] = None,
     *,
     protokoll: Optional[Protokoll] = None,
     breadcrumb: Optional[list] = None,
@@ -80,8 +84,8 @@ def _projizierte_flaeche_default(
                 breadcrumb=base_bc,
                 name="projizierte_flaeche",
                 wert=float("nan"),
-                label="Projizierte Fläche A",
-                formelzeichen="A",
+                label="math.bezugsflaeche_traverse.label",
+                formelzeichen="math.bezugsflaeche_traverse.symbol",
                 einheit="m²",
                 meta=base_meta,
             )
@@ -104,8 +108,8 @@ def _projizierte_flaeche_default(
                 breadcrumb=base_bc,
                 name="projizierte_flaeche",
                 wert=float("nan"),
-                label="Projizierte Fläche A",
-                formelzeichen="A",
+                label="math.bezugsflaeche_traverse.label",
+                formelzeichen="math.bezugsflaeche_traverse.symbol",
                 einheit="m²",
                 meta=base_meta,
             )
@@ -119,9 +123,9 @@ def _projizierte_flaeche_default(
             breadcrumb=base_bc,
             name="projizierte_flaeche",
             wert=wert,
-            label="Projizierte Fläche A",
-            formelzeichen="A",
-            formel="A = 2·L·d_gurt + 3,2·L·d_diag",
+            label="math.bezugsflaeche_traverse.label",
+            formelzeichen="math.bezugsflaeche_traverse.symbol",
+            formel="math.bezugsflaeche_traverse.formula",
             einheit="m²",
             meta=base_meta,
         )
@@ -148,8 +152,8 @@ def _projizierte_flaeche_default(
                 breadcrumb=base_bc,
                 name="projizierte_flaeche",
                 wert=float("nan"),
-                label="Projizierte Fläche A",
-                formelzeichen="A",
+                label="math.bezugsflaeche_rohr.label",
+                formelzeichen="math.bezugsflaeche_rohr.symbol",
                 einheit="m²",
                 meta=base_meta,
             )
@@ -162,9 +166,9 @@ def _projizierte_flaeche_default(
             breadcrumb=base_bc,
             name="projizierte_flaeche",
             wert=wert,
-            label="Projizierte Fläche A",
-            formelzeichen="A",
-            formel="A = L·d_aussen",
+            label="math.bezugsflaeche_rohr.label",
+            formelzeichen="math.bezugsflaeche_rohr.symbol",
+            formel="math.bezugsflaeche_rohr.formula",
             einheit="m²",
             meta=base_meta,
         )
@@ -173,17 +177,28 @@ def _projizierte_flaeche_default(
     elif objekttyp == ObjektTyp.SENKRECHTE_FLAECHE:
         wert = flaecheninhalt_polygon(punkte)
 
-        protokolliere_ergebnis(
-            protokoll,
-            breadcrumb=base_bc,
-            name="projizierte_flaeche",
-            wert=wert,
-            label="Projizierte Fläche A",
-            formelzeichen="A",
-            formel="A = Flächeninhalt der senkrechten Fläche",
-            einheit="m²",
-            meta=base_meta,
-        )
+        if senkrechte_flaeche_typ == senkrechteFlaecheTyp.WAND:
+            protokolliere_ergebnis(
+                protokoll,
+                breadcrumb=base_bc,
+                name="projizierte_flaeche",
+                wert=wert,
+                label="math.bezugsflaeche_wand.label",
+                formelzeichen="math.bezugsflaeche_wand.symbol",
+                einheit="m²",
+                meta=base_meta,
+            )
+        elif senkrechte_flaeche_typ == senkrechteFlaecheTyp.ANZEIGETAFEL:
+            protokolliere_ergebnis(
+                protokoll,
+                breadcrumb=base_bc,
+                name="projizierte_flaeche",
+                wert=wert,
+                label="math.bezugsflaeche_anzeigetafel.label",
+                formelzeichen="math.bezugsflaeche_anzeigetafel.symbol",
+                einheit="m²",
+                meta=base_meta,
+             )
         return Zwischenergebnis(wert=wert)
 
     else:
@@ -199,6 +214,7 @@ def projizierte_flaeche(
     punkte: Sequence[Vec3],   # TRAVERSE: [start, ende, (optional) orientierung]
     objekt_name_intern: Optional[str] = None,
     windrichtung: Optional[Vec3] = None,       # Einheitsvektor
+    senkrechte_flaeche_typ: Optional[senkrechteFlaecheTyp] = None,
     *,
     protokoll: Optional[Protokoll] = None,
     breadcrumb: Optional[list] = None,
@@ -209,7 +225,7 @@ def projizierte_flaeche(
     }
 
     try:
-        _validate_inputs(objekttyp, punkte, objekt_name_intern, windrichtung)
+        _validate_inputs(objekttyp, punkte, objekt_name_intern, windrichtung, senkrechte_flaeche_typ)
     except NotImplementedError:
         raise
     except ValueError as e:
@@ -226,8 +242,8 @@ def projizierte_flaeche(
             breadcrumb=base_bc,
             name="projizierte_flaeche",
             wert=float("nan"),
-            label="Projizierte Fläche A",
-            formelzeichen="A",
+            label="math.bezugsflaeche.label",
+            formelzeichen="math.bezugsflaeche.symbol",
             einheit="m²",
             meta=base_meta,
         )
@@ -235,6 +251,6 @@ def projizierte_flaeche(
 
     funktion = _DISPATCH_PROJ.get(norm, _DISPATCH_PROJ[Norm.DEFAULT])
     return funktion(
-        objekttyp, punkte, objekt_name_intern, windrichtung,
+        objekttyp, punkte, objekt_name_intern, windrichtung, senkrechte_flaeche_typ,
         protokoll=protokoll, breadcrumb=base_bc,
     )

@@ -54,8 +54,8 @@ def _reynoldszahl_DinEn1991_1_4_2010_12(
                 breadcrumb=base_bc,
                 name="reynoldszahl",
                 wert=float("nan"),
-                label="Reynoldszahl Re",
-                formelzeichen="Re",
+                label="math.reynoldszahl_traverse.label",
+                formelzeichen="math.reynoldszahl_traverse.symbol",
                 meta=base_meta,
             )
             return Zwischenergebnis(wert=float("nan"))
@@ -67,9 +67,9 @@ def _reynoldszahl_DinEn1991_1_4_2010_12(
             breadcrumb=base_bc,
             name="stroemungsgeschwindigkeit",
             wert=geschwindigkeit,
-            label="Strömungsgeschwindigkeit v",
-            formelzeichen="v",
-            formel="v = √(2·q/ρ)",
+            label="math.stroemungsgeschwindigkeit.label",
+            formelzeichen="math.stroemungsgeschwindigkeit.symbol",
+            formel="math.stroemungsgeschwindigkeit.formula",
             einheit="m/s",
             meta=base_meta,
         )
@@ -81,9 +81,9 @@ def _reynoldszahl_DinEn1991_1_4_2010_12(
             breadcrumb=base_bc,
             name="reynoldszahl",
             wert=wert,
-            label="Reynoldszahl Re",
-            formelzeichen="Re",
-            formel="Re = v·L/ν",
+            label="math.reynoldszahl_traverse.label",
+            formelzeichen="math.reynoldszahl_traverse.symbol",
+            formel="math.reynoldszahl_traverse.formula",
             meta=base_meta,
         )
         return Zwischenergebnis(wert=wert)
@@ -107,8 +107,8 @@ def _reynoldszahl_DinEn1991_1_4_2010_12(
                 breadcrumb=base_bc,
                 name="reynoldszahl",
                 wert=float("nan"),
-                label="Reynoldszahl Re",
-                formelzeichen="Re",
+                label="math.reynoldszahl_rohr.label",
+                formelzeichen="math.reynoldszahl_rohr.symbol",
                 meta=base_meta,
             )
             return Zwischenergebnis(wert=float("nan"))
@@ -120,9 +120,9 @@ def _reynoldszahl_DinEn1991_1_4_2010_12(
             breadcrumb=base_bc,
             name="stroemungsgeschwindigkeit",
             wert=geschwindigkeit,
-            label="Strömungsgeschwindigkeit v",
-            formelzeichen="v",
-            formel="v = √(2·q/ρ)",
+            label="math.stroemungsgeschwindigkeit.label",
+            formelzeichen="math.stroemungsgeschwindigkeit.symbol",
+            formel="math.stroemungsgeschwindigkeit.formula",
             einheit="m/s",
             meta=base_meta,
         )
@@ -132,9 +132,9 @@ def _reynoldszahl_DinEn1991_1_4_2010_12(
             breadcrumb=base_bc,
             name="reynoldszahl",
             wert=wert,
-            label="Reynoldszahl Re",
-            formelzeichen="Re",
-            formel="Re = v·L/ν",
+            label="math.reynoldszahl_rohr.label",
+            formelzeichen="math.reynoldszahl_rohr.symbol",
+            formel="math.reynoldszahl_rohr.formula",
             meta=base_meta,
         )
         return Zwischenergebnis(wert=wert)
@@ -180,8 +180,8 @@ def reynoldszahl(
             breadcrumb=base_bc,
             name="reynoldszahl",
             wert=float("nan"),
-            label="Reynoldszahl Re",
-            formelzeichen="Re",
+            label="math.reynoldszahl.label",
+            formelzeichen="math.reynoldszahl.symbol",
             meta=base_meta,
         )
         return Zwischenergebnis(wert=float("nan"))
