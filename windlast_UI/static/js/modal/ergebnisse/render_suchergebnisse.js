@@ -1,4 +1,5 @@
-import { escapeHtml, formatNumberDE, formatVectorDE, formatMathWithSubSup } from "../../utils/formatierung.js";
+import { escapeHtml, formatNumberDE, formatVectorDE, formatMathWithSubSup, renderLatex } from "../../utils/formatierung.js";
+import { resolveResource } from "../../resources/resources.js";
 
 function formatValue(value) {
   if (Array.isArray(value)) return formatVectorDE(value, 4);
@@ -58,18 +59,29 @@ function renderHit(hit, index) {
 
 function renderErgebnisHit(hit, index) {
   const ergebnis = hit.item;
-  const label = ergebnis.label || ergebnis.name || "—";
-  const unit = ergebnis.einheit ? ` ${escapeHtml(ergebnis.einheit)}` : "";
-  const symbol = ergebnis.formelzeichen
-    ? `<span class="erg-result-symbol">${formatMathWithSubSup(ergebnis.formelzeichen)}</span>`
+
+  const labelCode = ergebnis.label || ergebnis.name || "—";
+  const label = resolveResource(labelCode, labelCode);
+
+  const symbolCode = ergebnis.formelzeichen;
+  const symbolLatex = symbolCode
+    ? resolveResource(symbolCode, symbolCode)
     : "";
+
+  const unit = ergebnis.einheit ? ` ${escapeHtml(ergebnis.einheit)}` : "";
 
   return `
     <button class="erg-search-hit" type="button" data-hit-index="${index}">
       <div class="erg-search-hit-breadcrumb">${escapeHtml(hit.breadcrumb)}</div>
+
       <div class="erg-result-main">
         <span class="erg-result-label">${escapeHtml(label)}</span>
-        ${symbol}
+
+        ${symbolLatex
+          ? `<span class="erg-result-symbol">${renderLatex(symbolLatex)}</span>`
+          : ""
+        }
+
         <span class="erg-result-value">${formatValue(ergebnis.wert)}${unit}</span>
       </div>
     </button>
@@ -80,11 +92,15 @@ function renderMessageHit(hit, index) {
   const message = hit.item;
   const severity = String(message.severity || "").toLowerCase();
 
+  const textCode = message.text || "";
+  const text = resolveResource(textCode, textCode);
+
   return `
     <button class="erg-search-hit" type="button" data-hit-index="${index}">
       <div class="erg-search-hit-breadcrumb">${escapeHtml(hit.breadcrumb)}</div>
+
       <div class="erg-message-item erg-message-${escapeHtml(severity)}">
-        <span class="erg-message-text">${escapeHtml(message.text || "")}</span>
+        <span class="erg-message-text">${escapeHtml(text)}</span>
       </div>
     </button>
   `;

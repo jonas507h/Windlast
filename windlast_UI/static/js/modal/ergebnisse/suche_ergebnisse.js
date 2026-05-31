@@ -1,4 +1,5 @@
 import { FILTER_GROUPS } from "./filter_ergebnisse.js";
+import { resolveResource } from "../../resources/resources.js";
 
 export function searchFilterSuggestions(query) {
   const q = normalizeSearch(query);
@@ -109,9 +110,9 @@ function getNodeAtPath(rootNode, path = []) {
 function matchesErgebnis(ergebnis, q) {
   return [
     ergebnis.name,
-    ergebnis.label,
-    ergebnis.formelzeichen,
-    ergebnis.formel,
+    resolveResource(ergebnis.label, ergebnis.label),
+    resolveResource(ergebnis.formelzeichen, ergebnis.formelzeichen),
+    resolveResource(ergebnis.formel, ergebnis.formel),
     ergebnis.einheit,
     ergebnis.wert,
   ].some((value) => normalizeSearch(value).includes(q));
@@ -120,7 +121,7 @@ function matchesErgebnis(ergebnis, q) {
 function matchesMessage(message, q) {
   return [
     message.severity,
-    message.text,
+    resolveResource(message.text, message.text),
     message.code,
   ].some((value) => normalizeSearch(value).includes(q));
 }
