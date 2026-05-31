@@ -57,9 +57,9 @@ class Traversenstrecke:
             breadcrumb=base_bc,
             name="gewichtskraft",
             wert= -1 * Fz,
-            label="Gewichtskraft F_G",
-            formelzeichen="F_G",
-            formel="F_G = m · L · g",
+            label="math.gewichtskraft_traverse.label",
+            formelzeichen="math.gewichtskraft_traverse.symbol",
+            formel="math.gewichtskraft_traverse.formel",
             einheit="N",
             meta=base_meta,
         )

@@ -1,11 +1,20 @@
 schemaVersion: 1
 entries:
+# =======================
+# Kräfte
+# =======================
+
+# Abminderungsfaktor Schlankheit
   abminderungsfaktor_schlankheit:
     label: Abminderungsfaktor zur Berücksichtigung der Schlankheit
     symbol: \psi_\lambda
   abminderungsfaktor_schlankheit_rohr:
     label: Abminderungsfaktor zur Berücksichtigung der Schlankheit
     symbol: \psi_\lambda
+    anzahl_kippachsen:
+      label: Anzahl der Kippachsen
+
+# Bezugsfläche
   bezugsflaeche:
     label: Bezugsfläche
     symbol: A_\text{ref}
@@ -27,6 +36,8 @@ entries:
   bezugsflaeche_wand:
     label: Bezugsfläche
     symbol: A_\text{ref,ij}
+
+# Eingeschlossene Fläche
   eingeschlossene_flaeche:
     label: Eingeschlossene Fläche
     symbol: A_{C,i}
@@ -34,9 +45,37 @@ entries:
     label: Eingeschlossene Fläche
     symbol: A_{C,i}
     formula: A_{C,i} = l_i \cdot h_\text{Trav}
+
+# Gewichtskraft
+  gewichtskraft_bodenplatte:
+    label: Gewichtskraft
+    symbol: F_G
+    formula: F_G = -m_\text{Bp} \cdot g
+  gewichtskraft_rohr:
+    label: Gewichtskraft
+    symbol: F_G
+    formula: |-
+      \begin{aligned}
+      d_\text{innen} &= d_\text{Rohr} - 2 \cdot t_\text{Rohr} \\
+      S_\text{Rohr} &= \pi \cdot \frac{d_\text{Rohr}^2 - d_\text{innen}^2}{4} \\
+      p &= S_\text{Rohr} \cdot \rho_\text{Rohr} \cdot g \\
+      F_G &= -l_\text{Rohr} \cdot p
+      \end{aligned}
+  gewichtskraft_traverse:
+    label: Gewichtskraft
+    symbol: F_G
+    formula: |-
+      \begin{aligned}
+      p &= m_\text{Trav} \cdot g \\
+      F_G &= -l_\text{Trav} \cdot p
+      \end{aligned}
+
+# Grundkraftbeiwert
   grundkraftbeiwert:
     label: Grundkraftbeiwert
     symbol: c_{f,0,i}
+
+# Kraftbeiwert
   kraftbeiwert:
     label: Kraftbeiwert
     symbol: c_f
@@ -56,9 +95,13 @@ entries:
     label: Kraftbeiwert
     symbol: c_{f,i}
     formula: c_{f,i} = c_{f,0,i} \cdot \psi_{\lambda,i}
+
+# Nettodruckbeiwert
   nettodruckkbeiwert_wand:
     label: Nettodruckbeiwert
     symbol: c_{p,net}
+
+# Reibwert
   reibwert:
     label: Reibwert
     symbol: \mu
@@ -67,6 +110,8 @@ entries:
     label: Reibwert
     symbol: \mu
     formula: \mu = \min_i\left(\mu_i\right)
+
+# Reynoldszahl
   reynoldszahl:
     label: Reynoldszahl
     symbol: Re
@@ -78,6 +123,8 @@ entries:
     label: Reynoldszahl
     symbol: Re_i
     formula: Re_i = Re_i = v_i \cdot \frac{d_\text{Gurt}}{\nu}
+
+# Schlankheit
   schlankheit:
     label: Schlankheit
     symbol: \lambda
@@ -109,14 +156,111 @@ entries:
       1,4 & l_{Trav} \geq 50
       \end{cases}
       \end{aligned}
+
+# Sicherheitsbeiwert
+  sicherheitsbeiwert:
+    label: Sicherheitsbeiwert
+    symbol: \gamma
+
+# Staudruck
+  staudruck:
+    label: Staudrücke
+    symbol: q_i
+  staudruck_anzeigetafel:
+    label: Staudruck im Mittelpunkt der Anzeigetafel
+    symbol: q
+  staudruck_obergrenze:
+    label: Obergrenzen für Staudrücke
+    symbol: z_{\text{max},i}
+
+# Strömungsgeschwindigkeit
   stroemungsgeschwindigkeit:
     label: Strömungsgeschwindigkeit
     symbol: v_i
     formula: v_i = \sqrt{\frac{2 \cdot q_i}{\rho_\text{Luft}}}
 
+# Völligkeitsgrad
+  voelligkeitsgrad:
+    label: Völligkeitsgrad
+    symbol: \phi_i
+    formula: \phi_i = \frac{A_i}{A_{C,i}}
+
+# Windkraft
+  windkraft:
+    label: Windkraft
+    symbol: F_W
+  windkraft_anzeigetafel:
+    label: Windkraft
+    symbol: F_W
+    formula: F_W = c_f \cdot q \cdot A_\text{ref}
+  windkraft_rohr:
+    label: Windkraft
+    symbol: F_{W,i}
+    formula: F_{W,i} = c_{f,i} \cdot q_i \cdot A_{ref,i}
+  windkraft_traverse:
+    label: Windkraft
+    symbol: F_{W,i}
+    formula: F_{W,i} = c_{f,i} \cdot q_i \cdot A_{ref,i}
+  windkraft_wand:
+    label: Windkraft
+    symbol: F_{W,ij}
+    formula: F_{W,ij} = c_{p,net,j} \cdot q_i \cdot A_{ref,ij}
+  windkraft_vektor:
+    label: Windkraft
+    symbol: \vec{F}_W
+  windkraft_vektor_anzeigetafel:
+    label: Windkraft
+    symbol: \vec{F}_W
+    formula: |-
+      \begin{aligned}
+      \vec{n} &= \left(\vec{b} - \vec{a}\right) \times \left(\vec{c} - \vec{a}\right) \\
+      \hat{n} &= \frac{\vec{n}}{\left\|\vec{n}\right\|} \\
+      \vec{w}_\perp &= \left(\hat{w} \cdot \hat{n}\right) \cdot \hat{n} \\
+      \vec{F_W} &= F_W \cdot \vec{w}_\perp
+      \end{aligned}
+  windkraft_vektor_rohr:
+    label: Windkraft
+    symbol: \vec{F}_{W,i}
+    formula: |-
+      \begin{aligned}
+      \hat{t}_i &= \frac{\vec{b_i} - \vec{a_i}}{\left\|\vec{b_i} - \vec{a_i}\right\|} \\
+      \vec{w}_{\perp,i} &= \hat{w} - \left(\hat{w} \cdot \hat{t}_i\right) \cdot \hat{t}_i \\
+      \vec{F}_{W,i} &= F_{W,i} \cdot \vec{w}_{\perp,i}
+      \end{aligned}
+  windkraft_vektor_traverse:
+    label: Windkraft
+    symbol: \vec{F}_{W,i}
+    formula: |-
+      \begin{aligned}
+      \hat{t}_i &= \frac{\vec{b_i} - \vec{a_i}}{\left\|\vec{b_i} - \vec{a_i}\right\|} \\
+      \vec{w}_{\perp,i} &= \hat{w} - \left(\hat{w} \cdot \hat{t}_i\right) \cdot \hat{t}_i \\
+      \vec{F}_{W,i} &= F_{W,i} \cdot \vec{w}_{\perp,i}
+      \end{aligned}
+  windkraft_vektor_wand:
+    label: Windkraft
+    symbol: \vec{F}_{W,ij}
+    formula: |-
+      \begin{aligned}
+      \vec{n}_{ij} &= \left(\vec{b}_{ij} - \vec{a}_{ij}\right) \times \left(\vec{c}_{ij} - \vec{a}_{ij}\right) \\
+      \hat{n}_{ij} &= \frac{\vec{n}_{ij}}{\left\|\vec{n}_{ij}\right\|} \\
+      \vec{F}_{W,ij} &= F_{W,ij} \cdot \hat{n}_{ij}
+      \end{aligned}
+
 # =======================
 # Abhebesicherheit
 # =======================
+
+# Lastfall
+  abhebe_normalkraft_down_lastfall:
+    label: Normalkraft nach unten
+    symbol: N_{\text{down},j}
+    formula: N_{\text{down},j} = \sum_{i:\,F_{z,i} < 0} \gamma_i \left(-F_{z,i}\right)
+  abhebe_normalkraft_up_lastfall:
+    label: Normalkraft nach oben
+    symbol: N_{\text{up},j}
+    formula: N_{\text{up},j} = \sum_{i:\,F_{z,i} > 0} \gamma_i F_{z,i}
+
+# Bauelement
   abhebe_normalkraft_down_element:
     label: Normalkraft nach unten
     symbol: N_{down,k}
@@ -125,6 +269,8 @@ entries:
     label: Normalkraft nach oben
     symbol: N_{up,k}
     formula: N_{\text{up},k} = N_{\text{up},G,k} + N_{\text{up},W,k}
+
+# Windrichtung
   abhebe_normalkraft_down_richtung:
     label: Normalkraft nach unten
     symbol: N_{down,m}
@@ -141,10 +287,14 @@ entries:
       \infty &\text{für } N_{\text{up},m}=0\\
       \frac{N_{\text{down},m}}{N_{\text{up},m}} &\text{für } N_{\text{up},m}>0
       \end{cases}
+
+# Gesamtkonstruktion
   abhebe_sicherheit:
     label: Abhebesicherheit
     symbol: S_{\text{Abhebe}}
     formula: S_\text{Abhebe} = \min_m \left(S_{\text{Abhebe},m}\right)
+
+# Ballast
   abhebe_ballast_richtung:
     label: Ballastkraft
     symbol: F_{\text{Ball,Abhebe},m}
@@ -165,6 +315,30 @@ entries:
 # =======================
 # Gleitsicherheit
 # =======================
+
+# Lastfall
+  gleit_horizontalkraft_lastfall:
+    label: Horizontalkraft
+    symbol: \vec{H}_j
+    formula: \vec{H}_j = \sum_i \gamma_i \begin{pmatrix} F_{x,i} \\ F_{y,i} \\ 0\end{pmatrix}
+  gleit_horizontalkraft_betrag_lastfall:
+    label: Betrag der Horizontalkraft
+    symbol: H_j
+    formula: H_j = \left\|\vec{H}_j\right\|
+  gleit_normalkraft_down_lastfall:
+    label: Normalkraft nach unten
+    symbol: N_{\text{down},j}
+    formula: N_{\text{down},j} = \sum_{i:\,F_{z,i} < 0} \gamma_i \left(-F_{z,i}\right)
+  gleit_normalkraft_up_lastfall:
+    label: Normalkraft nach oben
+    symbol: N_{\text{up},j}
+    formula: N_{\text{up},j} = \sum_{i:\,F_{z,i} > 0} \gamma_i F_{z,i}
+  gleit_normalkraft_effektiv_lastfall:
+    label: Effektive Normalkraft
+    symbol: N_{\text{eff},j}
+    formula: N_{\text{eff},j} = N_{\text{down},j} - N_{\text{up},j}
+
+# Bauelement
   gleit_horizontalkraft_element:
     label: Horizontalkraft
     symbol: \vec{H}_k
@@ -177,6 +351,8 @@ entries:
     label: Normalkraft nach oben
     symbol: N_{\text{up},k}
     formula: N_{\text{up},k} = N_{\text{up},j} \quad \text{für das } j \text{ mit maximalem } H_j
+
+# Windrichtung
   gleit_horizontalkraft_richtung:
     label: Horizontalkraft
     symbol: H_m
@@ -205,10 +381,14 @@ entries:
     label: Gleitsicherheit
     symbol: S_{\text{Gleit},m}
     formula: S_{\text{Gleit},m} = \frac{F_{R,m}}{H_m}
+
+# Gesamtkonstruktion
   gleit_sicherheit:
     label: Gleitsicherheit
     symbol: S_{\text{Gleit}}
     formula: S_\text{Gleit} = \min_m \left(S_{\text{Gleit},m}\right)
+
+# Ballast
   gleit_ballast_richtung:
     label: Ballastkraft
     symbol: F_{\text{Ball,Gleit},m}
@@ -230,6 +410,18 @@ entries:
 # =======================
 # Kippsicherheit
 # =======================
+
+# Lastfall
+  kipp_kippmoment_lastfall:
+    label: Kippmoment
+    symbol: M_{\text{Kipp},j}
+    formula: M_{\text{Kipp},j} = \sum_{i:\, M_{\text{Kipp},i} > 0} \gamma_i M_{\text{Kipp},i}
+  kipp_standmoment_lastfall:
+    label: Standmoment
+    symbol: M_{\text{Stand},j}
+    formula: M_{\text{Stand},j} = \sum_{i:\, M_{\text{Kipp},i} \leq 0} \gamma_i M_{\text{Kipp},i}
+
+# Bauelement
   kipp_kippmoment_element:
     label: Kippmoment
     symbol: M_{\text{Kipp},k}
@@ -238,6 +430,8 @@ entries:
     label: Standmoment
     symbol: M_{\text{Stand},k}
     formula: M_{\text{Stand},k} = M_{\text{Stand},G,k} + M_{\text{Stand},W,k}
+
+# Kippachse
   kipp_kippmoment_achse:
     label: Kippmoment
     symbol: M_{\text{Kipp},l}
@@ -254,14 +448,20 @@ entries:
       0,0 \quad &\text{für } M_{\text{Kipp},l} \leq 0\\
       \frac{M_{\text{Stand},l}}{M_{\text{Kipp},l}} \quad &\text{für } M_{\text{Kipp},l} > 0
       \end{cases}
+
+# Windrichtung
   kipp_sicherheit_richtung:
     label: Kippsicherheit
     symbol: S_{\text{Kipp},m}
     formula: S_{\text{Kipp},m} = \min_l S_{\text{Kipp},l}
+
+# Gesamtkonstruktion
   kipp_sicherheit:
     label: Kippsicherheit
     symbol: S_{\text{Kipp}}
     formula: S_{\text{Kipp}} = \min_m S_{\text{Kipp},m}
+
+#Ballast
   kipp_ballast_achse:
     label: Ballastkraft
     symbol: F_{\text{Ball,Kipp},l}
@@ -283,3 +483,11 @@ entries:
     label: Ballast
     symbol: m_\text{Ball,Kipp}
     formula: m_\text{Ball,Kipp} = \frac{F_\text{Ball,Kipp}}{g}
+
+# =======================
+# Gesamtkonstruktion
+# =======================
+  gesamt_ballast:
+    label: Erforderlicher Ballast
+    symbol: m_\text{Ball}
+    formula: m_\text{Ball} = \max\left(m_\text{Ball,Kipp}, m_\text{Ball,Gleit}, m_\text{Ball,Abhebe}\right)

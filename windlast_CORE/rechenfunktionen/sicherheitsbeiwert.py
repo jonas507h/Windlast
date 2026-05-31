@@ -29,32 +29,26 @@ def _sicherheitsbeiwert_default(
     }
 
     gamma: Optional[float] = None
-    formel: str = ""
     titel: str = f"Sicherheitsbeiwert ({kraft.typ.value}) γ_{'G' if kraft.typ == Lasttyp.GEWICHT else 'W' if kraft.typ == Lasttyp.WIND else 'R' if kraft.typ == Lasttyp.REIBUNG else ''}"
 
     if ist_guenstig:
         if kraft.typ == Lasttyp.GEWICHT and kraft.variabilitaet == Variabilitaet.STAENDIG:
             # Eigenlast günstig & ständig
             gamma = 1.0
-            formel = "γ_G = 1.0 (günstig, ständig)"
         else:
             # alle anderen günstigen Lasten
             gamma = 0.0
-            formel = "γ = 0.0 (günstige variable oder nicht zulässige Gutschrift)"
 
     else:
         if kraft.typ == Lasttyp.WIND:
             # Wind ungünstig
             gamma = 1.2
-            formel = "γ_wind = 1.2 (ungünstig)"
         elif kraft.typ == Lasttyp.GEWICHT:
             # Eigenlast ungünstig
             gamma = 1.1
-            formel = "γ_G = 1.1 (ungünstig)"
         elif kraft.typ == Lasttyp.REIBUNG:
             # Reibung ungünstig
             gamma = 1.3
-            formel = "γ_R = 1.3 (ungünstig; sonstige Lastanteile)"
         else:
             protokolliere_msg(
                 protokoll, severity=Severity.ERROR, code="SICHB/UNKNOWN_LASTTYP",
@@ -66,8 +60,8 @@ def _sicherheitsbeiwert_default(
                 breadcrumb=base_bc,
                 name="sicherheitsbeiwert",
                 wert=float("nan"),
-                label="Sicherheitsbeiwert γ",
-                formelzeichen="γ",
+                label="math.sicherheitsbeiwert.label",
+                formelzeichen="math.sicherheitsbeiwert.symbol",
                 meta=base_meta,
             )
             return Zwischenergebnis(wert=float("nan"))
@@ -77,9 +71,8 @@ def _sicherheitsbeiwert_default(
         breadcrumb=base_bc,
         name="sicherheitsbeiwert",
         wert=gamma,
-        label="Sicherheitsbeiwert γ",
-        formelzeichen="γ",
-        formel=formel,
+        label="math.sicherheitsbeiwert.label",
+        formelzeichen="math.sicherheitsbeiwert.symbol",
         meta=base_meta,
     )
     return Zwischenergebnis(wert=gamma)
@@ -114,8 +107,8 @@ def sicherheitsbeiwert(
             breadcrumb=base_bc,
             name="sicherheitsbeiwert",
             wert=float("nan"),
-            label="Sicherheitsbeiwert γ",
-            formelzeichen="γ",
+            label="math.sicherheitsbeiwert.label",
+            formelzeichen="math.sicherheitsbeiwert.symbol",
             meta=base_meta,
         )
         return Zwischenergebnis(wert=float("nan"))

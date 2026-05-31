@@ -49,8 +49,9 @@ def _voelligkeitsgrad_default(
         breadcrumb=base_bc,
         name="voelligkeitsgrad",
         wert=wert,
-        label="Völligkeitsgrad φ",
-        formelzeichen="φ",
+        label="math.voelligkeitsgrad.label",
+        formelzeichen="math.voelligkeitsgrad.symbol",
+        formel="math.voelligkeitsgrad.formula",
         meta=base_meta,
     )
     return Zwischenergebnis(wert=wert)
@@ -90,8 +91,8 @@ def voelligkeitsgrad(
             breadcrumb=base_bc,
             name="voelligkeitsgrad",
             wert=float("nan"),
-            label="Völligkeitsgrad φ",
-            formelzeichen="φ",
+            label="math.voelligkeitsgrad.label",
+            formelzeichen="math.voelligkeitsgrad.symbol",
             meta=base_meta,
         )
         return Zwischenergebnis(wert=float("nan"))

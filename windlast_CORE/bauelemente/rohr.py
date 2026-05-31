@@ -59,9 +59,9 @@ class Rohr:
             breadcrumb=base_bc,
             name="gewichtskraft",
             wert= -1 * Fz,
-            label="Gewichtskraft F_G",
-            formelzeichen="F_G",
-            formel="F_G = A · ρ · g · L",
+            label="math.gewichtskraft_rohr.label",
+            formelzeichen="math.gewichtskraft_rohr.symbol",
+            formel="math.gewichtskraft_rohr.formula",
             einheit="N",
             meta=base_meta,
         )

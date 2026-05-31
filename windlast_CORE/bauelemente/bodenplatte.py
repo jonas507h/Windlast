@@ -85,9 +85,9 @@ class Bodenplatte:
             breadcrumb=base_bc,
             name="gewichtskraft",
             wert= -1 * gewichtskraft,
-            label="Gewichtskraft F_G",
-            formelzeichen="F_G",
-            formel="F_G = m · g",
+            label="math.gewichtskraft_bodenplatte.label",
+            formelzeichen="math.gewichtskraft_bodenplatte.symbol",
+            formel="math.gewichtskraft_bodenplatte.formula",
             einheit="N",
             meta=base_meta,
         )

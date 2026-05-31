@@ -270,7 +270,7 @@ def sammle_kippachsen(konstruktion, *, protokoll: Optional[Protokoll] = None, br
         breadcrumb=base_bc,
         name="anz_kippachsen",
         wert=len(achsen),
-        label="Anzahl Kippachsen",
+        label="math.anzahl_kippachsen.label",
         meta=base_meta
     )
     return achsen
@@ -429,7 +429,9 @@ def kipp_envelope_pro_bauelement(
             breadcrumb=lastfall_bc,
             name="lastfall_kippmoment",
             wert=kipp,
-            label=f"Kippmoment M_K (Lastfall {lasttyp} #{lastfall_index})",
+            label="math.kipp_kippmoment_lastfall.label",
+            formelzeichen="math.kipp_kippmoment_lastfall.symbol",
+            formel="math.kipp_kippmoment_lastfall.formula",
             einheit="Nm",
             meta=base_meta,
         )
@@ -438,7 +440,9 @@ def kipp_envelope_pro_bauelement(
             breadcrumb=lastfall_bc,
             name="lastfall_standmoment",
             wert=stand,
-            label=f"Standmoment M_St (Lastfall {lasttyp} #{lastfall_index})",
+            label="math.kipp_standmoment_lastfall.label",
+            formelzeichen="math.kipp_standmoment_lastfall.symbol",
+            formel="math.kipp_standmoment_lastfall.formula",
             einheit="Nm",
             meta=base_meta,
         )
@@ -603,7 +607,9 @@ def gleit_envelope_pro_bauelement(
             breadcrumb=lastfall_bc,
             name="lastfall_horizontalkraft_vektor",
             wert=H_vec,
-            label="Horizontalkraft-Vektor H",
+            label="math.gleit_horizontalkraft_lastfall.label",
+            formelzeichen="math.gleit_horizontalkraft_lastfall.symbol",
+            formel="math.gleit_horizontalkraft_lastfall.formula",
             einheit="N",
             meta=base_meta,
         )
@@ -613,7 +619,9 @@ def gleit_envelope_pro_bauelement(
             breadcrumb=lastfall_bc,
             name="lastfall_horizontalkraft_betrag",
             wert=H_betrag,
-            label="Horizontalkraft-Betrag |H|",
+            label="math.gleit_horizontalkraft_betrag_lastfall.label",
+            formelzeichen="math.gleit_horizontalkraft_betrag_lastfall.symbol",
+            formel="math.gleit_horizontalkraft_betrag_lastfall.formula",
             einheit="N",
             meta=base_meta,
         )
@@ -623,7 +631,9 @@ def gleit_envelope_pro_bauelement(
             breadcrumb=lastfall_bc,
             name="lastfall_normalkraft_down",
             wert=N_down,
-            label="Normalkraft N_down",
+            label="math.gleit_normalkraft_down_lastfall.label",
+            formelzeichen="math.gleit_normalkraft_down_lastfall.symbol",
+            formel="math.gleit_normalkraft_down_lastfall.formula",
             einheit="N",
             meta=base_meta,
         )
@@ -633,7 +643,9 @@ def gleit_envelope_pro_bauelement(
             breadcrumb=lastfall_bc,
             name="lastfall_normalkraft_up",
             wert=N_up,
-            label="Normalkraft N_up",
+            label="math.gleit_normalkraft_up_lastfall.label",
+            formelzeichen="math.gleit_normalkraft_up_lastfall.symbol",
+            formel="math.gleit_normalkraft_up_lastfall.formula",
             einheit="N",
             meta=base_meta,
         )
@@ -643,9 +655,9 @@ def gleit_envelope_pro_bauelement(
             breadcrumb=lastfall_bc,
             name="lastfall_normalkraft_effektiv",
             wert=N_down - N_up,
-            label="Effektive Normalkraft N_down - N_up",
-            formelzeichen="N_eff",
-            formel="N_eff = N_down - N_up",
+            label="math.gleit_normalkraft_effektiv_lastfall.label",
+            formelzeichen="math.gleit_normalkraft_effektiv_lastfall.symbol",
+            formel="math.gleit_normalkraft_effektiv_lastfall.formula",
             einheit="N",
             meta=base_meta,
         )
@@ -745,7 +757,9 @@ def abhebe_envelope_pro_bauelement(
             breadcrumb=lastfall_bc,
             name="lastfall_normalkraft_down",
             wert=N_down,
-            label="Normalkraft N_down",
+            label="math.abhebe_normalkraft_down_lastfall.label",
+            formelzeichen="math.abhebe_normalkraft_down_lastfall.symbol",
+            formel="math.abhebe_normalkraft_down_lastfall.formula",
             einheit="N",
             meta=base_meta,
         )
@@ -755,7 +769,9 @@ def abhebe_envelope_pro_bauelement(
             breadcrumb=lastfall_bc,
             name="lastfall_normalkraft_up",
             wert=N_up,
-            label="Normalkraft N_up",
+            label="math.abhebe_normalkraft_up_lastfall.label",
+            formelzeichen="math.abhebe_normalkraft_up_lastfall.symbol",
+            formel="math.abhebe_normalkraft_up_lastfall.formula",
             einheit="N",
             meta=base_meta,
         )

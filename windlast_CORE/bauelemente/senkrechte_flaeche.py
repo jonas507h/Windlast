@@ -185,8 +185,8 @@ class senkrechteFlaeche:
                 breadcrumb=base_bc,
                 name="staudruck",
                 wert=staudruck,
-                label="Staudruck q",
-                formelzeichen="q",
+                label="math.staudruck_anzeigetafel.label",
+                formelzeichen="math.staudruck_anzeigetafel.symbol",
                 einheit="N/m²",
                 meta=flaeche_meta,
             )

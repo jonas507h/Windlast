@@ -73,10 +73,7 @@ def _ermittle_staudruecke(
     breadcrumb: Optional[list] = None,
 ) -> Tuple[Optional[List[float]], Optional[List[float]]]:
 
-    loads_bc = merge_breadcrumb(
-        breadcrumb,
-        [bc_step("kraefte", "windkraefte", ebene_label="Kräfte", gruppe_label="Windkräfte")]
-    )
+    loads_bc = breadcrumb
 
     try:
         # TODO: Warum??? was ist s.modus?
@@ -146,10 +143,7 @@ def _rechne_drei_nachweise(
     breadcrumb: Optional[list] = None,
 ) -> Tuple[Optional[float], Optional[float], Optional[float]]:
     
-    loads_bc = merge_breadcrumb(
-        breadcrumb,
-        [bc_step("kraefte", "windkraefte", ebene_label="Kräfte", gruppe_label="Windkräfte")]
-    )
+    loads_bc = breadcrumb
 
     v_kipp = v_gleit = v_abhebe = None
     b_kipp = b_gleit = b_abhebe = None
@@ -340,11 +334,11 @@ def _rechne_drei_nachweise(
             protokoll,
             breadcrumb=ballast_bc,
             name="ballast_max",
-            label="Erforderlicher Ballast",
-            formelzeichen="m_Ballast,max",
+            label="math.gesamt_ballast.label",
+            formelzeichen="math.gesamt_ballast.symbol",
             wert=ballast_wert,
             einheit="kg",
-            formel="m_Ballast,max = max(m_Ballast,kipp, m_Ballast,gleit, m_Ballast,abheb)",
+            formel="math.gesamt_ballast.formula",
             priority=10,
         )
 
