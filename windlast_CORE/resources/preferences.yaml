@@ -1,2 +1,7 @@
 schemaVersion: 1
-language: de
+
+main:
+  sprache: de
+
+berechnung:
+  windrichtungen_anzahl: 12

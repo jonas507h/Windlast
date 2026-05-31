@@ -19,7 +19,8 @@ for p in (str(ROOT), str(CORE_DIR), str(API_DIR)):
 import socket, time, webbrowser
 from threading import Thread
 from flask import Flask, send_from_directory, abort
-from resources import init_resources
+from app_resources import init_resources
+from app_settings import init_settings
 from api.v1 import bp_v1  # klappt jetzt, weil ROOT/API/CORE im sys.path sind
 
 UI_ROOT      = (ROOT / "windlast_UI").resolve()
@@ -91,6 +92,7 @@ def create_app():
     app = Flask(__name__, static_folder=str(STATIC_DIR), static_url_path="/static")
 
     init_resources(ROOT)
+    init_settings(ROOT / "windlast_CORE" / "resources")
 
     @app.get("/")
     def index():

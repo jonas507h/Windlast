@@ -22,11 +22,13 @@ class ResourceManager:
             self.index = self._load_yaml("index.yaml")
             self.preferences = self._load_yaml("preferences.yaml")
 
-            language = (
-                self.preferences.get("language")
-                or self.index.get("defaultLanguage")
-                or "de"
-            )
+            # language = (
+            #     self.preferences.get("language")
+            #     or self.index.get("defaultLanguage")
+            #     or "de"
+            # )
+
+            language = "de"
 
             self.resources = {}
 

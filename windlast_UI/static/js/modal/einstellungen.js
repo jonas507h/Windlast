@@ -2,12 +2,57 @@
 
 import { getFlagLabel } from "../utils/formatierung.js";
 
-function renderBerechnung(container) {
+async function fetchSettingsDefinitions() {
+  const res = await fetch("/api/v1/settings/definitions");
+  if (!res.ok) throw new Error(`Settings-Definitionen konnten nicht geladen werden: ${res.status}`);
+  return await res.json();
+}
+
+async function setSetting(key, value) {
+  const res = await fetch(`/api/v1/settings/${encodeURIComponent(key)}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ value }),
+  });
+
+  const data = await res.json().catch(() => ({}));
+
+  if (!res.ok || data.ok === false) {
+    throw new Error(data.message || `Setting konnte nicht gespeichert werden: ${res.status}`);
+  }
+
+  return data.value;
+}
+
+function findSettingDef(groups, key) {
+  for (const settings of Object.values(groups || {})) {
+    const found = settings.find((s) => s.key === key);
+    if (found) return found;
+  }
+  return null;
+}
+
+async function renderBerechnung(container) {
   // Hinweis "nicht implementiert"
   const info = document.createElement("div");
   info.className = "tt-line info";
-  info.textContent = "Hinweis: Diese Einstellungen sind noch nicht implementiert.";
+  info.textContent = "Hinweis: Diese Einstellungen sind nur teilweise implementiert.";
   container.appendChild(info);
+
+  const WIND_KEY = "berechnung.windrichtungen_anzahl";
+
+  let windSetting = null;
+
+  try {
+    const data = await fetchSettingsDefinitions();
+    windSetting = findSettingDef(data.groups, WIND_KEY);
+  } catch (err) {
+    const error = document.createElement("div");
+    error.className = "tt-line error";
+    error.textContent = `Einstellungen konnten nicht geladen werden: ${err.message}`;
+    container.appendChild(error);
+    return () => {};
+  }
 
   // Abschnitt 1: Basis
   const cardBase = document.createElement("div");
@@ -40,8 +85,46 @@ function renderBerechnung(container) {
   iWind.step = "1";
   iWind.placeholder = "z. B. 12";
 
+  if (windSetting) {
+    lWind.textContent = windSetting.label || "Anzahl Windrichtungen";
+
+    iWind.value = windSetting.value ?? windSetting.default ?? "";
+    iWind.min = windSetting.min ?? 1;
+    iWind.max = windSetting.max ?? "";
+    iWind.step = "1";
+
+    if (Array.isArray(windSetting.allowed) && windSetting.allowed.length) {
+      iWind.setAttribute("list", "settings-windrichtungen-options");
+
+      const datalist = document.createElement("datalist");
+      datalist.id = "settings-windrichtungen-options";
+      datalist.innerHTML = windSetting.allowed
+        .map((value) => `<option value="${value}"></option>`)
+        .join("");
+
+      fWind.appendChild(datalist);
+    }
+  }
+
   fWind.appendChild(lWind);
   fWind.appendChild(iWind);
+
+  let lastValidWindValue = Number(iWind.value);
+
+  iWind.addEventListener("change", async () => {
+    const value = Number(iWind.value);
+
+    try {
+      const saved = await setSetting(WIND_KEY, value);
+      iWind.value = saved;
+      lastValidWindValue = saved;
+    } catch (err) {
+      console.warn(err);
+      iWind.value = lastValidWindValue;
+
+      alert(err.message || "Einstellung konnte nicht gespeichert werden.");
+    }
+  });
 
   row1.appendChild(fWind);
   cardBase.appendChild(row1);
@@ -351,7 +434,7 @@ export function openEinstellungenModal({ initialTab = "berechnung" } = {}) {
   let activeTab = null;
   let destroyActive = null;
 
-  function switchTab(view) {
+  async function switchTab(view) {
     if (!tabRenderers[view]) view = "berechnung";
     if (view === activeTab) return;
 
@@ -366,7 +449,7 @@ export function openEinstellungenModal({ initialTab = "berechnung" } = {}) {
     content.innerHTML = "";
 
     // neuen Inhalt rendern
-    destroyActive = tabRenderers[view](content) || null;
+    destroyActive = await tabRenderers[view](content) || null;
     activeTab = view;
   }
 

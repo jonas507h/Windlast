@@ -8,3 +8,4 @@ from . import routes_berechnung
 from . import routes_reibwert
 from . import routes_meta
 from . import routes_resources
+from . import routes_settings

@@ -1,7 +1,7 @@
 from flask import jsonify
 from . import bp_v1
 
-from resources import get_resource_manager
+from app_resources import get_resource_manager
 
 
 @bp_v1.get("/resources")

@@ -1,5 +1,8 @@
 from typing import Dict, Any
 
+from app_settings import get_settings_manager
+
+from windlast_CORE import settings
 from windlast_CORE.konstruktionen.generic import Konstruktion
 from windlast_CORE.datenstruktur.enums import Zeitfaktor, Windzone as WindzoneEnum
 from windlast_CORE.datenstruktur.zeit import Dauer
@@ -50,12 +53,16 @@ def berechne_konstruktion(payload: Dict[str, Any]) -> Dict[str, Any]:
         windzone = WindzoneEnum[payload["windzone"]]
     except Exception as e:
         raise ValueError(f"Unbekannte windzone: {payload['windzone']}") from e
+    
+    settings = get_settings_manager()
+    anzahl_windrichtungen = settings.get("berechnung.windrichtungen_anzahl")
 
     # 3) Rechnen
     er = standsicherheit(
         konstruktion,
         aufstelldauer=aufstelldauer,
         windzone=windzone,
+        anzahl_windrichtungen=anzahl_windrichtungen,
     )
 
     # 4) Auf Minimalformat mappen
