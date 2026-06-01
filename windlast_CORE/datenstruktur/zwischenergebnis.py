@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, List, Optional, Protocol, Sequence, Tuple, Union, Callable, TYPE_CHECKING, runtime_checkable
+from contextvars import ContextVar
 
 from windlast_CORE.datenstruktur.enums import Severity, ProtokollModus
 
@@ -92,6 +93,35 @@ class BreadcrumbStep:
 
 Breadcrumb = List[BreadcrumbStep]
 
+# =========================
+# Protokoll-Regeln
+# =========================
+
+PROTOKOLLTIEFE_MIN_PRIORITY = {
+    "zwischenergebnisse": 0,
+    "kraefte": 30,
+    "lastfall": 50,
+    "bauelement": 60,
+    "windrichtung": 70,
+    "endergebnisse": 90,
+}
+
+_protokolltiefe_var = ContextVar(
+    "protokolltiefe",
+    default="endergebnisse",
+)
+
+
+def set_protokoll_policy(*, protokolltiefe: str) -> None:
+    _protokolltiefe_var.set(protokolltiefe)
+
+
+def get_min_priority() -> int:
+    tiefe = _protokolltiefe_var.get()
+    return PROTOKOLLTIEFE_MIN_PRIORITY.get(tiefe, 90)
+
+def soll_protokollieren(*, priority: int = 0) -> bool:
+    return priority >= get_min_priority()
 
 # =========================
 # Protokoll-Schnittstelle
@@ -296,6 +326,9 @@ def protokolliere_ergebnis(
     """Sicheres Protokollieren eines Ergebnisses in den Baum."""
     if protokoll is None:
         return
+    
+    if not soll_protokollieren(priority=priority):
+        return
 
     protokoll.add_ergebnis(
         breadcrumb=list(breadcrumb or []),
@@ -339,21 +372,24 @@ def protokolliere_msg(
 def set_winner(root_or_protokoll: Union[ErgebnisBaum, Protokoll], breadcrumb: Sequence[BreadcrumbStep]) -> None:
     """
     Setzt innerhalb der Ebene des letzten Breadcrumb-Schritts genau diese Gruppe als Gewinner.
-    Alle Geschwistergruppen derselben Ebene bekommen winner=False.
+    Legt dabei KEINE neuen Ebenen/Gruppen an.
     """
     root = getattr(root_or_protokoll, "root", root_or_protokoll)
     if not isinstance(root, ErgebnisBaum):
         return
 
+    if not breadcrumb:
+        return
+
     ebene = find_ebene_for_last_step(root, breadcrumb)
     if ebene is None:
-        # Pfad bei Bedarf anlegen und dann erneut suchen.
-        get_or_create_gruppe(root, breadcrumb)
-        ebene = find_ebene_for_last_step(root, breadcrumb)
-        if ebene is None:
-            return
+        return
 
     target_name = breadcrumb[-1].gruppe
+
+    if not any(gruppe.name == target_name for gruppe in ebene.gruppen):
+        return
+
     for gruppe in ebene.gruppen:
         gruppe.winner = (gruppe.name == target_name)
 

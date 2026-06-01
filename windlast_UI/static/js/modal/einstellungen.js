@@ -40,12 +40,15 @@ async function renderBerechnung(container) {
   container.appendChild(info);
 
   const WIND_KEY = "berechnung.windrichtungen_anzahl";
+  const PROTO_KEY = "berechnung.protokolltiefe";
 
   let windSetting = null;
+  let protoSetting = null;
 
   try {
     const data = await fetchSettingsDefinitions();
     windSetting = findSettingDef(data.groups, WIND_KEY);
+    protoSetting = findSettingDef(data.groups, PROTO_KEY);
   } catch (err) {
     const error = document.createElement("div");
     error.className = "tt-line error";
@@ -194,17 +197,53 @@ async function renderBerechnung(container) {
   head3.appendChild(h3);
   cardLog.appendChild(head3);
 
-  const logList = document.createElement("div");
-  logList.className = "settings-check-list";
+  const logRow = document.createElement("div");
+  logRow.className = "row row-1";
 
-  logList.appendChild(
-    mkCheck(
-      "settings-log-all-intermediate",
-      "Alle Zwischenergebnisse protokollieren"
-    )
-  );
+  const fProto = document.createElement("div");
+  fProto.className = "field";
 
-  cardLog.appendChild(logList);
+  const lProto = document.createElement("label");
+  lProto.setAttribute("for", "settings-protokolltiefe");
+  lProto.textContent = "Protokolltiefe";
+
+  const sProto = document.createElement("select");
+  sProto.id = "settings-protokolltiefe";
+
+  if (protoSetting) {
+    lProto.textContent = protoSetting.label || "Protokolltiefe";
+
+    sProto.innerHTML = Object.entries(protoSetting.options || {})
+      .map(([value, label]) => `
+        <option value="${value}">${label}</option>
+      `)
+      .join("");
+
+    sProto.value = protoSetting.value ?? protoSetting.default ?? "";
+
+    let lastValidProtoValue = sProto.value;
+
+    sProto.addEventListener("change", async () => {
+      try {
+        const saved = await setSetting(PROTO_KEY, sProto.value);
+        sProto.value = saved;
+        lastValidProtoValue = saved;
+      } catch (err) {
+        console.warn(err);
+        sProto.value = lastValidProtoValue;
+        alert(err.message || "Protokolltiefe konnte nicht gespeichert werden.");
+      }
+    });
+  } else {
+    sProto.disabled = true;
+    sProto.innerHTML = `<option>Setting nicht gefunden</option>`;
+  }
+
+  fProto.appendChild(lProto);
+  fProto.appendChild(sProto);
+
+  logRow.appendChild(fProto);
+  cardLog.appendChild(logRow);
 
   // Compose in Container
   container.appendChild(cardBase);

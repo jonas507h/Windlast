@@ -72,6 +72,22 @@ SETTING_DEFS: list[SettingDef] = [
     ),
 
     SettingDef(
+        key="berechnung.protokolltiefe",
+        group="berechnung",
+        label="Protokolltiefe",
+        type="enum",
+        default="endergebnisse",
+        options={
+            "zwischenergebnisse": "Zwischenergebnisse",
+            "kraefte": "Kräfte",
+            "lastfall": "Lastfall",
+            "bauelement": "Bauelement",
+            "windrichtung": "Windrichtung",
+            "endergebnisse": "Endergebnisse",
+        },
+    ),
+
+    SettingDef(
         key="ui.theme",
         group="ui",
         label="Farbschema",

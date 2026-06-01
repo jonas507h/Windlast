@@ -60,6 +60,7 @@ class Traversenstrecke:
             label="math.gewichtskraft_traverse.label",
             formelzeichen="math.gewichtskraft_traverse.symbol",
             formel="math.gewichtskraft_traverse.formel",
+            priority=20,
             einheit="N",
             meta=base_meta,
         )

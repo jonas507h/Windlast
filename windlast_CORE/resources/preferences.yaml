@@ -5,3 +5,4 @@ main:
 
 berechnung:
   windrichtungen_anzahl: 8
+  protokolltiefe: endergebnisse

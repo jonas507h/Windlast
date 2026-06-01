@@ -7,6 +7,7 @@ from windlast_CORE.konstruktionen.generic import Konstruktion
 from windlast_CORE.datenstruktur.enums import Zeitfaktor, Windzone as WindzoneEnum
 from windlast_CORE.datenstruktur.zeit import Dauer
 from windlast_CORE.rechenfunktionen.standsicherheit import standsicherheit
+from windlast_CORE.datenstruktur.zwischenergebnis import set_protokoll_policy
 
 from .ergebnis_mapper import build_api_output
 
@@ -56,6 +57,7 @@ def berechne_konstruktion(payload: Dict[str, Any]) -> Dict[str, Any]:
     
     settings = get_settings_manager()
     anzahl_windrichtungen = settings.get("berechnung.windrichtungen_anzahl")
+    set_protokoll_policy(protokolltiefe=settings.get("berechnung.protokolltiefe"))
 
     # 3) Rechnen
     er = standsicherheit(
