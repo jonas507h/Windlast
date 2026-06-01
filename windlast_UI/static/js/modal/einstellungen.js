@@ -213,9 +213,9 @@ async function renderBerechnung(container) {
   if (protoSetting) {
     lProto.textContent = protoSetting.label || "Protokolltiefe";
 
-    sProto.innerHTML = Object.entries(protoSetting.options || {})
-      .map(([value, label]) => `
-        <option value="${value}">${label}</option>
+    sProto.innerHTML = (protoSetting.options || [])
+      .map((opt) => `
+        <option value="${opt.value}">${opt.label}</option>
       `)
       .join("");
 

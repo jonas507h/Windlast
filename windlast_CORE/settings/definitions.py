@@ -55,9 +55,9 @@ SETTING_DEFS: list[SettingDef] = [
         label="Sprache",
         type="enum",
         default="de",
-        options={
-            "de": "Deutsch",
-        },
+        options=[
+            {"value": "de", "label": "Deutsch"},
+        ],
     ),
 
     SettingDef(
@@ -77,14 +77,14 @@ SETTING_DEFS: list[SettingDef] = [
         label="Protokolltiefe",
         type="enum",
         default="endergebnisse",
-        options={
-            "zwischenergebnisse": "Zwischenergebnisse",
-            "kraefte": "Kräfte",
-            "lastfall": "Lastfall",
-            "bauelement": "Bauelement",
-            "windrichtung": "Windrichtung",
-            "endergebnisse": "Endergebnisse",
-        },
+        options=[
+            {"value": "endergebnisse", "label": "Endergebnisse"},
+            {"value": "windrichtung", "label": "Windrichtung"},
+            {"value": "bauelement", "label": "Bauelement"},
+            {"value": "lastfall", "label": "Lastfall"},
+            {"value": "kraefte", "label": "Kräfte"},
+            {"value": "zwischenergebnisse", "label": "Zwischenergebnisse"},
+        ]
     ),
 
     SettingDef(
@@ -93,11 +93,11 @@ SETTING_DEFS: list[SettingDef] = [
         label="Farbschema",
         type="enum",
         default="light",
-        options={
-            "light": "Hell",
-            "dark": "Dunkel",
-            "special": "Spezial",
-        },
+        options=[
+            {"value": "light", "label": "Hell"},
+            {"value": "dark", "label": "Dunkel"},
+            {"value": "special", "label": "Spezial"},
+        ],
 
     ),
 ]

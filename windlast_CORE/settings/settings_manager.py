@@ -143,9 +143,13 @@ class SettingsManager:
 
         if definition.type == "enum":
             if not isinstance(value, str):
-                raise SettingsError(f"{definition.key}: Erwartet enum-string, bekommen {type(value).__name__}.")
-            if not definition.options or value not in definition.options:
+                raise SettingsError(...)
+
+            allowed_values = [opt["value"] for opt in definition.options or []]
+
+            if value not in allowed_values:
                 raise SettingsError(f"{definition.key}: Ungültige Option '{value}'.")
+
             return value
 
         raise SettingsError(f"{definition.key}: Unbekannter Setting-Typ '{definition.type}'.")
