@@ -139,7 +139,7 @@ def _abhebesicherheit_DinEn13814_2005_06(
                     formelzeichen="math.abhebe_normalkraft_down_element.symbol",
                     formel="math.abhebe_normalkraft_down_element.formula",
                     einheit="N",
-                    priority=10,
+                    priority=60,
                     meta=base_meta,
                 )
                 protokolliere_ergebnis(
@@ -151,7 +151,7 @@ def _abhebesicherheit_DinEn13814_2005_06(
                     formelzeichen="math.abhebe_normalkraft_up_element.symbol",
                     formel="math.abhebe_normalkraft_up_element.formula",
                     einheit="N",
-                    priority=10,
+                    priority=60,
                     meta=base_meta,
                 )
                 total_normal_down += N_down_b
@@ -167,7 +167,7 @@ def _abhebesicherheit_DinEn13814_2005_06(
                 formelzeichen="math.abhebe_normalkraft_down_richtung.symbol",
                 formel="math.abhebe_normalkraft_down_richtung.formula",
                 einheit="N",
-                priority=7,
+                priority=70,
                 meta=base_meta,
             )
             protokolliere_ergebnis(
@@ -179,7 +179,7 @@ def _abhebesicherheit_DinEn13814_2005_06(
                 formelzeichen="math.abhebe_normalkraft_up_richtung.symbol",
                 formel="math.abhebe_normalkraft_up_richtung.formula",
                 einheit="N",
-                priority=7,
+                priority=70,
                 meta=base_meta,
             )
 
@@ -192,7 +192,7 @@ def _abhebesicherheit_DinEn13814_2005_06(
                 formelzeichen="math.abhebe_sicherheit_richtung.symbol",
                 formel="math.abhebe_sicherheit_richtung.formula",
                 wert=sicherheit,
-                priority=10,
+                priority=70,
                 meta=base_meta,
             )
 
@@ -213,7 +213,7 @@ def _abhebesicherheit_DinEn13814_2005_06(
                 wert=ballastkraft,
                 einheit="N",
                 formel="math.abhebe_ballast_richtung.formula",
-                priority=10,
+                priority=70,
                 meta=base_meta,
             )
 
@@ -245,7 +245,7 @@ def _abhebesicherheit_DinEn13814_2005_06(
             formelzeichen="math.abhebe_sicherheit.symbol",
             wert=sicherheit_min_global,
             formel="math.abhebe_sicherheit.formula",
-            priority=10,
+            priority=100,
             meta=base_meta,
         )
 
@@ -258,7 +258,7 @@ def _abhebesicherheit_DinEn13814_2005_06(
             wert=ballast_kg,
             einheit="kg",
             formel="math.abhebe_ballast.formula",
-            priority=10,
+            priority=90,
             meta=base_meta,
         )
 
@@ -347,7 +347,7 @@ def _abhebesicherheit_DinEn17879_2024_08(
                     formelzeichen="math.abhebe_normalkraft_down_element.symbol",
                     formel="math.abhebe_normalkraft_down_element.formula",
                     einheit="N",
-                    priority=10,
+                    priority=60,
                     meta=base_meta,
                 )
                 protokolliere_ergebnis(
@@ -359,7 +359,7 @@ def _abhebesicherheit_DinEn17879_2024_08(
                     formelzeichen="math.abhebe_normalkraft_up_element.symbol",
                     formel="math.abhebe_normalkraft_up_element.formula",
                     einheit="N",
-                    priority=10,
+                    priority=60,
                     meta=base_meta,
                 )
                 total_normal_down += N_down_b
@@ -375,7 +375,7 @@ def _abhebesicherheit_DinEn17879_2024_08(
                 formelzeichen="math.abhebe_normalkraft_down_richtung.symbol",
                 formel="math.abhebe_normalkraft_down_richtung.formula",
                 einheit="N",
-                priority=7,
+                priority=70,
                 meta=base_meta,
             )
             protokolliere_ergebnis(
@@ -387,7 +387,7 @@ def _abhebesicherheit_DinEn17879_2024_08(
                 formelzeichen="math.abhebe_normalkraft_up_richtung.symbol",
                 formel="math.abhebe_normalkraft_up_richtung.formula",
                 einheit="N",
-                priority=7,
+                priority=70,
                 meta=base_meta,
             )
 
@@ -400,7 +400,7 @@ def _abhebesicherheit_DinEn17879_2024_08(
                 formelzeichen="math.abhebe_sicherheit_richtung.symbol",
                 wert=sicherheit,
                 formel="math.abhebe_sicherheit_richtung.formula",
-                priority=10,
+                priority=70,
                 meta=base_meta,
             )
 
@@ -421,7 +421,7 @@ def _abhebesicherheit_DinEn17879_2024_08(
                 wert=ballastkraft,
                 einheit="N",
                 formel="math.abhebe_ballast_richtung.formula",
-                priority=10,
+                priority=70,
                 meta=base_meta,
             )
 
@@ -453,7 +453,7 @@ def _abhebesicherheit_DinEn17879_2024_08(
             formelzeichen="math.abhebe_sicherheit.symbol",
             wert=sicherheit_min_global,
             formel="math.abhebe_sicherheit.formula",
-            priority=10,
+            priority=100,
             meta=base_meta,
         )
 
@@ -466,7 +466,7 @@ def _abhebesicherheit_DinEn17879_2024_08(
             wert=ballast_kg,
             einheit="kg",
             formel="math.abhebe_ballast.formula",
-            priority=10,
+            priority=90,
             meta=base_meta,
         )
 

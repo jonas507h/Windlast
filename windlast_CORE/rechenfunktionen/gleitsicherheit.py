@@ -108,6 +108,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
             label="math.reibwert.label",
             formelzeichen="math.reibwert.symbol",
             formel="math.reibwert.formula",
+            priority=20,
             meta=base_meta,
         )
 
@@ -159,7 +160,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
                     formelzeichen="math.gleit_horizontalkraft_element.symbol",
                     formel="math.gleit_horizontalkraft_element.formula",
                     einheit="N",
-                    priority=10,
+                    priority=60,
                     meta=base_meta,
                 )
                 protokolliere_ergebnis(
@@ -171,7 +172,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
                     formelzeichen="math.gleit_normalkraft_down_element.symbol",
                     formel="math.gleit_normalkraft_down_element.formula",
                     einheit="N",
-                    priority=10,
+                    priority=60,
                     meta=base_meta,
                 )
                 protokolliere_ergebnis(
@@ -183,7 +184,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
                     formelzeichen="math.gleit_normalkraft_up_element.symbol",
                     formel="math.gleit_normalkraft_up_element.formula",
                     einheit="N",
-                    priority=10,
+                    priority=60,
                     meta=base_meta,
                 )
                 total_horizontal = vektoren_addieren([total_horizontal, H_vec])
@@ -204,7 +205,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
                 formelzeichen="math.gleit_horizontalkraft_richtung.symbol",
                 formel="math.gleit_horizontalkraft_richtung.formula",
                 einheit="N",
-                priority=7,
+                priority=70,
                 meta=base_meta,
             )
             protokolliere_ergebnis(
@@ -216,7 +217,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
                 formelzeichen="math.gleit_normalkraft_down_richtung.symbol",
                 formel="math.gleit_normalkraft_down_richtung.formula",
                 einheit="N",
-                priority=7,
+                priority=70,
                 meta=base_meta,
             )
             protokolliere_ergebnis(
@@ -228,7 +229,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
                 formelzeichen="math.gleit_normalkraft_up_richtung.symbol",
                 formel="math.gleit_normalkraft_up_richtung.formula",
                 einheit="N",
-                priority=7,
+                priority=70,
                 meta=base_meta,
             )
             protokolliere_ergebnis(
@@ -240,7 +241,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
                 formelzeichen="math.gleit_normalkraft_effektiv_richtung.symbol",
                 formel="math.gleit_normalkraft_effektiv_richtung.formula",
                 einheit="N",
-                priority=7,
+                priority=70,
                 meta=base_meta,
             )
             protokolliere_ergebnis(
@@ -252,7 +253,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
                 formelzeichen="math.gleit_reibkraft_richtung.symbol",
                 formel="math.gleit_reibkraft_richtung.formula",
                 einheit="N",
-                priority=7,
+                priority=70,
                 meta=base_meta,
             )
 
@@ -268,7 +269,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
                 label="math.gleit_sicherheit_richtung.label",
                 formelzeichen="math.gleit_sicherheit_richtung.symbol",
                 formel="math.gleit_sicherheit_richtung.formula",
-                priority=10,
+                priority=70,
                 meta=base_meta,
             )
 
@@ -294,7 +295,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
                 formelzeichen="math.gleit_ballast_richtung.symbol",
                 formel="math.gleit_ballast_richtung.formula",
                 einheit="N",
-                priority=10,
+                priority=70,
                 meta=base_meta,
             )
 
@@ -328,7 +329,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
             label="math.gleit_sicherheit.label",
             formelzeichen="math.gleit_sicherheit.symbol",
             formel="math.gleit_sicherheit.formula",
-            priority=10,
+            priority=100,
             meta=base_meta,
         )
         protokolliere_ergebnis(
@@ -340,7 +341,7 @@ def _gleitsicherheit_DinEn13814_2005_06(
             formelzeichen="math.gleit_ballast.symbol",
             formel="math.gleit_ballast.formula",
             einheit="kg",
-            priority=10,
+            priority=90,
             meta=base_meta,
         )
 
@@ -396,6 +397,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
             label="math.reibwert.label",
             formelzeichen="math.reibwert.symbol",
             formel="math.reibwert.formula",
+            priority=20,
             meta=base_meta,
         )
 
@@ -447,7 +449,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
                     formelzeichen="math.gleit_horizontalkraft_element.symbol",
                     formel="math.gleit_horizontalkraft_element.formula",
                     einheit="N",
-                    priority=10,
+                    priority=60,
                     meta=base_meta,
                 )
                 protokolliere_ergebnis(
@@ -459,7 +461,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
                     formelzeichen="math.gleit_normalkraft_down_element.symbol",
                     formel="math.gleit_normalkraft_down_element.formula",
                     einheit="N",
-                    priority=10,
+                    priority=60,
                     meta=base_meta,
                 )
                 protokolliere_ergebnis(
@@ -471,7 +473,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
                     formelzeichen="math.gleit_normalkraft_up_element.symbol",
                     formel="math.gleit_normalkraft_up_element.formula",
                     einheit="N",
-                    priority=10,
+                    priority=60,
                     meta=base_meta,
                 )
                 total_horizontal = vektoren_addieren([total_horizontal, H_vec])
@@ -492,7 +494,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
                 formelzeichen="math.gleit_horizontalkraft_richtung.symbol",
                 formel="math.gleit_horizontalkraft_richtung.formula",
                 einheit="N",
-                priority=7,
+                priority=70,
                 meta=base_meta,
             )
             protokolliere_ergebnis(
@@ -504,7 +506,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
                 formelzeichen="math.gleit_normalkraft_down_richtung.symbol",
                 formel="math.gleit_normalkraft_down_richtung.formula",
                 einheit="N",
-                priority=7,
+                priority=70,
                 meta=base_meta,
             )
             protokolliere_ergebnis(
@@ -516,7 +518,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
                 formelzeichen="math.gleit_normalkraft_up_richtung.symbol",
                 formel="math.gleit_normalkraft_up_richtung.formula",
                 einheit="N",
-                priority=7,
+                priority=70,
                 meta=base_meta,
             )
             protokolliere_ergebnis(
@@ -528,7 +530,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
                 formelzeichen="math.gleit_normalkraft_effektiv_richtung.symbol",
                 formel="math.gleit_normalkraft_effektiv_richtung.formula",
                 einheit="N",
-                priority=7,
+                priority=70,
                 meta=base_meta,
             )
             protokolliere_ergebnis(
@@ -540,7 +542,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
                 formelzeichen="math.gleit_reibkraft_richtung.symbol",
                 formel="math.gleit_reibkraft_richtung.formula",
                 einheit="N",
-                priority=7,
+                priority=70,
                 meta=base_meta,
             )
 
@@ -556,7 +558,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
                 label="math.gleit_sicherheit_richtung.label",
                 formelzeichen="math.gleit_sicherheit_richtung.symbol",
                 formel="math.gleit_sicherheit_richtung.formula",
-                priority=10,
+                priority=70,
                 meta=base_meta,
             )
 
@@ -582,7 +584,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
                 formelzeichen="math.gleit_ballast_richtung.symbol",
                 formel="math.gleit_ballast_richtung.formula",
                 einheit="N",
-                priority=10,
+                priority=70,
                 meta=base_meta,
             )
 
@@ -616,7 +618,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
             label="math.gleit_sicherheit.label",
             formelzeichen="math.gleit_sicherheit.symbol",
             formel="math.gleit_sicherheit.formula",
-            priority=10,
+            priority=100,
             meta=base_meta,
         )
         protokolliere_ergebnis(
@@ -628,7 +630,7 @@ def _gleitsicherheit_DinEn17879_2024_08(
             formelzeichen="math.gleit_ballast.symbol",
             formel="math.gleit_ballast.formula",
             einheit="kg",
-            priority=10,
+            priority=90,
             meta=base_meta,
         )
 

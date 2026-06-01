@@ -162,7 +162,7 @@ def _kippsicherheit_DinEn13814_2005_06(
                         formelzeichen="math.kipp_kippmoment_element.symbol",
                         formel="math.kipp_kippmoment_element.formula",
                         einheit="Nm",
-                        priority=10,
+                        priority=60,
                         meta=base_meta,
                     )
                     protokolliere_ergebnis(
@@ -174,7 +174,7 @@ def _kippsicherheit_DinEn13814_2005_06(
                         formelzeichen="math.kipp_standmoment_element.symbol",
                         formel="math.kipp_standmoment_element.formula",
                         einheit="Nm",
-                        priority=10,
+                        priority=60,
                         meta=base_meta,
                     )
                     total_kipp += kipp_b
@@ -195,7 +195,7 @@ def _kippsicherheit_DinEn13814_2005_06(
                     formelzeichen="math.kipp_kippmoment_achse.symbol",
                     formel="math.kipp_kippmoment_achse.formula",
                     einheit="Nm",
-                    priority=10,
+                    priority=65,
                     meta=base_meta,
                 )
                 protokolliere_ergebnis(
@@ -207,7 +207,7 @@ def _kippsicherheit_DinEn13814_2005_06(
                     formelzeichen="math.kipp_standmoment_achse.symbol",
                     formel="math.kipp_standmoment_achse.formula",
                     einheit="Nm",
-                    priority=10,
+                    priority=65,
                     meta=base_meta,
                 )
                 protokolliere_ergebnis(
@@ -218,7 +218,7 @@ def _kippsicherheit_DinEn13814_2005_06(
                     label="math.kipp_sicherheit_achse.label",
                     formelzeichen="math.kipp_sicherheit_achse.symbol",
                     formel="math.kipp_sicherheit_achse.formula",
-                    priority=10,
+                    priority=65,
                     meta=base_meta,
                 )
 
@@ -256,7 +256,7 @@ def _kippsicherheit_DinEn13814_2005_06(
                     formelzeichen="math.kipp_ballast_achse.symbol",
                     formel="math.kipp_ballast_achse.formula",
                     einheit="N",
-                    priority=10,
+                    priority=65,
                     meta=base_meta,
                 )
 
@@ -268,7 +268,7 @@ def _kippsicherheit_DinEn13814_2005_06(
                 label="math.kipp_sicherheit_richtung.label",
                 formelzeichen="math.kipp_sicherheit_richtung.symbol",
                 formel="math.kipp_sicherheit_richtung.formula",
-                priority=10,
+                priority=70,
                 meta=base_meta,
             )
             protokolliere_ergebnis(
@@ -280,7 +280,7 @@ def _kippsicherheit_DinEn13814_2005_06(
                 formelzeichen="math.kipp_ballast_richtung.symbol",
                 formel="math.kipp_ballast_richtung.formula",
                 einheit="N",
-                priority=10,
+                priority=70,
                 meta=base_meta,
             )
 
@@ -316,7 +316,7 @@ def _kippsicherheit_DinEn13814_2005_06(
             label="math.kipp_sicherheit.label",
             formelzeichen="math.kipp_sicherheit.symbol",
             formel="math.kipp_sicherheit.formula",
-            priority=10,
+            priority=100,
             meta=base_meta,
         )
         protokolliere_ergebnis(
@@ -328,7 +328,7 @@ def _kippsicherheit_DinEn13814_2005_06(
             formelzeichen="math.kipp_ballast.symbol",
             einheit="kg",
             formel="math.kipp_ballast.formula",
-            priority=10,
+            priority=90,
             meta=base_meta,
         )
 
@@ -441,7 +441,7 @@ def _kippsicherheit_DinEn17879_2024_08(
                         formelzeichen="math.kipp_kippmoment_element.symbol",
                         formel="math.kipp_kippmoment_element.formula",
                         einheit="Nm",
-                        priority=10,
+                        priority=60,
                         meta=base_meta,
                     )
                     protokolliere_ergebnis(
@@ -453,7 +453,7 @@ def _kippsicherheit_DinEn17879_2024_08(
                         formelzeichen="math.kipp_standmoment_element.symbol",
                         formel="math.kipp_standmoment_element.formula",
                         einheit="Nm",
-                        priority=10,
+                        priority=60,
                         meta=base_meta,
                     )
                     total_kipp += kipp_b
@@ -474,7 +474,7 @@ def _kippsicherheit_DinEn17879_2024_08(
                     formelzeichen="math.kipp_kippmoment_achse.symbol",
                     formel="math.kipp_kippmoment_achse.formula",
                     einheit="Nm",
-                    priority=10,
+                    priority=65,
                     meta=base_meta,
                 )
                 protokolliere_ergebnis(
@@ -486,7 +486,7 @@ def _kippsicherheit_DinEn17879_2024_08(
                     formelzeichen="math.kipp_standmoment_achse.symbol",
                     formel="math.kipp_standmoment_achse.formula",
                     einheit="Nm",
-                    priority=10,
+                    priority=65,
                     meta=base_meta,
                 )
                 protokolliere_ergebnis(
@@ -497,7 +497,7 @@ def _kippsicherheit_DinEn17879_2024_08(
                     label="math.kipp_sicherheit_achse.label",
                     formelzeichen="math.kipp_sicherheit_achse.symbol",
                     formel="math.kipp_sicherheit_achse.formula",
-                    priority=10,
+                    priority=65,
                     meta=base_meta,
                 )
 
@@ -535,7 +535,7 @@ def _kippsicherheit_DinEn17879_2024_08(
                     formelzeichen="math.kipp_ballast_achse.symbol",
                     formel="math.kipp_ballast_achse.formula",
                     einheit="N",
-                    priority=10,
+                    priority=65,
                     meta=base_meta,
                 )
 
@@ -547,7 +547,7 @@ def _kippsicherheit_DinEn17879_2024_08(
                 label="math.kipp_sicherheit_richtung.label",
                 formelzeichen="math.kipp_sicherheit_richtung.symbol",
                 formel="math.kipp_sicherheit_richtung.formula",
-                priority=10,
+                priority=70,
                 meta=base_meta,
             )
             protokolliere_ergebnis(
@@ -559,7 +559,7 @@ def _kippsicherheit_DinEn17879_2024_08(
                 formelzeichen="math.kipp_ballast_richtung.symbol",
                 formel="math.kipp_ballast_richtung.formula",
                 einheit="kg",
-                priority=10,
+                priority=70,
                 meta=base_meta,
             )
 
@@ -595,7 +595,7 @@ def _kippsicherheit_DinEn17879_2024_08(
             label="math.kipp_sicherheit.label",
             formelzeichen="math.kipp_sicherheit.symbol",
             formel="math.kipp_sicherheit.formula",
-            priority=10,
+            priority=100,
             meta=base_meta,
         )
         protokolliere_ergebnis(
@@ -607,7 +607,7 @@ def _kippsicherheit_DinEn17879_2024_08(
             formelzeichen="math.kipp_ballast.symbol",
             einheit="kg",
             formel="math.kipp_ballast.formula",
-            priority=10,
+            priority=90,
             meta=base_meta,
         )
 

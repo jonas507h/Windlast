@@ -57,6 +57,7 @@ def _eingeschlossene_flaeche_default(
                 wert=float("nan"),
                 label="math.eingeschlossene_flaeche_traverse.label",
                 formelzeichen="math.eingeschlossene_flaeche_traverse.symbol",
+                priority=20,
                 meta=base_meta,
             )
             return Zwischenergebnis(wert=float("nan"))
@@ -71,6 +72,7 @@ def _eingeschlossene_flaeche_default(
             label="math.eingeschlossene_flaeche_traverse.label",
             formelzeichen="math.eingeschlossene_flaeche_traverse.symbol",
             formel="math.eingeschlossene_flaeche_traverse.formula",
+            priority=20,
             einheit="m²",
             meta=base_meta,
         )
@@ -102,6 +104,7 @@ def _eingeschlossene_flaeche_default(
                 formelzeichen="A_C",
                 formel="A_C = L · d_aussen",
                 einheit="m²",
+                priority=20,
                 meta=base_meta,
             )
             return Zwischenergebnis(wert=float("nan"))
@@ -117,6 +120,7 @@ def _eingeschlossene_flaeche_default(
             formelzeichen="A_C",
             formel="A_C = L · d_aussen",
             einheit="m²",
+            priority=20,
             meta=base_meta,
         )
         return Zwischenergebnis(wert=wert)
@@ -163,6 +167,7 @@ def eingeschlossene_flaeche(
             label="math.eingeschlossene_flaeche.label",
             formelzeichen="math.eingeschlossene_flaeche.symbol",
             einheit="m²",
+            priority=20,
             meta=base_meta,
         )
         return Zwischenergebnis(wert=float("nan"))

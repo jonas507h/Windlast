@@ -88,6 +88,7 @@ class Bodenplatte:
             label="math.gewichtskraft_bodenplatte.label",
             formelzeichen="math.gewichtskraft_bodenplatte.symbol",
             formel="math.gewichtskraft_bodenplatte.formula",
+            priority=30,
             einheit="N",
             meta=base_meta,
         )

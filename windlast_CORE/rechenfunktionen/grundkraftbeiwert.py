@@ -121,6 +121,7 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
                 wert=float("nan"),
                 label="math.grundkraftbeiwert.label",
                 formelzeichen="math.grundkraftbeiwert.symbol",
+                priority=20,
                 meta=base_meta,
             )
             return Zwischenergebnis(wert=float("nan"))
@@ -209,6 +210,7 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
                     wert=float("nan"),
                     label="math.grundkraftbeiwert.label",
                     formelzeichen="math.grundkraftbeiwert.symbol",
+                    priority=20,
                     meta=base_meta,
                 )
                 return Zwischenergebnis(wert=float("nan"))
@@ -220,6 +222,7 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
             wert=wert,
             label="math.grundkraftbeiwert.label",
             formelzeichen="math.grundkraftbeiwert.symbol",
+            priority=20,
             meta=base_meta,
         )
         return Zwischenergebnis(wert=wert)
@@ -235,6 +238,7 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
                 wert=0.0,
                 label="math.grundkraftbeiwert.label",
                 formelzeichen="math.grundkraftbeiwert.symbol",
+                priority=20,
                 meta=base_meta,
             )
             return Zwischenergebnis(wert=0.0)
@@ -257,6 +261,7 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
             wert=wert,
             label="math.grundkraftbeiwert.label",
             formelzeichen="math.grundkraftbeiwert.symbol",
+            priority=20,
             meta=base_meta,
         )
         return Zwischenergebnis(wert=wert)
@@ -277,6 +282,7 @@ def _grundkraftbeiwert_DinEn1991_1_4_2010_12(
             wert=float("nan"),
             label="math.grundkraftbeiwert.label",
             formelzeichen="math.grundkraftbeiwert.symbol",
+            priority=20,
             meta=base_meta,
         )
         return Zwischenergebnis(wert=float("nan"))
@@ -324,6 +330,7 @@ def grundkraftbeiwert(
             wert=float("nan"),
             label="math.grundkraftbeiwert.label",
             formelzeichen="math.grundkraftbeiwert.symbol",
+            priority=20,
             meta=base_meta,
         )
         return Zwischenergebnis(wert=float("nan"))

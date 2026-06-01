@@ -54,6 +54,7 @@ def _windkraft_default(
             label="math.windkraft_traverse.label",
             formelzeichen="math.windkraft_traverse.symbol",
             formel="math.windkraft_traverse.formula",
+            priority=30,
             einheit="N",
             meta=base_meta,
         )
@@ -69,6 +70,7 @@ def _windkraft_default(
             label="math.windkraft_rohr.label",
             formelzeichen="math.windkraft_rohr.symbol",
             formel="math.windkraft_rohr.formula",
+            priority=30,
             einheit="N",
             meta=base_meta,
         )
@@ -89,6 +91,7 @@ def _windkraft_default(
                 label="math.windkraft_anzeigetafel.label",
                 formelzeichen="math.windkraft_anzeigetafel.symbol",
                 formel="math.windkraft_anzeigetafel.formula",
+                priority=30,
                 einheit="N",
                 meta=flaeche_meta,
             )
@@ -103,6 +106,7 @@ def _windkraft_default(
                 label="math.windkraft_wand.label",
                 formelzeichen="math.windkraft_wand.symbol",
                 formel="math.windkraft_wand.formula",
+                priority=30,
                 einheit="N",
                 meta=flaeche_meta,
             )
@@ -135,6 +139,7 @@ def _windkraft_default(
             wert=float("nan"),
             label="math.windkraft.label",
             formelzeichen="math.windkraft.symbol",
+            priority=30,
             einheit="N",
             meta=base_meta,
         )
@@ -181,6 +186,7 @@ def windkraft(
             wert=float("nan"),
             label="math.windkraft.label",
             formelzeichen="math.windkraft.symbol",
+            priority=30,
             einheit="N",
             meta=base_meta,
         )

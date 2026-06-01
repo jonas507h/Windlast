@@ -339,7 +339,7 @@ def _rechne_drei_nachweise(
             wert=ballast_wert,
             einheit="kg",
             formel="math.gesamt_ballast.formula",
-            priority=10,
+            priority=100,
         )
 
     return v_kipp, v_gleit, v_abhebe

@@ -86,6 +86,7 @@ def _projizierte_flaeche_default(
                 wert=float("nan"),
                 label="math.bezugsflaeche_traverse.label",
                 formelzeichen="math.bezugsflaeche_traverse.symbol",
+                priority=20,
                 einheit="m²",
                 meta=base_meta,
             )
@@ -110,6 +111,7 @@ def _projizierte_flaeche_default(
                 wert=float("nan"),
                 label="math.bezugsflaeche_traverse.label",
                 formelzeichen="math.bezugsflaeche_traverse.symbol",
+                priority=20,
                 einheit="m²",
                 meta=base_meta,
             )
@@ -126,6 +128,7 @@ def _projizierte_flaeche_default(
             label="math.bezugsflaeche_traverse.label",
             formelzeichen="math.bezugsflaeche_traverse.symbol",
             formel="math.bezugsflaeche_traverse.formula",
+            priority=20,
             einheit="m²",
             meta=base_meta,
         )
@@ -154,6 +157,7 @@ def _projizierte_flaeche_default(
                 wert=float("nan"),
                 label="math.bezugsflaeche_rohr.label",
                 formelzeichen="math.bezugsflaeche_rohr.symbol",
+                priority=20,
                 einheit="m²",
                 meta=base_meta,
             )
@@ -169,6 +173,7 @@ def _projizierte_flaeche_default(
             label="math.bezugsflaeche_rohr.label",
             formelzeichen="math.bezugsflaeche_rohr.symbol",
             formel="math.bezugsflaeche_rohr.formula",
+            priority=20,
             einheit="m²",
             meta=base_meta,
         )
@@ -185,6 +190,7 @@ def _projizierte_flaeche_default(
                 wert=wert,
                 label="math.bezugsflaeche_wand.label",
                 formelzeichen="math.bezugsflaeche_wand.symbol",
+                priority=20,
                 einheit="m²",
                 meta=base_meta,
             )
@@ -196,6 +202,7 @@ def _projizierte_flaeche_default(
                 wert=wert,
                 label="math.bezugsflaeche_anzeigetafel.label",
                 formelzeichen="math.bezugsflaeche_anzeigetafel.symbol",
+                priority=20,
                 einheit="m²",
                 meta=base_meta,
              )
@@ -244,6 +251,7 @@ def projizierte_flaeche(
             wert=float("nan"),
             label="math.bezugsflaeche.label",
             formelzeichen="math.bezugsflaeche.symbol",
+            priority=20,
             einheit="m²",
             meta=base_meta,
         )

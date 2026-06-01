@@ -70,6 +70,7 @@ def _schlankheit_DinEn1991_1_4_2010_12(
                 wert=float("nan"),
                 label="math.schlankheit_traverse.label",
                 formelzeichen="math.schlankheit_traverse.symbol",
+                priority=20,
                 meta=base_meta,
             )
             return Zwischenergebnis(wert=float("nan"))
@@ -97,6 +98,7 @@ def _schlankheit_DinEn1991_1_4_2010_12(
             label="math.schlankheit_traverse.label",
             formelzeichen="math.schlankheit_traverse.symbol",
             formel="math.schlankheit_traverse.formula",
+            priority=20,
             meta=base_meta,
         )
         return Zwischenergebnis(wert=wert)
@@ -123,6 +125,7 @@ def _schlankheit_DinEn1991_1_4_2010_12(
                 wert=float("nan"),
                 label="math.schlankheit_rohr.label",
                 formelzeichen="math.schlankheit_rohr.symbol",
+                priority=20,
                 meta=base_meta,
             )
             return Zwischenergebnis(wert=float("nan"))
@@ -150,6 +153,7 @@ def _schlankheit_DinEn1991_1_4_2010_12(
             label="math.schlankheit_rohr.label",
             formelzeichen="math.schlankheit_rohr.symbol",
             formel="math.schlankheit_rohr.formula",
+            priority=20,
             meta=base_meta,
         )
         return Zwischenergebnis(wert=wert)
@@ -198,6 +202,7 @@ def schlankheit(
             wert=float("nan"),
             label="math.schlankheit.label",
             formelzeichen="math.schlankheit.symbol",
+            priority=20,
             meta=base_meta,
         )
         return Zwischenergebnis(wert=float("nan"))

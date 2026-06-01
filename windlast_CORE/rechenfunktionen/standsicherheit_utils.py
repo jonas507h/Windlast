@@ -271,6 +271,7 @@ def sammle_kippachsen(konstruktion, *, protokoll: Optional[Protokoll] = None, br
         name="anz_kippachsen",
         wert=len(achsen),
         label="math.anzahl_kippachsen.label",
+        priority=10,
         meta=base_meta
     )
     return achsen
@@ -432,6 +433,7 @@ def kipp_envelope_pro_bauelement(
             label="math.kipp_kippmoment_lastfall.label",
             formelzeichen="math.kipp_kippmoment_lastfall.symbol",
             formel="math.kipp_kippmoment_lastfall.formula",
+            priority=50,
             einheit="Nm",
             meta=base_meta,
         )
@@ -443,6 +445,7 @@ def kipp_envelope_pro_bauelement(
             label="math.kipp_standmoment_lastfall.label",
             formelzeichen="math.kipp_standmoment_lastfall.symbol",
             formel="math.kipp_standmoment_lastfall.formula",
+            priority=50,
             einheit="Nm",
             meta=base_meta,
         )
@@ -610,6 +613,7 @@ def gleit_envelope_pro_bauelement(
             label="math.gleit_horizontalkraft_lastfall.label",
             formelzeichen="math.gleit_horizontalkraft_lastfall.symbol",
             formel="math.gleit_horizontalkraft_lastfall.formula",
+            priority=50,
             einheit="N",
             meta=base_meta,
         )
@@ -622,6 +626,7 @@ def gleit_envelope_pro_bauelement(
             label="math.gleit_horizontalkraft_betrag_lastfall.label",
             formelzeichen="math.gleit_horizontalkraft_betrag_lastfall.symbol",
             formel="math.gleit_horizontalkraft_betrag_lastfall.formula",
+            priority=50,
             einheit="N",
             meta=base_meta,
         )
@@ -634,6 +639,7 @@ def gleit_envelope_pro_bauelement(
             label="math.gleit_normalkraft_down_lastfall.label",
             formelzeichen="math.gleit_normalkraft_down_lastfall.symbol",
             formel="math.gleit_normalkraft_down_lastfall.formula",
+            priority=50,
             einheit="N",
             meta=base_meta,
         )
@@ -646,6 +652,7 @@ def gleit_envelope_pro_bauelement(
             label="math.gleit_normalkraft_up_lastfall.label",
             formelzeichen="math.gleit_normalkraft_up_lastfall.symbol",
             formel="math.gleit_normalkraft_up_lastfall.formula",
+            priority=50,
             einheit="N",
             meta=base_meta,
         )
@@ -658,6 +665,7 @@ def gleit_envelope_pro_bauelement(
             label="math.gleit_normalkraft_effektiv_lastfall.label",
             formelzeichen="math.gleit_normalkraft_effektiv_lastfall.symbol",
             formel="math.gleit_normalkraft_effektiv_lastfall.formula",
+            priority=50,
             einheit="N",
             meta=base_meta,
         )
@@ -761,6 +769,7 @@ def abhebe_envelope_pro_bauelement(
             formelzeichen="math.abhebe_normalkraft_down_lastfall.symbol",
             formel="math.abhebe_normalkraft_down_lastfall.formula",
             einheit="N",
+            priority=50,
             meta=base_meta,
         )
 
@@ -772,6 +781,7 @@ def abhebe_envelope_pro_bauelement(
             label="math.abhebe_normalkraft_up_lastfall.label",
             formelzeichen="math.abhebe_normalkraft_up_lastfall.symbol",
             formel="math.abhebe_normalkraft_up_lastfall.formula",
+            priority=50,
             einheit="N",
             meta=base_meta,
         )

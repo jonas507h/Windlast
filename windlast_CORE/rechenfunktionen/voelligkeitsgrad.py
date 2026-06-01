@@ -52,6 +52,7 @@ def _voelligkeitsgrad_default(
         label="math.voelligkeitsgrad.label",
         formelzeichen="math.voelligkeitsgrad.symbol",
         formel="math.voelligkeitsgrad.formula",
+        priority=20,
         meta=base_meta,
     )
     return Zwischenergebnis(wert=wert)
@@ -93,6 +94,7 @@ def voelligkeitsgrad(
             wert=float("nan"),
             label="math.voelligkeitsgrad.label",
             formelzeichen="math.voelligkeitsgrad.symbol",
+            priority=20,
             meta=base_meta,
         )
         return Zwischenergebnis(wert=float("nan"))

@@ -187,6 +187,7 @@ class senkrechteFlaeche:
                 wert=staudruck,
                 label="math.staudruck_anzeigetafel.label",
                 formelzeichen="math.staudruck_anzeigetafel.symbol",
+                priority=10,
                 einheit="N/m²",
                 meta=flaeche_meta,
             )

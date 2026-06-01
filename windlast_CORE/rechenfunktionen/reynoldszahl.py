@@ -56,6 +56,7 @@ def _reynoldszahl_DinEn1991_1_4_2010_12(
                 wert=float("nan"),
                 label="math.reynoldszahl_traverse.label",
                 formelzeichen="math.reynoldszahl_traverse.symbol",
+                priority=20,
                 meta=base_meta,
             )
             return Zwischenergebnis(wert=float("nan"))
@@ -70,6 +71,7 @@ def _reynoldszahl_DinEn1991_1_4_2010_12(
             label="math.stroemungsgeschwindigkeit.label",
             formelzeichen="math.stroemungsgeschwindigkeit.symbol",
             formel="math.stroemungsgeschwindigkeit.formula",
+            priority=20,
             einheit="m/s",
             meta=base_meta,
         )
@@ -84,6 +86,7 @@ def _reynoldszahl_DinEn1991_1_4_2010_12(
             label="math.reynoldszahl_traverse.label",
             formelzeichen="math.reynoldszahl_traverse.symbol",
             formel="math.reynoldszahl_traverse.formula",
+            priority=20,
             meta=base_meta,
         )
         return Zwischenergebnis(wert=wert)
@@ -109,6 +112,7 @@ def _reynoldszahl_DinEn1991_1_4_2010_12(
                 wert=float("nan"),
                 label="math.reynoldszahl_rohr.label",
                 formelzeichen="math.reynoldszahl_rohr.symbol",
+                priority=20,
                 meta=base_meta,
             )
             return Zwischenergebnis(wert=float("nan"))
@@ -123,6 +127,7 @@ def _reynoldszahl_DinEn1991_1_4_2010_12(
             label="math.stroemungsgeschwindigkeit.label",
             formelzeichen="math.stroemungsgeschwindigkeit.symbol",
             formel="math.stroemungsgeschwindigkeit.formula",
+            priority=20,
             einheit="m/s",
             meta=base_meta,
         )
@@ -135,6 +140,7 @@ def _reynoldszahl_DinEn1991_1_4_2010_12(
             label="math.reynoldszahl_rohr.label",
             formelzeichen="math.reynoldszahl_rohr.symbol",
             formel="math.reynoldszahl_rohr.formula",
+            priority=20,
             meta=base_meta,
         )
         return Zwischenergebnis(wert=wert)
@@ -182,6 +188,7 @@ def reynoldszahl(
             wert=float("nan"),
             label="math.reynoldszahl.label",
             formelzeichen="math.reynoldszahl.symbol",
+            priority=20,
             meta=base_meta,
         )
         return Zwischenergebnis(wert=float("nan"))

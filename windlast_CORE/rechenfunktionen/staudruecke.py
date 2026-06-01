@@ -211,6 +211,7 @@ def _winddruck_DinEn13814_2005_06(
         wert=obergrenzen,
         label="math.staudruck_obergrenze.label",
         formelzeichen="math.staudruck_obergrenze.symbol",
+        priority=10,
         einheit="m",
         meta=base_meta,
     )
@@ -221,6 +222,7 @@ def _winddruck_DinEn13814_2005_06(
         wert=q_werte,
         label="math.staudruck.label",
         formelzeichen="math.staudruck.symbol",
+        priority=10,
         einheit="N/m²",
         meta=base_meta,
     )
@@ -280,6 +282,7 @@ def _winddruck_DinEn17879_2024_08(
         wert=obergrenzen,
         label="math.staudruck_obergrenze.label",
         formelzeichen="math.staudruck_obergrenze.symbol",
+        priority=10,
         einheit="m",
         meta=base_meta,
     )
@@ -290,6 +293,7 @@ def _winddruck_DinEn17879_2024_08(
         wert=q_werte,
         label="math.staudruck.label",
         formelzeichen="math.staudruck.symbol",
+        priority=10,
         einheit="N/m²",
         meta=base_meta,
     )
@@ -397,6 +401,7 @@ def _geschwindigkeitsdruck_DinEn1991_1_4_2010_12(
         wert=gueltige_obergrenze,
         label="math.staudruck_obergrenze.label",
         formelzeichen="math.staudruck_obergrenze.symbol",
+        priority=10,
         einheit="m",
         meta=base_meta,
     )
@@ -407,6 +412,7 @@ def _geschwindigkeitsdruck_DinEn1991_1_4_2010_12(
         wert=q_eff,
         label="math.staudruck.label",
         formelzeichen="math.staudruck.symbol",
+        priority=10,
         einheit="N/m²",
         meta=base_meta,
     )
@@ -458,6 +464,7 @@ def staudruecke(
             wert=float("nan"),
             label="math.staudruck_obergrenze.label",
             formelzeichen="math.staudruck_obergrenze.symbol",
+            priority=10,
             einheit="m",
             meta=base_meta,
         )
@@ -468,6 +475,7 @@ def staudruecke(
             wert=float("nan"),
             label="math.staudruck.label",
             formelzeichen="math.staudruck.symbol",
+            priority=10,
             einheit="N/m²",
             meta=base_meta,
         )

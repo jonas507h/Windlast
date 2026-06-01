@@ -76,6 +76,7 @@ def _windkraft_zu_vektor_default(
             label="math.windkraft_vektor_traverse.label",
             formelzeichen="math.windkraft_vektor_traverse.symbol",
             formel="math.windkraft_vektor_traverse.formula",
+            priority=30,
             einheit="N",
             meta=base_meta,
         )
@@ -95,6 +96,7 @@ def _windkraft_zu_vektor_default(
             label="math.windkraft_vektor_rohr.label",
             formelzeichen="math.windkraft_vektor_rohr.symbol",
             formel="math.windkraft_vektor_rohr.formula",
+            priority=30,
             einheit="N",
             meta=base_meta,
         )
@@ -118,6 +120,7 @@ def _windkraft_zu_vektor_default(
                 label="math.windkraft_vektor_anzeigetafel.label",
                 formelzeichen="math.windkraft_vektor_anzeigetafel.symbol",
                 formel="math.windkraft_vektor_anzeigetafel.formula",
+                priority=30,
                 einheit="N",
                 meta=flaeche_meta,
             )
@@ -133,6 +136,7 @@ def _windkraft_zu_vektor_default(
                 label="math.windkraft_vektor_wand.label",
                 formelzeichen="math.windkraft_vektor_wand.symbol",
                 formel="math.windkraft_vektor_wand.formula",
+                priority=30,
                 einheit="N",
                 meta=flaeche_meta,
             )
@@ -165,6 +169,7 @@ def _windkraft_zu_vektor_default(
             wert=bad,
             label="math.windkraft_vektor.label",
             formelzeichen="math.windkraft_vektor.symbol",
+            priority=30,
             einheit="N",
             meta=base_meta,
         )
@@ -211,6 +216,7 @@ def windkraft_zu_vektor(
             wert=bad,
             label="math.windkraft_vektor.label",
             formelzeichen="math.windkraft_vektor.symbol",
+            priority=30,
             einheit="N",
             meta=base_meta,
         )

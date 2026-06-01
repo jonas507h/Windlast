@@ -62,6 +62,7 @@ def _sicherheitsbeiwert_default(
                 wert=float("nan"),
                 label="math.sicherheitsbeiwert.label",
                 formelzeichen="math.sicherheitsbeiwert.symbol",
+                priority=10,
                 meta=base_meta,
             )
             return Zwischenergebnis(wert=float("nan"))
@@ -73,6 +74,7 @@ def _sicherheitsbeiwert_default(
         wert=gamma,
         label="math.sicherheitsbeiwert.label",
         formelzeichen="math.sicherheitsbeiwert.symbol",
+        priority=10,
         meta=base_meta,
     )
     return Zwischenergebnis(wert=gamma)
@@ -109,6 +111,7 @@ def sicherheitsbeiwert(
             wert=float("nan"),
             label="math.sicherheitsbeiwert.label",
             formelzeichen="math.sicherheitsbeiwert.symbol",
+            priority=10,
             meta=base_meta,
         )
         return Zwischenergebnis(wert=float("nan"))

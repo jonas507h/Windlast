@@ -108,6 +108,7 @@ def _kraftbeiwert_DinEn1991_1_4_2010_12(
             label="math.kraftbeiwert_traverse.label",
             formelzeichen="math.kraftbeiwert_traverse.symbol",
             formel="math.kraftbeiwert_traverse.formula",
+            priority=20,
             meta=base_meta,
         )
         return Zwischenergebnis(wert=wert)
@@ -122,6 +123,7 @@ def _kraftbeiwert_DinEn1991_1_4_2010_12(
             label="math.kraftbeiwert_rohr.label",
             formelzeichen="math.kraftbeiwert_rohr.symbol",
             formel="math.kraftbeiwert_rohr.formula",
+            priority=20,
             meta=base_meta,
         )
         return Zwischenergebnis(wert=wert)
@@ -154,6 +156,7 @@ def _kraftbeiwert_DinEn1991_1_4_2010_12(
                 label="math.kraftbeiwert_anzeigetafel.label",
                 formelzeichen="math.kraftbeiwert_anzeigetafel.symbol",
                 formel="math.kraftbeiwert_anzeigetafel.formula",
+                priority=20,
                 meta=flaeche_meta,
             )
             return Zwischenergebnis(wert=wert)
@@ -180,6 +183,7 @@ def _kraftbeiwert_DinEn1991_1_4_2010_12(
                 wert=wert,
                 label="math.nettodruckbeiwert_wand.label",
                 formelzeichen="math.nettodruckbeiwert_wand.symbol",
+                priority=20,
                 meta=wand_meta,
             )
             return Zwischenergebnis(wert=wert)
@@ -199,6 +203,7 @@ def _kraftbeiwert_DinEn1991_1_4_2010_12(
                 wert=float("nan"),
                 label="math.kraftbeiwert.label",
                 formelzeichen="math.kraftbeiwert.symbol",
+                priority=20,
                 meta=flaeche_meta,
             )
             return Zwischenergebnis(wert=float("nan"))  
@@ -249,6 +254,7 @@ def kraftbeiwert(
             wert=float("nan"),
             label="math.kraftbeiwert.label",
             formelzeichen="math.kraftbeiwert.symbol",
+            priority=20,
             meta=base_meta,
         )
         return Zwischenergebnis(wert=float("nan"))

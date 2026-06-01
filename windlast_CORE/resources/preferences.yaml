@@ -4,4 +4,4 @@ main:
   sprache: de
 
 berechnung:
-  windrichtungen_anzahl: 12
+  windrichtungen_anzahl: 8

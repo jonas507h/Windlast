@@ -62,6 +62,7 @@ class Rohr:
             label="math.gewichtskraft_rohr.label",
             formelzeichen="math.gewichtskraft_rohr.symbol",
             formel="math.gewichtskraft_rohr.formula",
+            priority=30,
             einheit="N",
             meta=base_meta,
         )

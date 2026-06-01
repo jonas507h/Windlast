@@ -60,6 +60,7 @@ def reibwert(
             wert=float("nan"),
             label="math.reibwert_bodenplatte.label",
             formelzeichen="math.reibwert_bodenplatte.symbol",
+            priority=20,
             meta=base_meta,
         )
         return Zwischenergebnis(wert=None)
@@ -103,6 +104,7 @@ def reibwert(
             wert=float("nan"),
             label="math.reibwert_bodenplatte.label",
             formelzeichen="math.reibwert_bodenplatte.symbol",
+            priority=20,
             meta=base_meta,
         )
         return Zwischenergebnis(wert=None)
@@ -130,6 +132,7 @@ def reibwert(
         label="math.reibwert_bodenplatte.label",
         formelzeichen="math.reibwert_bodenplatte.symbol",
         formel="math.reibwert_bodenplatte.formula",
+        priority=20,
         meta=base_meta,
     )
 

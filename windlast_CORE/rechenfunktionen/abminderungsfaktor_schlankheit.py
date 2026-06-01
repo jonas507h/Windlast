@@ -93,6 +93,7 @@ def _abminderungsfaktor_schlankheit_default(
             wert=wert,
             label="math.abminderungsfaktor_schlankheit_rohr.label",
             formelzeichen="math.abminderungsfaktor_schlankheit_rohr.symbol",
+            priority=20,
             meta=base_meta,
         )
     else:
@@ -103,6 +104,7 @@ def _abminderungsfaktor_schlankheit_default(
             wert=wert,
             label="math.abminderungsfaktor_schlankheit.label",
             formelzeichen="math.abminderungsfaktor_schlankheit.symbol",
+            priority=20,
             meta=base_meta,
         )
 
@@ -146,6 +148,7 @@ def abminderungsfaktor_schlankheit(
             wert=float("nan"),
             label="math.abminderungsfaktor_schlankheit.label",
             formelzeichen="math.abminderungsfaktor_schlankheit.symbol",
+            priority=20,
             meta=base_meta,
         )
         return Zwischenergebnis(wert=float("nan"))
