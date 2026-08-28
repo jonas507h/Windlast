@@ -11,6 +11,7 @@ from flask import Flask, abort, jsonify, request, send_from_directory
 
 from windlast_API.runtime import RuntimeMode
 
+MAX_REQUEST_BYTES = 1 * 1024 * 1024
 
 # ============================================================
 # Projektpfade / Import-Shim
@@ -163,6 +164,7 @@ def create_app(
 
     # Runtime-Modus zentral in der Flask-Konfiguration ablegen.
     app.config["RUNTIME_MODE"] = runtime_mode
+    app.config["MAX_CONTENT_LENGTH"] = MAX_REQUEST_BYTES
 
 
     # --------------------------------------------------------

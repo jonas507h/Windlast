@@ -244,10 +244,6 @@ async function submitSteher() {
       return;
     }
 
-    const okConfirm = await window.UI_WARN?.confirmNichtZertifiziert?.();
-    if (okConfirm === false) return;
-    showLoading();
-
     const gmVal = document.getElementById("gummimatte")?.value ?? "ja";
     const gummimatte_bool = (gmVal === "ja");
 
@@ -273,6 +269,14 @@ async function submitSteher() {
       konstruktion,
       ...readHeaderValues(),
     };
+
+    const valid = await UI_VALIDATION.validateKonstruktion(konstruktion);
+    if (!valid) return;
+
+    const ok = await UI_WARN.confirmNichtZertifiziert();
+    if (!ok) return;
+
+    showLoading();
 
     const data = await fetchJSON(apiUrl("/konstruktion/berechnen"), {
       method: "POST",

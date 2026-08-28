@@ -249,11 +249,6 @@ async function submitTisch() {
       return;
     }
 
-    const ok = await UI_WARN.confirmNichtZertifiziert();
-    if (!ok) return;
-
-    showLoading();
-
     // 2) Gummimatte (ja/nein) -> Boolean
     const gmVal = document.getElementById("gummimatte")?.value ?? "ja";
     const gummimatte_bool = (gmVal === "ja");
@@ -284,6 +279,14 @@ async function submitTisch() {
       konstruktion,
       ...header,
     };
+
+    const valid = await UI_VALIDATION.validateKonstruktion(konstruktion);
+    if (!valid) return;
+
+    const ok = await UI_WARN.confirmNichtZertifiziert();
+    if (!ok) return;
+
+    showLoading();
 
     // 6) Generischen Endpoint aufrufen
     const data = await fetchJSON(apiUrl("/konstruktion/berechnen"), {
