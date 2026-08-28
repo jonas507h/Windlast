@@ -378,6 +378,34 @@
 
   window.APP_STATE = Object.freeze(api);
 
+  window.Runtime = {
+    mode: null,
+
+    get isLocal() {
+      return this.mode === "local";
+    },
+
+    get isServer() {
+      return this.mode === "server";
+    }
+  };
+
+  window.loadRuntimeConfig = async function () {
+    const response = await fetch("/api/v1/appconfig/runtime");
+
+    if (!response.ok) {
+      throw new Error(
+        `Runtime-Konfiguration konnte nicht geladen werden (${response.status})`
+      );
+    }
+
+    const data = await response.json();
+
+    window.Runtime.mode = data.mode;
+
+    return window.Runtime;
+  };
+
   if (document.readyState === "loading")
     document.addEventListener("DOMContentLoaded", state.applyDomAttributes);
   else

@@ -220,6 +220,7 @@
   <script type="module" src="/static/js/modal/help.js"></script>
   <script type="module" src="/static/js/modal/einstellungen.js"></script>
   <script src="/static/js/wiki_modal.js"></script>
+  <script type="module" src="/static/js/runtime/client_lifecycle.js"></script>
   <!-- Preview -->
   <script type="module" src="/static/js/preview/tor_preview.js"></script>
   <script type="module" src="/static/js/preview/tisch_preview.js"></script>
@@ -295,38 +296,31 @@
         btn.setAttribute("aria-current", btn.dataset.view === view ? "page" : "")
       );
     }
-
-    // beim Start Tor laden
-    document.addEventListener("DOMContentLoaded", () => switch_konstruktion("tor"));
   </script>
 
-  <!-- Client heartbeat (wie bisher) -->
-  <script>
-    (function(){
-      const KEY = 'windlast_client_id';
-      let id = sessionStorage.getItem(KEY);
-      if (!id) { id = crypto.randomUUID(); sessionStorage.setItem(KEY, id); }
+  <script type="module">
+    import {
+      startClientLifecycle
+    } from "/static/js/runtime/client_lifecycle.js";
 
-      function send(event){
-        const payload = JSON.stringify({ event, id, t: Date.now() });
+    document.addEventListener(
+      "DOMContentLoaded",
+      async () => {
         try {
-          const blob = new Blob([payload], { type: 'application/json' });
-          if (navigator.sendBeacon && navigator.sendBeacon('/__client_event', blob)) return;
-        } catch {}
-        fetch('/__client_event', {
-          method: 'POST',
-          headers: {'Content-Type':'application/json'},
-          body: payload,
-          keepalive: true
-        }).catch(()=>{});
-      }
+          await window.loadRuntimeConfig();
 
-      window.addEventListener('pageshow', () => send('open'), { once: true });
-      const hb = setInterval(() => send('beat'), 3000);
-      const bye = () => { try { clearInterval(hb); } catch {} send('close'); };
-      window.addEventListener('pagehide', bye);
-      window.addEventListener('beforeunload', bye);
-    })();
+          startClientLifecycle();
+
+        } catch (error) {
+          console.error(
+            "Runtime-Konfiguration konnte nicht geladen werden:",
+            error
+          );
+        }
+
+        await switch_konstruktion("tor");
+      }
+    );
   </script>
 </body>
 </html>

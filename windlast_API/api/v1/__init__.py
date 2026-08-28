@@ -7,3 +7,4 @@ from . import routes_catalog
 from . import routes_berechnung
 from . import routes_reibwert
 from . import routes_meta
+from . import routes_appconfig

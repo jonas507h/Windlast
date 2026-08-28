@@ -9,7 +9,7 @@ from pathlib import Path
 
 from flask import Flask, abort, jsonify, request, send_from_directory
 
-from runtime import RuntimeMode
+from windlast_API.runtime import RuntimeMode
 
 
 # ============================================================
