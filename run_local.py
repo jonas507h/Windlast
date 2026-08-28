@@ -1,5 +1,4 @@
 import sys
-
 from threading import Thread
 
 from windlast_API.app import (
@@ -7,12 +6,15 @@ from windlast_API.app import (
     find_free_port,
     open_browser_when_ready,
 )
+from windlast_API.runtime import RuntimeMode
 
 
-app = create_app(local_lifecycle=True)
+app = create_app(
+    runtime_mode=RuntimeMode.LOCAL,
+)
 
-port = find_free_port() or 5000
 host = "127.0.0.1"
+port = find_free_port() or 5000
 
 url = f"http://{host}:{port}"
 
@@ -22,7 +24,10 @@ Thread(
     daemon=True,
 ).start()
 
-debug = not hasattr(sys, "_MEIPASS")
+debug = not hasattr(
+    sys,
+    "_MEIPASS",
+)
 
 app.run(
     host=host,

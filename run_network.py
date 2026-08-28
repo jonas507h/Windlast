@@ -1,7 +1,10 @@
 from windlast_API.app import create_app
+from windlast_API.runtime import RuntimeMode
 
 
-app = create_app(local_lifecycle=False)
+app = create_app(
+    runtime_mode=RuntimeMode.SERVER,
+)
 
 app.run(
     host="0.0.0.0",

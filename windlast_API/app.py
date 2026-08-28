@@ -1,195 +1,364 @@
-# --- Pfad-Shim: Projektwurzel & CORE in sys.path, für Dev **und** .exe ---
+import logging
+import os
+import socket
 import sys
+import threading
+import time
+import webbrowser
 from pathlib import Path
 
-import os, threading, time, logging
-from flask import request, jsonify
+from flask import Flask, abort, jsonify, request, send_from_directory
 
-# Bei .exe zeigt sys._MEIPASS auf das entpackte Temp-Verzeichnis
-BASE = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parents[1]))  # .../Windlast oder _MEIPASS
+from runtime import RuntimeMode
+
+
+# ============================================================
+# Projektpfade / Import-Shim
+# ============================================================
+
+# Bei .exe zeigt sys._MEIPASS auf das entpackte Temp-Verzeichnis.
+BASE = Path(
+    getattr(
+        sys,
+        "_MEIPASS",
+        Path(__file__).resolve().parents[1],
+    )
+)
+
 ROOT = BASE
 CORE_DIR = ROOT / "windlast_CORE"
-API_DIR  = Path(__file__).resolve().parent
+API_DIR = Path(__file__).resolve().parent
 
-for p in (str(ROOT), str(CORE_DIR), str(API_DIR)):
-    if p not in sys.path:
-        sys.path.insert(0, p)
-# -------------------------------------------------------------------------
+for path in (ROOT, CORE_DIR, API_DIR):
+    path_str = str(path)
 
-import socket, time, webbrowser
-from threading import Thread
-from flask import Flask, send_from_directory, abort
-from api.v1 import bp_v1  # klappt jetzt, weil ROOT/API/CORE im sys.path sind
+    if path_str not in sys.path:
+        sys.path.insert(0, path_str)
 
-UI_ROOT      = (ROOT / "windlast_UI").resolve()
-STATIC_DIR   = (UI_ROOT / "static").resolve()
+
+# Import erst nach dem Pfad-Shim
+from api.v1 import bp_v1
+
+
+# ============================================================
+# UI-Pfade
+# ============================================================
+
+UI_ROOT = (ROOT / "windlast_UI").resolve()
+STATIC_DIR = (UI_ROOT / "static").resolve()
 PARTIALS_DIR = (UI_ROOT / "partials").resolve()
 
-_clients: dict[str, float] = {}   # {client_id: last_seen_ts}
-_lock = threading.Lock()
 
-HB_TIMEOUT = 900        # s ohne Heartbeat => Client gilt als weg
-HK_PERIOD  = 2.0        # s Housekeeper-Intervall
-GRACE      = 10        # s Gnadenfrist bevor wir wirklich beenden
-STARTUP_GRACE = 300  # s Wartezeit nach Start, bevor wir beenden können
+# ============================================================
+# Lokaler Browser-Lifecycle
+# ============================================================
+
+HB_TIMEOUT = 900       # s ohne Heartbeat -> Client gilt als weg
+HK_PERIOD = 2.0        # s Housekeeper-Intervall
+GRACE = 10             # s Gnadenfrist vor Shutdown
+STARTUP_GRACE = 300    # s Wartezeit nach Programmstart
+
+_clients: dict[str, float] = {}
+_lock = threading.Lock()
 
 _ever_had_client = False
 _start_ts = time.time()
+
 _shutdown_timer: threading.Timer | None = None
 _housekeeper_started = False
 
+
 def _cancel_shutdown():
     global _shutdown_timer
+
     if _shutdown_timer is not None:
         _shutdown_timer.cancel()
         _shutdown_timer = None
 
+
 def _schedule_shutdown():
-    """Plane Shutdown nach GRACE Sekunden; wird durch _cancel_shutdown aufgehoben."""
+    """Plant den Shutdown der lokalen Anwendung nach GRACE Sekunden."""
     global _shutdown_timer
+
     _cancel_shutdown()
+
     def _do_exit():
         logging.info("shutdown now")
         os._exit(0)
-    t = threading.Timer(GRACE, _do_exit)
-    t.daemon = True
-    t.start()
-    _shutdown_timer = t
+
+    timer = threading.Timer(GRACE, _do_exit)
+    timer.daemon = True
+    timer.start()
+
+    _shutdown_timer = timer
+
 
 def _reap_stale(now: float | None = None):
     """Entfernt Clients ohne Heartbeat > HB_TIMEOUT."""
-    if now is None: now = time.time()
-    stale = [cid for cid, ts in _clients.items() if now - ts > HB_TIMEOUT]
-    for cid in stale:
-        _clients.pop(cid, None)
+    if now is None:
+        now = time.time()
+
+    stale = [
+        client_id
+        for client_id, last_seen in _clients.items()
+        if now - last_seen > HB_TIMEOUT
+    ]
+
+    for client_id in stale:
+        _clients.pop(client_id, None)
+
 
 def _ensure_housekeeper():
-    """Startet einen leichten Background-Thread, der verwaiste Clients entfernt und ggf. Shutdown plant."""
+    """Startet den Housekeeper für den lokalen Browser-Lifecycle."""
     global _housekeeper_started
+
     if _housekeeper_started:
         return
+
     def _loop():
         while True:
             time.sleep(HK_PERIOD)
+
             now = time.time()
+
             with _lock:
                 _reap_stale(now)
 
-                if not _clients:
-                    # WICHTIG: beim Start NICHT beenden, bevor je ein Client da war
-                    if not _ever_had_client and (now - _start_ts) < STARTUP_GRACE:
-                        continue
+                if _clients:
+                    continue
 
-                    if _shutdown_timer is None:
-                        _schedule_shutdown()
-    th = threading.Thread(target=_loop, daemon=True)
-    th.start()
+                # Beim Start nicht beenden, bevor jemals ein Client da war.
+                if (
+                    not _ever_had_client
+                    and (now - _start_ts) < STARTUP_GRACE
+                ):
+                    continue
+
+                if _shutdown_timer is None:
+                    _schedule_shutdown()
+
+    thread = threading.Thread(
+        target=_loop,
+        daemon=True,
+    )
+
+    thread.start()
+
     _housekeeper_started = True
 
-def create_app(*, local_lifecycle: bool = True):
-    app = Flask(__name__, static_folder=str(STATIC_DIR), static_url_path="/static")
-    # ... deine vorhandenen Routen ...
+
+# ============================================================
+# Flask-App
+# ============================================================
+
+def create_app(
+    *,
+    runtime_mode: RuntimeMode = RuntimeMode.LOCAL,
+):
+    app = Flask(
+        __name__,
+        static_folder=str(STATIC_DIR),
+        static_url_path="/static",
+    )
+
+    # Runtime-Modus zentral in der Flask-Konfiguration ablegen.
+    app.config["RUNTIME_MODE"] = runtime_mode
+
+
+    # --------------------------------------------------------
+    # UI
+    # --------------------------------------------------------
 
     @app.get("/")
     def index():
-        return send_from_directory(UI_ROOT, "index.html")
+        return send_from_directory(
+            UI_ROOT,
+            "index.html",
+        )
+
 
     @app.get("/partials/<path:filename>")
     def serve_partials(filename: str):
         target = (PARTIALS_DIR / filename).resolve()
-        # Sicherstellen, dass die Datei innerhalb von PARTIALS_DIR liegt
-        if not target.is_file() or PARTIALS_DIR not in target.parents:
-            abort(404)
-        return send_from_directory(PARTIALS_DIR, filename)
 
-    app.register_blueprint(bp_v1, url_prefix="/api/v1")
+        # Sicherstellen, dass die Datei innerhalb von PARTIALS_DIR liegt.
+        if (
+            not target.is_file()
+            or PARTIALS_DIR not in target.parents
+        ):
+            abort(404)
+
+        return send_from_directory(
+            PARTIALS_DIR,
+            filename,
+        )
+
+
+    # --------------------------------------------------------
+    # API
+    # --------------------------------------------------------
+
+    app.register_blueprint(
+        bp_v1,
+        url_prefix="/api/v1",
+    )
+
+
+    # --------------------------------------------------------
+    # System-Endpunkte
+    # --------------------------------------------------------
 
     @app.get("/healthz")
     def healthz():
-        return {"status": "ok"}
-    
-    # Lizenz-Datei ausliefern
+        return {
+            "status": "ok",
+        }
+
+
     @app.get("/licenses")
     def licenses():
-        return send_from_directory(ROOT, "THIRD_PARTY_NOTICES.txt")
-    
-    _ensure_housekeeper()  # beim App-Start einmal starten
+        return send_from_directory(
+            ROOT,
+            "THIRD_PARTY_NOTICES.txt",
+        )
 
-    if local_lifecycle:
+
+    # --------------------------------------------------------
+    # Lokaler Browser-Lifecycle
+    # --------------------------------------------------------
+
+    if runtime_mode == RuntimeMode.LOCAL:
         _ensure_housekeeper()
 
-    @app.post("/__client_event")
-    def __client_event():
-        # Im Netzwerk-Test brauchen wir den lokalen Lebenszyklus nicht.
-        # Die bestehende UI darf den Endpoint vorerst trotzdem aufrufen.
-        if not local_lifecycle:
-            return {"ok": True, "active": None}
 
+    @app.post("/__client_event")
+    def client_event():
         global _ever_had_client
 
-        if request.remote_addr not in ("127.0.0.1", "::1"):
-            return jsonify({"ok": False, "reason": "forbidden"}), 403
+        # Auf dem Server hat der Browser-Lifecycle keine Bedeutung.
+        if runtime_mode != RuntimeMode.LOCAL:
+            return {
+                "ok": True,
+                "active": None,
+            }
 
-        d = request.get_json(silent=True) or {}
-        ev = (d.get("event") or "").lower()
-        cid = d.get("id")
+        if request.remote_addr not in (
+            "127.0.0.1",
+            "::1",
+        ):
+            return jsonify({
+                "ok": False,
+                "reason": "forbidden",
+            }), 403
 
-        if not cid:
-            return {"ok": False, "reason": "missing id"}, 400
+        data = request.get_json(silent=True) or {}
+
+        event = (data.get("event") or "").lower()
+        client_id = data.get("id")
+
+        if not client_id:
+            return {
+                "ok": False,
+                "reason": "missing id",
+            }, 400
 
         now = time.time()
 
         with _lock:
-            if ev in ("open", "beat"):
+            if event in ("open", "beat"):
                 _ever_had_client = True
-                _clients[cid] = now
+
+                _clients[client_id] = now
+
                 _reap_stale(now)
                 _cancel_shutdown()
 
-            elif ev == "close":
-                _clients.pop(cid, None)
+            elif event == "close":
+                _clients.pop(client_id, None)
+
                 _reap_stale(now)
 
                 if not _clients:
                     _schedule_shutdown()
 
-        return {"ok": True, "active": len(_clients)}
+        return {
+            "ok": True,
+            "active": len(_clients),
+        }
+
 
     return app
 
-def find_free_port(preferred=5500, span=50):
-    for p in range(preferred, preferred + span):
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+
+# ============================================================
+# Helfer für lokalen Programmstart
+# ============================================================
+
+def find_free_port(
+    preferred: int = 5500,
+    span: int = 50,
+):
+    for port in range(
+        preferred,
+        preferred + span,
+    ):
+        with socket.socket(
+            socket.AF_INET,
+            socket.SOCK_STREAM,
+        ) as sock:
             try:
-                s.bind(("127.0.0.1", p))
-                return p
+                sock.bind(
+                    ("127.0.0.1", port)
+                )
+
+                return port
+
             except OSError:
                 continue
+
     return 0
 
-def wait_until_listening(host, port, timeout=6.0):
+
+def wait_until_listening(
+    host: str,
+    port: int,
+    timeout: float = 6.0,
+):
     end = time.time() + timeout
+
     while time.time() < end:
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.settimeout(0.3)
+        with socket.socket(
+            socket.AF_INET,
+            socket.SOCK_STREAM,
+        ) as sock:
+            sock.settimeout(0.3)
+
             try:
-                s.connect((host, port))
+                sock.connect(
+                    (host, port)
+                )
+
                 return True
+
             except OSError:
                 time.sleep(0.15)
+
     return False
 
-def open_browser_when_ready(url, host, port):
-    if wait_until_listening(host, port):
-        try:
-            webbrowser.open(url)
-        except Exception:
-            pass
 
-if __name__ == "__main__":
-    app = create_app()
-    port = find_free_port() or 5000
-    url = f"http://127.0.0.1:{port}"
-    Thread(target=open_browser_when_ready, args=(url, "127.0.0.1", port), daemon=True).start()
-    debug = not hasattr(sys, "_MEIPASS")  # Dev: True, EXE: False
-    app.run(host="127.0.0.1", port=port, debug=debug, use_reloader=False)
+def open_browser_when_ready(
+    url: str,
+    host: str,
+    port: int,
+):
+    if not wait_until_listening(
+        host,
+        port,
+    ):
+        return
+
+    try:
+        webbrowser.open(url)
+
+    except Exception:
+        pass
