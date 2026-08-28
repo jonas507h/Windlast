@@ -1,4 +1,5 @@
 // utils/reibwert.js
+import { fetchJSON, apiUrl } from "./api.js";
 
 export async function fetchKompatibilitaet({ bodenplatte, gummimatte }) {
   const qs = new URLSearchParams({
@@ -6,9 +7,6 @@ export async function fetchKompatibilitaet({ bodenplatte, gummimatte }) {
     gummimatte: gummimatte || "nein",
   });
 
-  const res = await fetch(`/api/v1/reibwert/kompatibilitaet?${qs.toString()}`, {
-    headers: { "Accept": "application/json" },
-  });
-  if (!res.ok) throw new Error(`Kompatibilität HTTP ${res.status}`);
-  return res.json();
+  const res = await fetchJSON(apiUrl(`reibwert/kompatibilitaet?${qs.toString()}`));
+  return res;
 }

@@ -1,9 +1,4 @@
-async function fetchOptions(url) {
-  const res = await fetch(url, { headers: { "Accept": "application/json" } });
-  if (!res.ok) throw new Error(`GET ${url} -> ${res.status}`);
-  const data = await res.json();
-  return data.options || [];
-}
+import { apiUrl, fetchOptions } from "./utils/api.js";
 
 function fillSelect(el, options, { placeholder = null, defaultValue = null } = {}) {
   el.innerHTML = "";
@@ -25,8 +20,8 @@ function fillSelect(el, options, { placeholder = null, defaultValue = null } = {
 async function initHeaderDropdowns() {
   try {
     const [dauerOpts, windOpts] = await Promise.all([
-      fetchOptions("/api/v1/config/dauer-einheiten"),
-      fetchOptions("/api/v1/config/windzonen"),
+      fetchOptions(apiUrl("config/dauer-einheiten")),
+      fetchOptions(apiUrl("config/windzonen")),
     ]);
 
     const dauerSel = document.getElementById("aufstelldauer_einheit");

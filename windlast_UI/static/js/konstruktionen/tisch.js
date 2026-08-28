@@ -1,21 +1,19 @@
 import { buildTisch } from '../build/build_tisch.js';
 import { showFieldError, showFieldWarn, clearWarnOnInteract } from '../utils/error.js';
 import { showLoading, hideLoading } from "/static/js/utils/loading.js";
-import { fetchOptions } from "../utils/catalog.js";
 import { fillSelect, applyBodenplattenFilterByTraverse, applyReibwertDropdownFiltering } from "../utils/forms.js";
-import { fetchJSON } from "../utils/api.js";
+import { fetchJSON, fetchOptions, apiUrl } from "../utils/api.js";
 import { readHeaderValues } from "../utils/header.js";
 import { isPositiveNumber } from "../utils/number.js";
-import { fetchKompatibilitaet } from "../utils/reibwert.js";
 
 async function initTischDropdowns() {
   // Initialisiert die Dropdowns für den Tisch
   try {
     // Inhalte aus API laden
     const [traversen, bps, untergruende] = await Promise.all([
-      fetchOptions("/api/v1/catalog/traversen"),
-      fetchOptions("/api/v1/catalog/bodenplatten"),
-      fetchOptions("/api/v1/catalog/untergruende"),
+      fetchOptions(apiUrl("/catalog/traversen")),
+      fetchOptions(apiUrl("/catalog/bodenplatten")),
+      fetchOptions(apiUrl("/catalog/untergruende")),
     ]);
 
     // Dropdowns füllen
@@ -288,7 +286,7 @@ async function submitTisch() {
     };
 
     // 6) Generischen Endpoint aufrufen
-    const data = await fetchJSON("/api/v1/konstruktion/berechnen", {
+    const data = await fetchJSON(apiUrl("/konstruktion/berechnen"), {
       method: "POST",
       body: JSON.stringify(payload),
     });

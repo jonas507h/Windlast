@@ -1,4 +1,6 @@
 // config.js
+import { apiUrl, fetchJSON } from "./utils/api.js";
+
 (function () {
   const VERSION = "2.0.0";
 
@@ -391,15 +393,7 @@
   };
 
   window.loadRuntimeConfig = async function () {
-    const response = await fetch("/api/v1/appconfig/runtime");
-
-    if (!response.ok) {
-      throw new Error(
-        `Runtime-Konfiguration konnte nicht geladen werden (${response.status})`
-      );
-    }
-
-    const data = await response.json();
+    const data = await fetchJSON(apiUrl("/config/runtime"));
 
     window.Runtime.mode = data.mode;
 

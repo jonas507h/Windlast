@@ -1,5 +1,7 @@
 // static/js/modal/help.js
 
+import { apiUrl, fetchText } from "../utils/api.js";
+
 import {
   HELP_PAGES_BY_ID,
   getHelpPage
@@ -95,12 +97,14 @@ async function loadChangelogIntoHelp() {
   if (!container) return;
 
   try {
-    const res = await fetch("/api/v1/meta/changelog", {
-      headers: { "Accept": "text/html" }
-    });
-    if (!res.ok) throw new Error(res.statusText);
-
-    const html = await res.text();
+    const html = await fetchText(
+      apiUrl("/meta/changelog"),
+      {
+        headers: {
+          "Accept": "text/html",
+        },
+      }
+    );
     container.innerHTML = html;
     transformChangelogForHelp(container);
   } catch (e) {
