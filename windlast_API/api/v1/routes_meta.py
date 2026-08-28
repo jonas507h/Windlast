@@ -12,17 +12,19 @@ def get_changelog():
     root = get_project_root()
     changelog_path = root / "CHANGELOG.md"
 
-    if not changelog_path.exists():
-        return jsonify({"error": "CHANGELOG.md nicht gefunden"}), 404
-
-    md_text = changelog_path.read_text(encoding="utf-8")
+    md_text = changelog_path.read_text(
+        encoding="utf-8"
+    )
 
     html = markdown.markdown(
         md_text,
         extensions=[
-            "extra",        # Tabellen, Listen, etc.
-            "sane_lists"
-        ]
+            "extra",
+            "sane_lists",
+        ],
     )
 
-    return Response(html, mimetype="text/html")
+    return Response(
+        html,
+        mimetype="text/html",
+    )

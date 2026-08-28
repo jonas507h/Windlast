@@ -1,10 +1,14 @@
 from flask import request, jsonify
+from pydantic import ValidationError
+
 from . import bp_v1
+from .errors import api_error
 from .schemas import KonstruktionInput, Result  # , TorInput, SteherInput, TischInput
+
+from core_adapter.generic import berechne_konstruktion
 # from core_adapter.tor import berechne_tor
 # from core_adapter.steher import berechne_steher
 # from core_adapter.tisch import berechne_tisch
-from core_adapter.generic import berechne_konstruktion
 
 # @bp_v1.post("/tor/berechnen") # Setzt Endpunkt /api/v1/tor/berechnen
 # def tor_berechnen(): # Funktion wird aufgerufen bei POST-Request
@@ -39,9 +43,31 @@ from core_adapter.generic import berechne_konstruktion
 @bp_v1.post("/konstruktion/berechnen")
 def konstruktion_berechnen():
     try:
-        data = KonstruktionInput.model_validate_json(request.data)
-        payload = data.model_dump()
+        data = KonstruktionInput.model_validate_json(
+            request.data
+        )
+
+    except ValidationError as e:
+        return api_error(
+            400,
+            "INVALID_INPUT",
+            str(e),
+        )
+
+    payload = data.model_dump()
+
+    try:
         resp = berechne_konstruktion(payload)
-        return jsonify(Result(**resp).model_dump())
-    except Exception as e:
-        return jsonify({"error": {"code": "INVALID_INPUT", "message": str(e)}}), 400
+
+    except ValueError as e:
+        return api_error(
+            400,
+            "INVALID_INPUT",
+            str(e),
+        )
+
+    result = Result(**resp)
+
+    return jsonify(
+        result.model_dump()
+    )

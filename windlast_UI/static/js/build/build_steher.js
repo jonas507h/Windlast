@@ -154,14 +154,14 @@ export function buildSteher(inputs, catalog) {
   // --- Wenn Unterkante definiert, dann Fläche und untere Pipe ---
   if (H_F !== null) {
     const rohr_bottom = {
-    typ: 'Rohr',
-    rohr_name_intern,
-    start: [ -R_L / 2, -t_part, R_H - H_F ],
-    ende:  [ R_L / 2, -t_part, R_H - H_F ],
-    objekttyp: 'ROHR',
-    element_id_intern: 'Rohr_unten',
-    anzeigename: rohr_name_intern,
-  };
+      typ: 'Rohr',
+      rohr_name_intern,
+      start: [ -R_L / 2, -t_part, R_H - H_F ],
+      ende:  [ R_L / 2, -t_part, R_H - H_F ],
+      objekttyp: 'ROHR',
+      element_id_intern: 'Rohr_unten',
+      anzeigename: rohr_name_intern,
+    };
 
     const flaeche = {
       typ: 'senkrechteFlaeche', 
