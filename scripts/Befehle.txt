@@ -4,7 +4,8 @@ Virtuelle Umgebung
 .venv\Scripts\activate
 
 App ausführen
-python .\windlast_API\app.py
+python run_local.py
+python run_network.py
 
 App bauen
 pyinstaller --onefile --windowed --name "Windlastrechner 2" --icon Logo\windlast.ico `

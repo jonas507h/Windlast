@@ -86,7 +86,7 @@ def _ensure_housekeeper():
     th.start()
     _housekeeper_started = True
 
-def create_app():
+def create_app(*, local_lifecycle: bool = True):
     app = Flask(__name__, static_folder=str(STATIC_DIR), static_url_path="/static")
     # ... deine vorhandenen Routen ...
 
@@ -115,30 +115,43 @@ def create_app():
     
     _ensure_housekeeper()  # beim App-Start einmal starten
 
+    if local_lifecycle:
+        _ensure_housekeeper()
+
     @app.post("/__client_event")
     def __client_event():
+        # Im Netzwerk-Test brauchen wir den lokalen Lebenszyklus nicht.
+        # Die bestehende UI darf den Endpoint vorerst trotzdem aufrufen.
+        if not local_lifecycle:
+            return {"ok": True, "active": None}
+
         global _ever_had_client
+
         if request.remote_addr not in ("127.0.0.1", "::1"):
             return jsonify({"ok": False, "reason": "forbidden"}), 403
 
         d = request.get_json(silent=True) or {}
         ev = (d.get("event") or "").lower()
         cid = d.get("id")
+
         if not cid:
             return {"ok": False, "reason": "missing id"}, 400
 
         now = time.time()
+
         with _lock:
             if ev in ("open", "beat"):
                 _ever_had_client = True
                 _clients[cid] = now
                 _reap_stale(now)
-                _cancel_shutdown()             # Aktivität -> geplanten Exit abbrechen
+                _cancel_shutdown()
+
             elif ev == "close":
                 _clients.pop(cid, None)
                 _reap_stale(now)
+
                 if not _clients:
-                    _schedule_shutdown()        # leer -> Exit planen (debounced)
+                    _schedule_shutdown()
 
         return {"ok": True, "active": len(_clients)}
 
