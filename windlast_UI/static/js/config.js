@@ -393,7 +393,7 @@ import { apiUrl, fetchJSON } from "./utils/api.js";
   };
 
   window.loadRuntimeConfig = async function () {
-    const data = await fetchJSON(apiUrl("/config/runtime"));
+    const data = await fetchJSON(apiUrl("/appconfig/runtime"));
 
     window.Runtime.mode = data.mode;
 
